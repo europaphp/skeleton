@@ -1,0 +1,13 @@
+== 1.0.1 ==
+
+1. Fix bug in Europa_Loader::loadClass() on BSD/Mac systems where PHP would return the path to a file using realpath() even if the file didn't exist.
+
+2. Add static method Europa_Controller::getActiveInstance() and Europa_Controller::getDispatchStack().
+
+3. Fix bug where force routing (via route property or passing an argument to dispatch) wasn't working in Europa_Controller.
+
+
+
+== 1.0.0 ==
+
+1. Initial release of EuropaPHP.
