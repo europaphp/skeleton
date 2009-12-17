@@ -1,7 +1,21 @@
 <?php
 
+/**
+ * 
+ */
+
+/**
+ * 
+ */
 class Europa_Form extends Europa_View
 {
+	const
+		/**
+		 * The exception that is thrown if the elements property is attempted to
+		 * be overwritten.
+		 */
+		CANNOT_SET_ELEMENTS_PROPERTY = 25;
+	
 	public
 		/**
 		 * The form's id.
@@ -52,7 +66,6 @@ class Europa_Form extends Europa_View
 	 * Constructs the object setting the part of the form to render.
 	 * 
 	 * @param string $name
-	 * 
 	 * @return Europa_View
 	 */
 	public function __construct($form = 'default')
@@ -60,6 +73,24 @@ class Europa_Form extends Europa_View
 		$this->elements = new stdClass;
 		
 		$this->setScript($form);
+	}
+	
+	/**
+	 * Checks to see if the user is attempting to overwrite the elements
+	 * property.
+	 * 
+	 * @param string $name
+	 * @param mixed $value
+	 * @return void
+	 */
+	public function __set($name, $value)
+	{
+		if ($name === 'elements') {
+			throw new Europa_Form_Exception(
+				'You cannot set the value of the "elements" property.',
+				self::EXCEPTION_CANNOT_SET_ELEMENTS_PROPERTY
+			);
+		}
 	}
 	
 	/**
@@ -84,7 +115,6 @@ class Europa_Form extends Europa_View
 	 * Fills all elements associated to this group.
 	 * 
 	 * @param array $values The values to fill the elements with.
-	 * 
 	 * @return Europa_Form_Fieldset
 	 */
 	public function fill($values)

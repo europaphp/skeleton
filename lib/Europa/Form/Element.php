@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @author  Trey Shugart
+ * @author Trey Shugart
  * @license http://europaphp.org/license
  */
 
@@ -57,9 +57,8 @@ class Europa_Form_Element extends Europa_View
 	 * Automatically retrieves the value for the input field base on its name
 	 * from the passed in values.
 	 * 
-	 * @param string $name   The name of the field to retrieve the value for.
-	 * @param mixed  $values The values to find the value in.
-	 * 
+	 * @param string $name The name of the field to retrieve the value for.
+	 * @param mixed $values The values to find the value in.
 	 * @todo Optimize performance.
 	 * @todo Do more security tests on call to eval.
 	 */
