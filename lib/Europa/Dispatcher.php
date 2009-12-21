@@ -492,7 +492,7 @@ class Europa_Dispatcher
 	{
 		$controller = $this->_route->getParam('controller', 'index');
 		
-		return Europa_String::create($controller)->camelCase(true);
+		return Europa_String::create($controller)->camelCase();
 	}
 	
 	/**
@@ -508,7 +508,7 @@ class Europa_Dispatcher
 		$controller = $route->getParam('controller', 'index');
 		$action     = $route->getParam('action', 'index');
 		
-		return Europa_String::create($controller)->camelCase(true)
+		return Europa_String::create($controller)->camelCase()
 		       . '/' 
 		       . Europa_String::create($action)->camelCase();
 	}

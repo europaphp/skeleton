@@ -60,7 +60,7 @@ class Europa_Form extends Europa_View
 		 * 
 		 * @var elements
 		 */
-		$elements = null;
+		$elements;
 	
 	/**
 	 * Constructs the object setting the part of the form to render.
@@ -70,9 +70,17 @@ class Europa_Form extends Europa_View
 	 */
 	public function __construct($form = 'default')
 	{
-		$this->elements = new stdClass;
-		
 		$this->setScript($form);
+		
+		$this->elements = new stdClass;
+		$this->buttons  = new stdClass;
+		
+		// default submit
+		$this->buttons->submit = new Europa_Form_Element('submit');
+		
+		// default name/label
+		$this->buttons->submit->name  = 'submit';
+		$this->buttons->submit->value = 'Submit';
 	}
 	
 	/**
@@ -91,6 +99,8 @@ class Europa_Form extends Europa_View
 				self::EXCEPTION_CANNOT_SET_ELEMENTS_PROPERTY
 			);
 		}
+		
+		$this->$name = $value;
 	}
 	
 	/**
@@ -127,12 +137,22 @@ class Europa_Form extends Europa_View
 	}
 	
 	/**
+	 * Overrides the parent method to return the script path to the forms.
+	 * 
+	 * @return string
+	 */
+	public function getScript()
+	{
+		return 'forms/' . $this->_script;
+	}
+	
+	/**
 	 * Sets the default form view directory.
 	 * 
 	 * @return string
 	 */
-	protected function _getViewPath()
+	protected function _getViewFullPath()
 	{
-		return './app/forms';
+		return realpath('./app/views/' . $this->getScript() . '.php');
 	}
 }

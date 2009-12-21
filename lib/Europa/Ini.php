@@ -2,6 +2,13 @@
 
 class Europa_Ini
 {
+	const
+		/**
+		 * The exception that is thrown when the ini file us unable to be
+		 * parsed.
+		 */
+		EXCEPTION_UNABLE_TO_PARSE = 99;
+	
 	protected
 		/**
 		 * Holds the path to the ini file associated with this instance.
@@ -27,21 +34,15 @@ class Europa_Ini
 		$this->_file = $file;
 		
 		// load the ini file or parse it from a string
-		try {
-			if (is_file($this->_file)) {
-				$this->_vars = parse_ini_file($this->_file, true);
-			} elseif (function_exists('parse_ini_string')) {
-				$this->_vars = parse_ini_string($this->_file, true);
-			} else {
-				throw new Europa_Exception('Unable to parse input.');
-			}
-		} catch(Exception $e) {
-			throw new Exception(
+		if (is_file($this->_file)) {
+			$this->_vars = parse_ini_file($this->_file, true);
+		} elseif (function_exists('parse_ini_string')) {
+			$this->_vars = parse_ini_string($this->_file, true);
+		} else {
+			Europa_Exception::trigger(
 				'Unable to parse ini file at: ' 
 				. $file 
-				. ' with message ' 
-				. $e->getMessage() 
-				, $e->getCode()
+				, self::EXCEPTION_UNABLE_TO_PARSE
 			);
 		}
 		
@@ -76,6 +77,11 @@ class Europa_Ini
 	    $this->_vars->$name = $value;
 	}
 	
+	public function toObject()
+	{
+		return clone $this->_vars;
+	}
+	
 	/**
 	 * Exports the Ini objects to an array.
 	 * 
@@ -83,7 +89,7 @@ class Europa_Ini
 	 */
 	public function toArray()
 	{
-		$vars = clone $this->_vars;
+		$vars = $this->toObject();
 		$vars = (array) $vars;
 		
 		foreach  ($vars as &$var) {

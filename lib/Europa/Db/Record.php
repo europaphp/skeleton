@@ -13,7 +13,8 @@ abstract class Europa_Db_Record
 {
 	private
 		/**
-		 * Contains a snapshot of the field values when the instance was first instantiated.
+		 * Contains a snapshot of the field values when the instance was first 
+		 * instantiated.
 		 * 
 		 * @var $_snapshot
 		 */
@@ -26,19 +27,14 @@ abstract class Europa_Db_Record
 		 */
 		$_relationships = array();
 	
-	
-	
 	/**
 	 * Constructs a record and fills any values that are passed.
 	 * 
 	 * Properties on the class are cascaded from defaults, to database values
 	 * (if set to load) then to the specific values passed in.
 	 * 
-	 * @param array   $keyVals An array of key/value pairs to fill the object 
-	 *                         with.
-	 * @param boolean $load    Whether or not to auto-call load() on the new 
-	 *                         instance.
-	 * 
+	 * @param array $keyVals Key/value pairs to fill the object with.
+	 * @param boolean $load Whether or not to auto-load the new instance.
 	 * @return Europa_Db_Record
 	 */
 	public function __construct($keyVals = null, $load = true)
@@ -77,7 +73,6 @@ abstract class Europa_Db_Record
 	 * array defined by Europa_Db_Record->_getRelationshipNames().
 	 * 
 	 * @param string $name The name of the variable being retrieved.
-	 * 
 	 * @return mixed
 	 */
 	public function __get($name)
@@ -94,8 +89,7 @@ abstract class Europa_Db_Record
 	 * valid relationship columns.
 	 * 
 	 * @param string $name
-	 * @param mixed  $value
-	 * 
+	 * @param mixed $value
 	 * @return void
 	 */
 	public function __set($name, $value)
@@ -117,9 +111,7 @@ abstract class Europa_Db_Record
 	 * This also transforms all relationships on the current instance. If a
 	 * property is unset, then it won't be returned.
 	 * 
-	 * @param $recursive Whether or not to recursively transform all 
-	 *                   relationships.
-	 * 
+	 * @param bool $recursive Whether or not to recursively get relationships.
 	 * @return array
 	 */
 	public function toArray($recursive = true)
@@ -136,8 +128,8 @@ abstract class Europa_Db_Record
 		}
 		
 		if ($recursive) {
-			foreach ($this->_relationships as $relationship) {
-				$relationship->toArray($recursive);
+			foreach ($this->_relationships as $name => $relationship) {
+				$arr[$name] = $relationship->toArray($recursive);
 			}
 		}
 		
@@ -163,8 +155,10 @@ abstract class Europa_Db_Record
 			return $this;
 		}
 		
-		// set each property, if one doesn't exist, a relationship will be
-		// filled with the value
+		/*
+		 * Set each property. If one doesn't exist, a relationship will be
+		 * filled with the value.
+		 */
 		foreach ($keyVals as $name => $value) {
 			$this->$name = $value;
 		}
@@ -234,9 +228,12 @@ abstract class Europa_Db_Record
 	}
 	
 	/**
-	 * Automates saving for a record. Intelligently deciedes whether to update or to insert a record
-	 * based on if all of the primary keys are set. If all are set, it updates, if not all are set
-	 * then an insert takes place. Returns true on succes or false on failure.
+	 * Automates saving for a record.
+	 * 
+	 * Intelligently deciedes whether to update or to insert a record based on 
+	 * if all of the primary keys are set. If all are set, it updates, if not 
+	 * all are set then an insert takes place. Returns true on succes or false 
+	 * on failure.
 	 * 
 	 * @return boolean
 	 */
@@ -246,7 +243,7 @@ abstract class Europa_Db_Record
 		$pk     = $this->getPrimaryKeyName();
 		$insert = false;
 		
-		// handle single relatinoship cascading
+		// handle single relationship cascading
 		if ($cascade) {
 			foreach ($this->_relationships as $rel) {
 				if ($rel instanceof Europa_Db_Record) {
@@ -280,9 +277,9 @@ abstract class Europa_Db_Record
 			$stmt->andWhere($pk . ' = ?', $this->$pk);
 		} else {
 			/*
-			 * Unset the primary key if it is not properly set. We check here since
-			 * some models might require a custom primary key to be generated
-			 * before it is inserted.
+			 * Unset the primary key if it is not properly set. We check here 
+			 * since some models might require a custom primary key to be 
+			 * generated before it is inserted.
 			 */
 			if (!$this->isPrimaryKeySet()) {
 				unset($this->$pk);
@@ -335,17 +332,12 @@ abstract class Europa_Db_Record
 	 * Deletes the current record and returns true if successful or false on 
 	 * failure.
 	 * 
+	 * @param bool $cascade Whether or not to recursively delete relationships.
 	 * @return boolean
 	 */
 	public function delete($cascade = true)
 	{
 		$db = $this->getDb();
-		
-		if ($cascade) {
-			foreach ($this->_relationships as $relationshp) {
-				$relationship->delete($cascade);
-			}
-		}
 		
 		// if the primary key is set then we can delete it
 		if ($this->isPrimaryKeySet()) {
@@ -355,9 +347,18 @@ abstract class Europa_Db_Record
 			$stmt->andWhere($pk . ' = ?', $this->$pk)
 			     ->limit(1);
 			
-			return $db->query($stmt) 
-				? true 
-				: false;
+			// if successfully deleted
+			if ($db->query($stmt)) {
+				// if cascading, delete all relationships
+				if ($cascade) {
+					foreach ($this->_relationships as $relationshp) {
+						$relationship->delete($cascade);
+					}
+				}
+				
+				// return true
+				return true;
+			}
 		}
 		
 		return false;
@@ -367,7 +368,6 @@ abstract class Europa_Db_Record
 	 * Returns a single value from the database and casts its value.
 	 * 
 	 * @param Europa_Db_Statement $stmt
-	 * 
 	 * @return mixed
 	 */
 	public function fetchValue(Europa_Db_Statement $stmt = null)
@@ -381,8 +381,7 @@ abstract class Europa_Db_Record
 	/**
 	 * Like Europa_Db_Record::fetchAll(), but only fetches a single record.
 	 * 
-	 * @param Europa_Db_Statement $stmt The prepared statement to use for fetching.
-	 * 
+	 * @param Europa_Db_Statement $stmt The statement to use for fetching.
 	 * @return mixed
 	 */
 	public function fetchOne(Europa_Db_Statement $stmt = null)
@@ -399,9 +398,7 @@ abstract class Europa_Db_Record
 	/**
 	 * Fetches an array of instances of the current table.
 	 * 
-	 * @param Europa_Db_Statement $stmt The prepared statement to use for 
-	 *                                  fetching.
-	 * 
+	 * @param Europa_Db_Statement $stmt The statement to use for fetching.
 	 * @return array|false
 	 */
 	public function fetchAll(Europa_Db_Statement $stmt = null)
@@ -486,7 +483,6 @@ abstract class Europa_Db_Record
 	 * specify a specific database instance for the record class to use.
 	 * 
 	 * The default naming convention for a class is:
-	 * 
 	 * [database name]_[table name]
 	 * 
 	 * @return Europa_Db
@@ -509,15 +505,14 @@ abstract class Europa_Db_Record
 	/**
 	 * Returns the database name.
 	 * 
-	 * The database name, by default, is generated from the first part
-	 * of the class name; so up to where the first underscore is. So a
-	 * class name of Database_Table will have the database name of
-	 * "Database".
+	 * The database name, by default, is generated from the first part of the 
+	 * class name; up to where the first underscore is. So a class name of 
+	 * Database_Table will have the database name of "Database".
 	 * 
-	 * By default, this is only used in the default configuration and if
-	 * the Europa_Db::$defaultConfig['database'] option isn't set. This
-	 * allows the programmer to override this to specify a convention, or
-	 * to use the configuration setting set a database name.
+	 * By default, this is only used in the default configuration and if the 
+	 * Europa_Db::$defaultConfig['database'] option isn't set. This allows the 
+	 * programmer to override this to specify a convention, or to use the 
+	 * configuration setting set a database name.
 	 * 
 	 * @return string
 	 */
@@ -537,10 +532,9 @@ abstract class Europa_Db_Record
 	/**
 	 * Returns the table name.
 	 * 
-	 * By default this is parsed out of the class name.
-	 * If the class name contains an underscore, the table name is the part
-	 * after the first underscore. If no underscore is found, it is the whole
-	 * class name.
+	 * By default this is parsed out of the class name. If the class name 
+	 * contains an underscore, the table name is the part after the first 
+	 * underscore. If no underscore is found, it is the whole class name.
 	 * 
 	 * @return string
 	 */
@@ -563,10 +557,10 @@ abstract class Europa_Db_Record
 	 * Returns the columns in the table for this record as a numerically indexed
 	 * array.
 	 * 
-	 * The column keys should be the column name and the values should be
-	 * their default values. In the default implementation, the default
-	 * values will always be null since the column names are sniffed without
-	 * their default values.
+	 * The column keys should be the column name and the values should be their 
+	 * default values. In the default implementation, the default values will 
+	 * always be null since the column names are sniffed without their default 
+	 * values.
 	 * 
 	 * @return array
 	 */
@@ -575,7 +569,11 @@ abstract class Europa_Db_Record
 		static $columns = array();
 		
 		if (!$columns) {
-			$tempCols = $this->getDb()->fetchAll('SHOW COLUMNS FROM `' . $this->getTableName() . '`;');
+			$tempCols = $this->getDb()->fetchAll(
+				'SHOW COLUMNS FROM `' 
+				. $this->getTableName() 
+				. '`;'
+			);
 			
 			if ($tempCols) {
 				foreach ($tempCols as $tempCol) {
@@ -590,8 +588,8 @@ abstract class Europa_Db_Record
 	/**
 	 * Returns whether the specified column exists.
 	 * 
-	 * Column names are specified as the array's keys. This can be
-	 * overridden to provide any specialized validation if necessary.
+	 * Column names are specified as the array's keys. This can be overridden to
+	 * provide any specialized validation if necessary.
 	 * 
 	 * @return boolean
 	 */
@@ -605,7 +603,6 @@ abstract class Europa_Db_Record
 	 * 
 	 * @param string $name The relationship name - if any - that is being
 	 *                     accessed while retrieving the primary key.
-	 * 
 	 * @return string
 	 */
 	public function getPrimaryKeyName($name = null)
@@ -618,7 +615,6 @@ abstract class Europa_Db_Record
 	 * 
 	 * @param string $name The relationship name - if any - that is being
 	 *                     accessed while retrieving the foreign key.
-	 * 
 	 * @return string
 	 */
 	public function getForeignKeyName($name = null)
@@ -629,12 +625,11 @@ abstract class Europa_Db_Record
 	/**
 	 * Checks to see whether the primary key is valid.
 	 * 
-	 * This can be overridden to do custom validation on the primary
-	 * key. This is suitable in situations where a primary key may
-	 * not be an integer for some tables. However, the primary key must
-	 * still be unique and as a result, only requires one. It is not a
-	 * design limitation or flaw to support only one primary key, but
-	 * a choice in using Europa_Db_Record.
+	 * This can be overridden to do custom validation on the primary key. This 
+	 * is suitable in situations where a primary key may not be an integer for 
+	 * some tables. However, the primary key must still be unique and as a 
+	 * result, only requires one. It is not a design limitation or flaw to 
+	 * support only one primary key, but a choice in using Europa_Db_Record.
 	 * 
 	 * @return bool
 	 */
@@ -654,6 +649,14 @@ abstract class Europa_Db_Record
 	 * relational keys are found, then an exception is thrown describing which 
 	 * keys were not set.
 	 * 
+	 * Since relationships are cached, they will not be retrieved/loaded more
+	 * than once on the same object, but will not be cached for other objects.
+	 * To re-load the data on the relationshp, just call the load method on it.
+	 * 
+	 * @param string $name The name of the relationship to retrieve. This is the
+	 *                     name of the property that will be used to access the
+	 *                     relationship and is formatted with
+	 *                     Europa_Db_Record->_formatRelationshipClassName().
 	 * @return Europa_Db_Record|Europa_Db_RecordSet
 	 */
 	public function getRelationship($name)
@@ -668,19 +671,7 @@ abstract class Europa_Db_Record
 		
 		// if the relationship class can't be found throw an exception.
 		if (!Europa_Loader::loadClass($className)) {
-			Europa_Db_Exception::trigger(
-				'Either the relationship class <strong>'
-				. $className
-				. '</strong> could not be found for <strong>'
-				. $name
-				. '</strong> <em>or</em> <strong>'
-				. get_class($this)
-				. '->'
-				. $name
-				. '</strong> cannot be found for table <strong>'
-				. $this->getTableName()
-				. '</strong>.'
-			);
+			return false;
 		}
 		
 		// instantiate the relationship of the class
@@ -692,19 +683,7 @@ abstract class Europa_Db_Record
 		
 		// check to see if the foreign key exists
 		if (!$this->hasColumn($thisLocalKey) || !$class->hasColumn($classLocalKey)) {
-			Europa_Db_Exception::trigger(
-				'The relationship <strong>'
-				. get_class($this) 
-				. '->' 
-				. $thisLocalKey
-				. '</strong>'
-				. ' could not be mapped to '
-				. '<strong>'
-				. $className
-				. '->'
-				. $classLocalKey
-				. '</strong>.'
-			);
+			return false;
 		}
 		
 		/*
@@ -733,34 +712,60 @@ abstract class Europa_Db_Record
 	}
 	
 	/**
+	 * Sets a relationship to the passed in value.
 	 * 
+	 * @param string $name
+	 * @param mixed $value
+	 * @return Europa_Db_Record
 	 */
 	public function setRelationship($name, $value)
 	{
-		$value = (array) $value;
+		$rel = $this->getRelationship($name);
 		
-		// check to see if the relationship value is a has-many
-		if (isset($value[0]) && (is_array($value[0]) || is_object($value[0] || $value[0] instanceof Europa_Db_Record))) {
-			$records = array();
+		// the relationship will only be set/filled if it is valid
+		if ($rel instanceof Europa_Db_Record) {
+			$value = (array) $value;
 			
-			foreach ($values[0] as $filler) {
-				$records = $this->getRelationship($name)->fill($filler);
+			// check to see if the relationship value is a has-many
+			if (isset($value[0]) && (is_array($value[0]) || is_object($value[0] || $value[0] instanceof Europa_Db_Record))) {
+				$records = array();
+				
+				foreach ($values[0] as $filler) {
+					$records[] = $this->getRelationship($name)->fill($filler);
+				}
+				
+				$this->_relationships[$name] = new Europa_Db_RecordSet($records);
+			} else {
+				$rel->fill($value);
 			}
-			
-			$this->_relationships[$name] = new Europa_Db_RecordSet($records);
-		} elseif ($value instanceof Europa_Db_Record) {
-			$rel = $this->getRelationship($name);
-			
-			$rel->fill($value);
 		}
+		
+		return $this;
+	}
+	
+	/**
+	 * Loads all specified relationships.
+	 * 
+	 * @param mixed $rels
+	 * @return Europa_Db_Record
+	 */
+	public function loadRelationships($rels)
+	{
+		$rels = (array) $rels;
+		
+		foreach ($rels as $rel) {
+			$this->$rel = $this->getRelationship($rel);
+		}
+		
+		return $this;
 	}
 	
 	/**
 	 * Formats the passed name into a class name and returns it.
 	 * 
-	 * Europa_Loader::loadClass is called against this return value.
-	 * If Europa_Loader::loadClass returns false, the relationship
-	 * is not instantiated and an exception is thrown.
+	 * Europa_Loader::loadClass is called against this return value. If 
+	 * Europa_Loader::loadClass returns false, the relationship is not 
+	 * instantiated and an exception is thrown.
 	 * 
 	 * @return string
 	 */

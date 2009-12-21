@@ -64,6 +64,10 @@ class Europa_Form_Element extends Europa_View
 	 */
 	final public function fill($values)
 	{
+		if (!$values) {
+			return $this;
+		}
+		
 		$subs = '';
 		$name = $this->name;
 		
@@ -78,11 +82,11 @@ class Europa_Form_Element extends Europa_View
 		
 		// if it's just a straight value, set it
 		if (!is_array($values) && !is_object($values)) {
-			$this->value = $value;
+			$this->value = $values;
 		}
 		
 		// build the parameter to evaluate
-		$evalParam = '$values[\'' . $name . '\']' . $subs;
+		$evalParam = '$values' . $subs;
 		
 		// evaluate the value
 		$value = eval("return isset({$evalParam}) ? {$evalParam} : false;");
@@ -95,14 +99,13 @@ class Europa_Form_Element extends Europa_View
 	}
 	
 	/**
-	 * Overrides Europa_View::_getViewPath() to return the path to the default
-	 * form element path.
+	 * Overrides the parent method to return the script path to the forms.
 	 * 
 	 * @return string
 	 */
-	protected function _getViewPath()
+	public function getScript()
 	{
-		return realpath('./app/forms/elements');
+		return 'forms/elements/' . $this->_script;
 	}
 	
 	/**
@@ -135,5 +138,15 @@ class Europa_Form_Element extends Europa_View
 		}
 		
 		return $this;
+	}
+	
+	/**
+	 * Sets the default form view directory.
+	 * 
+	 * @return string
+	 */
+	protected function _getViewFullPath()
+	{
+		return realpath('./app/views/' . $this->getScript() . '.php');
 	}
 }

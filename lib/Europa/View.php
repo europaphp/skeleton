@@ -21,17 +21,36 @@ class Europa_View
 		 * The exception that is thrown when a helper was called but could not 
 		 * be found.
 		 */
-		EXCEPTION_HELPER_NOT_FOUND = 5;
+		EXCEPTION_HELPER_NOT_FOUND = 5,
+		
+		/**
+		 * Thrown when the script hasn't be set before being rendered.
+		 */
+		EXCEPTION_SCRIPT_NOT_SET = 6;
 	
 	protected
+		/**
+		 * Contains the parameters set on the view.
+		 * 
+		 * @var array $_args
+		 */
 		$_args = array(),
 		
 		/**
 		 * The script that will be rendered. Set using Europa_View::render().
 		 * 
-		 * @var $_script
+		 * @var string $_script
 		 */
-		$_script = null;
+		$_script = null,
+		
+		/**
+		 * Holds references to all of the plugins that have been called on this
+		 * view instance which are to be treated as singleton plugins for this
+		 * instance only.
+		 * 
+		 * @var array $_plugins
+		 */
+		$_plugins = array();
 	
 	/**
 	 * Construct the view and sets defaults.
@@ -47,16 +66,15 @@ class Europa_View
 		$this->setScript($script);
 		
 		// and set arguments
-		$this->_args = array();
+		$this->_args = $args;
 	}
 	
 	/**
 	 * Similar to calling a plugin via Europa_View->__call(), but treats the
-	 * plugin as a signleton and once instantiated, that instance is always
+	 * plugin as a singleton and once instantiated, that instance is always
 	 * returned for the duration of the Europa_View object's lifespan.
 	 * 
 	 * @param string $name The name of the plugin to load.
-	 * 
 	 * @return object
 	 */
 	public function __get($name)
@@ -66,18 +84,16 @@ class Europa_View
 			return $this->_args[$name];
 		}
 		
-		static $plugins = array();
-		
-		if (!isset($plugins[$name])) {
-			$plugin = $this->__call($name, array($this));
+		if (!isset($this->_plugins[$name])) {
+			$plugin = $this->__call($name);
 			
 			if ($plugin) {
-				$plugins[$name] = $plugin;
+				$this->_plugins[$name] = $plugin;
 			}
 		}
 		
-		if (isset($plugins[$name])) {
-			return $plugins[$name];
+		if (isset($this->_plugins[$name])) {
+			return $this->_plugins[$name];
 		}
 		
 		return null;
@@ -87,8 +103,7 @@ class Europa_View
 	 * When setting a property, it actually maps to the parameter array.
 	 * 
 	 * @param string $name
-	 * @param mixed  $value
-	 * 
+	 * @param mixed $value
 	 * @return Europa_View
 	 */
 	public function __set($name, $value)
@@ -97,17 +112,39 @@ class Europa_View
 	}
 	
 	/**
+	 * Returns whether or not the specified variable is set or not.
+	 * 
+	 * @param string $name
+	 * @return boolean;
+	 */
+	public function __isset($name)
+	{
+		return isset($this->_args[$name]);
+	}
+	
+	/**
+	 * Unsets the specified variable.
+	 * 
+	 * @param string $name
+	 * @return void;
+	 */
+	public function __unset($name)
+	{
+		unset($this->_args[$name]);
+	}
+	
+	/**
 	 * Loads a plugin and executes it. Throws an exception if not found.
 	 * 
-	 * @return Mixed
+	 * @return mixed
 	 */
-	public function __call($func, $args)
+	public function __call($func, $args = array())
 	{
-		$class = $this->_getPluginName($func);
+		$class = $this->_getPluginClassName($func);
 		$class = (string) $class;
 		
 		// if the class can't be loaded, return null
-		if (!Europa_Loader::loadClass($class, $this->_getPluginPath())) {
+		if (!Europa_Loader::loadClass($class, $this->_getPluginBasePath())) {
 			return null;
 		}
 		
@@ -129,42 +166,28 @@ class Europa_View
 	 */
 	public function __toString()
 	{
-		if (!$this->_script) {
+		// the script must be set before rendering
+		if (!$this->getScript()) {
 			Europa_Exception::trigger(
 				'No script was set to be rendered.'
+				, self::EXCEPTION_NO_SCRIPT_SET
 			);
 		}
 		
-		$path      = $this->_getViewPath();
-		$extension = $this->_getViewExtension();
-		$extension = $extension ? '.' . $extension : '';
-		$script    = $this->_script . $extension;
-		$file      = realpath($path . DIRECTORY_SEPARATOR . $script);
+		$file = $this->_getViewFullPath();
 		
-		// since we can't throw an exception in __toString, we have to trigger one
+		// can't "throw" exceptions in __toString, triggering gets around that
 		if (!is_file($file)) {
 			Europa_Exception::trigger(
 				'View script <strong>' 
-				. $script 
-				. '</strong> does not exist in <strong>' 
-				. $path 
-				. '</strong>.', 
-				self::EXCEPTION_VIEW_NOT_FOUND
+				. $file 
+				. '</strong> cannot be found'
+				, self::EXCEPTION_VIEW_NOT_FOUND
 			);
 		}
 		
-		// allows us to return the included file as a string
-		ob_start();
-		
-		// include it
-		include $file;
-		
-		// get the output buffer
-		$contents = ob_get_clean();
-			
-		// and return it;
 		// the newline character just helps to make the source look better ;)
-		return $contents . "\n";
+		return $this->_parseViewFile() . "\n";
 	}
 	
 	/**
@@ -231,23 +254,30 @@ class Europa_View
 	}
 	
 	/**
+	 * Parses and returns the passed file.
+	 * 
+	 * @return string
+	 */
+	protected function _parseViewFile()
+	{
+		// allows us to return the included file as a string
+		ob_start();
+		
+		// include it
+		include $this->_getViewFullPath();
+		
+		// get the output buffer
+		return ob_get_clean();
+	}
+	
+	/**
 	 * Returns the full path to the base view path.
 	 * 
 	 * @return string
 	 */
-	protected function _getViewPath()
+	protected function _getViewFullPath()
 	{
-		return './app/views';
-	}
-	
-	/**
-	 * Returns the extension the views should use.
-	 * 
-	 * @return string
-	 */
-	protected function _getViewExtension()
-	{
-		return 'php';
+		return realpath('./app/views/' . $this->getScript() . '.php');
 	}
 	
 	/**
@@ -255,17 +285,18 @@ class Europa_View
 	 * 
 	 * @return string
 	 */
-	protected function _getPluginPath()
+	protected function _getPluginBasePath()
 	{
-		return './app/plugins';
+		return realpath('./app/plugins');
 	}
 	
 	/**
 	 * Returns a plugin class name based on the $name pased in.
 	 * 
+	 * @param string $name The name of the plugin to get the class name of.
 	 * @return string
 	 */
-	protected function _getPluginName($name)
+	protected function _getPluginClassName($name)
 	{
 		return (string) Europa_String::create($name)->camelCase(true) . 'Plugin';
 	}
