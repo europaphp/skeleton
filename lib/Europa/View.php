@@ -32,9 +32,9 @@ class Europa_View
 		/**
 		 * Contains the parameters set on the view.
 		 * 
-		 * @var array $_args
+		 * @var array $_params
 		 */
-		$_args = array(),
+		$_params = array(),
 		
 		/**
 		 * The script that will be rendered. Set using Europa_View::render().
@@ -56,17 +56,17 @@ class Europa_View
 	 * Construct the view and sets defaults.
 	 * 
 	 * @param string $script The script to render.
-	 * @param array  $args   The arguments to pass to the script.
+	 * @param array  $params The arguments to pass to the script.
 	 * 
 	 * @return Europa_View
 	 */
-	public function __construct($script = null, $args = array())
+	public function __construct($script = null, $params = array())
 	{
 		// set a script if defined
 		$this->setScript($script);
 		
 		// and set arguments
-		$this->_args = $args;
+		$this->_params = $params;
 	}
 	
 	/**
@@ -80,8 +80,8 @@ class Europa_View
 	public function __get($name)
 	{
 		// attempt to grab an argument
-		if (isset($this->_args[$name])) {
-			return $this->_args[$name];
+		if (isset($this->_params[$name])) {
+			return $this->_params[$name];
 		}
 		
 		if (!isset($this->_plugins[$name])) {
@@ -108,7 +108,7 @@ class Europa_View
 	 */
 	public function __set($name, $value)
 	{
-		$this->_args[$name] = $value;
+		$this->_params[$name] = $value;
 	}
 	
 	/**
@@ -119,7 +119,7 @@ class Europa_View
 	 */
 	public function __isset($name)
 	{
-		return isset($this->_args[$name]);
+		return isset($this->_params[$name]);
 	}
 	
 	/**
@@ -130,7 +130,7 @@ class Europa_View
 	 */
 	public function __unset($name)
 	{
-		unset($this->_args[$name]);
+		unset($this->_params[$name]);
 	}
 	
 	/**
@@ -140,7 +140,7 @@ class Europa_View
 	 */
 	public function __call($func, $args = array())
 	{
-		$class = $this->_getPluginClassName($func);
+		$class = $this->_formatPluginClassName($func);
 		$class = (string) $class;
 		
 		// if the class can't be loaded, return null
@@ -296,7 +296,7 @@ class Europa_View
 	 * @param string $name The name of the plugin to get the class name of.
 	 * @return string
 	 */
-	protected function _getPluginClassName($name)
+	protected function _formatPluginClassName($name)
 	{
 		return (string) Europa_String::create($name)->camelCase(true) . 'Plugin';
 	}

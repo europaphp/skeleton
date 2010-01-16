@@ -52,13 +52,6 @@ class Europa_Route
 	 */
 	public function __construct($pattern, $map = array(), $reverse = null)
 	{
-		// if the first parameter is an array, we assume it's a 
-		// parameter mapping
-		if (is_array($pattern)) {
-			$map     = $pattern;
-			$pattern = null;
-		}
-		
 		$this->_pattern = $pattern;
 		$this->_map     = (array) $map;
 		$this->_reverse = $reverse;

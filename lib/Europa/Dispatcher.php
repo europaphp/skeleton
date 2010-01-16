@@ -129,8 +129,8 @@ class Europa_Dispatcher
 	 */
 	final public function __construct()
 	{
-		$this->_layout = $this->_getLayoutInstance();
-		$this->_view   = $this->_getViewInstance();
+		$this->_layout = $this->_getDefaultLayoutInstance();
+		$this->_view   = $this->_getDefaultViewInstance();
 	}
 	
 	/**
@@ -548,6 +548,7 @@ class Europa_Dispatcher
 	 */
 	final static public function getContentType()
 	{
+		// parse out the conten't type request header
 		if (isset($_SERVER['HTTP_CONTENT_TYPE'])) {
 			$type = $_SERVER['HTTP_CONTENT_TYPE'];
 			$type = explode(';', $type);
@@ -555,18 +556,20 @@ class Europa_Dispatcher
 			return trim($type[0]);
 		}
 		
+		// default content type
 		return 'text/plain';
 	}
 	
 	/**
 	 * Returns the default layout instance. By default, this just
-	 * calls Europa_Dispatcher->_getViewInstance().
+	 * calls Europa_Dispatcher->_getDefaultViewInstance().
 	 * 
 	 * @return Europa_View
 	 */
-	protected function _getLayoutInstance()
+	protected function _getDefaultLayoutInstance()
 	{
-		return $this->_getViewInstance();
+		// a layout, by default, is just a separate view instance
+		return $this->_getDefaultViewInstance();
 	}
 	
 	/**
@@ -580,12 +583,13 @@ class Europa_Dispatcher
 	 * 
 	 * @return Europa_View
 	 */
-	protected function _getViewInstance()
+	protected function _getDefaultViewInstance()
 	{
 		$contentType = Europa_String::create(self::getContentType());
 		$contentType = $contentType->camelCase();
 		$className   = 'Europa_View_' . $contentType;
 		
+		// fallback to the main Europa_View class
 		if (!Europa_Loader::loadClass($className)) {
 			$className = 'Europa_View';
 		}

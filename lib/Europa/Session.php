@@ -83,7 +83,7 @@ class Europa_Session
 	 * 
 	 * @return string
 	 */
-	public function getPhpSessionId()
+	public function getSessionId()
 	{
 		return session_id();
 	}
