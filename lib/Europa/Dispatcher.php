@@ -50,77 +50,46 @@ set_exception_handler(array('Europa_Exception', 'handle'));
  */
 class Europa_Dispatcher
 {
-	const
-		/**
-		 * Contains the event name used to trigger the event that gets called
-		 * before dispatching.
-		 */
-		EVENT_PRE_DISPATCH = 'Europa_Dispatcher.preDispatch',
-		
-		/**
-		 * Contains the event name used to trigger the event after dispatching
-		 * is complete.
-		 */
-		EVENT_POST_DISPATCH = 'Europa_Dispatcher.postDispatch',
-		
-		/**
-		 * The exception/error code that identifies and exception with a 
-		 * controller not being found.
-		 */
-		EXCEPTION_CONTROLLER_NOT_FOUND = 1,
-		
-		/**
-		 * The exception/error code that identifies and exception with a action
-		 * not being found.
-		 */
-		EXCEPTION_ACTION_NOT_FOUND = 2,
-		
-		/**
-		 * Fired when a required parameter inside an action is not defined in 
-		 * the request.
-		 */
-		EXCEPTION_REQUIRED_PARAMETER_NOT_DEFINED = 3;
-	
 	protected
 		/**
 		 * An insntance or child of Europa_View which represents the layout.
 		 * 
-		 * @var $_layout
+		 * @var $layout
 		 */
-		$_layout,
+		$layout,
 		
 		/**
 		 * An instance or child of Europa_View which represents the view.
 		 * 
-		 * @var $_view
+		 * @var $view
 		 */
-		$_view,
+		$view,
 		
 		/**
 		 * After dispatching, this will contain the route that was used to reach
 		 * the  current page. This can be set before dispatching to force a 
 		 * route to be taken.
 		 * 
-		 * @var $_route
+		 * @var $route
 		 */
-		$_route = null,
+		$route = null,
 		
 		/**
 		 * All routes are set to this property. A route must be an instance of
 		 * Europa_Route.
 		 * 
-		 * @var $_routes
+		 * @var $routes
 		 */
-		$_routes = array();
+		$routes = array();
 		
-	static private
+	private static
 		/**
 		 * Contains the instances of all controllers that are currently 
 		 * dispatching in chronological order.
 		 * 
-		 * @var $_dispatchStack
+		 * @var $stack
 		 */
-		$_dispatchStack = null;
+		$stack = null;
 	
 	/**
 	 * Constructs the dispatcher and sets defaults.
@@ -129,8 +98,13 @@ class Europa_Dispatcher
 	 */
 	final public function __construct()
 	{
-		$this->_layout = $this->_getDefaultLayoutInstance();
-		$this->_view   = $this->_getDefaultViewInstance();
+		// retrieve class names
+		$layoutClassName = $this->getLayoutClassName();
+		$viewClassName   = $this->getViewClassName();
+
+		// initialize layout and viewå
+		$this->layout = new $layoutClassName();
+		$this->view   = new $viewClassName();
 	}
 	
 	/**
@@ -142,11 +116,11 @@ class Europa_Dispatcher
 	{
 		// we add this dispatch instance to the stack if it is to be registered
 		if ($register) {
-			self::$_dispatchStack[] = $this;
+			self::$stack[] = $this;
 		}
 		
 		// if the route wasn't already set, find one and set it
-		if (!$this->_route) {
+		if (!$this->route) {
 			$this->setRoute('empty', new Europa_Route(
 					'^/?(\?.*)?$'
 				));
@@ -162,9 +136,9 @@ class Europa_Dispatcher
 				));
 			
 			// process routes
-			foreach ($this->_routes as $name => $route) {
+			foreach ($this->routes as $name => $route) {
 				if ($route->match(self::getRequestUri())) {
-					$this->_route = $route;
+					$this->route = $route;
 					
 					break;
 				}
@@ -172,18 +146,20 @@ class Europa_Dispatcher
 		}
 		
 		// set the controller and action names, and the layout and view
-		$controllerPath = $this->getControllerPath();
-		$controllerName = $this->getControllerClassName();
-		$actionName     = $this->getActionMethodName();
+		$controllerPaths = $this->getControllerPaths();
+		$controllerName  = $this->getControllerClassName();
+		$actionName      = $this->getActionMethodName();
 		
 		// load the controller
-		if (!Europa_Loader::loadClass($controllerName, $controllerPath)) {
-			throw new Europa_Exception(
+		if (!Europa_Loader::loadClass($controllerName, $controllerPaths)) {
+			throw new Europa_Dispatcher_Exception(
 				'Could not load controller <strong>'
 				. $controllerName
 				. '</strong> from <strong>' 
-				. $controllerPath
+				. implode(', ', $controllerPaths)
 				. '</strong>.'
+				,
+                Europa_Dispatcher_Exception::CONTROLLER_NOT_FOUND
 			);
 		}
 		
@@ -193,21 +169,21 @@ class Europa_Dispatcher
 		// instantiate the controller
 		$controllerInstance = $controllerReflection->newInstanceArgs();
 		
-		// call the init method, like __construct, but set properties are now 
-		// available
+		// call the init method, like __construct, but set properties
+                // are now available
 		if ($controllerReflection->hasMethod('init')) {
-			// the return value of the layout determines the action taken on the
-			// layout
+			// the return value of the layout determines the action
+                        // taken on the layout
 			$initResult = $controllerInstance->init();
 			
 			// if init() returns false, the layout is disabled
 			if ($initResult === false) {
-				$this->_layout = null;
-			// otherwise it is assumed to be an array of properties to apply to
-			// the layout
+				$this->layout = null;
+			// otherwise it is assumed to be an array of properties
+                        // to apply to the layout
 			} else {
 				foreach ((array) $initResult as $k => $v) {
-					$this->_layout->$k = $v;
+					$this->layout->$k = $v;
 				}
 			}
 		}
@@ -219,7 +195,7 @@ class Europa_Dispatcher
 		if ($controllerReflection->hasMethod($actionName)) {
 			$actionReflection = $controllerReflection->getMethod($actionName);
 			$actionParams     = array();
-			$routeParams      = $this->_route->getParams();
+			$routeParams      = $this->route->getParams();
 			
 			// automatically define the parameters that will be passed to the 
 			// action
@@ -246,7 +222,7 @@ class Europa_Dispatcher
 						. $actionName
 						. '()</strong> is not set.'
 						,
-						self::EXCEPTION_REQUIRED_PARAMETER_NOT_DEFINED
+						Europa_Dispatcher_Exception::REQUIRED_PARAMETER_NOT_DEFINED
 					);
 				}
 				
@@ -263,25 +239,25 @@ class Europa_Dispatcher
 			
 			// returning false in the action terminates the view
 			if ($actionResult === false) {
-				$this->_view = null;
+				$this->view = null;
 			// otherwise it is assumed to be an array of properties to apply to
 			// the view
 			} else {
 				foreach ((array) $actionResult as $k => $v) {
-					$this->_view->$k = $v;
+					$this->view->$k = $v;
 				}
 			}
 		} elseif ($controllerReflection->hasMethod('__call')) {
 			$controllerInstance->$actionName();
 		} else {
-			throw new Europa_Exception(
+			throw new Europa_Dispatcher_Exception(
 				'Action <strong>' 
 				. $actionName
 				. '</strong> does not exist in <strong>' 
 				. $controllerName
 				. '</strong> and it was not trapped in <strong>__call</strong>.'
 				, 
-				self::EXCEPTION_ACTION_NOT_FOUND
+				Europa_Dispatcher_Exception::ACTION_NOT_FOUND
 			);
 		}
 		
@@ -291,20 +267,20 @@ class Europa_Dispatcher
 		}
 		
 		// set the default layout script name if it hasn't been set yet
-		if ($this->_layout && !$this->_layout->getScript()) {
-			$this->_layout->setScript($this->getLayoutScriptName());
+		if ($this->layout && !$this->layout->getScript()) {
+			$this->layout->setScript($this->getLayoutScriptName());
 		}
 		
 		// set the default view script name if it hasn't been set yet
-		if ($this->_view && !$this->_view->getScript()) {
-			$this->_view->setScript($this->getViewScriptName());
+		if ($this->view && !$this->view->getScript()) {
+			$this->view->setScript($this->getViewScriptName());
 		}
 		
 		// layout ouput assumes the view is output in it
-		if ($this->_layout) {
-			echo $this->_layout;
-		} elseif ($this->_view) {
-			echo $this->_view;
+		if ($this->layout) {
+			echo $this->layout;
+		} elseif ($this->view) {
+			echo $this->view;
 		}
 		
 		// call a post-rendering hook if it exists
@@ -312,53 +288,10 @@ class Europa_Dispatcher
 			$controllerInstance->postRender();
 		}
 		
-		// unset it, calling the __destruct method
-		unset($controllerInstance);
-		
 		// now we remove it from the dispatch stack if it is registered
 		if ($register) {
-			unset(self::$_dispatchStack[count(self::$_dispatchStack) - 1]);
+			unset(self::$stack[count(self::$stack) - 1]);
 		}
-	}
-	
-	/**
-	 * Returns the Europa root URI in relation to the file that dispatched
-	 * the controller.
-	 * 
-	 * @return unknown_type
-	 */
-	final static public function getRootUri()
-	{
-		static $rootUri;
-		
-		if (!isset($rootUri)) {
-			$rootUri = trim(dirname($_SERVER['PHP_SELF']), '/');
-		}
-		
-		return $rootUri;
-	}
-	
-	/**
-	 * Returns the Europa request URI in relation to the file that dispatched
-	 * the controller.
-	 * 
-	 * @return string
-	 */
-	final static public function getRequestUri()
-	{
-		static $requestUri;
-		
-		if (!isset($requestUri)) {
-			// remove the root uri from the request uri to get the relative
-			// request uri for the framework
-			$requestUri = isset($_SERVER['HTTP_X_REWRITE_URL']) 
-			            ? $_SERVER['HTTP_X_REWRITE_URL'] 
-				        : $_SERVER['REQUEST_URI'];
-			$requestUri = ltrim($requestUri, '/');
-			$requestUri = substr($requestUri, strlen(self::getRootUri()));
-		}
-		
-		return $requestUri;
 	}
 	
 	/**
@@ -369,7 +302,7 @@ class Europa_Dispatcher
 	 */
 	final public function setLayout(Europa_View $layout = null)
 	{
-		$this->_layout = $layout;
+		$this->layout = $layout;
 		
 		return $this;
 	}
@@ -381,7 +314,7 @@ class Europa_Dispatcher
 	 */
 	final public function getLayout()
 	{
-		return $this->_layout;
+		return $this->layout;
 	}
 	
 	/**
@@ -393,7 +326,7 @@ class Europa_Dispatcher
 	 */
 	final public function setView(Europa_View $view = null)
 	{
-		$this->_view = $view;
+		$this->view = $view;
 		
 		return $this;
 	}
@@ -405,7 +338,7 @@ class Europa_Dispatcher
 	 */
 	final public function getView()
 	{
-		return $this->_view;
+		return $this->view;
 	}
 	
 	/**
@@ -419,9 +352,9 @@ class Europa_Dispatcher
 	final public function setRoute($name, Europa_Route $route = null)
 	{
 		if ($name instanceof Europa_Route) {
-			$this->_route = $name;
+			$this->route = $name;
 		} else {
-			$this->_routes[$name] = $route;
+			$this->routes[$name] = $route;
 		}
 		
 		return $this;
@@ -437,14 +370,14 @@ class Europa_Dispatcher
 	final public function getRoute($name = null)
 	{
 		if ($name) {
-			if (isset($this->_routes[$name])) {
-				return $this->_routes[$name];
+			if (isset($this->routes[$name])) {
+				return $this->routes[$name];
 			}
 			
 			return null;
 		}
 		
-		return $this->_route;
+		return $this->route;
 	}
 	
 	/**
@@ -453,9 +386,9 @@ class Europa_Dispatcher
 	 * 
 	 * @return string
 	 */
-	public function getControllerPath()
+	protected function getControllerPaths()
 	{
-		return './app/controllers';
+		return array('./app/controllers');
 	}
 	
 	/**
@@ -463,9 +396,9 @@ class Europa_Dispatcher
 	 * 
 	 * @return string
 	 */
-	public function getControllerClassName()
+	protected function getControllerClassName()
 	{
-		$controller = $this->_route->getParam('controller', 'index');
+		$controller = $this->route->getParam('controller', 'index');
 		
 		return Europa_String::create($controller)->camelCase(true) . 'Controller';
 	}
@@ -475,11 +408,31 @@ class Europa_Dispatcher
 	 * 
 	 * @return string
 	 */
-	public function getActionMethodName()
+	protected function getActionMethodName()
 	{
-		$action = $this->_route->getParam('action', 'index');
+		$action = $this->route->getParam('action', 'index');
 		
 		return Europa_String::create($action)->camelCase() . 'Action';
+	}
+
+	/**
+	 * Returns the name of the class to be used for the layout.
+	 *
+	 * @return string
+	 */
+	protected function getLayoutClassName()
+	{
+		return 'Europa_View';
+	}
+
+	/**
+	 * Returns the name of the class to be used for the view.
+	 *
+	 * @return string
+	 */
+	protected function getViewClassName()
+	{
+		return 'Europa_View';
 	}
 	
 	/**
@@ -488,9 +441,9 @@ class Europa_Dispatcher
 	 * 
 	 * @return string
 	 */
-	public function getLayoutScriptName()
+	protected function getLayoutScriptName()
 	{
-		$controller = $this->_route->getParam('controller', 'index');
+		$controller = $this->route->getParam('controller', 'index');
 		
 		return Europa_String::create($controller)->camelCase();
 	}
@@ -502,7 +455,7 @@ class Europa_Dispatcher
 	 * 
 	 * @return string
 	 */
-	public function getViewScriptName()
+	protected function getViewScriptName()
 	{
 		$route      = $this->getRoute();
 		$controller = $route->getParam('controller', 'index');
@@ -514,17 +467,57 @@ class Europa_Dispatcher
 	}
 	
 	/**
+	 * Returns the Europa root URI in relation to the file that dispatched
+	 * the controller.
+	 *
+	 * @return unknown_type
+	 */
+	final public static function getRootUri()
+	{
+		static $rootUri;
+
+		if (!isset($rootUri)) {
+			$rootUri = trim(dirname($_SERVER['PHP_SELF']), '/');
+		}
+
+		return $rootUri;
+	}
+
+	/**
+	 * Returns the Europa request URI in relation to the file that dispatched
+	 * the controller.
+	 *
+	 * @return string
+	 */
+	final public static function getRequestUri()
+	{
+		static $requestUri;
+
+		if (!isset($requestUri)) {
+			// remove the root uri from the request uri to get the relative
+			// request uri for the framework
+			$requestUri = isset($_SERVER['HTTP_X_REWRITE_URL'])
+			            ? $_SERVER['HTTP_X_REWRITE_URL']
+				        : $_SERVER['REQUEST_URI'];
+			$requestUri = ltrim($requestUri, '/');
+			$requestUri = substr($requestUri, strlen(self::getRootUri()));
+		}
+
+		return $requestUri;
+	}
+	
+	/**
 	 * Returns the Europa_Dispatcher instance that is currently dispatching.
 	 * 
 	 * @return mixed
 	 */
-	final static public function getActiveInstance()
+	final public static function getActiveInstance()
 	{
-		$len = count(self::$_dispatchStack);
+		$len = count(self::$stack);
 		
 		// if there are dispatched instances, then return the latest one
 		if ($len) {
-			return self::$_dispatchStack[$len - 1];
+			return self::$stack[$len - 1];
 		}
 		
 		return null;
@@ -536,64 +529,8 @@ class Europa_Dispatcher
 	 * 
 	 * @return array
 	 */
-	final static public function getDispatchStack()
+	final public static function getStack()
 	{
-		return self::$_dispatchStack;
-	}
-	
-	/**
-	 * Returns the content type from the request. Defaults to text/html.
-	 * 
-	 * @return string
-	 */
-	final static public function getContentType()
-	{
-		// parse out the conten't type request header
-		if (isset($_SERVER['HTTP_CONTENT_TYPE'])) {
-			$type = $_SERVER['HTTP_CONTENT_TYPE'];
-			$type = explode(';', $type);
-			
-			return trim($type[0]);
-		}
-		
-		// default content type
-		return 'text/plain';
-	}
-	
-	/**
-	 * Returns the default layout instance. By default, this just
-	 * calls Europa_Dispatcher->_getDefaultViewInstance().
-	 * 
-	 * @return Europa_View
-	 */
-	protected function _getDefaultLayoutInstance()
-	{
-		// a layout, by default, is just a separate view instance
-		return $this->_getDefaultViewInstance();
-	}
-	
-	/**
-	 * Returns the default view instance. 
-	 * 
-	 * This can be overridden to return a custom view instance. By 
-	 * default, this implements a form of content negotiation. Based 
-	 * on the content type of the request, a particular view instance
-	 * will be returned. If a class of that instance doesn't exist,
-	 * then the default Europa_View will be returned.
-	 * 
-	 * @return Europa_View
-	 */
-	protected function _getDefaultViewInstance()
-	{
-		$contentType = Europa_String::create(self::getContentType());
-		$contentType = $contentType->camelCase();
-		$className   = 'Europa_View_' . $contentType;
-		
-		// fallback to the main Europa_View class
-		if (!Europa_Loader::loadClass($className)) {
-			$className = 'Europa_View';
-		}
-		
-		return new $className;
+		return self::$stack;
 	}
 }

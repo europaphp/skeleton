@@ -10,47 +10,29 @@
  */
 class Europa_View
 {
-	const 
-		/**
-		 * Thrown when a view could not be found. Does not get thrown until a 
-		 * view is rendered.
-		 */
-		EXCEPTION_VIEW_NOT_FOUND = 4,
-		
-		/**
-		 * The exception that is thrown when a helper was called but could not 
-		 * be found.
-		 */
-		EXCEPTION_HELPER_NOT_FOUND = 5,
-		
-		/**
-		 * Thrown when the script hasn't be set before being rendered.
-		 */
-		EXCEPTION_SCRIPT_NOT_SET = 6;
-	
 	protected
 		/**
 		 * Contains the parameters set on the view.
 		 * 
-		 * @var array $_params
+		 * @var array $params
 		 */
-		$_params = array(),
+		$params = array(),
 		
 		/**
 		 * The script that will be rendered. Set using Europa_View::render().
 		 * 
-		 * @var string $_script
+		 * @var string $script
 		 */
-		$_script = null,
+		$script = null,
 		
 		/**
 		 * Holds references to all of the plugins that have been called on this
 		 * view instance which are to be treated as singleton plugins for this
 		 * instance only.
 		 * 
-		 * @var array $_plugins
+		 * @var array $plugins
 		 */
-		$_plugins = array();
+		$plugins = array();
 	
 	/**
 	 * Construct the view and sets defaults.
@@ -66,7 +48,7 @@ class Europa_View
 		$this->setScript($script);
 		
 		// and set arguments
-		$this->_params = $params;
+		$this->params = $params;
 	}
 	
 	/**
@@ -80,20 +62,20 @@ class Europa_View
 	public function __get($name)
 	{
 		// attempt to grab an argument
-		if (isset($this->_params[$name])) {
-			return $this->_params[$name];
+		if (isset($this->params[$name])) {
+			return $this->params[$name];
 		}
 		
-		if (!isset($this->_plugins[$name])) {
+		if (!isset($this->plugins[$name])) {
 			$plugin = $this->__call($name);
 			
 			if ($plugin) {
-				$this->_plugins[$name] = $plugin;
+				$this->plugins[$name] = $plugin;
 			}
 		}
 		
-		if (isset($this->_plugins[$name])) {
-			return $this->_plugins[$name];
+		if (isset($this->plugins[$name])) {
+			return $this->plugins[$name];
 		}
 		
 		return null;
@@ -108,7 +90,7 @@ class Europa_View
 	 */
 	public function __set($name, $value)
 	{
-		$this->_params[$name] = $value;
+		$this->params[$name] = $value;
 	}
 	
 	/**
@@ -119,7 +101,7 @@ class Europa_View
 	 */
 	public function __isset($name)
 	{
-		return isset($this->_params[$name]);
+		return isset($this->params[$name]);
 	}
 	
 	/**
@@ -130,7 +112,7 @@ class Europa_View
 	 */
 	public function __unset($name)
 	{
-		unset($this->_params[$name]);
+		unset($this->params[$name]);
 	}
 	
 	/**
@@ -140,11 +122,11 @@ class Europa_View
 	 */
 	public function __call($func, $args = array())
 	{
-		$class = $this->_formatPluginClassName($func);
+		$class = $this->getPluginClassName($func);
 		$class = (string) $class;
 		
 		// if the class can't be loaded, return null
-		if (!Europa_Loader::loadClass($class, $this->_getPluginBasePath())) {
+		if (!Europa_Loader::loadClass($class, $this->getPluginPaths())) {
 			return null;
 		}
 		
@@ -166,28 +148,30 @@ class Europa_View
 	 */
 	public function __toString()
 	{
+		$script = $this->getScript();
+
 		// the script must be set before rendering
-		if (!$this->getScript()) {
-			Europa_Exception::trigger(
+		if (!$script) {
+			Europa_View_Exception::trigger(
 				'No script was set to be rendered.'
 				, self::EXCEPTION_NO_SCRIPT_SET
 			);
 		}
 		
-		$file = $this->_getViewFullPath();
+		$script = $this->getScriptFullPath($script);
 		
 		// can't "throw" exceptions in __toString, triggering gets around that
-		if (!is_file($file)) {
-			Europa_Exception::trigger(
+		if (!is_file($script)) {
+			Europa_View_Exception::trigger(
 				'View script <strong>' 
-				. $file 
+				. $script
 				. '</strong> cannot be found'
 				, self::EXCEPTION_VIEW_NOT_FOUND
 			);
 		}
 		
 		// the newline character just helps to make the source look better ;)
-		return $this->_parseViewFile() . "\n";
+		return $this->parseScript($script) . "\n";
 	}
 	
 	/**
@@ -200,7 +184,7 @@ class Europa_View
 	 */
 	public function setScript($script)
 	{
-		$this->_script = $script;
+		$this->script = $script;
 		
 		return $this;
 	}
@@ -212,7 +196,7 @@ class Europa_View
 	 */
 	public function getScript()
 	{
-		return $this->_script;
+		return $this->script;
 	}
 	
 	/**
@@ -224,33 +208,36 @@ class Europa_View
 	 * modifications are made, then it is returned.
 	 * 
 	 * @param string $uri The request URI to transform.
-	 * 
+	 * @param array $params Any parameters to use when reverse-engineering.
 	 * @return string
 	 */
 	public function uri($uri, $params = array())
 	{
+		$uri = trim($uri);
+
+		// if it has a protocol prepended just return it
+		if (strpos($uri, '://') !== false) {
+			return $uri;
+		}
+
 		$controller = Europa_Dispatcher::getActiveInstance();
 		$route      = $controller->getRoute($uri);
 		
 		// if the route was found, reverse engineer it and set it
 		if ($route) {
-			$uri = $this->uri($route->reverseEngineer($params));
+			$uri = $route->reverseEngineer($params);
 		}
 		
-		// if a uri is passed, format it
+		// make consistent
 		if ($uri) {
 			$uri = ltrim($uri, '/');
 		}
-		
-		if (stripos($uri, 'http://') !== 0) {
-			$uri = '/' 
-		         . Europa_Dispatcher::getActiveInstance()->getRootUri() 
-		         . '/' 
-		         . $uri;
-		}
-		
-		// automate the root uri
-		return $uri;
+
+		// automate
+		return '/'
+			 . Europa_Dispatcher::getRootUri()
+			 . '/'
+			 . $uri;
 	}
 	
 	/**
@@ -258,13 +245,13 @@ class Europa_View
 	 * 
 	 * @return string
 	 */
-	protected function _parseViewFile()
+	protected function parseScript($script)
 	{
 		// allows us to return the included file as a string
 		ob_start();
 		
 		// include it
-		include $this->_getViewFullPath();
+		include $script;
 		
 		// get the output buffer
 		return ob_get_clean();
@@ -275,9 +262,9 @@ class Europa_View
 	 * 
 	 * @return string
 	 */
-	protected function _getViewFullPath()
+	protected function getScriptFullPath($script)
 	{
-		return realpath('./app/views/' . $this->getScript() . '.php');
+		return realpath('./app/views/' . $script . '.php');
 	}
 	
 	/**
@@ -285,9 +272,9 @@ class Europa_View
 	 * 
 	 * @return string
 	 */
-	protected function _getPluginBasePath()
+	protected function getPluginPaths()
 	{
-		return realpath('./app/plugins');
+		return array('./app/plugins');
 	}
 	
 	/**
@@ -296,7 +283,7 @@ class Europa_View
 	 * @param string $name The name of the plugin to get the class name of.
 	 * @return string
 	 */
-	protected function _formatPluginClassName($name)
+	protected function getPluginClassName($name)
 	{
 		return (string) Europa_String::create($name)->camelCase(true) . 'Plugin';
 	}

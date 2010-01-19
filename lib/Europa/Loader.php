@@ -30,10 +30,10 @@ class Europa_Loader
 		 * @static
 		 * @private
 		 * 
-		 * @name _loadPaths
+		 * @name loadPaths
 		 * @desc Contains all load paths that Europa_Loader will use when attempting to load a class.
 		 */
-		$_loadPaths = array();
+		$loadPaths = array();
 	
 	/**
 	 * Loads a class based on the Europa file naming convention and returns it. 
@@ -43,7 +43,7 @@ class Europa_Loader
 	 * 
 	 * @return bool|string
 	 */
-	static public function loadClass($className, $path = null)
+	public static function loadClass($className, $paths = null)
 	{
 		// if the class already exists, then we don't need to load it
 		if (class_exists($className, false)) {
@@ -53,13 +53,13 @@ class Europa_Loader
 		// for logging purposes
 		$startTime = microtime();
 		
-		// Parse the class name to find the conventional file path relative to either
-		// the passed $path or the load paths.
+		// Parse the class name to find the conventional file path relative to
+		// either the passed $path or the load paths.
 		$file  = str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
 		$found = false;
-		$paths = $path
-			? array_merge((array) $path, self::$_loadPaths)
-			: self::$_loadPaths;
+		$paths = $paths
+		       ? array_merge((array) $paths, self::$loadPaths)
+		       : self::$loadPaths;
 		
 		// search for the file
 		foreach ($paths as $path) {
@@ -105,26 +105,8 @@ class Europa_Loader
 			return false;
 		}
 		
-		self::$_loadPaths[$path] = $path;
+		self::$loadPaths[] = $path;
 		
 		return $path;
-	}
-	
-	/**
-	 * If path exists in the load paths it is removed and returned, otherwise false is returned.
-	 * 
-	 * @param $name string The name of the path given at the time of adding. If no name was given, 
-	 *                     it attempts to find via the path value.
-	 * 
-	 * @return bool|string
-	 */
-	static public function removeLoadPath($path) {
-		if (isset(self::$_loadPaths[$path])) {
-			unset(self::$_loadPaths[$path]);
-			
-			return $path;
-		}
-		
-		return false;
 	}
 }

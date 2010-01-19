@@ -1,3 +1,17 @@
+== 1.1.0 ==
+
+1. Completely re-work architecture to use extending over configuration and to use dependency injection where necessary.
+
+2. Add Europa_Route class which controls route matching and parameter parsing and retrieving.
+
+3. Add Europa_String class for fluid string manipulation. It's also an integral part of the core for enforcing naming conventions.
+
+4. Change the name of the Europa_Controller class to something a bit more fitting: Europa_Dispatcher.
+
+5. Add Europa_Controller_Abstract class for using as a parent class for controllers. It isn't required, but it sets up properties and methods for common tasks.
+
+
+
 == 1.0.2 ==
 
 1. Fix bug where exceptions wouldn't be printed out on PHP <= 5.2.0 because  die() wouldn't invoke the magic __toString() method. Changed to echo while exiting after it (you don't really have to exit, it's just an anal precaution).
