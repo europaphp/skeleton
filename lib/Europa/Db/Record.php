@@ -16,16 +16,16 @@ abstract class Europa_Db_Record
 		 * Contains a snapshot of the field values when the instance was first 
 		 * instantiated.
 		 * 
-		 * @var $_snapshot
+		 * @var $snapshot
 		 */
-		$_snapshot = array(),
+		$snapshot = array(),
 		
 		/**
 		 * Contains relationships that have been accessed.
 		 * 
-		 * @var $_relationships
+		 * @var $relationships
 		 */
-		$_relationships = array();
+		$relationships = array();
 	
 	/**
 	 * Constructs a record and fills any values that are passed.
@@ -128,7 +128,7 @@ abstract class Europa_Db_Record
 		}
 		
 		if ($recursive) {
-			foreach ($this->_relationships as $name => $relationship) {
+			foreach ($this->relationships as $name => $relationship) {
 				$arr[$name] = $relationship->toArray($recursive);
 			}
 		}
@@ -173,7 +173,7 @@ abstract class Europa_Db_Record
 	 */
 	public function revertState()
 	{
-		foreach ($this->_snapshot as $name => $value) {
+		foreach ($this->snapshot as $name => $value) {
 			$this->$name = $value;
 		}
 		
@@ -188,7 +188,7 @@ abstract class Europa_Db_Record
 	 */
 	public function commitState()
 	{
-		foreach ($this->_snapshot as $name => &$value) {
+		foreach ($this->snapshot as $name => &$value) {
 			$value = $this->$name;
 		}
 		
@@ -245,7 +245,7 @@ abstract class Europa_Db_Record
 		
 		// handle single relationship cascading
 		if ($cascade) {
-			foreach ($this->_relationships as $rel) {
+			foreach ($this->relationships as $rel) {
 				if ($rel instanceof Europa_Db_Record) {
 					$relLocalKey   = $rel->getPrimaryKeyName();
 					$relForeignKey = $rel->getForeignKeyName();
@@ -302,7 +302,7 @@ abstract class Europa_Db_Record
 		
 		// handle has-many relationship cascading
 		if ($cascade) {
-			foreach ($this->_relationships as $rel) {
+			foreach ($this->relationships as $rel) {
 				// must be an instance of Europa_Db_RecordSet
 				if ($rel instanceof Europa_Db_RecordSet) {
 					$thisForeignKey = $this->getForeignKeyName();
@@ -351,7 +351,7 @@ abstract class Europa_Db_Record
 			if ($db->query($stmt)) {
 				// if cascading, delete all relationships
 				if ($cascade) {
-					foreach ($this->_relationships as $relationshp) {
+					foreach ($this->relationships as $relationshp) {
 						$relationship->delete($cascade);
 					}
 				}
@@ -386,8 +386,18 @@ abstract class Europa_Db_Record
 	 */
 	public function fetchOne(Europa_Db_Statement $stmt = null)
 	{
+		// if no statement exists, create one so we can limit it
+		if (!$stmt) {
+			$stmt = new Europa_Db_Statement;
+		}
+
+		// limit to 1 record, overriding any existing limits
+		$stmt->limit(1);
+
+		// execute the query
 		$res = $this->fetchAll($stmt);
-		
+
+		// return it if it was successful
 		if ($res) {
 			return $res->offsetGet(0);
 		}
@@ -404,8 +414,6 @@ abstract class Europa_Db_Record
 	public function fetchAll(Europa_Db_Statement $stmt = null)
 	{
 		// get the class, allows extending Europa_Db_Record
-		$class = get_class($this);
-		
 		if (!$stmt) {
 			$stmt = new Europa_Db_Statement;
 		}
@@ -414,17 +422,10 @@ abstract class Europa_Db_Record
 		$stmt->select()->setTables($this->getTableName());
 		
 		// will either return an array of results or false
-		$res = $this->getDb()->fetchAll($stmt);
+		$res = $this->getDb()->query($stmt);
 		
-		// build a list of instances
-		if ($res) {
-			foreach ($res as &$row) {
-				$row = new $class($row, false);
-			}
-		}
-		
-		// return a record set
-		return $res ? new Europa_Db_RecordSet($res) : false;
+		// return a record set and use a custom class if it is being extended
+		return $res ? new Europa_Db_RecordSet($res, get_class($this)) : false;
 	}
 	
 	/**
@@ -437,7 +438,7 @@ abstract class Europa_Db_Record
 	 * 
 	 * @return array|false
 	 */
-	public function fetchPage($page = 1, $numPerPage = 10, $orderBy = null, $groupBy = null, Europa_Db_Statement $stmt = null)
+	public function fetchPage($page = 1, $numPerPage = 10, $orderBy = null, Europa_Db_Statement $stmt = null)
 	{
 		$stmt = $stmt
 		      ? $stmt
@@ -447,10 +448,6 @@ abstract class Europa_Db_Record
 		
 		if ($orderBy) {
 			$stmt->orderBy($orderBy);
-		}
-		
-		if ($groupBy) {
-			$stmt->orderBy($groupBy);
 		}
 		
 		return $this->fetchAll($stmt);
@@ -656,18 +653,18 @@ abstract class Europa_Db_Record
 	 * @param string $name The name of the relationship to retrieve. This is the
 	 *                     name of the property that will be used to access the
 	 *                     relationship and is formatted with
-	 *                     Europa_Db_Record->_formatRelationshipClassName().
+	 *                     Europa_Db_Record->formatRelationshipClassName().
 	 * @return Europa_Db_Record|Europa_Db_RecordSet
 	 */
-	public function getRelationship($name)
+	final public function getRelationship($name)
 	{
 		// if the relationshp already exists, return it
-		if (isset($this->_relationships[$name])) {
-			return $this->_relationships[$name];
+		if (isset($this->relationships[$name])) {
+			return $this->relationships[$name];
 		}
 		
 		// get relationship naming conventions
-		$className = $this->_formatRelationshipClassName($name);
+		$className = $this->formatRelationshipClassName($name);
 		
 		// if the relationship class can't be found throw an exception.
 		if (!Europa_Loader::loadClass($className)) {
@@ -696,7 +693,7 @@ abstract class Europa_Db_Record
 			// fetch all where this foreign key is in the relationship table
 			$stmt->andWhere($thisForeignKey . ' = ?', $this->$thisLocalKey);
 			
-			$this->_relationship[$name] = $class->fetchAll();
+			$this->relationships[$name] = $class->fetchAll();
 		} else {
 			// load the data if the key is set
 			if ($this->hasColumn($classForeignKey) && $this->$classForeignKey) {
@@ -704,11 +701,11 @@ abstract class Europa_Db_Record
 			}
 			
 			// define the property
-			$this->_relationships[$name] = $class;
+			$this->relationships[$name] = $class;
 		}
 		
 		// and return it
-		return $this->_relationships[$name];
+		return $this->relationships[$name];
 	}
 	
 	/**
@@ -718,7 +715,7 @@ abstract class Europa_Db_Record
 	 * @param mixed $value
 	 * @return Europa_Db_Record
 	 */
-	public function setRelationship($name, $value)
+	final public function setRelationship($name, $value)
 	{
 		$rel = $this->getRelationship($name);
 		
@@ -734,7 +731,7 @@ abstract class Europa_Db_Record
 					$records[] = $this->getRelationship($name)->fill($filler);
 				}
 				
-				$this->_relationships[$name] = new Europa_Db_RecordSet($records);
+				$this->relationships[$name] = new Europa_Db_RecordSet($records);
 			} else {
 				$rel->fill($value);
 			}
@@ -749,7 +746,7 @@ abstract class Europa_Db_Record
 	 * @param mixed $rels
 	 * @return Europa_Db_Record
 	 */
-	public function loadRelationships($rels)
+	final public function loadRelationships($rels)
 	{
 		$rels = (array) $rels;
 		
@@ -769,7 +766,7 @@ abstract class Europa_Db_Record
 	 * 
 	 * @return string
 	 */
-	protected function _formatRelationshipClassName($name)
+	protected function formatRelationshipClassName($name)
 	{
 		$name      = ucfirst($name);
 		$className = $this->getDbName()

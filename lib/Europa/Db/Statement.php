@@ -189,7 +189,8 @@ class Europa_Db_Statement
 				       . implode(', ', $tables)
 				       . $conditions
 				       . $groupBy
-				       . $orderBy;
+				       . $orderBy
+				       . $limit;
 		}
 		
 		// return a statement for preparation

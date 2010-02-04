@@ -19,8 +19,10 @@ class IndexController extends Europa_Controller_Abstract
 	 */
 	public function __call($name, $args)
 	{
-		$this->layout->title = 'Error: 404 - Not Found';
-		$this->view->msg     = 'The requested page was unable to be found';
+		$this->layout->title = 'EuropaPHP - 404';
+		$this->view->msg     = 'The page you requested could not be found.';
+
+		$this->view->setScript('Index/index');
 	}
 	
 	/**
@@ -43,7 +45,9 @@ class IndexController extends Europa_Controller_Abstract
 	 */
 	public function init()
 	{
-		return array('title' => 'EuropaPHP');
+		return array(
+			'title' => 'EuropaPHP'
+		);
 	}
 	
 	/**
@@ -53,8 +57,10 @@ class IndexController extends Europa_Controller_Abstract
 	 * 
 	 * @return array|false|void
 	 */
-	public function indexAction($msg = 'This is the default message.')
+	public function indexAction($msg = 'Welcome to EuropaPHP!')
 	{
-		return array('msg' => $msg);
+		return array(
+			'msg' => $msg
+		);
 	}
 }

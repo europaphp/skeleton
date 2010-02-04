@@ -42,7 +42,7 @@ class Europa_Db extends PDO
 		 * 
 		 * @var array
 		 */
-		$_config = array();
+		$config = array();
 	
 	
 	
@@ -55,19 +55,19 @@ class Europa_Db extends PDO
 	 */
 	public function __construct($config = null)
 	{
-		$this->_config = array_merge(self::$defaultConfig, (array) $config);
+		$this->config = array_merge(self::$defaultConfig, (array) $config);
 		
 		// create a PDO DSN
-		$dsn = $this->_config['driver'] . ':' 
-		     . 'host=' . $this->_config['host'] . ';'
-		     . 'dbname=' . $this->_config['database'];
+		$dsn = $this->config['driver'] . ':'
+		     . 'host=' . $this->config['host'] . ';'
+		     . 'dbname=' . $this->config['database'];
 		
 		// construct the parent PDO
 		parent::__construct(
 			$dsn,
-			$this->_config['username'],
-			$this->_config['password'],
-			$this->_config['driverOptions']
+			$this->config['username'],
+			$this->config['password'],
+			$this->config['driverOptions']
 		);
 	}
 	
@@ -98,7 +98,7 @@ class Europa_Db extends PDO
 		$query = parent::prepare($this->translate($query));
 		
 		// if logging, set the query start time
-		if ($this->_config['log']) {
+		if ($this->config['log']) {
 			$startTime = microtime();
 		}
 		
@@ -106,11 +106,11 @@ class Europa_Db extends PDO
 		$res = $query->execute($params);
 		
 		// if logging, record query details
-		if ($this->_config['log']) {
+		if ($this->config['log']) {
 			$endTime = microtime() - $startTime;
 			
 			self::$log[] = array(
-				'database' => $this->_config['database'],
+				'database' => $this->config['database'],
 				'query'    => $query->queryString,
 				'params'   => $params,
 				'time'     => $endTime,
@@ -232,12 +232,12 @@ class Europa_Db extends PDO
 	public function translate($query)
 	{
 		// if we are not translating, then just return the query
-		if (!$this->_config['translate']) {
+		if (!$this->config['translate']) {
 			return $query;
 		}
 		
 		// so we can camelcase
-		$driver = new Europa_String($this->_config['driver']);
+		$driver = new Europa_String($this->config['driver']);
 		
 		// instantiate the translation object
 		$tranny = 'Europa_Db_Translator_' . (string) $driver->camelCase(true);
