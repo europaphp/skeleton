@@ -10,16 +10,17 @@ abstract class Europa_Controller_Abstract
 	
 	public function __construct()
 	{
-		$this->controller = Europa_Controller::getActiveInstance();
-		$this->route      = $this->controller->getRoute();
-		$this->layout     = $this->controller->getLayout();
-		$this->view       = $this->controller->getView();
+		$this->controller   = Europa_Controller::getActiveInstance();
+		$this->route        = $this->controller->getRoute();
+		$this->layout       = $this->controller->getLayout();
+		$this->view         = $this->controller->getView();
+		$this->layout->view = $this->view;
 	}
 	
 	protected function forward($action)
 	{
 		// force a route
-		$this->discontrollerpatcher->setRoute(new Europa_Route(array(
+		$this->controller->setRoute(new Europa_Route(array(
 			'controller' => $this->route->getParam('controller'),
 			'action'     => $action
 		)));

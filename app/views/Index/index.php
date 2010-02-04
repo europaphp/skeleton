@@ -1,1 +1,1 @@
-<?php echo $this->msg; ?>
+<p><?php echo $this->msg; ?></p>
