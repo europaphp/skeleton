@@ -6,10 +6,10 @@ ini_set('display_errors', 'on');
 $time = microtime();
 
 // include the framework
-require 'lib/Europa/Dispatcher.php';
+require 'lib/Europa/Controller.php';
 
 // instantiate
-$europa = new Europa_Dispatcher;
+$europa = new Europa_Controller;
 
 // dispatch
 $europa->dispatch();

@@ -1,6 +1,6 @@
 <?php
 
-class IndexController
+class IndexController extends Europa_Controller_Abstract
 {
 	/**
 	 * The constructor. Similar to init, but init allows a return value
@@ -8,7 +8,7 @@ class IndexController
 	 */
 	public function __construct()
 	{
-		$this->dispatcher = Europa_Dispatcher::getActiveInstance();
+		parent::__construct();
 	}
 	
 	/**
@@ -19,8 +19,8 @@ class IndexController
 	 */
 	public function __call($name, $args)
 	{
-		$this->dispatcher->getLayout()->title = 'Error: 404 - Not Found';
-		$this->dispatcher->getView()->msg     = 'The requested page was unable to be found';
+		$this->layout->title = 'Error: 404 - Not Found';
+		$this->view->msg     = 'The requested page was unable to be found';
 	}
 	
 	/**

@@ -1,6 +1,6 @@
 <?php
 
-class Europa_Dispatcher_Exception extends Europa_Exception
+class Europa_Controller_Exception extends Europa_Exception
 {
     const
         /**

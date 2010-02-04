@@ -2,7 +2,7 @@
 
 /**
  * @package    Europa
- * @subpackage Dispatcher
+ * @subpackage Controller
  */
 
 
@@ -48,7 +48,7 @@ set_exception_handler(array('Europa_Exception', 'handle'));
 /**
  * The heart of EuropaPHP. This is where it all starts and ends.
  */
-class Europa_Dispatcher
+class Europa_Controller
 {
 	protected
 		/**
@@ -92,9 +92,9 @@ class Europa_Dispatcher
 		$stack = null;
 	
 	/**
-	 * Constructs the dispatcher and sets defaults.
+	 * Constructs the Controller and sets defaults.
 	 * 
-	 * @return Europa_Dispatcher
+	 * @return Europa_Controller
 	 */
 	final public function __construct()
 	{
@@ -152,14 +152,13 @@ class Europa_Dispatcher
 		
 		// load the controller
 		if (!Europa_Loader::loadClass($controllerName, $controllerPaths)) {
-			throw new Europa_Dispatcher_Exception(
+			throw new Europa_Controller_Exception(
 				'Could not load controller <strong>'
 				. $controllerName
 				. '</strong> from <strong>' 
 				. implode(', ', $controllerPaths)
 				. '</strong>.'
-				,
-                Europa_Dispatcher_Exception::CONTROLLER_NOT_FOUND
+				, Europa_Controller_Exception::CONTROLLER_NOT_FOUND
 			);
 		}
 		
@@ -213,7 +212,7 @@ class Europa_Dispatcher
 				} elseif ($param->isOptional()) {
 					$actionParams[$pos] = $param->getDefaultValue();
 				} else {
-					throw new Europa_Exception(
+					throw new Europa_Controller_Exception(
 						'Required request parameter <strong>$'
 						. $name 
 						. '</strong> for <strong>' 
@@ -221,8 +220,7 @@ class Europa_Dispatcher
 						. '->' 
 						. $actionName
 						. '()</strong> is not set.'
-						,
-						Europa_Dispatcher_Exception::REQUIRED_PARAMETER_NOT_DEFINED
+						, Europa_Controller_Exception::REQUIRED_PARAMETER_NOT_DEFINED
 					);
 				}
 				
@@ -250,14 +248,13 @@ class Europa_Dispatcher
 		} elseif ($controllerReflection->hasMethod('__call')) {
 			$controllerInstance->$actionName();
 		} else {
-			throw new Europa_Dispatcher_Exception(
+			throw new Europa_Controller_Exception(
 				'Action <strong>' 
 				. $actionName
 				. '</strong> does not exist in <strong>' 
 				. $controllerName
 				. '</strong> and it was not trapped in <strong>__call</strong>.'
-				, 
-				Europa_Dispatcher_Exception::ACTION_NOT_FOUND
+				, Europa_Controller_Exception::ACTION_NOT_FOUND
 			);
 		}
 		
@@ -270,7 +267,7 @@ class Europa_Dispatcher
 		if ($this->layout && !$this->layout->getScript()) {
 			$this->layout->setScript($this->getLayoutScriptName());
 		}
-		
+
 		// set the default view script name if it hasn't been set yet
 		if ($this->view && !$this->view->getScript()) {
 			$this->view->setScript($this->getViewScriptName());
@@ -322,7 +319,7 @@ class Europa_Dispatcher
 	 * 
 	 * @param Europa_View $view
 	 * 
-	 * @return Europa_Dispatcher
+	 * @return Europa_Controller
 	 */
 	final public function setView(Europa_View $view = null)
 	{
@@ -347,7 +344,7 @@ class Europa_Dispatcher
 	 * @param Europa_Route $name
 	 * @param $route
 	 * 
-	 * @return Europa_Dispatcher
+	 * @return Europa_Controller
 	 */
 	final public function setRoute($name, Europa_Route $route = null)
 	{
@@ -382,7 +379,7 @@ class Europa_Dispatcher
 	
 	/**
 	 * Returns the formatted path to the controller directory. In relation
-	 * to the script that instantiates the Europa_Dispatcher class.
+	 * to the script that instantiates the Europa_Controller class.
 	 * 
 	 * @return string
 	 */
@@ -443,9 +440,9 @@ class Europa_Dispatcher
 	 */
 	protected function getLayoutScriptName()
 	{
-		$controller = $this->route->getParam('controller', 'index');
+		$controller = $this->route->getParam('controller', 'Index');
 		
-		return Europa_String::create($controller)->camelCase();
+		return Europa_String::create($controller)->camelCase(true);
 	}
 	
 	/**
@@ -458,10 +455,10 @@ class Europa_Dispatcher
 	protected function getViewScriptName()
 	{
 		$route      = $this->getRoute();
-		$controller = $route->getParam('controller', 'index');
+		$controller = $route->getParam('controller', 'Index');
 		$action     = $route->getParam('action', 'index');
 		
-		return Europa_String::create($controller)->camelCase()
+		return Europa_String::create($controller)->camelCase(true)
 		       . '/' 
 		       . Europa_String::create($action)->camelCase();
 	}
@@ -507,7 +504,7 @@ class Europa_Dispatcher
 	}
 	
 	/**
-	 * Returns the Europa_Dispatcher instance that is currently dispatching.
+	 * Returns the Europa_Controller instance that is currently dispatching.
 	 * 
 	 * @return mixed
 	 */
@@ -524,7 +521,7 @@ class Europa_Dispatcher
 	}
 	
 	/**
-	 * Returns all Europa_Dispatcher instances that are dispatching, 
+	 * Returns all Europa_Controller instances that are dispatching,
 	 * in chronological order, as an array.
 	 * 
 	 * @return array

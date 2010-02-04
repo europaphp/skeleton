@@ -2,30 +2,30 @@
 
 abstract class Europa_Controller_Abstract
 {
-	public
-		$dispatcher,
+	protected
+		$controller,
 		$route,
 		$layout,
 		$view;
 	
 	public function __construct()
 	{
-		$this->dispatcher = Europa_Dispatcher::getActiveInstance();
-		$this->route      = $this->dispatcher->getRoute();
-		$this->layout     = $this->dispatcher->getLayout();
-		$this->view       = $this->dispatcher->getView();
+		$this->controller = Europa_Controller::getActiveInstance();
+		$this->route      = $this->controller->getRoute();
+		$this->layout     = $this->controller->getLayout();
+		$this->view       = $this->controller->getView();
 	}
 	
-	protected function _forward($action)
+	protected function forward($action)
 	{
 		// force a route
-		$this->dispatcher->setRoute(new Europa_Route(array(
+		$this->discontrollerpatcher->setRoute(new Europa_Route(array(
 			'controller' => $this->route->getParam('controller'),
 			'action'     => $action
 		)));
 		
 		// by dispatching here, it cancels the last dispatch call
-		$this->dispatcher->dispatch();
+		$this->controller->dispatch();
 		
 		exit;
 	}
@@ -43,7 +43,7 @@ abstract class Europa_Controller_Abstract
 	 * 
 	 * @return void
 	 */
-	protected function _redirect($uri = '/', $europaRelative = true)
+	protected function redirect($uri = '/', $europaRelative = true)
 	{
 		if ($europaRelative) {
 			$uri = $this->view->uri($uri);

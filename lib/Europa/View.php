@@ -45,10 +45,14 @@ class Europa_View
 	public function __construct($script = null, $params = array())
 	{
 		// set a script if defined
-		$this->setScript($script);
+		if ($script) {
+			$this->setScript($script);
+		}
 		
 		// and set arguments
-		$this->params = $params;
+		if (is_array($params)) {
+			$this->params = $params;
+		}
 	}
 	
 	/**
@@ -154,7 +158,7 @@ class Europa_View
 		if (!$script) {
 			Europa_View_Exception::trigger(
 				'No script was set to be rendered.'
-				, self::EXCEPTION_NO_SCRIPT_SET
+				, Europa_View_Exception::SCRIPT_NOT_SET
 			);
 		}
 		
@@ -166,7 +170,7 @@ class Europa_View
 				'View script <strong>' 
 				. $script
 				. '</strong> cannot be found'
-				, self::EXCEPTION_VIEW_NOT_FOUND
+				, Europa_View_Exception::VIEW_NOT_FOUND
 			);
 		}
 		
