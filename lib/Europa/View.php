@@ -224,7 +224,7 @@ class Europa_View
 			return $uri;
 		}
 
-		$controller = Europa_Dispatcher::getActiveInstance();
+		$controller = Europa_Controller::getActiveInstance();
 		$route      = $controller->getRoute($uri);
 		
 		// if the route was found, reverse engineer it and set it
@@ -239,7 +239,7 @@ class Europa_View
 
 		// automate
 		return '/'
-			 . Europa_Dispatcher::getRootUri()
+			 . Europa_Controller::getRootUri()
 			 . '/'
 			 . $uri;
 	}
