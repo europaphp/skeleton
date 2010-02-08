@@ -99,6 +99,13 @@ class Europa_Db_Statement
 		$_orderBy = array(),
 		
 		/**
+		 * The direction or ordering.
+		 * 
+		 * @var string
+		 */
+		$_orderDirection = 'ASC',
+		
+		/**
 		 * An array that holds the data for the limit clause.
 		 * 
 		 * @var array
@@ -125,9 +132,9 @@ class Europa_Db_Statement
 		$columns    = $this->_escape($this->_columns);
 		$tables     = $this->_escape($this->_tables);
 		$columns    = $this->_escape($this->_columns);
-		$conditions = $this->_conditions ? ' WHERE '    . $this->_conditions                              : '';
-		$groupBy    = $this->_groupBy    ? ' GROUP BY ' . implode(', ', $this->_escape($this->_groupBy)) : '';
-		$orderBy    = $this->_orderBy    ? ' ORDER BY ' . implode(', ', $this->_escape($this->_orderBy)) : '';
+		$conditions = $this->_conditions ? ' WHERE ' . $this->_conditions : '';
+		$groupBy    = $this->_groupBy ? ' GROUP BY ' . implode(', ', $this->_escape($this->_groupBy)) . ' ' : '';
+		$orderBy    = $this->_orderBy ? ' ORDER BY ' . implode(', ', $this->_escape($this->_orderBy)) . ' ' . $this->_orderDirection . ' ' : '';
 		$limit      = '';
 		
 		// an array to hold a matching number of question marks as parameters bound
@@ -403,10 +410,10 @@ class Europa_Db_Statement
 	 * 
 	 * @return Europa_Db_Statement
 	 */
-	public function orderBy($columns)
+	public function orderBy($columns, $orderDirection = 'ASC')
 	{
-		// merge order by columns
-		$this->_orderBy = array_merge($this->_orderBy, $columns);
+		$this->_orderBy        = array_merge($this->_orderBy, (array) $columns);
+		$this->_orderDirection = strtolower($orderDirection) == 'desc' ? 'DESC' : 'ASC';
 		
 		return $this;
 	}
@@ -421,6 +428,16 @@ class Europa_Db_Statement
 	 */
 	public function limit($numPerPage = 10, $page = null)
 	{
+		// force a number, otherwise 10
+		if (!is_numeric($numPerPage)) {
+			$numPerPage = 10;
+		}
+		
+		// force a number, otherwise null
+		if (!is_numeric($page)) {
+			$page = null;
+		}
+		
 		$this->_limit = $page
 			? array(($numPerPage * $page) - $numPerPage, $numPerPage)
 			: array($numPerPage);

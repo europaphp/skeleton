@@ -31,12 +31,18 @@ class Europa_Db_RecordSet implements Iterator, ArrayAccess
 	 * @param string $class The class to instantiate and fill with a record.
 	 * @param Europa_Db_RecordSet
 	 */
-	public function __construct(PDOStatement $stmt, $class = 'Europa_Db_Record')
+	public function __construct(PDOStatement $stmt, $class = null)
 	{
 		$this->stmt  = $stmt;
 		$this->class = $class;
 	}
 
+	/**
+	 * When the final instance of the record set is cleaned up,
+	 * then close the cursor on the statement.
+	 * 
+	 * @return void
+	 */
 	public function __destruct()
 	{
 		$this->stmt->closeCursor();
@@ -94,7 +100,11 @@ class Europa_Db_RecordSet implements Iterator, ArrayAccess
 		$class = $this->class;
 		$row   = $this->stmt->fetch(PDO::FETCH_ASSOC, PDO::FETCH_ORI_ABS, $index);
 
-		return new $class($row);
+		if ($class) {
+			return new $class($row);
+		}
+		
+		return $row;
 	}
 
 	/**
@@ -154,6 +164,6 @@ class Europa_Db_RecordSet implements Iterator, ArrayAccess
 	 */
 	public function valid()
 	{
-		return $this->index < $this->stmt->rowCount();
+		return $this->count() && $this->index < ($this->count() - 1);
 	}
 }

@@ -6,7 +6,7 @@
  */
 
 /**
- * Extends PHP's PDO library prviding database abstraction and access to all public
+ * Extends PHP's PDO library providing database abstraction and access to all public
  * methods/properties in the PDO library. Provides an easy method for connecting
  * to a PDO driver and querying the database in fewer calls.
  */
@@ -25,9 +25,16 @@ class Europa_Db extends PDO
 			'database'      => null,
 			'username'      => 'root',
 			'password'      => null,
-			'translate'     => false,
 			'log'           => true
-		),
+		);
+	
+	protected
+		/**
+		 * Contains the configuration for the current instance.
+		 * 
+		 * @var array
+		 */
+		$config = array(),
 		
 		/**
 		 * Contains the query log for the current db connection.
@@ -36,25 +43,17 @@ class Europa_Db extends PDO
 		 */
 		$log = array();
 	
-	protected
-		/**
-		 * Contains the configuration for the current instance.
-		 * 
-		 * @var array
-		 */
-		$config = array();
-	
 	
 	
 	/**
 	 * Instantiates a new database connection from the given configuration options.
 	 * 
-	 * @param array $config The configuraiton to use for the instance.
-	 * 
+	 * @param array $config The configuration to use for the instance.
 	 * @return Europa_Db
 	 */
 	public function __construct($config = null)
 	{
+		// merge the configuration
 		$this->config = array_merge(self::$defaultConfig, (array) $config);
 		
 		// create a PDO DSN
@@ -74,28 +73,19 @@ class Europa_Db extends PDO
 	
 	
 	/**
-	 * Wraps PDO::query() to implement statement translation and auto-execution.
+	 * Wraps PDO::query() and automatically executes it with the specified parameters. If a record set
+	 * is being returned, then the cursor may have to be closed before issuing another query.
 	 * 
-	 * @param string $query  The query to use.
-	 * @param mixed  $params The parameters to use for the prepared statement. None if not prepared.
-	 * 
+	 * @param string $query The query to use.
+	 * @param mixed  $params The parameters, if any, to use for the prepared statement.
 	 * @return mixed Returns PDOStatement result on success or false on failure.
 	 */
 	public function query($query, $params = array())
 	{
-		// retrieve the params from the statement
-		// if a Europa_Db_Statement instance is passed use the params set on it
-		// unless overridden with $params
-		if ($query instanceof Europa_Db_Statement) {
-			// passed in parameters will override bound parameters
-			$params = $params ? $params : $query->getParams();
-			
-			// convert the query to a string
-			$query  = (string) $query;
-		}
-		
 		// prepare the statement, returning a PDOStatement
-		$query = parent::prepare($this->translate($query));
+		$query = parent::prepare($query, array(
+			PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL
+		));
 		
 		// if logging, set the query start time
 		if ($this->config['log']) {
@@ -109,12 +99,13 @@ class Europa_Db extends PDO
 		if ($this->config['log']) {
 			$endTime = microtime() - $startTime;
 			
-			self::$log[] = array(
+			$this->log[] = array(
 				'database' => $this->config['database'],
 				'query'    => $query->queryString,
 				'params'   => $params,
 				'time'     => $endTime,
-				'success'  => $res
+				'success'  => $res,
+				'error'    => $res ? false : $query->errorInfo()
 			);
 		}
 		
@@ -123,6 +114,7 @@ class Europa_Db extends PDO
 			return $query;
 		}
 		
+		// make sure it's closed if it's not
 		$query->closeCursor();
 		
 		// if the execution failed, return false
@@ -133,8 +125,7 @@ class Europa_Db extends PDO
 	 * Fetches a single row, reduces it to a single array and returns it on success. Returns false on failure.
 	 * 
 	 * @param string $query  The query to execute.
-	 * @param mixed  $params The parameters to use in the prepared statement.
-	 * 
+	 * @param mixed $params The parameters to use in the prepared statement.
 	 * @return Mixed Array on success. False on failure.
 	 */
 	public function fetchOne($query, $params = null)
@@ -147,102 +138,28 @@ class Europa_Db extends PDO
 	}
 	
 	/**
-	 * Fetches mutlitple rows and returns a multi-dimensional array on success. Returns false on failure.
+	 * Fetches multiple rows and returns a multi-dimensional array on success. Returns false on failure.
 	 * 
 	 * @param string $query  The query to execute.
-	 * @param mixed  $params The parameters to use in the prepared statement.
-	 * 
+	 * @param mixed $params The parameters to use in the prepared statement.
 	 * @return Mixed Array on success. False on failure.
 	 */
 	public function fetchAll($query, $params = null)
 	{
 		if ($stmt = $this->query($query, $params)) {
-			$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-			
-			$stmt->closeCursor();
-			
-			return $results;
+			return new Europa_Db_RecordSet($stmt);
 		}
 		
 		return false;
 	}
 	
 	/**
-	 * A shortcut for instantiating a Europa_Db_Statement and then calling the select() method.
+	 * Returns the query log as an array.
 	 * 
-	 * @param string|array $columns The columns to select from. Can be a string or array. Multiple columns must be specified in an array.
-	 * 
-	 * @return Europa_Db_Statement
+	 * @return array
 	 */
-	public function select($columns = '*')
+	public function getLog()
 	{
-		$stmt = new Europa_Db_Statement;
-		
-		return $stmt->select($columns);
-	}
-	
-	/**
-	 * A shortcut for instantiating a Europa_Db_Statement and then calling the insert() method.
-	 * 
-	 * @param array $keyVals The key value pairs of $columnName => $columnValue to insert.
-	 * 
-	 * @return Europa_Db_Statement
-	 */
-	public function insert($keyVals)
-	{
-		$stmt = new Europa_Db_Statement;
-		
-		return $stmt->insert($keyVals);
-	}
-	
-	/**
-	 * A shortcut for instantiating a Europa_Db_Statement and then calling the update() method.
-	 * 
-	 * @param array $keyVals The key value pairs of $columnName => $columnValue to update.
-	 * 
-	 * @return Europa_Db_Statement
-	 */
-	public function update($keyVals)
-	{
-		$stmt = new Europa_Db_Statement;
-		
-		return $stmt->update($keyVals);
-	}
-	
-	/**
-	 * A shortcut for instantiating a Europa_Db_Statement and then calling the delete() method.
-	 * 
-	 * @return Europa_Db_Statement
-	 */
-	public function delete()
-	{
-		$stmt = new Europa_Db_Statement;
-		
-		return $stmt->delete();
-	}
-	
-	/**
-	 * Instantiates the appropriate translation class for the specified driver. If translation is turned
-	 * off, nothing is done and the original statement is returned.
-	 * 
-	 * @param string $query The query to translate.
-	 * 
-	 * @return string
-	 */
-	public function translate($query)
-	{
-		// if we are not translating, then just return the query
-		if (!$this->config['translate']) {
-			return $query;
-		}
-		
-		// so we can camelcase
-		$driver = new Europa_String($this->config['driver']);
-		
-		// instantiate the translation object
-		$tranny = 'Europa_Db_Translator_' . (string) $driver->camelCase(true);
-		
-		// translate and return
-		return (string) new $tranny($query);
+		return $this->log;
 	}
 }
