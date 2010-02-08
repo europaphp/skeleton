@@ -216,7 +216,7 @@ abstract class Europa_Db_Record implements ArrayAccess
 	 * 
 	 * @return Europa_Db_Record
 	 */
-	final public function fill($keyVals, $cascade = true)
+	final public function fill($keyVals)
 	{
 		// if none were passed, just return
 		if (!$keyVals) {
@@ -559,9 +559,11 @@ abstract class Europa_Db_Record implements ArrayAccess
 				' . $pk . ' = :id
 		';
 		
-		return (bool) $this->getDb()->query($query, array(
+		$res = $this->getDb()->fetchAll($query, array(
 			':id' => $this->$pk
 		));
+		
+		return (bool) $res->count();
 	}
 	
 	/**
