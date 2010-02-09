@@ -460,7 +460,7 @@ abstract class Europa_Db_Record implements ArrayAccess
 	 * 
 	 * @return int
 	 */
-	final public function count()
+	public function count()
 	{
 		return $this->fetchAll()->count();
 	}
@@ -470,7 +470,7 @@ abstract class Europa_Db_Record implements ArrayAccess
 	 * 
 	 * @return mixed
 	 */
-	final public function fetchOne()
+	public function fetchOne(Europa_Db_Select $select = null)
 	{
 		// execute the query
 		$res = $this->fetchAll();
@@ -488,7 +488,7 @@ abstract class Europa_Db_Record implements ArrayAccess
 	 * 
 	 * @return Europa_Db_RecordSet|false
 	 */
-	final public function fetchAll()
+	public function fetchAll(Europa_Db_Select $select = null)
 	{
 		$res = $this->getDb()->query('
 			SELECT 
@@ -504,38 +504,24 @@ abstract class Europa_Db_Record implements ArrayAccess
 	/**
 	 * Fetches a specific page number and orders it accordingly.
 	 * 
-	 * @return array|false
+	 * @return Europa_Db_RecordSet|false
 	 */
-	final public function fetchPage($page = 1, $numPerPage = 10, $orderBy = null, $orderDirection = 'ASC')
+	public function fetchPage($page = 1, $numPerPage = 10, $orderBy = null, $orderDirection = 'ASC', Europa_Db_Select $select = null)
 	{
-		// SELECT
-		$query = '
-			SELECT 
-				* 
-			FROM 
-				' . $this->getTableName() . '
-		';
-		
-		// ORDER BY
-		if ($orderBy) {
-			// force order direction to either ASC or DESC
-			if (strtoupper($orderDirection) == 'ASC') {
-				$orderDirection = 'ASC';
-			} else {
-				$orderDirection = 'DESC';
-			}
-			
-			$query .= ' ORDER BY ' . $orderBy . ', ' . $orderDirection;
+		if (!$select) {
+			$select = $this->getDb()->select();
 		}
 		
-		// LIMIT
-		if (is_numeric($page)) {
-			$page   = ($numPerPage * $page) - $numPerPage;
-			$query .= ' LIMIT ' . $page . ', ' . $numPerPage;
-		}
+		$table = $this->getTableName();
 		
-		// execute
-		$res = $this->getDb()->query($query);
+		// build/add-on-to the existing select query
+		$select->columns($table . '.*')
+		       ->from($table)
+		       ->orderBy($table . '.' . $orderBy, $orderDirection)
+		       ->limit(($numPerPage * $page) - $numPerPage, $numPerPage);
+		
+		// execute to be passed to Europa_Db_RecordSet if successful
+		$res = $select->execute();
 		
 		// return
 		return $res ? new Europa_Db_RecordSet($res, get_class($this)) : false;
