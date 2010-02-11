@@ -100,6 +100,15 @@ class Europa_Db_RecordSet implements Iterator, ArrayAccess
 		$class = $this->class;
 		$row   = $this->stmt->fetch(PDO::FETCH_ASSOC, PDO::FETCH_ORI_ABS, $index);
 
+		// if fetch returns false, it means we need to reset the pointer
+		if (!$row) {
+			// currently only way to reset the pointer
+			$this->stmt->execute();
+			
+			// and then re-fetch
+			$row = $this->stmt->fetch(PDO::FETCH_ASSOC, PDO::FETCH_ORI_ABS, $index);
+		}
+
 		if ($class) {
 			return new $class($row);
 		}
