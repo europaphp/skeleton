@@ -215,7 +215,7 @@ class Europa_View
 	 * @param array $params Any parameters to use when reverse-engineering.
 	 * @return string
 	 */
-	public function uri($uri, $params = array())
+	public function uri($uri = null, $params = array())
 	{
 		$uri = trim($uri);
 
@@ -234,13 +234,17 @@ class Europa_View
 		
 		// make consistent
 		if ($uri) {
-			$uri = ltrim($uri, '/');
+			$uri = '/' . ltrim($uri, '/');
+		}
+		
+		// if there is a root uri, add a forward slash to it
+		$root = Europa_Controller::getRootUri();
+		if ($root) {
+			$root = '/' . $root;
 		}
 
 		// automate
-		return '/'
-			 . Europa_Controller::getRootUri()
-			 . '/'
+		return $root
 			 . $uri;
 	}
 	
