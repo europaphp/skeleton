@@ -58,6 +58,14 @@ class Europa_Loader
 		       ? array_merge((array) $paths, self::$loadPaths)
 		       : self::$loadPaths;
 		
+		// if there aren't any paths, die with a message
+		if (!$paths) {
+			die('
+				No load paths are defined. Please define a load path using
+				Europa_Loader::addLoadPath(\'./path/to/files\').
+			');
+		}
+		
 		// search for the file
 		foreach ($paths as $path) {
 			$fullPath = $path . DIRECTORY_SEPARATOR . $file;

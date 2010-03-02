@@ -5,61 +5,49 @@
  * @subpackage Controller
  */
 
-
-
-/*
- * Sets the default exception handler so that a Europa_Exception can be thrown 
- * without being wrapped in a try/catch block.
- */
-set_exception_handler(array('Europa_Exception', 'handle'));
-
-
-
 /**
  * The heart of EuropaPHP. This is where it all starts and ends.
  */
 class Europa_Controller
-{
-	protected
-		/**
-		 * An insntance or child of Europa_View which represents the layout.
-		 * 
-		 * @var $layout
-		 */
-		$layout,
-		
-		/**
-		 * An instance or child of Europa_View which represents the view.
-		 * 
-		 * @var $view
-		 */
-		$view,
-		
-		/**
-		 * After dispatching, this will contain the route that was used to reach
-		 * the  current page. This can be set before dispatching to force a 
-		 * route to be taken.
-		 * 
-		 * @var $route
-		 */
-		$route = null,
-		
-		/**
-		 * All routes are set to this property. A route must be an instance of
-		 * Europa_Route.
-		 * 
-		 * @var $routes
-		 */
-		$routes = array();
-		
-	private static
-		/**
-		 * Contains the instances of all controllers that are currently 
-		 * dispatching in chronological order.
-		 * 
-		 * @var $stack
-		 */
-		$stack = null;
+{	
+	/**
+	 * An instance or child of Europa_View which represents the layout.
+	 * 
+	 * @var $layout
+	 */
+	protected $layout;
+	
+	/**
+	 * An instance or child of Europa_View which represents the view.
+	 * 
+	 * @var $view
+	 */
+	protected $view;
+	
+	/**
+	 * After dispatching, this will contain the route that was used to reach
+	 * the  current page. This can be set before dispatching to force a 
+	 * route to be taken.
+	 * 
+	 * @var $route
+	 */
+	protected $route = null;
+	
+	/**
+	 * All routes are set to this property. A route must be an instance of
+	 * Europa_Route.
+	 * 
+	 * @var $routes
+	 */
+	protected $routes = array();
+	
+	/**
+	 * Contains the instances of all controllers that are currently 
+	 * dispatching in chronological order.
+	 * 
+	 * @var $stack
+	 */
+	private static $stack = null;
 	
 	/**
 	 * Constructs the Controller and sets defaults.
@@ -78,9 +66,10 @@ class Europa_Controller
 	}
 	
 	/**
-	 * Fires dispatching
+	 * Fires dispatching.
 	 * 
-	 * @return Europa\Controller
+	 * @param bool $register Whether or not to register this instance in the stack.
+	 * @return Europa_Controller
 	 */
 	final public function dispatch($register = true)
 	{
@@ -91,21 +80,6 @@ class Europa_Controller
 		
 		// if the route wasn't already set, find one and set it
 		if (!$this->route) {
-			$this->setRoute('empty', new Europa_Route(
-					'^/?(\?.*)?$'
-				));
-			$this->setRoute('controller', new Europa_Route(
-					'^/?([^/?]+)/?(\?.*)?$',
-					array('controller'),
-					':controller'
-				));
-			$this->setRoute('controllerAction', new Europa_Route(
-					'^/?([^/?]+)/([^/?]+)',
-					array('controller', 'action'),
-					':controller/:action'
-				));
-			
-			// process routes
 			foreach ($this->routes as $name => $route) {
 				if ($route->match(self::getRequestUri())) {
 					$this->route = $route;
@@ -113,6 +87,11 @@ class Europa_Controller
 					break;
 				}
 			}
+		}
+		
+		// if a route still wasn't found, provide a default
+		if (!$this->route) {
+			$this->route = $this->getDefaultRoute();
 		}
 		
 		// set the controller and action names, and the layout and view
@@ -138,19 +117,17 @@ class Europa_Controller
 		// instantiate the controller
 		$controllerInstance = $controllerReflection->newInstanceArgs();
 		
-		// call the init method, like __construct, but set properties
-                // are now available
+		// call the init method, like __construct, but set properties are now available
 		if ($controllerReflection->hasMethod('init')) {
-			// the return value of the layout determines the action
-                        // taken on the layout
+			// the return value of the layout determines the action taken on the layout
 			$initResult = $controllerInstance->init();
 			
 			// if init() returns false, the layout is disabled
 			if ($initResult === false) {
 				$this->layout = null;
-			// otherwise it is assumed to be an array of properties
-                        // to apply to the layout
-			} else {
+			}
+			// otherwise it is assumed to be an array of properties for the layout
+			else {
 				foreach ((array) $initResult as $k => $v) {
 					$this->layout->$k = $v;
 				}
@@ -164,7 +141,7 @@ class Europa_Controller
 		if ($controllerReflection->hasMethod($actionName)) {
 			$actionReflection = $controllerReflection->getMethod($actionName);
 			$actionParams     = array();
-			$routeParams      = $this->route->getParams();
+			$routeParams      = $this->route->getAllParams();
 			
 			// automatically define the parameters that will be passed to the 
 			// action
@@ -177,11 +154,14 @@ class Europa_Controller
 				// exception is thrown
 				if (array_key_exists($name, $routeParams)) {
 					$actionParams[$pos] = $routeParams[$name];
-				} elseif (array_key_exists($pos, $routeParams)) {
+				}
+				elseif (array_key_exists($pos, $routeParams)) {
 					$actionParams[$pos] = $routeParams[$pos];
-				} elseif ($param->isOptional()) {
+				}
+				elseif ($param->isOptional()) {
 					$actionParams[$pos] = $param->getDefaultValue();
-				} else {
+				}
+				else {
 					throw new Europa_Controller_Exception(
 						'Required request parameter <strong>$'
 						. $name 
@@ -210,14 +190,17 @@ class Europa_Controller
 				$this->view = null;
 			// otherwise it is assumed to be an array of properties to apply to
 			// the view
-			} else {
+			}
+			else {
 				foreach ((array) $actionResult as $k => $v) {
 					$this->view->$k = $v;
 				}
 			}
-		} elseif ($controllerReflection->hasMethod('__call')) {
+		}
+		elseif ($controllerReflection->hasMethod('__call')) {
 			$controllerInstance->$actionName();
-		} else {
+		}
+		else {
 			throw new Europa_Controller_Exception(
 				'Action <strong>' 
 				. $actionName
@@ -246,7 +229,8 @@ class Europa_Controller
 		// layout ouput assumes the view is output in it
 		if ($this->layout) {
 			echo $this->layout;
-		} elseif ($this->view) {
+		}
+		elseif ($this->view) {
 			echo $this->view;
 		}
 		
@@ -320,7 +304,8 @@ class Europa_Controller
 	{
 		if ($name instanceof Europa_Route) {
 			$this->route = $name;
-		} else {
+		}
+		else {
 			$this->routes[$name] = $route;
 		}
 		
@@ -331,7 +316,6 @@ class Europa_Controller
 	 * Gets a specified route or the route which was matched.
 	 * 
 	 * @param $name
-	 * 
 	 * @return Europa_Route
 	 */
 	final public function getRoute($name = null)
@@ -345,6 +329,20 @@ class Europa_Controller
 		}
 		
 		return $this->route;
+	}
+	
+	/**
+	 * Provides a default Europa_Route if no route is matched during dispatching.
+	 * 
+	 * @return Europa_Route
+	 */
+	public function getDefaultRoute()
+	{
+		return new Europa_Route(
+			'.*',
+			null,
+			'?controller=:controller&action=:action'
+		);
 	}
 	
 	/**
