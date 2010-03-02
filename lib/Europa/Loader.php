@@ -33,7 +33,11 @@ class Europa_Loader
 	 * Loads a class based on the Europa file naming convention and returns it. 
 	 * If the class is unable to be loaded, false is returned.
 	 * 
+	 * Alternate load paths can be specified to search in before the default
+	 * load paths in an explicit call to loadClass.
+	 * 
 	 * @param string $className The Class to load.
+	 * @param string|array $paths Alternate load paths to search in first.
 	 * @return bool|string
 	 */
 	public static function loadClass($className, $paths = null)
@@ -109,6 +113,8 @@ class Europa_Loader
 	 * Registers the auto-load handler. This first looks to see if the
 	 * spl_autoload_register function exists. If so, it is utilized, if not,
 	 * then it falls back to __autoload.
+	 * 
+	 * @return void
 	 */
 	static public function registerAutoload()
 	{
