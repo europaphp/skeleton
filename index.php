@@ -6,7 +6,13 @@ ini_set('display_errors', 'on');
 $time = microtime();
 
 // include the framework
-require 'lib/Europa/Controller.php';
+require 'lib/Europa/Loader.php';
+
+// register autoloading
+Europa_Loader::registerAutoload();
+
+// add the current load path
+Europa_Loader::addLoadPath('./lib');
 
 // instantiate
 $europa = new Europa_Controller;

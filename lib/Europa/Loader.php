@@ -1,18 +1,14 @@
 <?php
 
 /**
- * @file
- * 
  * @package    Europa
  * @subpackage Loader
  */
 
 /**
- * @class
- * 
- * @name Europa_Loader
- * @desc Handles all loading done in Europa using custom load paths so it doesn't interfere with PHP's default load paths.
- *       You can, however, use PHP's include paths if you desire, as well as a custom load path. See: Europa_Loader::loadClass().
+ * Handles all loading done in Europa using custom load paths so it doesn't interfere 
+ * with PHP's default load paths. You can, however, use PHP's include paths if you 
+ * desire, as well as a custom load path. See: Europa_Loader::loadClass().
  */
 class Europa_Loader
 {
@@ -26,12 +22,10 @@ class Europa_Loader
 	
 	static private 
 		/**
-		 * @property
-		 * @static
-		 * @private
+		 * Contains all load paths that Europa_Loader will use when attempting 
+		 * to load a class.
 		 * 
-		 * @name loadPaths
-		 * @desc Contains all load paths that Europa_Loader will use when attempting to load a class.
+		 * @var array
 		 */
 		$loadPaths = array();
 	
@@ -40,7 +34,6 @@ class Europa_Loader
 	 * If the class is unable to be loaded, false is returned.
 	 * 
 	 * @param string $className The Class to load.
-	 * 
 	 * @return bool|string
 	 */
 	public static function loadClass($className, $paths = null)
@@ -92,8 +85,10 @@ class Europa_Loader
 	/**
 	 * If path exists it is added and returned, otherwise false is returned.
 	 * 
-	 * @param string $path The path to add to the list of load paths.
+	 * Using load paths in this manner, is far faster than using PHP's built-in
+	 * include paths.
 	 * 
+	 * @param string $path The path to add to the list of load paths.
 	 * @return bool|string
 	 */
 	static public function addLoadPath($path)
@@ -108,5 +103,22 @@ class Europa_Loader
 		self::$loadPaths[] = $path;
 		
 		return $path;
+	}
+	
+	/**
+	 * Registers the auto-load handler. This first looks to see if the
+	 * spl_autoload_register function exists. If so, it is utilized, if not,
+	 * then it falls back to __autoload.
+	 */
+	static public function registerAutoload()
+	{
+		if (function_exists('spl_autoload_register')) {
+			spl_autoload_register(array('Europa_Loader', 'loadClass'));
+		} else {
+			function __autoload($className)
+			{
+				Europa_Loader::loadClass($className);
+			}
+		}
 	}
 }

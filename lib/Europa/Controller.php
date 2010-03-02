@@ -8,36 +8,6 @@
 
 
 /*
- * Autoloading
- * 
- * Autoloading significantly increases performace, therefore is enabled
- * automatically, making it a requirement for Europa to run.
- * 
- * We first check to see if the Standard PHP Library exists. If it does
- * then it is used for autoloading. If not, then we fallback to __autoload.
- */
-
-// require the loader if it isn't defined yet
-if (!class_exists('Europa_Loader')) {
-	require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'Loader.php';
-}
-
-// add Europa's directory to the list of load paths
-Europa_Loader::addLoadPath(dirname(__FILE__) . '/../');
-
-// register the autoload function
-if (function_exists('spl_autoload_register')) {
-	spl_autoload_register(array('Europa_Loader', 'loadClass'));
-} else {
-	function __autoload($className)
-	{
-		Europa_Loader::loadClass($className);
-	}
-}
-
-
-
-/*
  * Sets the default exception handler so that a Europa_Exception can be thrown 
  * without being wrapped in a try/catch block.
  */
