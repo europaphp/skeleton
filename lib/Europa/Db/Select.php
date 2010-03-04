@@ -1,100 +1,170 @@
 <?php
 
 /**
+ * @author Trey Shugart
+ * @date 2010-03-04
  * 
+ * @package Europa
+ * @subpackage Db
+ * @subpackage Select
  */
 
 /**
+ * A class that allows a select statement to be built and manipulated in an
+ * object oriented manner. It can also be iterated over and accessed like an
+ * array.
  * 
+ * NOTE: The statement is implicitly executed when iterated over or accessed
+ * like an array. Basically, whenever Europa_Db_Statement->offsetGet() is
+ * invoked, then the statement is executed and cached until it needs to be
+ * executed again.
  */
-class Europa_Db_Select
+class Europa_Db_Select implements Iterator, ArrayAccess
 {
-	const
-		WHERE_AND = 'AND',
-		
-		WHERE_OR = 'OR',
-		
-		JOIN_INNER = 'INNER',
-		
-		JOIN_LEFT = 'LEFT',
-		
-		ORDER_ASC = 'ASC',
-		
-		ORDER_DESC = 'DESC';
+	/**
+	 * The constant that defines AND conditional concatenation.
+	 */
+	const WHERE_AND = 'AND';
 	
-	protected
-		/**
-		 * A reference to the connected Europa_Db.
-		 * 
-		 * @var Europa_Db
-		 */
-		$db,
-		
-		/**
-		 * Holds column information.
-		 * 
-		 * @var array
-		 */
-		$columns = array(),
-		
-		/**
-		 * Holds table information.
-		 * 
-		 * @var array
-		 */
-		$tables = array(),
-		
-		/**
-		 * Holds where clause information.
-		 * 
-		 * @var array
-		 */
-		$clauses = array(),
-		
-		/**
-		 * Holds all join information.
-		 * 
-		 * @var array
-		 */
-		$joins = array(),
-		
-		/**
-		 * Contains grouping information.
-		 * 
-		 * @var array
-		 */
-		$groups = array(),
-		
-		/**
-		 * Contains ordering information.
-		 * 
-		 * @var array
-		 */
-		$orders = array(),
-		
-		/**
-		 * Holds the direction that the result should be ordered, if ordering.
-		 * 
-		 * @var string
-		 */
-		$orderDirection = 'ASC',
-		
-		/**
-		 * Contains parameters to be bound, if any.
-		 * 
-		 * @var array
-		 */
-		$params = array();
+	/**
+	 * The constant that defines OR conditional concatenation.
+	 */
+	const WHERE_OR = 'OR';
 	
-	public function __construct(Europa_Db $db, $columns = array())
+	/**
+	 * The join type INNER used when using Europa_Db_Select->join().
+	 */
+	const JOIN_INNER = 'INNER';
+	
+	/**
+	 * The join type LEFT used when using Europa_Db_Select->join().
+	 */
+	const JOIN_LEFT = 'LEFT';
+	
+	/**
+	 * The order direction ASC when using Europa_Db_Select->orderBy().
+	 */
+	const ORDER_ASC = 'ASC';
+	
+	/**
+	 * The order direction DESC when using Europa_Db_Select->orderBy().
+	 */
+	const ORDER_DESC = 'DESC';
+	
+	/**
+	 * A reference to the connected Europa_Db.
+	 * 
+	 * @var Europa_Db
+	 */
+	protected $db;
+	
+	/**
+	 * Holds column information.
+	 * 
+	 * @var array
+	 */
+	protected $columns = array();
+	
+	/**
+	 * Holds table information.
+	 * 
+	 * @var array
+	 */
+	protected $tables = array();
+	
+	/**
+	 * Holds where clause information.
+	 * 
+	 * @var array
+	 */
+	protected $clauses = array();
+	
+	/**
+	 * Holds all join information.
+	 * 
+	 * @var array
+	 */
+	protected $joins = array();
+	
+	/**
+	 * Contains grouping information.
+	 * 
+	 * @var array
+	 */
+	protected $groups = array();
+	
+	/**
+	 * Contains ordering information.
+	 * 
+	 * @var array
+	 */
+	protected $orders = array();
+	
+	/**
+	 * Holds the direction that the result should be ordered, if ordering.
+	 * 
+	 * @var string
+	 */
+	protected $orderDirection = 'ASC';
+	
+	/**
+	 * Contains information about the limit clause.
+	 * 
+	 * @var array
+	 */
+	protected $limit = array();
+	
+	/**
+	 * The current position in the set.
+	 *
+	 * @var int
+	 */
+	protected $index = 0;
+
+	/**
+	 * The class that will be instantiated and filled.
+	 *
+	 * @var string
+	 */
+	protected $class;
+	
+	/**
+	 * The cached array.
+	 * 
+	 * @var array
+	 */
+	protected $cache;
+	
+	/**
+	 * The number of items to keep cached.
+	 * 
+	 * @var int
+	 */
+	protected $cacheLimit = 1000;
+	
+	/**
+	 * Contains parameters to be bound, if any.
+	 * 
+	 * @var array
+	 */
+	protected $params = array();
+	
+	/**
+	 * Constructs a new Europa_Db_Select object.
+	 * 
+	 * @return Europa_Db_Select
+	 */
+	public function __construct(PDO $db)
 	{
 		// set the database reference
 		$this->db = $db;
-		
-		// add any columns if they were passed
-		$this->columns($columns);
 	}
 	
+	/**
+	 * Parses out the statement into a query string.
+	 * 
+	 * @return string
+	 */
 	public function __toString()
 	{
 		$queries  = array();
@@ -121,7 +191,13 @@ class Europa_Db_Select
 		// join by lines
 		return implode(PHP_EOL, $queries) . ';';
 	}
-	
+
+	/**
+	 * Sets which columns will be selected in the statement.
+	 * 
+	 * @param string|array $columns
+	 * @return Europa_Db_Select
+	 */
 	public function columns($columns)
 	{
 		foreach ((array) $columns as $name => $ref) {
@@ -135,7 +211,13 @@ class Europa_Db_Select
 		
 		return $this;
 	}
-	
+
+	/**
+	 * Adds the tables to be selected from to the statement.
+	 * 
+	 * @param string|array $tables
+	 * @return Europa_Db_Select
+	 */
 	public function from($tables)
 	{
 		foreach ((array) $tables as $name => $ref) {
@@ -150,6 +232,14 @@ class Europa_Db_Select
 		return $this;
 	}
 	
+	/**
+	 * Adds a [*] JOIN to the statement.
+	 * 
+	 * @param string $join
+	 * @param mixed $params
+	 * @param string $type
+	 * @return Europa_Db_Select
+	 */
 	public function join($join, $params = array(), $type = 'INNER')
 	{
 		$this->joins[] = array($type, $join);
@@ -159,16 +249,37 @@ class Europa_Db_Select
 		return $this;
 	}
 	
+	/**
+	 * Adds an INNER JOIN to the statement.
+	 * 
+	 * @param string $join
+	 * @param mixed $params
+	 */
 	public function innerJoin($join, $params = array())
 	{
 		return $this->join($join, $params, self::JOIN_INNER);
 	}
 	
+	/**
+	 * Adds a LEFT JOIN to the statement.
+	 * 
+	 * @param string $join
+	 * @param mixed $params
+	 * @return Europa_Db_Select
+	 */
 	public function leftJoin($join, $params = array())
 	{
 		return $this->join($join, $params, self::JOIN_LEFT);
 	}
 	
+	/**
+	 * Adds a condition to the statement.
+	 * 
+	 * @param string $clause
+	 * @param mixed $params
+	 * @param string $concat
+	 * @return Europa_Db_Select
+	 */
 	public function where($clause, $params = array(), $concat = self::WHERE_AND)
 	{
 		$this->clauses[] = array($concat, $clause);
@@ -178,12 +289,25 @@ class Europa_Db_Select
 		return $this;
 	}
 	
+	/**
+	 * Adds an OR clause to the statement.
+	 * 
+	 * @param string $clause
+	 * @param mixed $params
+	 * @return Europa_Db_Select
+	 */
 	public function orWhere($clause, $params = array())
 	{
 		// just send it to the where method with an OR concatenator
 		return $this->where($clause, $params, self::WHERE_OR);
 	}
 	
+	/**
+	 * Specifies the grouping of the result set.
+	 * 
+	 * @param string|array $tables
+	 * @return Europa_Db_Select
+	 */
 	public function groupBy($tables)
 	{
 		$this->groups = array_merge($this->groups, (array) $tables);
@@ -191,6 +315,13 @@ class Europa_Db_Select
 		return $this;
 	}
 	
+	/**
+	 * Orders the statement based on a table and a direction.
+	 * 
+	 * @param string|array $tables
+	 * @param string $direction
+	 * @return Europa_Db_Select
+	 */
 	public function orderBy($tables, $direction = 'ASC')
 	{
 		$this->orders         = array_merge($this->orders, (array) $tables);
@@ -198,7 +329,12 @@ class Europa_Db_Select
 		
 		return $this;
 	}
-	
+
+	/**
+	 * Defines the limits imposed on the statement.
+	 * 
+	 * @return Europa_Db_Select
+	 */
 	public function limit($start, $end = null)
 	{
 		// resetting the limit
@@ -219,7 +355,25 @@ class Europa_Db_Select
 		
 		return $this;
 	}
-	
+
+	/**
+	 * Effectively paginates the statement. Sets the page and number
+	 * per page that should be returned in the result set.
+	 * 
+	 * @param int $page
+	 * @param int $perPage
+	 * @return Europa_Db_Select
+	 */
+	public function page($page = 1, $perPage = 10)
+	{
+		return $this->limit(($perPage * $page) - $perPage, $perPage);
+	}
+
+	/**
+	 * Returns the column part of the statement.
+	 * 
+	 * @return string
+	 */
 	public function getPartColumns()
 	{
 		$columns = array();
@@ -236,7 +390,12 @@ class Europa_Db_Select
 		
 		return $query;
 	}
-	
+
+	/**
+	 * Returns the FROM part of the statement.
+	 * 
+	 * @return string
+	 */
 	public function getPartFrom()
 	{
 		$tables = array();
@@ -253,7 +412,12 @@ class Europa_Db_Select
 		
 		return 'FROM ' . $query;
 	}
-	
+
+	/**
+	 * Returns the [*] JOIN part of the statement.
+	 * 
+	 * @return string
+	 */
 	public function getPartJoin()
 	{
 		$joins = array();
@@ -268,7 +432,12 @@ class Europa_Db_Select
 		
 		return implode(PHP_EOL, $joins);
 	}
-	
+
+	/**
+	 * Returns the WHERE part of the statement.
+	 * 
+	 * @return string
+	 */
 	public function getPartWhere()
 	{
 		if (!$this->clauses) {
@@ -287,7 +456,12 @@ class Europa_Db_Select
 		
 		return 'WHERE ' . $query;
 	}
-	
+
+	/**
+	 * Returns the GROUP BY part of the statement.
+	 * 
+	 * @return string
+	 */
 	public function getPartGroup()
 	{
 		if (!$this->groups) {
@@ -296,7 +470,12 @@ class Europa_Db_Select
 		
 		return 'GROUP BY ' . implode(', ', $this->groups);
 	}
-	
+
+	/**
+	 * Returns the ORDER BY part of the statement.
+	 * 
+	 * @return string
+	 */
 	public function getPartOrder()
 	{
 		if (!$this->orders) {
@@ -313,7 +492,12 @@ class Europa_Db_Select
 		
 		return 'ORDER BY ' . implode(', ', $this->orders) . ' ' . $this->orderDirection;
 	}
-	
+
+	/**
+	 * Returns the LIMIT part of the statement.
+	 * 
+	 * @return string
+	 */
 	public function getPartLimit()
 	{
 		if (!$this->limit) {
@@ -322,44 +506,233 @@ class Europa_Db_Select
 		
 		return 'LIMIT ' . implode(', ', $this->limit);
 	}
-	
-	public function setParams($params)
-	{
-		$this->params = array_merge($this->params, (array) $params);
-	}
-	
+
+	/**
+	 * Retrieves the parameters that are bound to the statement.
+	 * 
+	 * @return array
+	 */
 	public function getParams()
 	{
 		return $this->params;
 	}
-	
+
 	/**
-	 * Allows the select statement to be executed directly.
-	 * 
-	 * @return PDOStatement|false
+	 * Returns the number of records in the current set.
+	 *
+	 * @return int
 	 */
-	public function execute()
+	public function count()
 	{
-		return $this->db->query($this);
+		$count = 0;
+		$stmt  = $this->db->prepare($this->__toString());
+		
+		// execute the prepared statement
+		$stmt->execute($this->getParams());
+		
+		while ($stmt->fetch()) {
+			++$count;
+		}
+		
+		return $count;
 	}
-	
+
 	/**
-	 * Allows direct fecthing of the first returned row.
-	 * 
-	 * @return Europa_Db_Record|false
+	 * Returns the record that resides at the current index.
+	 *
+	 * @return Europa_Db_Record
 	 */
-	public function fetchOne()
+	public function current()
 	{
-		return $this->db->fetchOne($this);
+		return $this->offsetGet($this->index);
 	}
-	
+
 	/**
-	 * Allows direct fetching of all of the results.
-	 * 
-	 * @return Europa_Db_RecordSet|false
+	 * Returns the key of the current record.
+	 *
+	 * @return mixed
 	 */
-	public function fetchAll()
+	public function key()
 	{
-		return $this->db->fetchAll($this);
+		return $this->index;
+	}
+
+	/**
+	 * Returns whether the offset at the specified index exists or not.
+	 *
+	 * @param mixed $index
+	 * @return bool
+	 */
+	public function offsetExists($index)
+	{
+		return (bool) $this->offsetGet($index);
+	}
+
+	/**
+	 * Returns a specific record without affecting the position at which the
+	 * index is currently at.
+	 * 
+	 * A cache is retrieved and kept at the set cache limit. The cache is
+	 * kept at the limit too keep a balance between memory usage and the
+	 * number of queries being run. This is so that for very large result sets
+	 * say in excess of 10,000 records, you can set your limit to 1000. This
+	 * means that a cache of 1,000 records is kept to iterate over. If the
+	 * cache fails to contain the selected item, the query is re-executed
+	 * with a different limit to check for more rows that would contain that
+	 * item. If that item isn't found, then false is returned.
+	 *
+	 * @return array|Europa_Db_Record
+	 */
+	public function offsetGet($index)
+	{
+		$class = $this->class;
+
+		// if the cache can't be found, attempt to get it
+		if (!isset($this->cache[$index])) {
+			// add a limit clause to the
+			$select = clone $this;
+			
+			// add a new limit clause
+			$select->limit($index, $index + $this->cacheLimit);
+			
+			// prepare a new statement from the current state
+			$stmt = $this->db->prepare($select->__toString());
+			
+			// if it is unable to be executed, return false
+			if (!$stmt || !$stmt->execute($this->getParams())) {
+				return false;
+			}
+			
+			// reset the cache
+			$this->cache = array();
+			
+			// the starting index for the cache
+			$newIndex = $index;
+			
+			// build the new cache array
+			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				$this->cache[$newIndex] = $row;
+				
+				++$newIndex;
+			}
+			
+			// close the cursor
+			$stmt->closeCursor();
+			
+			// clear the new statement
+			unset($stmt);
+			
+			// if the cache is still empty, return false
+			if (!$this->cache) {
+				return false;
+			}
+		}
+
+		if ($class) {
+			return new $class($this->cache[$index]);
+		}
+		
+		return $this->cache[$index];
+	}
+
+	/**
+	 * Currently a result set is read only, therefore, setting an element at 
+	 * a particular index DOES NOT work.
+	 *
+	 * @param mixed $index
+	 * @param mixed $value
+	 * @return void
+	 */
+	public function offsetSet($index, $value)
+	{
+
+	}
+
+	/**
+	 * Unsets an item from the cache if it exists.
+	 *
+	 * @param mixed $index
+	 * @return void
+	 */
+	public function offsetUnset($index)
+	{
+		if (isset($this->cache[$index])) {
+			unset($this->cache[$index]);
+		}
+	}
+
+	/**
+	 * Moves forward one record.
+	 *
+	 * @return void
+	 */
+	public function next()
+	{
+		++$this->index;
+	}
+
+	/**
+	 * Moves back one record.
+	 *
+	 * @return void
+	 */
+	public function rewind()
+	{
+		// clear the cache
+		$this->cache = array();
+
+		// reset the index
+		$this->index = 0;
+	}
+
+	/**
+	 * Whether or not it is still valid to iterate through the set.
+	 *
+	 * @return bool
+	 */
+	public function valid()
+	{
+		return (bool) $this->offsetGet($this->index);
+	}
+
+	/**
+	 * Sets a limit on the size of the result set cache.
+	 * 
+	 * @param int $limit
+	 * @return Europa_Db_Select
+	 */
+	public function setCacheLimit($limit)
+	{
+		$this->cacheLimit = (int) $limit;
+
+		return $this;
+	}
+
+	/**
+	 * Sets the class that should be instantiated when retrieving
+	 * an element from the result set.
+	 * 
+	 * @param string $className
+	 * @return Europa_Db_Select
+	 */
+	public function setClass($className)
+	{
+		$this->class = $className;
+
+		return $this;
+	}
+
+	/**
+	 * Sets a set of parameters. Used internally for adding parameters
+	 * to the select statement.
+	 * 
+	 * @param array $params
+	 * @return Europa_Db_Select;
+	 */
+	protected function setParams($params)
+	{
+		$this->params = array_merge($this->params, (array) $params);
+		
+		return $this;
 	}
 }

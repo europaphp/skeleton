@@ -1,51 +1,40 @@
 <?php
 
-class Europa_Db_RecordSet implements Iterator, ArrayAccess
+class Europa_Db_RecordSet extends Europa_Db_Select implements Iterator, ArrayAccess
 {
-	protected
-		/**
-		 * The current position in the set.
-		 *
-		 * @var int
-		 */
-		$index = 0,
-
-		/**
-		 * The executed statement containing the records.
-		 *
-		 * @var PDOStatement
-		 */
-		$stmt,
-
-		/**
-		 * The class that will be instantiated and filled.
-		 *
-		 * @var string
-		 */
-		$class;
-
+	protected $select;
+	
 	/**
-	 * Constructs the record set and sets required properties.
+	 * The current position in the set.
 	 *
-	 * @param PDOStatement $stmt The executed statement to use.
-	 * @param string $class The class to instantiate and fill with a record.
-	 * @param Europa_Db_RecordSet
+	 * @var int
 	 */
-	public function __construct(PDOStatement $stmt, $class = null)
-	{
-		$this->stmt  = $stmt;
-		$this->class = $class;
-	}
+	protected $index = 0;
 
 	/**
-	 * When the final instance of the record set is cleaned up,
-	 * then close the cursor on the statement.
-	 * 
-	 * @return void
+	 * The class that will be instantiated and filled.
+	 *
+	 * @var string
 	 */
-	public function __destruct()
+	protected $class;
+	
+	/**
+	 * The cached array.
+	 * 
+	 * @var array
+	 */
+	protected $cache;
+	
+	/**
+	 * The number of items to keep cached.
+	 * 
+	 * @var int
+	 */
+	protected $cacheLimit = 100;
+	
+	public function __construct(Europa_Db_Select $select)
 	{
-		$this->stmt->closeCursor();
+		$this->select = $select;
 	}
 
 	/**
@@ -55,7 +44,7 @@ class Europa_Db_RecordSet implements Iterator, ArrayAccess
 	 */
 	public function count()
 	{
-		return $this->stmt->rowCount();
+		return 10;
 	}
 
 	/**
@@ -98,28 +87,21 @@ class Europa_Db_RecordSet implements Iterator, ArrayAccess
 	public function offsetGet($index)
 	{
 		$class = $this->class;
-		$row   = $this->stmt->fetch(PDO::FETCH_ASSOC, PDO::FETCH_ORI_ABS, $index);
-
-		// if fetch returns false, it means we need to reset the pointer
-		if (!$row) {
-			// currently only way to reset the pointer
-			$this->stmt->execute();
+		
+		// if the cache can't be found, attempt to get it
+		if (!isset($this->cache[$index + 1])) {
+			$select = $this->select->limit($index + 1, $index + 1 + $this->cacheLimit);
+			die(var_dump($select->prepare()));
+			$this->cache = $select->prepare()->fetchAll(PDO::FETCH_ASSOC);
 			
-			// and then re-fetch
-			$row = $this->stmt->fetch(PDO::FETCH_ASSOC, PDO::FETCH_ORI_ABS, $index);
-		}
-
-		if ($class) {
-			return new $class($row);
+			die(var_dump($this->cache));
 		}
 		
-		return $row;
+		return $this->cache[$index + 1];
 	}
 
 	/**
-	 * Fills the record at the given index with the value. The value can be a
-	 * record instance, object or array. Keep in mind, that this auto-commits
-	 * the changes to the database.
+	 * Add description.
 	 *
 	 * @param mixed $index
 	 * @param Europa_Db_Record|object|array $value
@@ -127,11 +109,7 @@ class Europa_Db_RecordSet implements Iterator, ArrayAccess
 	 */
 	public function offsetSet($index, $value)
 	{
-		if (!$value instanceof $this->class || !is_array($value) || !is_object($value)) {
-			return;
-		}
-
-		$this->offsetGet($index)->fill($value)->save();
+		
 	}
 
 	/**
@@ -163,6 +141,9 @@ class Europa_Db_RecordSet implements Iterator, ArrayAccess
 	 */
 	public function rewind()
 	{
+		// clear the cache
+		$this->cache = array();
+		
 		--$this->index;
 	}
 
@@ -173,6 +154,20 @@ class Europa_Db_RecordSet implements Iterator, ArrayAccess
 	 */
 	public function valid()
 	{
-		return $this->count() && $this->index < ($this->count() - 1);
+		return $this->index < $this->count();
+	}
+	
+	public function setCacheLimit($limit)
+	{
+		$this->cacheLimit = $limit;
+		
+		return $this;
+	}
+	
+	public function setClass($className)
+	{
+		$this->class = $className;
+		
+		return $this;
 	}
 }

@@ -234,20 +234,11 @@ abstract class Europa_Db_Record implements ArrayAccess
 		}
 		
 		// fetch the row
-		$res = $this->getDb()->fetchOne('
-			SELECT 
-				* 
-			FROM 
-				' . $this->getTableName() . '
-			WHERE
-				' . $pk . ' = :id
-		', array(
-			':id'    => $this->$pk
-		));
+		$select = $this->find()->where(':id = ' . $pk, array(':id' => $this->$pk));
 		
 		// if successful, fill the current object with it's values
-		if ($res) {
-			$this->fill($res);
+		if ($select[0]) {
+			$this->fill($select[0]);
 			
 			return true;
 		}
@@ -290,12 +281,7 @@ abstract class Europa_Db_Record implements ArrayAccess
 		 */
 		if ($this->exists()) {
 			// build the UPDATE query
-			$query = '
-				UPDATE
-					' . $this->getTableName() . '
-				SET
-			';
-			
+			$query = 'UPDATE ' . $this->getTableName() . ' SET';
 			$parts = array();
 			
 			// build the SET values
@@ -308,10 +294,7 @@ abstract class Europa_Db_Record implements ArrayAccess
 			}
 			
 			$query .= ' ' . implode(', ', $parts);
-			$query .= '
-				WHERE
-					' . $pk . ' = :id
-			';
+			$query .= '	WHERE ' . $pk . ' = :id';
 		} else {
 			/*
 			 * Unset the primary key if it is not properly set. We check here 
@@ -326,14 +309,10 @@ abstract class Europa_Db_Record implements ArrayAccess
 			$cols   = array_keys($saveableValues);
 			
 			// build the INSERT query
-			$query  = '
-				INSERT
-				INTO
-					' . $this->getTableName() . '
-				(' . implode(', ', $cols) . ')
-				VALUES
-				(:' . implode(', :', $cols) . ')
-			';
+			$query = 'INSERT INTO ' . $this->getTableName()
+			       . '(' . implode(', ', $cols) . ')'
+			       . 'VALUES'
+			       . '(:' . implode(', :', $cols) . ')';
 			
 			// build the parameters
 			foreach ($saveableValues as $name => $value) {
@@ -342,15 +321,16 @@ abstract class Europa_Db_Record implements ArrayAccess
 		}
 		
 		// execute
-		$res = $db->query($query, $params) ? true : false;
+		$stmt   = $db->prepare($query);
+		$result = $stmt->execute($params);
 		
 		// if we have inserted, set the last insert id
-		if ($res && $insert) {
+		if ($result && $insert) {
 			$this->$pk = $db->lastInsertId();
 		}
 		
 		// true || false
-		return $res;
+		return $result;
 	}
 	
 	/**
@@ -365,19 +345,16 @@ abstract class Europa_Db_Record implements ArrayAccess
 		
 		// if the primary key is set then we can delete it
 		if ($this->hasPrimaryKey()) {
-			$pk    = $this->getPrimaryKeyName();
-			$query = '
+			$pk   = $this->getPrimaryKeyName();
+			$stmt = $db->prepare('
 				DELETE 
 				FROM
 					' . $this->getTableName() . '
 				WHERE
 					' . $pk . ' = :id
-			;';
-			$params = array(
-				':id' => $this->$pk
-			);
+			;');
 			
-			if ($db->query($query, $params)) {
+			if ($stmt->execute(array(':id' => $this->$pk))) {
 				return true;
 			}
 		}
@@ -392,32 +369,7 @@ abstract class Europa_Db_Record implements ArrayAccess
 	 */
 	public function count()
 	{
-		$query = '
-			SELECT 
-				COUNT(*)
-			FROM 
-				' . $this->getTableName() . '
-		;';
-		
-		return current($this->getDb()->query($query)->fetch());
-	}
-	
-	/**
-	 * Like Europa_Db_Record::fetchAll(), but only fetches a single record.
-	 * 
-	 * @return mixed
-	 */
-	public function fetchOne(Europa_Db_Select $select = null)
-	{
-		// execute the query
-		$res = $this->fetchAll();
-
-		// return it if it was successful
-		if ($res) {
-			return $res->offsetGet(0);
-		}
-		
-		return false;
+		return $this->find()->count();
 	}
 	
 	/**
@@ -425,51 +377,16 @@ abstract class Europa_Db_Record implements ArrayAccess
 	 * 
 	 * @return Europa_Db_RecordSet|false
 	 */
-	public function fetchAll(Europa_Db_Select $select = null)
+	public function find(Europa_Db_Select $select = null)
 	{
-		$res = $this->getDb()->query('
-			SELECT 
-				* 
-			FROM 
-				' . $this->getTableName() . '
-		;');
-		
-		// return a record set while populating records for each row
-		return $res ? new Europa_Db_RecordSet($res, get_class($this)) : false;
-	}
-	
-	/**
-	 * Fetches a specific page number and orders it accordingly.
-	 * 
-	 * @return Europa_Db_RecordSet|false
-	 */
-	public function fetchPage($page = 1, $numPerPage = 10, $orderBy = null, $orderDirection = 'ASC', Europa_Db_Select $select = null)
-	{
-		// if a select statement hasn't been created yet, create one
 		if (!$select) {
-			$select = $this->getDb()->select();
+			$select = $this->getDb()->select('*');
 		}
 		
-		// get the table name
-		$table = $this->getTableName();
+		$select->from($this->getTableName());
+		$select->setClass(get_class($this));
 		
-		// build/add-on-to the existing select query
-		$select->columns($table . '.*')
-		       ->from($table);
-		
-		// if specified, add the order by
-		if ($orderBy) {
-			$select->orderBy($table . '.' . $orderBy, $orderDirection);
-		}
-		
-		// force paging limit
-		$select->limit(($numPerPage * $page) - $numPerPage, $numPerPage);
-		
-		// execute to be passed to Europa_Db_RecordSet if successful
-		$res = $select->execute();
-		
-		// return
-		return $res ? new Europa_Db_RecordSet($res, get_class($this)) : false;
+		return $select;
 	}
 	
 	/**
@@ -480,21 +397,23 @@ abstract class Europa_Db_Record implements ArrayAccess
 	 */
 	final public function exists()
 	{
-		$pk     = $this->getPrimaryKeyName();
-		$query  = '
+		$pk   = $this->getPrimaryKeyName();
+		$stmt = $this->getDb()->prepare('
 			SELECT 
 				* 
 			FROM 
 				' . $this->getTableName() . '
 			WHERE
 				' . $pk . ' = :id
-		';
+		');
 		
-		$res = $this->getDb()->fetchAll($query, array(
-			':id' => $this->$pk
-		));
+		$stmt->execute(array(':id' => $this->$pk));
 		
-		return (bool) $res->count();
+		$exists = (bool) $stmt->fetch();
+		
+		unset($stmt);
+		
+		return $exists;
 	}
 	
 	/**
@@ -610,26 +529,18 @@ abstract class Europa_Db_Record implements ArrayAccess
 		 * a column by the name of the current class' foreign key name.
 		 */
 		if ($class->hasColumn($thisForeignKey)) {
-			$res = $class->getDb()->query('
-				SELECT
-					*
-				FROM
-					' . $class->getTableName() . '
-				WHERE
-					' . $thisForeignKey . ' = :id
-			;', array(
-				':id' => $this->$thisLocalKey
-			));
+			$select = $class->getDb()
+			                ->select()
+			                ->from($class->getTableName()) 
+			                ->where($thisForeignKey . ' = ?', $this->$thisLocalKey)
+			                ->setClass($class);
 			
-			// if the relationship was able to be retrieved, then pass it to a recordset
-			if ($res) {
-				$this->relationships[$name] = new Europa_Db_RecordSet($res, $className);
-			}
-		} else {
+			$this->relationships[$name] = $select;
+		}
+		// one to one relationship
+		elseif ($this->hasColumn($classForeignKey)) {
 			// load the data if the key is set
-			if ($this->hasColumn($classForeignKey) && $this->$classForeignKey) {
-				$class->load($this->$classForeignKey);
-			}
+			$class->load($this->$classForeignKey);
 			
 			// define the property
 			$this->relationships[$name] = $class;
