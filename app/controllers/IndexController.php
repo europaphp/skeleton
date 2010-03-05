@@ -20,18 +20,8 @@ class IndexController extends Europa_Controller_Abstract
 	public function __call($name, $args)
 	{
 		$this->layout->title = 'EuropaPHP - 404';
-		$this->view->setScript('Index/index');
-	}
-	
-	/**
-	 * Destructor. Does not need to be defined, but exists as a hook
-	 * for any post-dispatch events.
-	 * 
-	 * @return IndexController
-	 */
-	public function __destruct()
-	{
-		
+		$this->view->msg     = 'The page you requested could not be found.';
+		$this->view->setScript('index/index');
 	}
 	
 	/**
