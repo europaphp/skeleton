@@ -7,10 +7,8 @@ ini_set('display_errors', 'on');
 // include the loader
 require 'lib/Europa/Loader.php';
 
-// register autoloading
+// register autoloading and define paths
 Europa_Loader::registerAutoload();
-
-// add the current load path
 Europa_Loader::addLoadPath('./lib');
 
 // instantiate

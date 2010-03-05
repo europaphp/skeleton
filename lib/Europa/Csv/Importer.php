@@ -1,12 +1,14 @@
 <?php
 
 /**
- * @package Csv
- * @author  Trey Shugart
+ * @author Trey Shugart
  */
 
 /**
  * Takes a CSV file or CSV string and converts it to an array.
+ * 
+ * @package Europa
+ * @subpackage Csv
  */
 class Europa_Csv_Importer extends Europa_Csv_Abstract
 {

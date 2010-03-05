@@ -1,32 +1,31 @@
 <?php
 
 /**
- * @package    Europa
- * @subpackage Db
+ * @author Trey Shugart
  */
 
 /**
- * Extends PHP's PDO library providing database abstraction and access to all public
- * methods/properties in the PDO library. Provides an easy method for connecting
- * to a PDO driver and querying the database in fewer calls.
+ * Extends PHP's PDO library providing an easier method for querying databases.
+ * 
+ * @package Europa
+ * @subpackage Db
  */
 class Europa_Db extends PDO
 {
-	static public
-		/**
-		 * The default configuration.
-		 * 
-		 * @var array
-		 */
-		$defaultConfig = array(
-			'driver'        => 'mysql',
-			'driverOptions' => array(),
-			'host'          => 'localhost',
-			'database'      => null,
-			'username'      => 'root',
-			'password'      => null,
-			'log'           => true
-		);
+	/**
+	 * The default configuration.
+	 * 
+	 * @var array
+	 */
+	public static $defaultConfig = array(
+		'driver'        => 'mysql',
+		'driverOptions' => array(),
+		'host'          => 'localhost',
+		'database'      => null,
+		'username'      => 'root',
+		'password'      => null,
+		'log'           => true
+	);
 	
 	/**
 	 * Contains the configuration for the current instance.
@@ -65,8 +64,6 @@ class Europa_Db extends PDO
 			$this->config['password'],
 			$this->config['driverOptions']
 		);
-		
-		$this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('Europa_Db_Statement'));
 	}
 	
 	/**

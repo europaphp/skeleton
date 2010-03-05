@@ -1,33 +1,32 @@
 <?php
 
 /**
- * @package    Europa
- * @subpackage Loader
+ * @author Trey Shugart
  */
 
 /**
- * Handles all loading done in Europa using custom load paths so it doesn't interfere 
- * with PHP's default load paths. You can, however, use PHP's include paths if you 
- * desire, as well as a custom load path. See: Europa_Loader::loadClass().
+ * Handles class loading in Europa. Uses custom load paths due to the
+ * immense performance gain and ease of manipulation.
+ * 
+ * @package Europa
+ * @subpackage Loader
  */
 class Europa_Loader
 {
-	static public
-		/**
-		 * Contains logging information.
-		 * 
-		 * @var boolean
-		 */
-		$log = array();
+	/**
+	 * Contains logging information.
+	 * 
+	 * @var boolean
+	 */
+	public static $log = array();
 	
-	static private 
-		/**
-		 * Contains all load paths that Europa_Loader will use when attempting 
-		 * to load a class.
-		 * 
-		 * @var array
-		 */
-		$loadPaths = array();
+	/**
+	 * Contains all load paths that Europa_Loader will use when attempting 
+	 * to load a class.
+	 * 
+	 * @var array
+	 */
+	private static $loadPaths = array();
 	
 	/**
 	 * Loads a class based on the Europa file naming convention and returns it. 
@@ -103,7 +102,7 @@ class Europa_Loader
 	 * @param string $path The path to add to the list of load paths.
 	 * @return bool|string
 	 */
-	static public function addLoadPath($path)
+	public static function addLoadPath($path)
 	{
 		$path = realpath($path);
 		
@@ -124,7 +123,7 @@ class Europa_Loader
 	 * 
 	 * @return void
 	 */
-	static public function registerAutoload()
+	public static function registerAutoload()
 	{
 		if (function_exists('spl_autoload_register')) {
 			spl_autoload_register(array('Europa_Loader', 'loadClass'));

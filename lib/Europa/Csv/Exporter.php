@@ -1,12 +1,14 @@
 <?php
 
 /**
- * @package Csv
- * @author  Trey Shugart
+ * @author Trey Shugart
  */
 
 /** 
  * Exports a valid array to a CSV string.
+ * 
+ * @package Europa
+ * @subpackage Csv
  */
 class Europa_Csv_Exporter extends Europa_Csv_Abstract
 {

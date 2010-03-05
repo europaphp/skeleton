@@ -2,11 +2,6 @@
 
 /**
  * @author Trey Shugart
- * @date 2010-03-04
- * 
- * @package Europa
- * @subpackage Db
- * @subpackage Select
  */
 
 /**
@@ -18,6 +13,9 @@
  * like an array. Basically, whenever Europa_Db_Statement->offsetGet() is
  * invoked, then the statement is executed and cached until it needs to be
  * executed again.
+ * 
+ * @package Europa
+ * @subpackage Db
  */
 class Europa_Db_Select implements Iterator, ArrayAccess
 {

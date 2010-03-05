@@ -1,12 +1,13 @@
 <?php
 
 /**
- * @package    Europa
- * @subpackage Controller
+ * @author Trey Shugart
  */
 
 /**
  * The heart of EuropaPHP. This is where it all starts and ends.
+ * 
+ * @package Europa
  */
 class Europa_Controller
 {	
@@ -230,6 +231,7 @@ class Europa_Controller
 		if ($this->layout) {
 			echo $this->layout;
 		}
+		// if the layout is disabled, we render the view
 		elseif ($this->view) {
 			echo $this->view;
 		}
@@ -297,7 +299,6 @@ class Europa_Controller
 	 * 
 	 * @param Europa_Route $name
 	 * @param $route
-	 * 
 	 * @return Europa_Controller
 	 */
 	final public function setRoute($name, Europa_Route $route = null)
@@ -435,7 +436,7 @@ class Europa_Controller
 	 * Returns the Europa root URI in relation to the file that dispatched
 	 * the controller.
 	 *
-	 * @return unknown_type
+	 * @return string
 	 */
 	final public static function getRootUri()
 	{

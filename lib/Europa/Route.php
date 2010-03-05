@@ -1,45 +1,50 @@
 <?php
 
 /**
- * @author     Trey Shugart
- * @package    Europa
+ * @author Trey Shugart
+ */
+
+/**
+ * A route class used for determining url parameters as defined by the route
+ * as well as where the dispatcher should direct the application.
+ * 
+ * @package Europa
  * @subpackage Route
  */
 class Europa_Route
 {
-	protected
-		/**
-		 * The regular expression used to match and parse the URI according to
-		 * the route definition.
-		 * 
-		 * @var string
-		 */
-		$pattern,
-		
-		/**
-		 * The array mapping of the parameter names to be parsed out of the URI
-		 * with the pattern in order of appearance.
-		 * 
-		 * @var array
-		 */
-		$map,
-		
-		/**
-		 * Since it is very difficult to reverse engineer a regular expression
-		 * a reverse engineering string is used to reverse engineer the route
-		 * back into a URI. This allows for fluid links.
-		 * 
-		 * @var string
-		 */
-		$reverse,
-		
-		/**
-		 * Contains an associative array of the parameters that were parsed out
-		 * of the request from the route definition.
-		 * 
-		 * @var $params
-		 */
-		$params = array();
+	/**
+	 * The regular expression used to match and parse the URI according to
+	 * the route definition.
+	 * 
+	 * @var string
+	 */
+	protected $pattern;
+	
+	/**
+	 * The array mapping of the parameter names to be parsed out of the URI
+	 * with the pattern in order of appearance.
+	 * 
+	 * @var array
+	 */
+	protected $map;
+	
+	/**
+	 * Since it is very difficult to reverse engineer a regular expression
+	 * a reverse engineering string is used to reverse engineer the route
+	 * back into a URI. This allows for fluid links.
+	 * 
+	 * @var string
+	 */
+	protected $reverse;
+	
+	/**
+	 * Contains an associative array of the parameters that were parsed out
+	 * of the request from the route definition.
+	 * 
+	 * @var $params
+	 */
+	protected $params = array();
 	
 	/**
 	 * Constructs the route and sets required properties.

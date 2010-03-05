@@ -1,87 +1,69 @@
 <?php
 
 /**
- * @file
- * 
- * @package    Europa
- * @subpackage Registry
+ * @author Trey Shugart
  */
 
 /**
- * @class
+ * Sets variables to be stored in a common place and accessible from anywhere. 
+ * Variable name-spacing can be done any way you want, but it is recommended 
+ * to follow a strict convention when doing so.
  * 
- * @name Europa_Registry
- * @desc Sets variables to be stored in a common place and accessible from anywhere. Variable namespacing can be
- *       done any way you want, but it is recommended to follow a strict convention when doing so.
+ * @package Europa
+ * @subpackage Registry
  */
 class Europa_Registry
 {
-	static private 
-		/**
-		 * @property
-		 * @static
-		 * @private
-		 * 
-		 * @name _registry
-		 * @desc Holds all registry variables.
-		 */
-		$_registry = array();
-	
-	
+	/**
+	 * Holds all registry variables.
+	 * 
+	 * @var array
+	 */
+	protected static $registry = array();
 	
 	/**
-	 * @method
-	 * @static
-	 * @public
+	 * Retrieves a variable from the registry.
 	 * 
-	 * @name get
-	 * @desc Retrieves a variable from the registry.
-	 * 
-	 * @param $key String - The registry variable to retrieve.
-	 * 
-	 * @return Mixed
+	 * @param string $key The registry variable to retrieve.
+	 * @return mixed
 	 */
-	static public function get($key) {
-		return @self::$_registry[$key];
+	public static function get($key) {
+		if (isset($self::$registry[$key])) {
+			return self::$registry[$key];
+		}
+		
+		return null;
 	}
 	
 	/**
-	 * @method
-	 * @static
-	 * @public
+	 * Sets a variable named $key with the value of $val inside of $namespace.
 	 * 
-	 * @name set
-	 * @desc Sets a variable named $key with the value of $val inside of $namespace.
-	 * 
-	 * @param $key String - The name of the registry variable.
-	 * @param $val Mixed  - The value of the registry variable.
-	 * 
-	 * @return Mixed
+	 * @param $key string The name of the registry variable.
+	 * @param $val mixed The value of the registry variable.
+	 * @return mixed
 	 */
-	static public function set($key, $val) {
-		self::$_registry[$key] = $val;
+	public static function set($key, $val) {
+		self::$registry[$key] = $val;
 		
 		return $val;
 	}
 	
 	/**
-	 * @method
-	 * @static
-	 * @public
+	 * Removes the variable named $key from $namespace returning the value
+	 * of the variable that was removed.
 	 * 
-	 * @name remove
-	 * @desc Removes the variable named $key from $namespace returning the value
-	 *       of the variable that was removed.
-	 * 
-	 * @param $key String - The name of the registry variable to remove.
-	 * 
-	 * @return Mixed
+	 * @param string $key The name of the registry variable to remove.
+	 * @return mixed
 	 */
-	static public function remove($key) {
-		$val = self::$_registry[$key];
+	public static function remove($key) {
+		if (isset(self::$registry[$key])) {
+			$val = self::$registry[$key];
+			
+			unset(self::$registry[$key]);
+			
+			return $val;
+		}
 		
-		unset(self::$_registry[$key]);
-		
-		return $val;
+		return null;
 	}
 }

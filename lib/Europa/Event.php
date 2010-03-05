@@ -1,60 +1,48 @@
 <?php
 
 /**
- * @file
- * 
- * @package    Europa
- * @subpackage Event
+ * @author Trey Shugart
  */
 
 /**
- * @class
+ * Europa's Event class for binding, triggering and performing other 
+ * common event tasks.
  * 
- * @name Europa_Event
- * @desc Europa's Event class for binding, triggering and performing other common event tasks.
+ * @package Europa
+ * @subpackage Event
  */
 class Europa_Event
 {
-	static private
-		/**
-		 * @property
-		 * @static
-		 * @private
-		 * 
-		 * @name _events
-		 * @desc Holds event data for all registered events.
-		 */
-		$_events = array();
-	
-	
+	/**
+	 * Holds event data for all registered events.
+	 * 
+	 * @var array
+	 */
+	protected static $events = array();
 	
 	/**
-	 * @method
-	 * @static
-	 * @public
+	 * Binds a method to an event.
 	 * 
-	 * @name bind
-	 * @desc Binds a method to an event.
-	 * 
-	 * @param Mixed           $eventNames  - A string event name, or Array of event names to bind the passed callback an data to.
-	 * @param Mixed           $method      - The callback to bind to the event. Can be any valid callback. In PHP 5.3.0, this can
-	 *                                       be a closure. The callback takes only one argument and that is an instance of
-	 *                                       Europa_Event_Object.
-	 * @param Mixed[Optional] $bindData    - An optional argument of data (Array, String, whatever) to pass to the event object
-	 *                                       that gets passed to the callback as the only argument.
-	 * 
-	 * @return String
+	 * @param mixed $eventNames A string event name, or Array of event names to bind
+	 * the passed callback an data to.
+	 * @param mixed $method The callback to bind to the event. Can be any valid 
+	 * callback. In PHP 5.3.0, this can be a closure. The callback takes only 
+	 * one argument and that is an instance ofEuropa_Event_Object.
+	 * @param mixed $bindData An optional argument of data (Array, String, whatever)
+	 * to pass to the event object that gets passed to the callback as the only 
+	 * argument.
+	 * @return string
 	 */
-	static public function bind($eventNames, $method, $bindData = null)
+	public static function bind($eventNames, $method, $bindData = null)
 	{
 		foreach ((array) $eventNames as $eventName) {
 			// if the event hasn't been bound yet, make an array for it
-			if (!isset(self::$_events[$eventName])) {
-				self::$_events[$eventName] = array();
+			if (!isset(self::$events[$eventName])) {
+				self::$events[$eventName] = array();
 			}
 			
 			// now give it some data
-			self::$_events[$eventName][] = array(
+			self::$events[$eventName][] = array(
 					'method'   => $method,
 					'bindData' => $bindData
 				);
@@ -65,21 +53,17 @@ class Europa_Event
 	}
 	
 	/**
-	 * @method
-	 * @static
-	 * @public
+	 * Unbinds a specified method from an event, or if unspecified, the whole event
+	 * is unbound.
 	 * 
-	 * @name unbind
-	 * @desc Unbinds a specified method from an event, or if unspecified, the whole event is unbound.
-	 * 
-	 * @param Mixed $eventNames - A string event name, or an Array of event names to unbind.
-	 * 
+	 * @param Mixed $eventNames - A string event name, or an Array of event names to
+	 * unbind.
 	 * @return Boolean True if any events are unbound, false if not.
 	 */
-	static public function unbind($eventNames)
+	public static function unbind($eventNames)
 	{
 		// if no events are bound yet, then we don't need to go any further
-		if (!is_array(self::$_events)) {
+		if (!is_array(self::$events)) {
 			return false;
 		}
 		
@@ -93,7 +77,7 @@ class Europa_Event
 		// foreach event name, if it is bound, unbind it
 		foreach ($eventNames as $eventName) {
 			if (self::isBound($eventName)) {
-				unset(self::$_events[$eventName]);
+				unset(self::$events[$eventName]);
 				
 				// return true if an event was unbound
 				$ret = true;
@@ -105,22 +89,19 @@ class Europa_Event
 	}
 	
 	/**
-	 * @method
-	 * @static
-	 * @public
+	 * Triggers an event stack. Fires the callbacks in the order in which they 
+	 * were bound.
 	 * 
-	 * @name trigger
-	 * @desc Triggers an event stack. Fires the callbacks in the order in which they were bound.
-	 * 
-	 * @param Mixed           $eventNames  - A string event name, or Array of event names to trigger.
-	 * @param Array[Optional] $triggerData - The data to pass to the callback via Europa_Event_Object at the time of event triggering.
-	 * 
+	 * @param mixed $eventNames A string event name, or Array of event names to
+	 * trigger.
+	 * @param arraty $triggerData The data to pass to the callback via 
+	 * Europa_Event_Object at the time of event triggering.
 	 * @return Boolean
 	 */
-	static public function trigger($eventNames, $triggerData = null)
+	public static function trigger($eventNames, $triggerData = null)
 	{
 		// if there are no events to trigger, then return false
-		if (!is_array(self::$_events)) {
+		if (!is_array(self::$events)) {
 			return false;
 		}
 		
@@ -130,7 +111,7 @@ class Europa_Event
 		// foreach event to trigger
 		foreach ((array) $eventNames as $eventToTrigger) {
 			// now foreach event, try and find a match
-			foreach (self::$_events as $eventType => $eventHandlers) {
+			foreach (self::$events as $eventType => $eventHandlers) {
 				// if there is a match
 				if ($eventToTrigger === $eventType) {
 					// foreach handler, trigger the event
@@ -160,19 +141,13 @@ class Europa_Event
 	}
 	
 	/**
-	 * @method
-	 * @static
-	 * @public
-	 * 
-	 * @name isBound
-	 * @desc Returns whether the event passed is bound or not.
+	 * Returns whether the event passed is bound or not.
 	 * 
 	 * @param String $eventName
-	 * 
 	 * @return Boolean
 	 */
-	static public function isBound($eventName)
+	public static function isBound($eventName)
 	{
-		return isset(self::$_events[$eventName]);
+		return isset(self::$events[$eventName]);
 	}
 }

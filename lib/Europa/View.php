@@ -1,45 +1,45 @@
 <?php
 
 /**
- * @package    Europa
- * @subpackage View
+ * @author Trey Shugart
  */
 
 /**
  * Renders view scripts. Used to render both the layout and view in Europa.
+ * 
+ * @package Europa
+ * @subpackage View
  */
 class Europa_View
 {
-	protected
-		/**
-		 * Contains the parameters set on the view.
-		 * 
-		 * @var array $params
-		 */
-		$params = array(),
-		
-		/**
-		 * The script that will be rendered. Set using Europa_View::render().
-		 * 
-		 * @var string $script
-		 */
-		$script = null,
-		
-		/**
-		 * Holds references to all of the plugins that have been called on this
-		 * view instance which are to be treated as singleton plugins for this
-		 * instance only.
-		 * 
-		 * @var array $plugins
-		 */
-		$plugins = array();
+	/**
+	 * Contains the parameters set on the view.
+	 * 
+	 * @var array $params
+	 */
+	protected $params = array();
+	
+	/**
+	 * The script that will be rendered. Set using Europa_View::render().
+	 * 
+	 * @var string $script
+	 */
+	protected $script = null;
+	
+	/**
+	 * Holds references to all of the plugins that have been called on this
+	 * view instance which are to be treated as singleton plugins for this
+	 * instance only.
+	 * 
+	 * @var array $plugins
+	 */
+	protected $plugins = array();
 	
 	/**
 	 * Construct the view and sets defaults.
 	 * 
 	 * @param string $script The script to render.
-	 * @param array  $params The arguments to pass to the script.
-	 * 
+	 * @param array $params The arguments to pass to the script.
 	 * @return Europa_View
 	 */
 	public function __construct($script = null, $params = array())
@@ -112,7 +112,7 @@ class Europa_View
 	 * Unsets the specified variable.
 	 * 
 	 * @param string $name
-	 * @return void;
+	 * @return void
 	 */
 	public function __unset($name)
 	{
@@ -146,44 +146,27 @@ class Europa_View
 	}
 	
 	/**
-	 * Returns the contents of the rendered view.
+	 * Parses the view file and returns the result.
 	 * 
 	 * @return string
 	 */
 	public function __toString()
 	{
-		$script = $this->getScript();
-
-		// the script must be set before rendering
-		if (!$script) {
-			Europa_View_Exception::trigger(
-				'No script was set to be rendered.'
-				, Europa_View_Exception::SCRIPT_NOT_SET
-			);
-		}
+		// allows us to return the included file as a string
+		ob_start();
 		
-		$script = $this->getScriptFullPath($script);
+		// include it
+		include $this->getScriptFullPath();
 		
-		// can't "throw" exceptions in __toString, triggering gets around that
-		if (!is_file($script)) {
-			Europa_View_Exception::trigger(
-				'View script <strong>' 
-				. $script
-				. '</strong> cannot be found'
-				, Europa_View_Exception::VIEW_NOT_FOUND
-			);
-		}
-		
-		// the newline character just helps to make the source look better ;)
-		return $this->parseScript($script) . "\n";
+		// return the parsed view
+		return ob_get_clean() . "\n";
 	}
 	
 	/**
 	 * Sets the script to be rendered.
 	 * 
 	 * @param String $script The path to the script to be rendered relative 
-	 *                       to the view path, excluding the extension.
-	 * 
+	 * to the view path, excluding the extension.
 	 * @return Object Europa_View
 	 */
 	public function setScript($script)
@@ -244,35 +227,17 @@ class Europa_View
 		}
 
 		// automate
-		return $root
-			 . $uri;
+		return $root . $uri;
 	}
 	
 	/**
-	 * Parses and returns the passed file.
+	 * Returns the full path to the view including extension.
 	 * 
 	 * @return string
 	 */
-	protected function parseScript($script)
+	protected function getScriptFullPath()
 	{
-		// allows us to return the included file as a string
-		ob_start();
-		
-		// include it
-		include $script;
-		
-		// get the output buffer
-		return ob_get_clean();
-	}
-	
-	/**
-	 * Returns the full path to the base view path.
-	 * 
-	 * @return string
-	 */
-	protected function getScriptFullPath($script)
-	{
-		return realpath('./app/views/' . $script . '.php');
+		return realpath('./app/views/' . $this->script . '.php');
 	}
 	
 	/**
@@ -286,7 +251,7 @@ class Europa_View
 	}
 	
 	/**
-	 * Returns a plugin class name based on the $name pased in.
+	 * Returns a plugin class name based on the $name passed in.
 	 * 
 	 * @param string $name The name of the plugin to get the class name of.
 	 * @return string

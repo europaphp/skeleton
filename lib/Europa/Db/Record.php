@@ -1,13 +1,12 @@
 <?php
 
 /**
- * @package    Europa
- * @subpackage Db
- * @subpackage Record
+ * @author Trey Shugart
  */
 
 /**
- * 
+ * @package Europa
+ * @subpackage Db
  */
 abstract class Europa_Db_Record implements ArrayAccess
 {

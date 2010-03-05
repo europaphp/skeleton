@@ -1,42 +1,36 @@
 <?php 
 
 /**
- * @package    Europa
- * @subpackage Event
- * @subpackage Object
+ * @author Trey Shugart
  */
 
 /**
- * @name Europa_Event_Object       
- * @desc The event object that gets passed to the bound event callback whenever an event is triggered.
+ * The event object that gets passed to the bound event callback whenever 
+ * an event is triggered.
+ * 
+ * @package Europa
+ * @subpackage Event
  */
 class Europa_Event_Object
 {
-	public
-		/**
-		 * @property
-		 * @public
-		 * 
-		 * @name event
-		 * @desc Holds the name of the event that was triggered.
-		 */
-		$event       = null,
-		
-		/**
-		 * @property
-		 * @public
-		 * 
-		 * @name bindData
-		 * @desc Holds the data that was passed at the time of binding.
-		 */
-		$bindData    = array(),
-		
-		/**
-		 * @property
-		 * @public
-		 * 
-		 * @name triggerData
-		 * @desc Holds the data that was passed at the time of triggering.
-		 */
-		$triggerData = array();
+	/**
+	 * Holds the name of the event that was triggered.
+	 * 
+	 * @var string
+	 */
+	public $event = null;
+	
+	/**
+	 * Holds the data that was passed at the time of binding.
+	 * 
+	 * @var array
+	 */
+	public $bindData = array();
+	
+	/**
+	 * Holds the data that was passed at the time of triggering.
+	 * 
+	 * @var array
+	 */
+	public $triggerData = array();
 }
