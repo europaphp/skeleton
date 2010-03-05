@@ -96,21 +96,8 @@ class Europa_Controller
 		}
 		
 		// set the controller and action names, and the layout and view
-		$controllerPaths = $this->getControllerPaths();
-		$controllerName  = $this->getControllerClassName();
-		$actionName      = $this->getActionMethodName();
-		
-		// load the controller
-		if (!Europa_Loader::loadClass($controllerName, $controllerPaths)) {
-			throw new Europa_Controller_Exception(
-				'Could not load controller <strong>'
-				. $controllerName
-				. '</strong> from <strong>' 
-				. implode(', ', $controllerPaths)
-				. '</strong>.'
-				, Europa_Controller_Exception::CONTROLLER_NOT_FOUND
-			);
-		}
+		$controllerName = $this->getControllerClassName();
+		$actionName     = $this->getActionMethodName();
 		
 		// reverse engineer the controller
 		$controllerReflection = new ReflectionClass($controllerName);
@@ -347,17 +334,6 @@ class Europa_Controller
 	}
 	
 	/**
-	 * Returns the formatted path to the controller directory. In relation
-	 * to the script that instantiates the Europa_Controller class.
-	 * 
-	 * @return string
-	 */
-	protected function getControllerPaths()
-	{
-		return array('./app/controllers');
-	}
-	
-	/**
 	 * Returns the formatted controller name that should be instantiated.
 	 * 
 	 * @return string
@@ -409,9 +385,9 @@ class Europa_Controller
 	 */
 	protected function getLayoutScriptName()
 	{
-		$controller = $this->route->getParam('controller', 'Index');
+		$controller = $this->route->getParam('controller', 'index');
 		
-		return Europa_String::create($controller)->camelCase(true);
+		return Europa_String::create($controller)->camelCase(false);
 	}
 	
 	/**
@@ -424,12 +400,12 @@ class Europa_Controller
 	protected function getViewScriptName()
 	{
 		$route      = $this->getRoute();
-		$controller = $route->getParam('controller', 'Index');
+		$controller = $route->getParam('controller', 'index');
 		$action     = $route->getParam('action', 'index');
 		
-		return Europa_String::create($controller)->camelCase(true)
-		       . '/' 
-		       . Europa_String::create($action)->camelCase();
+		return Europa_String::create($controller)->camelCase(false)
+		     . '/' 
+		     . Europa_String::create($action)->camelCase(false);
 	}
 	
 	/**

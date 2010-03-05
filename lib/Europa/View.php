@@ -129,13 +129,10 @@ class Europa_View
 		$class = $this->getPluginClassName($func);
 		$class = (string) $class;
 		
-		// if the class can't be loaded, return null
-		if (!Europa_Loader::loadClass($class, $this->getPluginPaths())) {
-			return null;
-		}
-		
 		// istantiate the plugin passing the current view object into the it
-		$class = new $class($this);
+		if (Europa_Loader::loadClass($class)) {
+			$class = new $class($this);
+		}
 		
 		// then call the plugin method if it exists
 		if (method_exists($class, 'init')) {
@@ -238,16 +235,6 @@ class Europa_View
 	protected function getScriptFullPath()
 	{
 		return realpath('./app/views/' . $this->script . '.php');
-	}
-	
-	/**
-	 * Returns the full path to the view base plugin path.
-	 * 
-	 * @return string
-	 */
-	protected function getPluginPaths()
-	{
-		return array('./app/plugins');
 	}
 	
 	/**

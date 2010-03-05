@@ -18,7 +18,7 @@ class Europa_Loader
 	 * 
 	 * @var boolean
 	 */
-	public static $log = array();
+	protected static $log = array();
 	
 	/**
 	 * Contains all load paths that Europa_Loader will use when attempting 
@@ -26,11 +26,11 @@ class Europa_Loader
 	 * 
 	 * @var array
 	 */
-	private static $loadPaths = array();
+	protected static $paths = array();
 	
 	/**
-	 * Loads a class based on the Europa file naming convention and returns it. 
-	 * If the class is unable to be loaded, false is returned.
+	 * Loads a class based on the Europa file naming convention. If the class
+	 * is found, it's full path is returned. If not, then false is returned.
 	 * 
 	 * Alternate load paths can be specified to search in before the default
 	 * load paths in an explicit call to loadClass.
@@ -53,15 +53,21 @@ class Europa_Loader
 		// either the passed $path or the load paths.
 		$file  = str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
 		$found = false;
-		$paths = $paths
-		       ? array_merge((array) $paths, self::$loadPaths)
-		       : self::$loadPaths;
+		
+		// make use of specified paths, but fall back to set paths
+		if ($paths) {
+			$paths = array_merge((array) $paths, self::$paths);
+		}
+		// if not just use original paths
+		else {
+			$paths = self::$paths;
+		}
 		
 		// if there aren't any paths, die with a message
 		if (!$paths) {
 			die('
 				No load paths are defined. Please define a load path using
-				Europa_Loader::addLoadPath(\'./path/to/files\').
+				Europa_Loader::addPath(\'./path/to/files\').
 			');
 		}
 		
@@ -82,7 +88,7 @@ class Europa_Loader
 			include $fullPath;
 		}
 		
-		// build the log
+		// build logging information
 		self::$log[] = array(
 			'class' => $className,
 			'path'  => $fullPath,
@@ -90,7 +96,11 @@ class Europa_Loader
 			'found' => $found
 		);
 		
-		return $found ? $fullPath : false;
+		if ($found) {
+			return $fullPath;
+		}
+		
+		return false;
 	}
 	
 	/**
@@ -102,7 +112,7 @@ class Europa_Loader
 	 * @param string $path The path to add to the list of load paths.
 	 * @return bool|string
 	 */
-	public static function addLoadPath($path)
+	public static function addPath($path)
 	{
 		$path = realpath($path);
 		
@@ -111,9 +121,29 @@ class Europa_Loader
 			return false;
 		}
 		
-		self::$loadPaths[] = $path;
+		self::$paths[] = $path;
 		
 		return $path;
+	}
+	
+	/**
+	 * Returns an array of all bound load paths.
+	 * 
+	 * @return array
+	 */
+	public static function getPaths()
+	{
+		return self::$paths;
+	}
+	
+	/**
+	 * Returns a log with information about loaded classes.
+	 * 
+	 * @return array
+	 */
+	public static function getLog()
+	{
+		return self::$log;
 	}
 	
 	/**

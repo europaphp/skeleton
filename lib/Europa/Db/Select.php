@@ -690,7 +690,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function valid()
 	{
-		return (bool) $this->offsetGet($this->index);
+		return $this->index < $this->count();
 	}
 
 	/**

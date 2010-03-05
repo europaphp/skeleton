@@ -20,8 +20,6 @@ class IndexController extends Europa_Controller_Abstract
 	public function __call($name, $args)
 	{
 		$this->layout->title = 'EuropaPHP - 404';
-		$this->view->msg     = 'The page you requested could not be found.';
-
 		$this->view->setScript('Index/index');
 	}
 	
@@ -51,7 +49,7 @@ class IndexController extends Europa_Controller_Abstract
 	}
 	
 	/**
-	 * Gets called pre-rendering of the view. Any varables returned here
+	 * Gets called pre-rendering of the view. Any variables returned here
 	 * in an array are applied to the view. If false is returned, the view
 	 * is then disabled and not rendered.
 	 * 

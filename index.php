@@ -1,18 +1,14 @@
 <?php
 
-// strict error reporting by default
-error_reporting(E_ALL ^ E_STRICT);
-ini_set('display_errors', 'on');
-
-// include the loader
+// require the loader
 require 'lib/Europa/Loader.php';
 
 // register autoloading and define paths
 Europa_Loader::registerAutoload();
-Europa_Loader::addLoadPath('./lib');
+Europa_Loader::addPath('./app/controllers');
+Europa_Loader::addPath('./app/plugins');
+Europa_Loader::addPath('./lib');
 
-// instantiate
+// instantiate and dispatch
 $europa = new Europa_Controller;
-
-// dispatch
 $europa->dispatch();
