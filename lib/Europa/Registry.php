@@ -28,7 +28,7 @@ class Europa_Registry
 	 * @return mixed
 	 */
 	public static function get($key) {
-		if (isset($self::$registry[$key])) {
+		if (isset(self::$registry[$key])) {
 			return self::$registry[$key];
 		}
 		

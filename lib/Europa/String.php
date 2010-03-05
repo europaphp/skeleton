@@ -145,7 +145,7 @@ class Europa_String
 			return null;
 		}
 
-		if (isstring($val) && is_numeric($val)) {
+		if (is_string($val) && is_numeric($val)) {
 			if (strpos($val, '.') === false) {
 				$val = (int) $val;
 			}
