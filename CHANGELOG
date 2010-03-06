@@ -1,0 +1,43 @@
+== 1.1.0 ==
+
+1. Completely re-work architecture to use extending over configuration and to use dependency injection where necessary.
+
+2. Add Europa_Route class which controls route matching and parameter parsing and retrieving.
+
+3. Add Europa_String class for fluid string manipulation. It's also an integral part of the core for enforcing naming conventions.
+
+4. Change the name of the Europa_Controller class to something a bit more fitting: Europa_Dispatcher.
+
+5. Add Europa_Controller_Abstract class for using as a parent class for controllers. It isn't required, but it sets up properties and methods for common tasks.
+
+
+
+== 1.0.2 ==
+
+1. Fix bug where exceptions wouldn't be printed out on PHP <= 5.2.0 because  die() wouldn't invoke the magic __toString() method. Changed to echo while exiting after it (you don't really have to exit, it's just an anal precaution).
+
+2. Remove instance auto-saving from Europa_Base. Eliminates second argument to Europa_Base::__construct.
+
+3. Provide a setInstance method to save the instance to the object using an instance name.
+
+4. Remove ability to auto-instantiate a new instance with Europa_Base::getInstance. It now only retrieves a named instance that has been set using Europa_Base::setInstance.
+
+5. Implement spl_autoload and fallback to __autoload if the Standard PHP Library doesn't exist.
+
+6. Remove Europa_Loader::registerAutoload(). Autoload registering now occurs at the top of Europa/Controller.php.
+
+
+
+== 1.0.1 ==
+
+1. Fix bug in Europa_Loader::loadClass() on BSD/Mac systems where PHP would return the path to a file using realpath() even if the file didn't exist.
+
+2. Add static method Europa_Controller::getActiveInstance() and Europa_Controller::getDispatchStack().
+
+3. Fix bug where force routing (via route property or passing an argument to dispatch) wasn't working in Europa_Controller.
+
+
+
+== 1.0.0 ==
+
+1. Initial release of EuropaPHP.
