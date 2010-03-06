@@ -5,13 +5,13 @@
  */
 
 /**
- * The event object that gets passed to the bound event callback whenever 
+ * The event data object that gets passed to the bound event callback whenever 
  * an event is triggered.
  * 
  * @package Europa
  * @subpackage Event
  */
-class Europa_Event_Object
+class Europa_Event_Data
 {
 	/**
 	 * Holds the name of the event that was triggered.
