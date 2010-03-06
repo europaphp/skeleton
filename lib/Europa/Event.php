@@ -27,7 +27,7 @@ class Europa_Event
 	 * the passed callback an data to.
 	 * @param mixed $method The callback to bind to the event. Can be any valid 
 	 * callback. In PHP 5.3.0, this can be a closure. The callback takes only 
-	 * one argument and that is an instance ofEuropa_Event_Object.
+	 * one argument and that is an instance ofEuropa_Event_Data.
 	 * @param mixed $bindData An optional argument of data (Array, String, whatever)
 	 * to pass to the event object that gets passed to the callback as the only 
 	 * argument.
@@ -95,7 +95,7 @@ class Europa_Event
 	 * @param mixed $eventNames A string event name, or Array of event names to
 	 * trigger.
 	 * @param arraty $triggerData The data to pass to the callback via 
-	 * Europa_Event_Object at the time of event triggering.
+	 * Europa_Event_Data at the time of event triggering.
 	 * @return Boolean
 	 */
 	public static function trigger($eventNames, $triggerData = null)
@@ -117,9 +117,9 @@ class Europa_Event
 					// foreach handler, trigger the event
 					foreach ($eventHandlers as $eventHandler => $eventData) {
 						// event data is passed through a single arugment of the
-						// Europa_Event_Object object
+						// Europa_Event_Data object
 						$func           = $eventData['method'];
-						$e              = new Europa_Event_Object;
+						$e              = new Europa_Event_Data;
 						$e->event       = $eventType;
 						$e->bindData    = (array) $eventData['bindData'];
 						$e->triggerData = (array) $triggerData;
