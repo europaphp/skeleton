@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<component id="docs" name="Documentation">
+	<file>CHANGELOG</file>
+	<file>LICENSE</file>
+	<file>README</file>
+</component>
+<component id="sandbox" name="Sandbox">
+	<file>app/controllers/IndexController.php</file>
+	<file>app/views/index.php</file>
+	<file>app/views/index/index.php</file>
+	<file>index.php</file>
+	<dependency>core</dependency>
+</component>
+<component id="core" name="Core">
+	<file>lib/Europa/Controller/Abstract.php</file>
+	<file>lib/Europa/Controller/Exception.php</file>
+	<file>lib/Europa/Controller.php</file>
+	<file>lib/Europa/Exception.php</file>
+	<file>lib/Europa/Loader.php</file>
+	<file>lib/Europa/Route.php</file>
+	<file>lib/Europa/String.php</file>
+	<file>lib/Europa/View.php</file>
+</component>
+<!--component id="csv" name="Csv">
+	<file>lib/Europa/Csv/Abstract.php</file>
+	<file>lib/Europa/Csv/Exporter.php</file>
+	<file>lib/Europa/Csv/Importer.php</file>
+</component-->
+<!--component id="db" name="Db">
+	<file>lib/Europa/Db/Exception.php</file>
+	<file>lib/Europa/Db/Record.php</file>
+	<file>lib/Europa/Db/Select.php</file>
+	<file>lib/Europa/Db.php</file>
+</component-->
+<component id="event" name="Event">
+	<file>lib/Europa/Event/Data.php</file>
+	<file>lib/Europa/Event.php</file>
+</component>
+<!--component id="flash" name="Flash">
+	<file>lib/Europa/Flash.php</file>
+</component-->
+<!--component id="form" name="Form">
+	<file>lib/Europa/Form/Element.php</file>
+	<file>lib/Europa/Form.php</file>
+</component-->
+<!--component id="ini" name="Ini">
+	<file>lib/Europa/Ini.php</file>
+</component-->
+<component id="registry" name="Registry">
+	<file>lib/Europa/Registry.php</file>
+</component>
+<!--component id="session" name="Session">
+	<file>Europa/Session.php</file>
+</component-->
