@@ -9,6 +9,10 @@ Europa_Loader::addPath('./app/controllers');
 Europa_Loader::addPath('./app/plugins');
 Europa_Loader::addPath('./lib');
 
-// instantiate and dispatch
-$europa = new Europa_Controller;
-$europa->dispatch();
+// dispatch the request catching any exceptions
+try {
+	$europa = new Europa_Controller;
+	$europa->dispatch();
+} catch (Europa_Exception $e) {
+	die($e->getMessage());
+}
