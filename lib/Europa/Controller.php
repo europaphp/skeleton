@@ -342,7 +342,10 @@ class Europa_Controller
 	{
 		$controller = $this->route->getParam('controller', 'index');
 		
-		return Europa_String::create($controller)->camelCase(true) . 'Controller';
+		return Europa_String::create($controller)
+		       ->camelCase(true)
+		       ->__toString()
+		     . 'Controller';
 	}
 	
 	/**
@@ -354,7 +357,10 @@ class Europa_Controller
 	{
 		$action = $this->route->getParam('action', 'index');
 		
-		return Europa_String::create($action)->camelCase() . 'Action';
+		return Europa_String::create($action)
+		       ->camelCase()
+		       ->__toString()
+		     . 'Action';
 	}
 
 	/**
