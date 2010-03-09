@@ -149,6 +149,12 @@ class Europa_Route
 	 */
 	final public function getAllParams()
 	{
-		return array_merge($this->params, $_GET, $_POST);
+		static $params;
+		
+		if (!isset($params)) {
+			$params = array_merge($this->params, $_GET, $_POST);
+		}
+		
+		return $params;
 	}
 }
