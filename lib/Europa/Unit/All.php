@@ -1,7 +1,25 @@
 <?php
 
+/**
+ * @author Trey Shugart
+ */
+
+/**
+ * Base class for a test group macro.
+ * 
+ * By extending this class and providing it with test classes, it will run
+ * all tests methods in each test class and report on the results.
+ * 
+ * @package Europa
+ * @subpackage Unit
+ */
 abstract class Europa_Unit_All
 {
+	/**
+	 * Holds references to all group class instances.
+	 * 
+	 * @var array
+	 */
 	protected $groups = array();
 	
 	/**
@@ -17,6 +35,11 @@ abstract class Europa_Unit_All
 	 */
 	abstract public function getTestClasses();
 	
+	/**
+	 * Constructs the controlling class and sets group class references.
+	 * 
+	 * @return Europa_Unit_All
+	 */
 	public function __construct()
 	{
 		foreach ($this->getTestClasses() as $className) {
@@ -24,6 +47,11 @@ abstract class Europa_Unit_All
 		}
 	}
 	
+	/**
+	 * Runs all tests on each group.
+	 * 
+	 * @return Europa_Unit_All
+	 */
 	public function run()
 	{
 		if (method_exists($this, 'setUp')) {
@@ -41,11 +69,21 @@ abstract class Europa_Unit_All
 		return $this;
 	}
 	
+	/**
+	 * Returns a list of associated group references.
+	 * 
+	 * @return array
+	 */
 	public function getGroups()
 	{
 		return $this->groups;
 	}
 	
+	/**
+	 * Counts the number of associated group references.
+	 * 
+	 * @return int
+	 */
 	public function countGroups()
 	{
 		return count($this->getTestClasses());

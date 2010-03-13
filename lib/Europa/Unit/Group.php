@@ -1,11 +1,47 @@
 <?php
 
+/**
+ * @author Trey Shugart
+ */
+
+/**
+ * Base class for a test group.
+ * 
+ * By default all methods prefixed with 'test' are considered test methods and
+ * will be ran and evaluated.
+ * 
+ * Both a setUp and a tearDown method is available and works as in other unit
+ * test frameworks. Europa_Unit_Group->setUp() gets run after __construct(),
+ * but before any tests are run. Europa_Unit_Group->tearDown() gets run after
+ * the tests are run.
+ * 
+ * Tests that return true, pass; false, failed; and anything that returns
+ * otherwise is considered incomplete.
+ * 
+ * @package Europa
+ * @subpackage Unit
+ */
 abstract class Europa_Unit_Group
 {
+	/**
+	 * Contains all test names that passed.
+	 * 
+	 * @var array
+	 */
 	protected $passed = array();
 	
+	/**
+	 * Contains all test names that are incomplete.
+	 * 
+	 * @var array
+	 */
 	protected $incomplete = array();
 	
+	/**
+	 * Contains all test names that failed.
+	 * 
+	 * @var array
+	 */
 	protected $failed = array();
 	
 	/**
@@ -38,6 +74,12 @@ abstract class Europa_Unit_Group
 		}
 	}
 	
+	/**
+	 * Retrieves all methods from the test group class and filters them
+	 * returning only those which are valid test methods.
+	 * 
+	 * @return array
+	 */
 	public function getTestMethods()
 	{
 		$class   = new ReflectionClass($this);
@@ -54,41 +96,81 @@ abstract class Europa_Unit_Group
 		return $methods;
 	}
 	
+	/**
+	 * Returns the name of the test group. Defaults to the class' name.
+	 * 
+	 * @return string
+	 */
 	public function getName()
 	{
 		return get_class($this);
 	}
 	
+	/**
+	 * Returns all test names that passed.
+	 * 
+	 * @return array
+	 */
 	public function getPassed()
 	{
 		return $this->passed;
 	}
-
+	
+	/**
+	 * Returns all test names that were incomplete.
+	 * 
+	 * @return array
+	 */
 	public function getIncomplete()
 	{
 		return $this->incomplete;
 	}
-
+	
+	/**
+	 * Returns all test names that failed.
+	 * 
+	 * @return array
+	 */
 	public function getFailed()
 	{
 		return $this->failed;
 	}
 	
+	/**
+	 * Returns the number of tests that passed.
+	 * 
+	 * @return int
+	 */
 	public function countPassed()
 	{
 		return count($this->passed);
 	}
 	
+	/**
+	 * Returns the number of test that were incomplete.
+	 * 
+	 * @return int
+	 */
 	public function countIncomplete()
 	{
 		return count($this->incomplete);
 	}
 	
+	/**
+	 * Returns the number of tests that failed.
+	 * 
+	 * @return int
+	 */
 	public function countFailed()
 	{
 		return count($this->failed);
 	}
-
+	
+	/**
+	 * Returns the total number of tests.
+	 * 
+	 * @return int
+	 */
 	public function countTests()
 	{
 		return count($this->getTestMethods());
