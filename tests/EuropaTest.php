@@ -6,7 +6,11 @@ class EuropaTest extends Europa_Unit_All
 	{
 		return array(
 			'EuropaTest_Controller',
-			'EuropaTest_Event'
+			'EuropaTest_Exception',
+			'EuropaTest_Loader',
+			'EuropaTest_Route',
+			'EuropaTest_String',
+			'EuropaTest_View'
 		);
 	}
 }
