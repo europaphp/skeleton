@@ -4,13 +4,6 @@
 	<file>LICENSE</file>
 	<file>README</file>
 </component>
-<component id="sandbox" name="Sandbox">
-	<file>app/controllers/IndexController.php</file>
-	<file>app/views/index.php</file>
-	<file>app/views/index/index.php</file>
-	<file>index.php</file>
-	<dependency>core</dependency>
-</component>
 <component id="core" name="Core">
 	<dependency>controller</dependency>
 	<dependency>exception</dependency>
@@ -18,6 +11,25 @@
 	<dependency>route</dependency>
 	<dependency>string</dependency>
 	<dependency>view</dependency>
+</component>
+<component id="sandbox" name="Sandbox">
+	<file>app/controllers/IndexController.php</file>
+	<file>app/views/index.php</file>
+	<file>app/views/index/index.php</file>
+	<file>index.php</file>
+	<dependency>core</dependency>
+</component>
+<component id="tests">
+	<file>tests/EuropaTest/Controller.php</file>
+	<file>tests/EuropaTest/Exception.php</file>
+	<file>tests/EuropaTest/Loader.php</file>
+	<file>tests/EuropaTest/Route.php</file>
+	<file>tests/EuropaTest/String.php</file>
+	<file>tests/EuropaTest/View.php</file>
+	<file>tests/EuropaTest.php</file>
+	<file>tests/run.php</file>
+	<dependency>core</dependency>
+	<dependency>unit</dependency>
 </component>
 <component id="controller" name="Controller">
 	<file>lib/Europa/Controller/Abstract.php</file>
@@ -35,10 +47,10 @@
 	<file>lib/Europa/Db/Select.php</file>
 	<file>lib/Europa/Db.php</file>
 </component-->
-<component id="event" name="Event">
+<!--component id="event" name="Event">
 	<file>lib/Europa/Event/Data.php</file>
 	<file>lib/Europa/Event.php</file>
-</component>
+</component-->
 <component id="exception" name="Exception">
 	<file>lib/Europa/Exception.php</file>
 </component>
