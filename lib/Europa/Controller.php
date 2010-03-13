@@ -417,6 +417,8 @@ class Europa_Controller
 	/**
 	 * Returns the Europa root URI in relation to the file that dispatched
 	 * the controller.
+	 * 
+	 * If running from CLI, '.' will be returned.
 	 *
 	 * @return string
 	 */
@@ -434,6 +436,8 @@ class Europa_Controller
 	/**
 	 * Returns the Europa request URI in relation to the file that dispatched
 	 * the controller.
+	 * 
+	 * If the running from CLI, then false will be returned.
 	 *
 	 * @return string
 	 */
