@@ -171,7 +171,7 @@ abstract class Europa_Unit_Group
 	 * 
 	 * @return int
 	 */
-	public function countTests()
+	public function countTotal()
 	{
 		return count($this->getTestMethods());
 	}
