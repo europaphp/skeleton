@@ -12,14 +12,17 @@
 	<dependency>core</dependency>
 </component>
 <component id="core" name="Core">
+	<dependency>controller</dependency>
+	<dependency>exception</dependency>
+	<dependency>loader</dependency>
+	<dependency>route</dependency>
+	<dependency>string</dependency>
+	<dependency>view</dependency>
+</component>
+<component id="controller" name="Controller">
 	<file>lib/Europa/Controller/Abstract.php</file>
 	<file>lib/Europa/Controller/Exception.php</file>
 	<file>lib/Europa/Controller.php</file>
-	<file>lib/Europa/Exception.php</file>
-	<file>lib/Europa/Loader.php</file>
-	<file>lib/Europa/Route.php</file>
-	<file>lib/Europa/String.php</file>
-	<file>lib/Europa/View.php</file>
 </component>
 <!--component id="csv" name="Csv">
 	<file>lib/Europa/Csv/Abstract.php</file>
@@ -36,6 +39,9 @@
 	<file>lib/Europa/Event/Data.php</file>
 	<file>lib/Europa/Event.php</file>
 </component>
+<component id="exception" name="Exception">
+	<file>lib/Europa/Exception.php</file>
+</component>
 <!--component id="flash" name="Flash">
 	<file>lib/Europa/Flash.php</file>
 </component-->
@@ -46,9 +52,25 @@
 <!--component id="ini" name="Ini">
 	<file>lib/Europa/Ini.php</file>
 </component-->
+<component id="loader" name="Loader">
+	<file>lib/Europa/Loader.php</file>
+</component>
 <component id="registry" name="Registry">
 	<file>lib/Europa/Registry.php</file>
+</component>
+<component id="route" name="Route">
+	<file>lib/Europa/Route.php</file>
 </component>
 <!--component id="session" name="Session">
 	<file>Europa/Session.php</file>
 </component-->
+<component id="string" name="String">
+	<file>lib/Europa/String.php</file>
+</component>
+<component id="unit" name="Unit">
+	<file>lib/Europa/Unit/All.php</file>
+	<file>lib/Europa/Unit/Group.php</file>
+</component>
+<component id="view" name="View">
+	<file>lib/Europa/View.php</file>
+</component>
