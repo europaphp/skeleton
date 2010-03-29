@@ -11,7 +11,12 @@
  */
 class EuropaTest_Controller extends Europa_Unit_Group
 {
-	protected $controller;
+	/**
+	 * An instance of Europa_Controller to run tests against.
+	 * 
+	 * @var Europa_Controller
+	 */
+	protected $_controller;
 	
 	/**
 	 * Requires the appropriate files for running the test.
@@ -20,7 +25,7 @@ class EuropaTest_Controller extends Europa_Unit_Group
 	 */
 	public function setUp()
 	{
-		$this->controller = new Europa_Controller;
+		$this->_controller = new Europa_Controller;
 	}
 	
 	/**
@@ -31,8 +36,8 @@ class EuropaTest_Controller extends Europa_Unit_Group
 	 */
 	public function testConstructor()
 	{
-		$hasView   = $this->controller->getView()   instanceof Europa_View;
-		$hasLayout = $this->controller->getLayout() instanceof Europa_View;
+		$hasView   = $this->_controller->getView()   instanceof Europa_View;
+		$hasLayout = $this->_controller->getLayout() instanceof Europa_View;
 		
 		return $hasView && $hasLayout;
 	}
@@ -44,9 +49,9 @@ class EuropaTest_Controller extends Europa_Unit_Group
 	 */
 	public function testSetLayout()
 	{
-		$this->controller->setLayout(null);
+		$this->_controller->setLayout(null);
 		
-		return $this->controller->getLayout() === null;
+		return $this->_controller->getLayout() === null;
 	}
 
 	/**
@@ -56,9 +61,9 @@ class EuropaTest_Controller extends Europa_Unit_Group
 	 */
 	public function testSetView()
 	{
-		$this->controller->setView(null);
+		$this->_controller->setView(null);
 
-		return $this->controller->getView() === null;
+		return $this->_controller->getView() === null;
 	}
 
 	/**
@@ -68,13 +73,16 @@ class EuropaTest_Controller extends Europa_Unit_Group
 	 */
 	public function testImplicitRoute()
 	{
-		$this->controller->setRoute('test', new Europa_Route(
-			'test/([^/]*)/?([^/]*)/?',
-			array('controller', 'action'),
-			'index.php?controller=:controller&action=:action'
-		));
+		$this->_controller->setRoute(
+			'test',
+			new Europa_Route(
+				'test/([^/]*)/?([^/]*)/?',
+				array('controller', 'action'),
+				'index.php?controller=:controller&action=:action'
+			)
+		);
 		
-		return $this->controller->getRoute('test') instanceof Europa_Route;
+		return $this->_controller->getRoute('test') instanceof Europa_Route;
 	}
 
 	/**
@@ -84,9 +92,9 @@ class EuropaTest_Controller extends Europa_Unit_Group
 	 */
 	public function testExplicitRoute()
 	{
-		$this->controller->setRoute($this->controller->getRoute('test'));
+		$this->_controller->setRoute($this->_controller->getRoute('test'));
 		
-		return $this->controller->getRoute() instanceof Europa_Route;
+		return $this->_controller->getRoute() instanceof Europa_Route;
 	}
 
 	/**
@@ -96,6 +104,6 @@ class EuropaTest_Controller extends Europa_Unit_Group
 	 */
 	public function testDefaultRoute()
 	{
-		return $this->controller->getDefaultRoute() instanceof Europa_Route;
+		return $this->_controller->getDefaultRoute() instanceof Europa_Route;
 	}
 }

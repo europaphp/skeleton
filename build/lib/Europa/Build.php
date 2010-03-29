@@ -2,13 +2,13 @@
 
 class Europa_Build
 {
-	protected $xml;
+	protected $_xml;
 	
-	protected $components = array();
+	protected $_components = array();
 	
-	protected $basePath;
+	protected $_basePath;
 	
-	protected $zipBase;
+	protected $_zipBase;
 	
 	public function __construct($fromFile, $basePath = './', $zipBase = null)
 	{
@@ -16,13 +16,13 @@ class Europa_Build
 			throw new Europa_Build_Exception(
 				'Build file <strong>'
 				. $fromFile
-				. '</strong> cannot be found.'
-				, Europa_Build_Exception::FILE_NOT_FOUND
+				. '</strong> cannot be found.',
+				Europa_Build_Exception::FILE_NOT_FOUND
 			);
 		}
 		
 		// the xml file defining the release schema
-		$this->xml = new pQuery($fromFile);
+		$this->_xml = new pQuery($fromFile);
 		
 		// normalize base path
 		if ($basePath) {
@@ -36,22 +36,22 @@ class Europa_Build
 		}
 		
 		// set the normalized base path
-		$this->basePath = $basePath;
-		$this->zipBase  = $zipBase;
+		$this->_basePath = $basePath;
+		$this->_zipBase  = $zipBase;
 	}
 	
 	public function addComponent($component)
 	{
 		// if it's already added, do nothing
-		if (in_array($component, $this->components)) {
+		if (in_array($component, $this->_components)) {
 			return $this;
 		}
 		
-		$component = $this->xml->find('//component[@id="' . $component . '"]');
+		$component = $this->_xml->find('//component[@id="' . $component . '"]');
 		
 		if ($component->length) {
 			// add to list of components
-			$this->components[] = $component->attr('id');
+			$this->_components[] = $component->attr('id');
 			
 			// if this component has any dependencies, add them also
 			foreach ($component->find('//dependency') as $dependency) {
@@ -94,18 +94,18 @@ class Europa_Build
 			throw new Europa_Build_Exception(
 				'Cannot create file '
 				. $fullpath
-				. '</strong>.'
-				, Europa_Build_Exception::ZIP_CREATE_FAIL
+				. '</strong>.',
+				Europa_Build_Exception::ZIP_CREATE_FAIL
 			);
 		}
 		
 		// add component files
-		foreach ($this->components as $component) {
-			foreach ($this->xml->find('//component[@id="' . $component . '"]/file') as $file) {
+		foreach ($this->_components as $component) {
+			foreach ($this->_xml->find('//component[@id="' . $component . '"]/file') as $file) {
 				$file = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $file->text());
 				
-				if (is_file($this->basePath . $file)) {
-					$zip->addFile($this->basePath . $file, $this->zipBase . $file);
+				if (is_file($this->_basePath . $file)) {
+					$zip->addFile($this->_basePath . $file, $this->_zipBase . $file);
 				}
 			}
 		}

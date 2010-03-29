@@ -39,49 +39,49 @@ class pQuery implements Iterator
 	 * 
 	 * @var string
 	 */
-	protected $selector = null;
+	protected $_selector = null;
 	
 	/**
 	 * The current context selector being used.
 	 * 
 	 * @var string
 	 */
-	protected $context = null;
+	protected $_context = null;
 	
 	/**
 	 * An array of selected DOMNode objects.
 	 * 
 	 * @var string
 	 */
-	protected $nodeList = array();
+	protected $_nodeList = array();
 	
 	/**
 	 * Whether or not a doctype was explicitly used.
 	 * 
 	 * @var string
 	 */
-	protected $hasDoctype = false;
+	protected $_hasDoctype = false;
 	
 	/**
 	 * Whether or not an html tag was explicitly used.
 	 * 
 	 * @var string
 	 */
-	protected $hasHtmlTag = false;
+	protected $_hasHtmlTag = false;
 	
 	/**
 	 * Whether or not a body tag was explicitly used.
 	 * 
 	 * @var string
 	 */
-	protected $hasBodyTag = false;
+	protected $_hasBodyTag = false;
 	
 	/** 
 	 * Used to represent the iterator index.
 	 * 
 	 * @var int
 	 */
-	private $index = 0;
+	private $_index = 0;
 	
 	/**
 	 * Constructs a new pQuery object and effectively handles nearly any passed in
@@ -96,24 +96,24 @@ class pQuery implements Iterator
 	{
 		// handle pQuery instances, DOMDocument istances, URIs, files and strings
 		if ($document instanceof pQuery) {
-			$this->selector   = $document->selector;
-			$this->context    = $document->context;
-			$this->nodeList   = $document->nodeList;
-			$this->hasDoctype = $document->hasDoctype;
-			$this->hasHtmlTag = $document->hasHtmlTag;
-			$this->hasBodyTag = $document->hasBodyTag;
+			$this->_selector   = $document->selector;
+			$this->_context    = $document->context;
+			$this->_nodeList   = $document->nodeList;
+			$this->_hasDoctype = $document->hasDoctype;
+			$this->_hasHtmlTag = $document->hasHtmlTag;
+			$this->_hasBodyTag = $document->hasBodyTag;
 		} elseif ($document instanceof DOMDocument) {
 			foreach ($document->childNodes as $node) {
-				$this->nodeList[] = $node;
+				$this->_nodeList[] = $node;
 			}
 		} elseif ($document instanceof DOMNode) {
-			$this->nodeList[] = $document;
+			$this->_nodeList[] = $document;
 		} elseif ($document instanceof DOMNodeList) {
 			foreach ($document as $node) {
-				$this->nodeList[] = $node;
+				$this->_nodeList[] = $node;
 			}
 		} elseif (is_array($document)) {
-			$this->nodeList = $document;
+			$this->_nodeList = $document;
 		} else {
 			// handle a url, file or html string
 			$document = preg_match('/^http:\/\//', $document) || is_file($document)
@@ -128,42 +128,42 @@ class pQuery implements Iterator
 			
 			// import nodes
 			foreach ($doc->childNodes as $node) {
-				$this->nodeList[] = $node;
+				$this->_nodeList[] = $node;
 			}
 			
 			// set flags
-			$this->hasDoctype = (bool) preg_match('#<!DOCTYPE#i', $document);
-			$this->hasHtmlTag = (bool) preg_match('#<html#i', $document);
-			$this->hasBodyTag = (bool) preg_match('#<body#i', $document);
+			$this->_hasDoctype = (bool) preg_match('#<!DOCTYPE#i', $document);
+			$this->_hasHtmlTag = (bool) preg_match('#<html#i', $document);
+			$this->_hasBodyTag = (bool) preg_match('#<body#i', $document);
 		}
 		
 		// set properties
-		$this->selector = $selector;
-		$this->context  = $context;
+		$this->_selector = $selector;
+		$this->_context  = $context;
 		
-		if ($this->selector) {
+		if ($this->_selector) {
 			// retrieve a new document while keeping references
-			$doc = $this->getDocument($this->nodeList);
+			$doc = $this->getDocument($this->_nodeList);
 			
 			// to run queries against
 			$xPath = new DOMXPath($doc);
 			
 			// find the context node/element
-			$this->context = @$xPath->query($this->context);
+			$this->_context = @$xPath->query($this->_context);
 			
 			// set the filtered node list
-			if ($this->context) {
-				$nodeList = $xPath->query($this->selector, $this->context->item(0));
+			if ($this->_context) {
+				$nodeList = $xPath->query($this->_selector, $this->_context->item(0));
 			} else {
-				$nodeList = $xPath->query($this->selector);
+				$nodeList = $xPath->query($this->_selector);
 			}
 			
 			// reset the node list
-			$this->nodeList = array();
+			$this->_nodeList = array();
 			
 			// re-import the filtered nodes
 			foreach ($nodeList as $node) {
-				$this->nodeList[] = $node;
+				$this->_nodeList[] = $node;
 			}
 		}
 	}
@@ -222,15 +222,15 @@ class pQuery implements Iterator
 	{
 		// if an index is specified
 		if (is_numeric($index)) {
-			if (!isset($this->nodeList[$index])) {
+			if (!isset($this->_nodeList[$index])) {
 				return null;
 			}
 			
-			return $this->nodeList[$index];
+			return $this->_nodeList[$index];
 		}
 		
 		// return the whole node list
-		return $this->nodeList;
+		return $this->_nodeList;
 	}
 	
 	/**
@@ -260,7 +260,7 @@ class pQuery implements Iterator
 		$list = array();
 		
 		// build the list of pQuery objects to return
-		foreach ($this->nodeList as $node) {
+		foreach ($this->_nodeList as $node) {
 			$list[] = new self($node);
 		}
 		
@@ -300,20 +300,20 @@ class pQuery implements Iterator
 			}
 			
 			// create a new document from the current nodes
-			$str = $this->getDocument($this->nodeList)->saveHTML();
+			$str = $this->getDocument($this->_nodeList)->saveHTML();
 			
 			// remove automated doctype if it wasn't explicitly typed
-			if (!$this->hasDoctype) {
+			if (!$this->_hasDoctype) {
 				$str = preg_replace('#<!DOCTYPE([^>]*)>#i', '', $str);
 			}
 			
 			// remove automated html tag if it wasn't explicitly typed
-			if (!$this->hasHtmlTag) {
+			if (!$this->_hasHtmlTag) {
 				$str = preg_replace('#</?html([^>]*)>#i', '', $str);
 			}
 			
 			// remove automated body tag if it wasn't explicitly typed
-			if (!$this->hasBodyTag) {
+			if (!$this->_hasBodyTag) {
 				$str = preg_replace('#</?body([^>]*)>#i', '', $str);
 			}
 			
@@ -325,7 +325,7 @@ class pQuery implements Iterator
 			
 			// copy the imported html
 			foreach ($html->nodeList as $node) {
-				$this->nodeList[] = $node;
+				$this->_nodeList[] = $node;
 			}
 		}
 		
@@ -354,10 +354,10 @@ class pQuery implements Iterator
 	public function size($length = null)
 	{
 		if (is_numeric($length)) {
-			$this->nodeList = array_slice($this->nodeList, 0, (int) $length);
+			$this->_nodeList = array_slice($this->_nodeList, 0, (int) $length);
 		}
 		
-		return count($this->nodeList);
+		return count($this->_nodeList);
 	}
 	
 	/**
@@ -405,7 +405,7 @@ class pQuery implements Iterator
 	{
 		$html = new self($html);
 		
-		$this->nodeList[] = $html;
+		$this->_nodeList[] = $html;
 		
 		return $this;
 	}
@@ -434,7 +434,7 @@ class pQuery implements Iterator
 	{
 		$html = new self($html);
 		
-		array_unshift($this->nodeList, $html->nodeList);
+		array_unshift($this->_nodeList, $html->nodeList);
 		
 		return $this;
 	}
@@ -462,7 +462,7 @@ class pQuery implements Iterator
 	{
 		$nodes = array();
 		
-		foreach ($this->nodeList as $node) {
+		foreach ($this->_nodeList as $node) {
 			$nodes[] = $node->cloneNode(true);
 		}
 		
@@ -476,7 +476,7 @@ class pQuery implements Iterator
 	 */
 	public function remove()
 	{
-		$this->nodeList = array();
+		$this->_nodeList = array();
 
 		return $this;
 	}
@@ -557,7 +557,7 @@ class pQuery implements Iterator
 	 */
 	public function current()
 	{
-		return $this->eq($this->index);
+		return $this->eq($this->_index);
 	}
 	
 	/**
@@ -567,7 +567,7 @@ class pQuery implements Iterator
 	 */
 	public function next()
 	{
-		++$this->index;
+		++$this->_index;
 	}
 	
 	/**
@@ -577,7 +577,7 @@ class pQuery implements Iterator
 	 */
 	public function key()
 	{
-		return $this->index;
+		return $this->_index;
 	}
 	
 	/**
@@ -587,7 +587,7 @@ class pQuery implements Iterator
 	 */
 	public function rewind()
 	{
-		$this->index = 0;
+		$this->_index = 0;
 	}
 	
 	/**
@@ -597,6 +597,6 @@ class pQuery implements Iterator
 	 */
 	public function valid()
 	{
-		return $this->index < $this->size();
+		return $this->_index < $this->size();
 	}
 }

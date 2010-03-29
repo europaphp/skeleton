@@ -17,14 +17,14 @@ class Europa_View
 	 * 
 	 * @var array $params
 	 */
-	protected $params = array();
+	protected $_params = array();
 	
 	/**
 	 * The script that will be rendered. Set using Europa_View::render().
 	 * 
 	 * @var string $script
 	 */
-	protected $script = null;
+	protected $_script = null;
 	
 	/**
 	 * Holds references to all of the plugins that have been called on this
@@ -33,7 +33,7 @@ class Europa_View
 	 * 
 	 * @var array $plugins
 	 */
-	protected $plugins = array();
+	protected $_plugins = array();
 	
 	/**
 	 * Construct the view and sets defaults.
@@ -51,7 +51,7 @@ class Europa_View
 		
 		// and set arguments
 		if (is_array($params)) {
-			$this->params = $params;
+			$this->_params = $params;
 		}
 	}
 	
@@ -66,20 +66,20 @@ class Europa_View
 	public function __get($name)
 	{
 		// attempt to grab an argument
-		if (isset($this->params[$name])) {
-			return $this->params[$name];
+		if (isset($this->_params[$name])) {
+			return $this->_params[$name];
 		}
 		
-		if (!isset($this->plugins[$name])) {
+		if (!isset($this->_plugins[$name])) {
 			$plugin = $this->__call($name);
 			
 			if ($plugin) {
-				$this->plugins[$name] = $plugin;
+				$this->_plugins[$name] = $plugin;
 			}
 		}
 		
-		if (isset($this->plugins[$name])) {
-			return $this->plugins[$name];
+		if (isset($this->_plugins[$name])) {
+			return $this->_plugins[$name];
 		}
 		
 		return null;
@@ -94,7 +94,7 @@ class Europa_View
 	 */
 	public function __set($name, $value)
 	{
-		$this->params[$name] = $value;
+		$this->_params[$name] = $value;
 	}
 	
 	/**
@@ -105,7 +105,7 @@ class Europa_View
 	 */
 	public function __isset($name)
 	{
-		return isset($this->params[$name]);
+		return isset($this->_params[$name]);
 	}
 	
 	/**
@@ -116,7 +116,7 @@ class Europa_View
 	 */
 	public function __unset($name)
 	{
-		unset($this->params[$name]);
+		unset($this->_params[$name]);
 	}
 	
 	/**
@@ -168,7 +168,7 @@ class Europa_View
 	 */
 	public function setScript($script)
 	{
-		$this->script = $script;
+		$this->_script = $script;
 		
 		return $this;
 	}
@@ -180,7 +180,7 @@ class Europa_View
 	 */
 	public function getScript()
 	{
-		return $this->script;
+		return $this->_script;
 	}
 	
 	/**
@@ -234,7 +234,7 @@ class Europa_View
 	 */
 	protected function getScriptFullPath()
 	{
-		return realpath('./app/views/' . $this->script . '.php');
+		return realpath('./app/views/' . $this->_script . '.php');
 	}
 	
 	/**

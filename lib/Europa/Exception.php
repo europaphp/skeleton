@@ -24,4 +24,6 @@
  * @link       http://europaphp.org/
  */
 class Europa_Exception extends Exception
-{}
+{
+	
+}

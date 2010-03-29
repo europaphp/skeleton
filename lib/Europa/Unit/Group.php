@@ -28,21 +28,21 @@ abstract class Europa_Unit_Group
 	 * 
 	 * @var array
 	 */
-	protected $passed = array();
+	protected $_passed = array();
 	
 	/**
 	 * Contains all test names that are incomplete.
 	 * 
 	 * @var array
 	 */
-	protected $incomplete = array();
+	protected $_incomplete = array();
 	
 	/**
 	 * Contains all test names that failed.
 	 * 
 	 * @var array
 	 */
-	protected $failed = array();
+	protected $_failed = array();
 	
 	/**
 	 * Runs all test methods in the test group.
@@ -59,13 +59,11 @@ abstract class Europa_Unit_Group
 			$res = $this->$method();
 			
 			if ($res === true) {
-				$this->passed[] = $method;
-			}
-			elseif ($res === false) {
-				$this->failed[] = $method;
-			}
-			else {
-				$this->incomplete[] = $method;
+				$this->_passed[] = $method;
+			} elseif ($res === false) {
+				$this->_failed[] = $method;
+			} else {
+				$this->_incomplete[] = $method;
 			}
 		}
 		
@@ -113,7 +111,7 @@ abstract class Europa_Unit_Group
 	 */
 	public function getPassed()
 	{
-		return $this->passed;
+		return $this->_passed;
 	}
 	
 	/**
@@ -123,7 +121,7 @@ abstract class Europa_Unit_Group
 	 */
 	public function getIncomplete()
 	{
-		return $this->incomplete;
+		return $this->_incomplete;
 	}
 	
 	/**
@@ -133,7 +131,7 @@ abstract class Europa_Unit_Group
 	 */
 	public function getFailed()
 	{
-		return $this->failed;
+		return $this->_failed;
 	}
 	
 	/**
@@ -143,7 +141,7 @@ abstract class Europa_Unit_Group
 	 */
 	public function countPassed()
 	{
-		return count($this->passed);
+		return count($this->_passed);
 	}
 	
 	/**
@@ -153,7 +151,7 @@ abstract class Europa_Unit_Group
 	 */
 	public function countIncomplete()
 	{
-		return count($this->incomplete);
+		return count($this->_incomplete);
 	}
 	
 	/**
@@ -163,7 +161,7 @@ abstract class Europa_Unit_Group
 	 */
 	public function countFailed()
 	{
-		return count($this->failed);
+		return count(``);
 	}
 	
 	/**

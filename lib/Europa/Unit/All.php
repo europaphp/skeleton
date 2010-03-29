@@ -20,7 +20,7 @@ abstract class Europa_Unit_All
 	 * 
 	 * @var array
 	 */
-	protected $groups = array();
+	protected $_groups = array();
 	
 	/**
 	 * Returns the paths and class names for the test classes.
@@ -43,7 +43,7 @@ abstract class Europa_Unit_All
 	public function __construct()
 	{
 		foreach ($this->getTestClasses() as $className) {
-			$this->groups[] = new $className;
+			$this->_groups[] = new $className;
 		}
 	}
 	
@@ -58,7 +58,7 @@ abstract class Europa_Unit_All
 			$this->setUp();
 		}
 		
-		foreach ($this->groups as $class) {
+		foreach ($this->_groups as $class) {
 			$class->run();
 		}
 		
@@ -76,7 +76,7 @@ abstract class Europa_Unit_All
 	 */
 	public function getGroups()
 	{
-		return $this->groups;
+		return $this->_groups;
 	}
 	
 	/**

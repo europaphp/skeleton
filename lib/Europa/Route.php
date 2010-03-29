@@ -19,7 +19,7 @@ class Europa_Route
 	 * 
 	 * @var string
 	 */
-	protected $pattern;
+	protected $_pattern;
 	
 	/**
 	 * The array mapping of the parameter names to be parsed out of the URI
@@ -27,7 +27,7 @@ class Europa_Route
 	 * 
 	 * @var array
 	 */
-	protected $map;
+	protected $_map;
 	
 	/**
 	 * Since it is very difficult to reverse engineer a regular expression
@@ -36,7 +36,7 @@ class Europa_Route
 	 * 
 	 * @var string
 	 */
-	protected $reverse;
+	protected $_reverse;
 	
 	/**
 	 * Contains an associative array of the parameters that were parsed out
@@ -44,7 +44,7 @@ class Europa_Route
 	 * 
 	 * @var $params
 	 */
-	protected $params = array();
+	protected $_params = array();
 	
 	/**
 	 * Constructs the route and sets required properties.
@@ -56,14 +56,14 @@ class Europa_Route
 	 */
 	final public function __construct($pattern, $map = array(), $reverse = null)
 	{
-		$this->pattern = $pattern;
-		$this->map     = (array) $map;
-		$this->reverse = $reverse;
+		$this->_pattern = $pattern;
+		$this->_map     = (array) $map;
+		$this->_reverse = $reverse;
 		
 		// set default parameters if set
-		foreach ($this->map as $index => $name) {
+		foreach ($this->_map as $index => $name) {
 			if (is_string($index)) {
-				$this->params[$index] = $name;
+				$this->_params[$index] = $name;
 			}
 		}
 	}
@@ -83,16 +83,16 @@ class Europa_Route
 			$uri = Europa_Controller::getActiveInstance()->getRequestUri();
 		}
 		
-		preg_match('#' . $this->pattern . '#', $uri, $matches);
+		preg_match('#' . $this->_pattern . '#', $uri, $matches);
 		
 		if ($matches) {
 			// shift off the full match
 			array_shift($matches);
 			
 			// override any default/static parameters if they are set
-			foreach ($this->map as $index => $name) {
+			foreach ($this->_map as $index => $name) {
 				if (array_key_exists($index, $matches)) {
-					$this->params[$name] = $matches[$index];
+					$this->_params[$name] = $matches[$index];
 				}
 			}
 			
@@ -113,7 +113,7 @@ class Europa_Route
 	 */
 	final public function reverseEngineer($params = array())
 	{
-		$parsed = $this->reverse;
+		$parsed = $this->_reverse;
 		$params = array_merge($this->getParams(), $params);
 		
 		foreach ($params as $name => $value) {
@@ -152,7 +152,7 @@ class Europa_Route
 		static $params;
 		
 		if (!isset($params)) {
-			$params = array_merge($this->params, $_GET, $_POST);
+			$params = array_merge($this->_params, $_GET, $_POST);
 		}
 		
 		return $params;

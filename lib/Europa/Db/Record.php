@@ -15,7 +15,7 @@ abstract class Europa_Db_Record implements ArrayAccess
 	 * 
 	 * @var $relationships
 	 */
-	private $relationships = array();
+	private $_relationships = array();
 	
 	/**
 	 * Returns an array of elements. The key is the name of
@@ -73,8 +73,7 @@ abstract class Europa_Db_Record implements ArrayAccess
 		// check priamry key validity
 		if ($this->hasPrimaryKey()) {
 			$this->load();
-		}
-		else {
+		} else {
 			// initialize defaults
 			$this->fill($this->getColumns());
 			
@@ -116,9 +115,8 @@ abstract class Europa_Db_Record implements ArrayAccess
 		// first check columns
 		if ($this->hasColumn($name)) {
 			$this->$name = $value;
-		}
 		// then relationships
-		elseif ($this->hasRelationship($name)) {
+		} elseif ($this->hasRelationship($name)) {
 			$this->setRelationship($name, $value);
 		}
 	}
@@ -130,7 +128,7 @@ abstract class Europa_Db_Record implements ArrayAccess
 	 */
 	public function __isset($name)
 	{
-		return isset($this->$name) || isset($this->relationships[$name]);
+		return isset($this->$name) || isset($this->_relationships[$name]);
 	}
 	
 	/**
@@ -142,9 +140,8 @@ abstract class Europa_Db_Record implements ArrayAccess
 	{
 		if ($this->hasColumn($name)) {
 			unset($this->$name);
-		}
-		elseif ($this->hasRelationship($name)) {
-			unset($this->relationships[$name]);
+		} elseif ($this->hasRelationship($name)) {
+			unset($this->_relationships[$name]);
 		}
 	}
 	
@@ -163,7 +160,8 @@ abstract class Europa_Db_Record implements ArrayAccess
 	 * 
 	 * @return mixed
 	 */
-	public function offsetGet($index) {
+	public function offsetGet($index)
+	{
 		return $this->$index;
 	}
 	
@@ -345,13 +343,15 @@ abstract class Europa_Db_Record implements ArrayAccess
 		// if the primary key is set then we can delete it
 		if ($this->hasPrimaryKey()) {
 			$pk   = $this->getPrimaryKeyName();
-			$stmt = $db->prepare('
-				DELETE 
-				FROM
-					' . $this->getTableName() . '
-				WHERE
-					' . $pk . ' = :id
-			;');
+			$stmt = $db->prepare(
+				'
+					DELETE 
+					FROM
+						' . $this->getTableName() . '
+					WHERE
+						' . $pk . ' = :id
+				;'
+			);
 			
 			if ($stmt->execute(array(':id' => $this->$pk))) {
 				return true;
@@ -397,14 +397,14 @@ abstract class Europa_Db_Record implements ArrayAccess
 	final public function exists()
 	{
 		$pk   = $this->getPrimaryKeyName();
-		$stmt = $this->getDb()->prepare('
-			SELECT 
+		$stmt = $this->getDb()->prepare(
+			'SELECT 
 				* 
 			FROM 
 				' . $this->getTableName() . '
 			WHERE
-				' . $pk . ' = :id
-		');
+				' . $pk . ' = :id'
+		);
 		
 		$stmt->execute(array(':id' => $this->$pk));
 		
@@ -497,8 +497,8 @@ abstract class Europa_Db_Record implements ArrayAccess
 		}
 		
 		// if the relationshp already exists, return it
-		if (isset($this->relationships[$name])) {
-			return $this->relationships[$name];
+		if (isset($this->_relationships[$name])) {
+			return $this->_relationships[$name];
 		}
 		
 		// get a list of relationships
@@ -534,19 +534,18 @@ abstract class Europa_Db_Record implements ArrayAccess
 			                ->where($thisForeignKey . ' = ?', $this->$thisLocalKey)
 			                ->setClass($class);
 			
-			$this->relationships[$name] = $select;
-		}
+			$this->_relationships[$name] = $select;
 		// one to one relationship
-		elseif ($this->hasColumn($classForeignKey)) {
+		} elseif ($this->hasColumn($classForeignKey)) {
 			// load the data if the key is set
 			$class->load($this->$classForeignKey);
 			
 			// define the property
-			$this->relationships[$name] = $class;
+			$this->_relationships[$name] = $class;
 		}
 		
 		// and return it
-		return $this->relationships[$name];
+		return $this->_relationships[$name];
 	}
 	
 	/**
@@ -570,14 +569,21 @@ abstract class Europa_Db_Record implements ArrayAccess
 			$value = (array) $value;
 			
 			// check to see if the relationship value is a has-many
-			if (isset($value[0]) && (is_array($value[0]) || is_object($value[0] || $value[0] instanceof Europa_Db_Record))) {
+			if (
+				isset($value[0])
+				&& (
+					is_array($value[0])
+					|| is_object($value[0])
+					|| $value[0] instanceof Europa_Db_Record
+				)
+			) {
 				$records = array();
 				
 				foreach ($values[0] as $filler) {
 					$records[] = $this->getRelationship($name)->fill($filler);
 				}
 				
-				$this->relationships[$name] = new Europa_Db_RecordSet($records);
+				$this->_relationships[$name] = new Europa_Db_RecordSet($records);
 			} else {
 				$rel->fill($value);
 			}

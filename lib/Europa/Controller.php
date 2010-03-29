@@ -10,20 +10,20 @@
  * @package Europa
  */
 class Europa_Controller
-{	
+{
 	/**
 	 * An instance or child of Europa_View which represents the layout.
 	 * 
 	 * @var $layout
 	 */
-	protected $layout;
+	protected $_layout;
 	
 	/**
 	 * An instance or child of Europa_View which represents the view.
 	 * 
 	 * @var $view
 	 */
-	protected $view;
+	protected $_view;
 	
 	/**
 	 * After dispatching, this will contain the route that was used to reach
@@ -32,7 +32,7 @@ class Europa_Controller
 	 * 
 	 * @var $route
 	 */
-	protected $route = null;
+	protected $_route = null;
 	
 	/**
 	 * All routes are set to this property. A route must be an instance of
@@ -40,7 +40,7 @@ class Europa_Controller
 	 * 
 	 * @var $routes
 	 */
-	protected $routes = array();
+	protected $_routes = array();
 	
 	/**
 	 * Contains the instances of all controllers that are currently 
@@ -48,7 +48,7 @@ class Europa_Controller
 	 * 
 	 * @var $stack
 	 */
-	private static $stack = null;
+	private static $_stack = null;
 	
 	/**
 	 * Constructs the Controller and sets defaults.
@@ -62,8 +62,8 @@ class Europa_Controller
 		$viewClassName   = $this->getViewClassName();
 
 		// initialize layout and viewå
-		$this->layout = new $layoutClassName();
-		$this->view   = new $viewClassName();
+		$this->_layout = new $layoutClassName();
+		$this->_view   = new $viewClassName();
 	}
 	
 	/**
@@ -76,14 +76,14 @@ class Europa_Controller
 	{
 		// we add this dispatch instance to the stack if it is to be registered
 		if ($register) {
-			self::$stack[] = $this;
+			self::$_stack[] = $this;
 		}
 		
 		// if the route wasn't already set, find one and set it
-		if (!$this->route) {
-			foreach ($this->routes as $name => $route) {
+		if (!$this->_route) {
+			foreach ($this->_routes as $name => $route) {
 				if ($route->match(self::getRequestUri())) {
-					$this->route = $route;
+					$this->_route = $route;
 					
 					break;
 				}
@@ -91,8 +91,8 @@ class Europa_Controller
 		}
 		
 		// if a route still wasn't found, provide a default
-		if (!$this->route) {
-			$this->route = $this->getDefaultRoute();
+		if (!$this->_route) {
+			$this->_route = $this->getDefaultRoute();
 		}
 		
 		// set the controller and action names, and the layout and view
@@ -112,12 +112,11 @@ class Europa_Controller
 			
 			// if init() returns false, the layout is disabled
 			if ($initResult === false) {
-				$this->layout = null;
-			}
+				$this->_layout = null;
 			// otherwise it is assumed to be an array of properties for the layout
-			else {
+			} else {
 				foreach ((array) $initResult as $k => $v) {
-					$this->layout->$k = $v;
+					$this->_layout->$k = $v;
 				}
 			}
 		}
@@ -129,7 +128,7 @@ class Europa_Controller
 		if ($controllerReflection->hasMethod($actionName)) {
 			$actionReflection = $controllerReflection->getMethod($actionName);
 			$actionParams     = array();
-			$routeParams      = $this->route->getAllParams();
+			$routeParams      = $this->_route->getAllParams();
 			
 			// automatically define the parameters that will be passed to the 
 			// action
@@ -142,14 +141,11 @@ class Europa_Controller
 				// exception is thrown
 				if (array_key_exists($name, $routeParams)) {
 					$actionParams[$pos] = $routeParams[$name];
-				}
-				elseif (array_key_exists($pos, $routeParams)) {
+				} elseif (array_key_exists($pos, $routeParams)) {
 					$actionParams[$pos] = $routeParams[$pos];
-				}
-				elseif ($param->isOptional()) {
+				} elseif ($param->isOptional()) {
 					$actionParams[$pos] = $param->getDefaultValue();
-				}
-				else {
+				} else {
 					throw new Europa_Controller_Exception(
 						'Required request parameter <strong>$'
 						. $name 
@@ -157,8 +153,8 @@ class Europa_Controller
 						. $controllerName
 						. '->' 
 						. $actionName
-						. '()</strong> is not set.'
-						, Europa_Controller_Exception::REQUIRED_PARAMETER_NOT_DEFINED
+						. '()</strong> is not set.',
+						Europa_Controller_Exception::REQUIRED_PARAMETER_NOT_DEFINED
 					);
 				}
 				
@@ -175,27 +171,24 @@ class Europa_Controller
 			
 			// returning false in the action terminates the view
 			if ($actionResult === false) {
-				$this->view = null;
+				$this->_view = null;
 			// otherwise it is assumed to be an array of properties to apply to
 			// the view
-			}
-			else {
+			} else {
 				foreach ((array) $actionResult as $k => $v) {
-					$this->view->$k = $v;
+					$this->_view->$k = $v;
 				}
 			}
-		}
-		elseif ($controllerReflection->hasMethod('__call')) {
+		} elseif ($controllerReflection->hasMethod('__call')) {
 			$controllerInstance->$actionName();
-		}
-		else {
+		} else {
 			throw new Europa_Controller_Exception(
 				'Action <strong>' 
 				. $actionName
 				. '</strong> does not exist in <strong>' 
 				. $controllerName
-				. '</strong> and it was not trapped in <strong>__call</strong>.'
-				, Europa_Controller_Exception::ACTION_NOT_FOUND
+				. '</strong> and it was not trapped in <strong>__call</strong>.',
+				Europa_Controller_Exception::ACTION_NOT_FOUND
 			);
 		}
 		
@@ -205,22 +198,21 @@ class Europa_Controller
 		}
 		
 		// set the default layout script name if it hasn't been set yet
-		if ($this->layout && !$this->layout->getScript()) {
-			$this->layout->setScript($this->getLayoutScriptName());
+		if ($this->_layout && !$this->_layout->getScript()) {
+			$this->_layout->setScript($this->getLayoutScriptName());
 		}
 
 		// set the default view script name if it hasn't been set yet
-		if ($this->view && !$this->view->getScript()) {
-			$this->view->setScript($this->getViewScriptName());
+		if ($this->_view && !$this->_view->getScript()) {
+			$this->_view->setScript($this->getViewScriptName());
 		}
 		
 		// layout ouput assumes the view is output in it
-		if ($this->layout) {
-			echo $this->layout;
-		}
+		if ($this->_layout) {
+			echo $this->_layout;
 		// if the layout is disabled, we render the view
-		elseif ($this->view) {
-			echo $this->view;
+		} elseif ($this->_view) {
+			echo $this->_view;
 		}
 		
 		// call a post-rendering hook if it exists
@@ -230,7 +222,7 @@ class Europa_Controller
 		
 		// now we remove it from the dispatch stack if it is registered
 		if ($register) {
-			unset(self::$stack[count(self::$stack) - 1]);
+			unset(self::$_stack[count(self::$_stack) - 1]);
 		}
 	}
 	
@@ -242,7 +234,7 @@ class Europa_Controller
 	 */
 	final public function setLayout(Europa_View $layout = null)
 	{
-		$this->layout = $layout;
+		$this->_layout = $layout;
 		
 		return $this;
 	}
@@ -254,7 +246,7 @@ class Europa_Controller
 	 */
 	final public function getLayout()
 	{
-		return $this->layout;
+		return $this->_layout;
 	}
 	
 	/**
@@ -266,7 +258,7 @@ class Europa_Controller
 	 */
 	final public function setView(Europa_View $view = null)
 	{
-		$this->view = $view;
+		$this->_view = $view;
 		
 		return $this;
 	}
@@ -278,7 +270,7 @@ class Europa_Controller
 	 */
 	final public function getView()
 	{
-		return $this->view;
+		return $this->_view;
 	}
 	
 	/**
@@ -291,10 +283,9 @@ class Europa_Controller
 	final public function setRoute($name, Europa_Route $route = null)
 	{
 		if ($name instanceof Europa_Route) {
-			$this->route = $name;
-		}
-		else {
-			$this->routes[$name] = $route;
+			$this->_route = $name;
+		} else {
+			$this->_routes[$name] = $route;
 		}
 		
 		return $this;
@@ -309,14 +300,14 @@ class Europa_Controller
 	final public function getRoute($name = null)
 	{
 		if ($name) {
-			if (isset($this->routes[$name])) {
-				return $this->routes[$name];
+			if (isset($this->_routes[$name])) {
+				return $this->_routes[$name];
 			}
 			
 			return null;
 		}
 		
-		return $this->route;
+		return $this->_route;
 	}
 	
 	/**
@@ -340,7 +331,7 @@ class Europa_Controller
 	 */
 	protected function getControllerClassName()
 	{
-		$controller = $this->route->getParam('controller', 'index');
+		$controller = $this->_route->getParam('controller', 'index');
 		
 		return Europa_String::create($controller)
 		       ->camelCase(true)
@@ -355,7 +346,7 @@ class Europa_Controller
 	 */
 	protected function getActionMethodName()
 	{
-		$action = $this->route->getParam('action', 'index');
+		$action = $this->_route->getParam('action', 'index');
 		
 		return Europa_String::create($action)
 		       ->camelCase()
@@ -391,7 +382,7 @@ class Europa_Controller
 	 */
 	protected function getLayoutScriptName()
 	{
-		$controller = $this->route->getParam('controller', 'index');
+		$controller = $this->_route->getParam('controller', 'index');
 		
 		return Europa_String::create($controller)->camelCase(false);
 	}
@@ -465,11 +456,11 @@ class Europa_Controller
 	 */
 	final public static function getActiveInstance()
 	{
-		$len = count(self::$stack);
+		$len = count(self::$_stack);
 		
 		// if there are dispatched instances, then return the latest one
 		if ($len) {
-			return self::$stack[$len - 1];
+			return self::$_stack[$len - 1];
 		}
 		
 		return null;
@@ -483,6 +474,6 @@ class Europa_Controller
 	 */
 	final public static function getStack()
 	{
-		return self::$stack;
+		return self::$_stack;
 	}
 }

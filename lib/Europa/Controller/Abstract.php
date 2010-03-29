@@ -20,14 +20,14 @@ abstract class Europa_Controller_Abstract
 	 * 
 	 * @var Europa_Controller
 	 */
-	protected $controller;
+	protected $_controller;
 	
 	/**
 	 * An instance of the route that is being dispatched.
 	 * 
 	 * @var Europa_Route
 	 */
-	protected $route;
+	protected $_route;
 	
 	/**
 	 * An instance of the layout. Generally this is an instance of
@@ -35,7 +35,7 @@ abstract class Europa_Controller_Abstract
 	 * 
 	 * @var Europa_View
 	 */
-	protected $layout;
+	protected $_layout;
 	
 	/**
 	 * An instance of the view. Generally this is an instance of 
@@ -43,7 +43,7 @@ abstract class Europa_Controller_Abstract
 	 * 
 	 * @var Europa_View
 	 */
-	protected $view;
+	protected $_view;
 	
 	/**
 	 * Constructs the controller class and sets default properties.
@@ -52,11 +52,11 @@ abstract class Europa_Controller_Abstract
 	 */
 	public function __construct()
 	{
-		$this->controller   = Europa_Controller::getActiveInstance();
-		$this->route        = $this->controller->getRoute();
-		$this->layout       = $this->controller->getLayout();
-		$this->view         = $this->controller->getView();
-		$this->layout->view = $this->view;
+		$this->_controller   = Europa_Controller::getActiveInstance();
+		$this->_route        = $this->_controller->getRoute();
+		$this->_layout       = $this->_controller->getLayout();
+		$this->_view         = $this->_controller->getView();
+		$this->_layout->view = $this->_view;
 	}
 	
 	/**
@@ -68,13 +68,17 @@ abstract class Europa_Controller_Abstract
 	protected function forward($action)
 	{
 		// force a route
-		$this->controller->setRoute(new Europa_Route(array(
-			'controller' => $this->route->getParam('controller'),
-			'action'     => $action
-		)));
+		$this->_controller->setRoute(
+			new Europa_Route(
+				array(
+					'controller' => $this->_route->getParam('controller'),
+					'action'     => $action
+				)
+			)
+		);
 		
 		// by dispatching here, it cancels the last dispatch call
-		$this->controller->dispatch();
+		$this->_controller->dispatch();
 		
 		exit;
 	}
@@ -94,7 +98,7 @@ abstract class Europa_Controller_Abstract
 	protected function redirect($uri = '/', $europaRelative = true)
 	{
 		if ($europaRelative) {
-			$uri = $this->view->uri($uri);
+			$uri = $this->_view->uri($uri);
 		}
 		
 		header('Location: ' . $uri);

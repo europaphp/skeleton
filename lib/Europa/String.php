@@ -12,13 +12,12 @@
  */
 class Europa_String
 {
-	private
-		/**
-		 * Holds a reference to the current string.
-		 */
-		$string;
-
-
+	/**
+	 * Holds a reference to the current string.
+	 * 
+	 * @var string
+	 */
+	private $_string;
 
 	/**
 	 * Constructs a new string object from the passed in string.
@@ -28,7 +27,7 @@ class Europa_String
 	 */
 	public function __construct($string = '')
 	{
-		$this->string = (string) $string;
+		$this->_string = (string) $string;
 	}
 
 	/**
@@ -38,7 +37,7 @@ class Europa_String
 	 */
 	public function __toString()
 	{
-		return (string) $this->string;
+		return (string) $this->_string;
 	}
 
 	/**
@@ -49,7 +48,7 @@ class Europa_String
 	 */
 	public function camelCase($ucFirst = false)
 	{
-		$str = $this->string;
+		$str = $this->_string;
 		$str = urldecode($str);
 		$str = str_replace(DIRECTORY_SEPARATOR, '/', $str);
 		$str = trim($str, '/');
@@ -77,7 +76,7 @@ class Europa_String
 			$str{0} = strtolower($str{0});
 		}
 
-		$this->string = $str;
+		$this->_string = $str;
 
 		return $this;
 	}
@@ -90,7 +89,7 @@ class Europa_String
 	 */
 	public function trim($charList = null)
 	{
-		$this->string = trim($this->string, $charList);
+		$this->_string = trim($this->_string, $charList);
 
 		return $this;
 	}
@@ -103,7 +102,7 @@ class Europa_String
 	 */
 	public function ltrim($charList = null)
 	{
-		$this->string = ltrim($this->string, $charList);
+		$this->_string = ltrim($this->_string, $charList);
 
 		return $this;
 	}
@@ -116,7 +115,7 @@ class Europa_String
 	 */
 	public function rtrim($charList = null)
 	{
-		$this->string = rtrim($this->string, $charList);
+		$this->_string = rtrim($this->_string, $charList);
 
 		return $this;
 	}
@@ -131,7 +130,7 @@ class Europa_String
 	 */
 	public function cast()
 	{
-		$val = urldecode($this->string);
+		$val = urldecode($this->_string);
 
 		if (strtolower($val) == 'true') {
 			return true;
@@ -148,8 +147,7 @@ class Europa_String
 		if (is_string($val) && is_numeric($val)) {
 			if (strpos($val, '.') === false) {
 				$val = (int) $val;
-			}
-			else {
+			} else {
 				$val = (float) $val;
 			}
 		}

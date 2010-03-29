@@ -30,8 +30,9 @@ require $base . 'lib/Europa/Build/Exception.php';
 
 // create a new build
 $release = new Europa_Build(
-	$base . 'build.xml'
-	, $base
+	$base
+	. 'build.xml',
+	$base
 	. DIRECTORY_SEPARATOR
 	. '..'
 	. DIRECTORY_SEPARATOR

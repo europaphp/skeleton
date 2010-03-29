@@ -19,7 +19,7 @@ class Europa_Registry
 	 * 
 	 * @var array
 	 */
-	protected static $registry = array();
+	protected static $_registry = array();
 	
 	/**
 	 * Retrieves a variable from the registry.
@@ -27,9 +27,10 @@ class Europa_Registry
 	 * @param string $key The registry variable to retrieve.
 	 * @return mixed
 	 */
-	public static function get($key) {
-		if (isset(self::$registry[$key])) {
-			return self::$registry[$key];
+	public static function get($key)
+	{
+		if (isset(self::$_registry[$key])) {
+			return self::$_registry[$key];
 		}
 		
 		return null;
@@ -42,8 +43,9 @@ class Europa_Registry
 	 * @param $val mixed The value of the registry variable.
 	 * @return mixed
 	 */
-	public static function set($key, $val) {
-		self::$registry[$key] = $val;
+	public static function set($key, $val)
+	{
+		self::$_registry[$key] = $val;
 		
 		return $val;
 	}
@@ -55,11 +57,12 @@ class Europa_Registry
 	 * @param string $key The name of the registry variable to remove.
 	 * @return mixed
 	 */
-	public static function remove($key) {
-		if (isset(self::$registry[$key])) {
-			$val = self::$registry[$key];
+	public static function remove($key)
+	{
+		if (isset(self::$_registry[$key])) {
+			$val = self::$_registry[$key];
 			
-			unset(self::$registry[$key]);
+			unset(self::$_registry[$key]);
 			
 			return $val;
 		}

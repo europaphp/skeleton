@@ -32,14 +32,14 @@ class Europa_Db extends PDO
 	 * 
 	 * @var array
 	 */
-	protected $config = array();
+	protected $_config = array();
 		
 	/**
 	 * Contains the query log for the current db connection.
 	 * 
 	 * @var array
 	 */
-	protected $log = array();
+	protected $_log = array();
 	
 	/**
 	 * Instantiates a new database connection from the given configuration options.
@@ -50,19 +50,19 @@ class Europa_Db extends PDO
 	public function __construct($config = null)
 	{
 		// merge the configuration
-		$this->config = array_merge(self::$defaultConfig, (array) $config);
+		$this->_config = array_merge(self::$defaultConfig, (array) $config);
 		
 		// create a PDO DSN
-		$dsn = $this->config['driver'] . ':'
-		     . 'host=' . $this->config['host'] . ';'
-		     . 'dbname=' . $this->config['database'];
+		$dsn = $this->_config['driver'] . ':'
+		     . 'host=' . $this->_config['host'] . ';'
+		     . 'dbname=' . $this->_config['database'];
 		
 		// construct the parent PDO
 		parent::__construct(
 			$dsn,
-			$this->config['username'],
-			$this->config['password'],
-			$this->config['driverOptions']
+			$this->_config['username'],
+			$this->_config['password'],
+			$this->_config['driverOptions']
 		);
 	}
 	
@@ -87,6 +87,6 @@ class Europa_Db extends PDO
 	 */
 	public function getLog()
 	{
-		return $this->log;
+		return $this->_log;
 	}
 }

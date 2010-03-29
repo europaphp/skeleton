@@ -18,7 +18,7 @@ class Europa_Loader
 	 * 
 	 * @var boolean
 	 */
-	protected static $log = array();
+	protected static $_log = array();
 	
 	/**
 	 * Contains all load paths that Europa_Loader will use when attempting 
@@ -26,7 +26,7 @@ class Europa_Loader
 	 * 
 	 * @var array
 	 */
-	protected static $paths = array();
+	protected static $_paths = array();
 	
 	/**
 	 * Loads a class based on the Europa file naming convention. If the class
@@ -56,11 +56,10 @@ class Europa_Loader
 		
 		// make use of specified paths, but fall back to set paths
 		if ($paths) {
-			$paths = array_merge((array) $paths, self::$paths);
-		}
+			$paths = array_merge((array) $paths, self::$_paths);
 		// if not just use original paths
-		else {
-			$paths = self::$paths;
+		} else {
+			$paths = self::$_paths;
 		}
 		
 		// if there aren't any paths, die with a message
@@ -89,7 +88,7 @@ class Europa_Loader
 		}
 		
 		// build logging information
-		self::$log[] = array(
+		self::$_log[] = array(
 			'class' => $className,
 			'path'  => $fullPath,
 			'time'  => microtime() - $startTime,
@@ -121,7 +120,7 @@ class Europa_Loader
 			return false;
 		}
 		
-		self::$paths[] = $path;
+		self::$_paths[] = $path;
 		
 		return $path;
 	}
@@ -133,7 +132,7 @@ class Europa_Loader
 	 */
 	public static function getPaths()
 	{
-		return self::$paths;
+		return self::$_paths;
 	}
 	
 	/**
@@ -143,7 +142,7 @@ class Europa_Loader
 	 */
 	public static function getLog()
 	{
-		return self::$log;
+		return self::$_log;
 	}
 	
 	/**

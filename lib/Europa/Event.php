@@ -18,7 +18,7 @@ class Europa_Event
 	 * 
 	 * @var array
 	 */
-	protected static $events = array();
+	protected static $_events = array();
 	
 	/**
 	 * Binds a method to an event.
@@ -37,12 +37,12 @@ class Europa_Event
 	{
 		foreach ((array) $eventNames as $eventName) {
 			// if the event hasn't been bound yet, make an array for it
-			if (!isset(self::$events[$eventName])) {
-				self::$events[$eventName] = array();
+			if (!isset(self::$_events[$eventName])) {
+				self::$_events[$eventName] = array();
 			}
 			
 			// now give it some data
-			self::$events[$eventName][] = array(
+			self::$_events[$eventName][] = array(
 					'method'   => $method,
 					'bindData' => $bindData
 				);
@@ -63,7 +63,7 @@ class Europa_Event
 	public static function unbind($eventNames)
 	{
 		// if no events are bound yet, then we don't need to go any further
-		if (!is_array(self::$events)) {
+		if (!is_array(self::$_events)) {
 			return false;
 		}
 		
@@ -77,7 +77,7 @@ class Europa_Event
 		// foreach event name, if it is bound, unbind it
 		foreach ($eventNames as $eventName) {
 			if (self::isBound($eventName)) {
-				unset(self::$events[$eventName]);
+				unset(self::$_events[$eventName]);
 				
 				// return true if an event was unbound
 				$ret = true;
@@ -101,7 +101,7 @@ class Europa_Event
 	public static function trigger($eventNames, $triggerData = null)
 	{
 		// if there are no events to trigger, then return false
-		if (!is_array(self::$events)) {
+		if (!is_array(self::$_events)) {
 			return false;
 		}
 		
@@ -111,7 +111,7 @@ class Europa_Event
 		// foreach event to trigger
 		foreach ((array) $eventNames as $eventToTrigger) {
 			// now foreach event, try and find a match
-			foreach (self::$events as $eventType => $eventHandlers) {
+			foreach (self::$_events as $eventType => $eventHandlers) {
 				// if there is a match
 				if ($eventToTrigger === $eventType) {
 					// foreach handler, trigger the event
@@ -148,6 +148,6 @@ class Europa_Event
 	 */
 	public static function isBound($eventName)
 	{
-		return isset(self::$events[$eventName]);
+		return isset(self::$_events[$eventName]);
 	}
 }

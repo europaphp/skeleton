@@ -54,98 +54,98 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 * 
 	 * @var Europa_Db
 	 */
-	protected $db;
+	protected $_db;
 	
 	/**
 	 * Holds column information.
 	 * 
 	 * @var array
 	 */
-	protected $columns = array();
+	protected $_columns = array();
 	
 	/**
 	 * Holds table information.
 	 * 
 	 * @var array
 	 */
-	protected $tables = array();
+	protected $_tables = array();
 	
 	/**
 	 * Holds where clause information.
 	 * 
 	 * @var array
 	 */
-	protected $clauses = array();
+	protected $_clauses = array();
 	
 	/**
 	 * Holds all join information.
 	 * 
 	 * @var array
 	 */
-	protected $joins = array();
+	protected $_joins = array();
 	
 	/**
 	 * Contains grouping information.
 	 * 
 	 * @var array
 	 */
-	protected $groups = array();
+	protected $_groups = array();
 	
 	/**
 	 * Contains ordering information.
 	 * 
 	 * @var array
 	 */
-	protected $orders = array();
+	protected $_orders = array();
 	
 	/**
 	 * Holds the direction that the result should be ordered, if ordering.
 	 * 
 	 * @var string
 	 */
-	protected $orderDirection = 'ASC';
+	protected $_orderDirection = 'ASC';
 	
 	/**
 	 * Contains information about the limit clause.
 	 * 
 	 * @var array
 	 */
-	protected $limit = array();
+	protected $_limit = array();
 	
 	/**
 	 * The current position in the set.
 	 *
 	 * @var int
 	 */
-	protected $index = 0;
+	protected $_index = 0;
 
 	/**
 	 * The class that will be instantiated and filled.
 	 *
 	 * @var string
 	 */
-	protected $class;
+	protected $_class;
 	
 	/**
 	 * The cached array.
 	 * 
 	 * @var array
 	 */
-	protected $cache;
+	protected $_cache;
 	
 	/**
 	 * The number of items to keep cached.
 	 * 
 	 * @var int
 	 */
-	protected $cacheLimit = 1000;
+	protected $_cacheLimit = 1000;
 	
 	/**
 	 * Contains parameters to be bound, if any.
 	 * 
 	 * @var array
 	 */
-	protected $params = array();
+	protected $_params = array();
 	
 	/**
 	 * Constructs a new Europa_Db_Select object.
@@ -155,7 +155,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	public function __construct(PDO $db)
 	{
 		// set the database reference
-		$this->db = $db;
+		$this->_db = $db;
 	}
 	
 	/**
@@ -204,7 +204,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 				$ref  = null;
 			}
 			
-			$this->columns[] = array($name, $ref);
+			$this->_columns[] = array($name, $ref);
 		}
 		
 		return $this;
@@ -224,7 +224,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 				$ref  = null;
 			}
 			
-			$this->tables[] = array($name, $ref);
+			$this->_tables[] = array($name, $ref);
 		}
 		
 		return $this;
@@ -240,7 +240,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function join($join, $params = array(), $type = 'INNER')
 	{
-		$this->joins[] = array($type, $join);
+		$this->_joins[] = array($type, $join);
 		
 		$this->setParams($params);
 		
@@ -280,7 +280,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function where($clause, $params = array(), $concat = self::WHERE_AND)
 	{
-		$this->clauses[] = array($concat, $clause);
+		$this->_clauses[] = array($concat, $clause);
 		
 		$this->setParams($params);
 		
@@ -308,7 +308,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function groupBy($tables)
 	{
-		$this->groups = array_merge($this->groups, (array) $tables);
+		$this->_groups = array_merge($this->_groups, (array) $tables);
 		
 		return $this;
 	}
@@ -322,8 +322,8 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function orderBy($tables, $direction = 'ASC')
 	{
-		$this->orders         = array_merge($this->orders, (array) $tables);
-		$this->orderDirection = $direction;
+		$this->_orders         = array_merge($this->_orders, (array) $tables);
+		$this->_orderDirection = $direction;
 		
 		return $this;
 	}
@@ -337,7 +337,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	{
 		// resetting the limit
 		if ($start === null || $start === false) {
-			$this->limit = array();
+			$this->_limit = array();
 			
 			return $this;
 		}
@@ -349,7 +349,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 		}
 		
 		// set the limit information
-		$this->limit = array($start, $end);
+		$this->_limit = array($start, $end);
 		
 		return $this;
 	}
@@ -364,7 +364,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function page($page = 1, $perPage = 10)
 	{
-		return $this->limit(($perPage * $page) - $perPage, $perPage);
+		return $this->_limit(($perPage * $page) - $perPage, $perPage);
 	}
 
 	/**
@@ -375,7 +375,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	public function getPartColumns()
 	{
 		$columns = array();
-		foreach ($this->columns as $k => $col) {
+		foreach ($this->_columns as $k => $col) {
 			$columns[$k] = $col[0];
 			
 			// if there is a column reference, use it
@@ -397,7 +397,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	public function getPartFrom()
 	{
 		$tables = array();
-		foreach ($this->tables as $k => $table) {
+		foreach ($this->_tables as $k => $table) {
 			$tables[$k] = $table[0];
 			
 			// if there is a table reference, use it
@@ -420,7 +420,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	{
 		$joins = array();
 		
-		foreach ($this->joins as $k => $join) {
+		foreach ($this->_joins as $k => $join) {
 			$type = $join[0];
 			$join = $join[1];
 			
@@ -438,13 +438,13 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function getPartWhere()
 	{
-		if (!$this->clauses) {
+		if (!$this->_clauses) {
 			return null;
 		}
 		
 		$query = '';
 		
-		foreach ($this->clauses as $k => $clause) {
+		foreach ($this->_clauses as $k => $clause) {
 			if ($k != 0) {
 				$query .= ' ' . $clause[0];
 			}
@@ -462,11 +462,11 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function getPartGroup()
 	{
-		if (!$this->groups) {
+		if (!$this->_groups) {
 			return null;
 		}
 		
-		return 'GROUP BY ' . implode(', ', $this->groups);
+		return 'GROUP BY ' . implode(', ', $this->_groups);
 	}
 
 	/**
@@ -476,19 +476,19 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function getPartOrder()
 	{
-		if (!$this->orders) {
+		if (!$this->_orders) {
 			return null;
 		}
 		
 		// normalize
-		$this->orderDirection = strtoupper($this->orderDirection);
+		$this->_orderDirection = strtoupper($this->_orderDirection);
 		
 		// force correct syntax
-		if ($this->orderDirection != self::ORDER_ASC && $this->orderDirection != self::ORDER_DESC) {
-			$this->orderDirection = self::ORDER_ASC;
+		if ($this->_orderDirection != self::ORDER_ASC && $this->_orderDirection != self::ORDER_DESC) {
+			$this->_orderDirection = self::ORDER_ASC;
 		}
 		
-		return 'ORDER BY ' . implode(', ', $this->orders) . ' ' . $this->orderDirection;
+		return 'ORDER BY ' . implode(', ', $this->_orders) . ' ' . $this->_orderDirection;
 	}
 
 	/**
@@ -498,11 +498,11 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function getPartLimit()
 	{
-		if (!$this->limit) {
+		if (!$this->_limit) {
 			return null;
 		}
 		
-		return 'LIMIT ' . implode(', ', $this->limit);
+		return 'LIMIT ' . implode(', ', $this->_limit);
 	}
 
 	/**
@@ -512,7 +512,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function getParams()
 	{
-		return $this->params;
+		return $this->_params;
 	}
 
 	/**
@@ -523,7 +523,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	public function count()
 	{
 		$count = 0;
-		$stmt  = $this->db->prepare($this->__toString());
+		$stmt  = $this->_db->prepare($this->__toString());
 		
 		// execute the prepared statement
 		$stmt->execute($this->getParams());
@@ -542,7 +542,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function current()
 	{
-		return $this->offsetGet($this->index);
+		return $this->offsetGet($this->_index);
 	}
 
 	/**
@@ -552,7 +552,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function key()
 	{
-		return $this->index;
+		return $this->_index;
 	}
 
 	/**
@@ -583,18 +583,18 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function offsetGet($index)
 	{
-		$class = $this->class;
+		$class = $this->_class;
 
 		// if the cache can't be found, attempt to get it
-		if (!isset($this->cache[$index])) {
+		if (!isset($this->_cache[$index])) {
 			// add a limit clause to the
 			$select = clone $this;
 			
 			// add a new limit clause
-			$select->limit($index, $index + $this->cacheLimit);
+			$select->limit($index, $index + $this->_cacheLimit);
 			
 			// prepare a new statement from the current state
-			$stmt = $this->db->prepare($select->__toString());
+			$stmt = $this->_db->prepare($select->__toString());
 			
 			// if it is unable to be executed, return false
 			if (!$stmt || !$stmt->execute($this->getParams())) {
@@ -602,14 +602,14 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 			}
 			
 			// reset the cache
-			$this->cache = array();
+			$this->_cache = array();
 			
 			// the starting index for the cache
 			$newIndex = $index;
 			
 			// build the new cache array
 			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-				$this->cache[$newIndex] = $row;
+				$this->_cache[$newIndex] = $row;
 				
 				++$newIndex;
 			}
@@ -621,16 +621,16 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 			unset($stmt);
 			
 			// if the cache is still empty, return false
-			if (!$this->cache) {
+			if (!$this->_cache) {
 				return false;
 			}
 		}
 
 		if ($class) {
-			return new $class($this->cache[$index]);
+			return new $class($this->_cache[$index]);
 		}
 		
-		return $this->cache[$index];
+		return $this->_cache[$index];
 	}
 
 	/**
@@ -654,8 +654,8 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function offsetUnset($index)
 	{
-		if (isset($this->cache[$index])) {
-			unset($this->cache[$index]);
+		if (isset($this->_cache[$index])) {
+			unset($this->_cache[$index]);
 		}
 	}
 
@@ -666,7 +666,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function next()
 	{
-		++$this->index;
+		++$this->_index;
 	}
 
 	/**
@@ -677,10 +677,10 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	public function rewind()
 	{
 		// clear the cache
-		$this->cache = array();
+		$this->_cache = array();
 
 		// reset the index
-		$this->index = 0;
+		$this->_index = 0;
 	}
 
 	/**
@@ -690,7 +690,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function valid()
 	{
-		return $this->index < $this->count();
+		return $this->_index < $this->count();
 	}
 
 	/**
@@ -701,7 +701,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function setCacheLimit($limit)
 	{
-		$this->cacheLimit = (int) $limit;
+		$this->_cacheLimit = (int) $limit;
 
 		return $this;
 	}
@@ -715,7 +715,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	public function setClass($className)
 	{
-		$this->class = $className;
+		$this->_class = $className;
 
 		return $this;
 	}
@@ -729,7 +729,7 @@ class Europa_Db_Select implements Iterator, ArrayAccess
 	 */
 	protected function setParams($params)
 	{
-		$this->params = array_merge($this->params, (array) $params);
+		$this->_params = array_merge($this->_params, (array) $params);
 		
 		return $this;
 	}
