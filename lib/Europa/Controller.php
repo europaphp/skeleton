@@ -58,10 +58,10 @@ class Europa_Controller
 	final public function __construct()
 	{
 		// retrieve class names
-		$layoutClassName = $this->getLayoutClassName();
-		$viewClassName   = $this->getViewClassName();
+		$layoutClassName = $this->_getLayoutClassName();
+		$viewClassName   = $this->_getViewClassName();
 
-		// initialize layout and viewå
+		// initialize layout and viewÃ¥
 		$this->_layout = new $layoutClassName();
 		$this->_view   = new $viewClassName();
 	}
@@ -77,6 +77,11 @@ class Europa_Controller
 		// we add this dispatch instance to the stack if it is to be registered
 		if ($register) {
 			self::$_stack[] = $this;
+		}
+		
+		// if a route is pre-defined, auto-match to define params
+		if ($this->_route) {
+			$this->_route->match();
 		}
 		
 		// if the route wasn't already set, find one and set it
@@ -96,8 +101,8 @@ class Europa_Controller
 		}
 		
 		// set the controller and action names, and the layout and view
-		$controllerName = $this->getControllerClassName();
-		$actionName     = $this->getActionMethodName();
+		$controllerName = $this->_getControllerClassName();
+		$actionName     = $this->_getActionMethodName();
 		
 		// reverse engineer the controller
 		$controllerReflection = new ReflectionClass($controllerName);
@@ -128,13 +133,18 @@ class Europa_Controller
 		if ($controllerReflection->hasMethod($actionName)) {
 			$actionReflection = $controllerReflection->getMethod($actionName);
 			$actionParams     = array();
-			$routeParams      = $this->_route->getAllParams();
+			$routeParams      = array();
+			
+			// make route paramters case insensitive
+			foreach ($this->_route->getAllParams() as $name => $value) {
+				$routeParams[strtolower($name)] = $value;
+			}
 			
 			// automatically define the parameters that will be passed to the 
 			// action
 			foreach ($actionReflection->getParameters() as $paramIndex => $param) {
 				$pos  = $param->getPosition();
-				$name = $param->getName();
+				$name = strtolower($param->getName());
 				
 				// cascade from named parameters to index offsets then to 
 				// default values if a required parameter isn't defined, an 
@@ -199,12 +209,12 @@ class Europa_Controller
 		
 		// set the default layout script name if it hasn't been set yet
 		if ($this->_layout && !$this->_layout->getScript()) {
-			$this->_layout->setScript($this->getLayoutScriptName());
+			$this->_layout->setScript($this->_getLayoutScriptName());
 		}
 
 		// set the default view script name if it hasn't been set yet
 		if ($this->_view && !$this->_view->getScript()) {
-			$this->_view->setScript($this->getViewScriptName());
+			$this->_view->setScript($this->_getViewScriptName());
 		}
 		
 		// layout ouput assumes the view is output in it
@@ -329,7 +339,7 @@ class Europa_Controller
 	 * 
 	 * @return string
 	 */
-	protected function getControllerClassName()
+	protected function _getControllerClassName()
 	{
 		$controller = $this->_route->getParam('controller', 'index');
 		
@@ -344,7 +354,7 @@ class Europa_Controller
 	 * 
 	 * @return string
 	 */
-	protected function getActionMethodName()
+	protected function _getActionMethodName()
 	{
 		$action = $this->_route->getParam('action', 'index');
 		
@@ -359,7 +369,7 @@ class Europa_Controller
 	 *
 	 * @return string
 	 */
-	protected function getLayoutClassName()
+	protected function _getLayoutClassName()
 	{
 		return 'Europa_View';
 	}
@@ -369,7 +379,7 @@ class Europa_Controller
 	 *
 	 * @return string
 	 */
-	protected function getViewClassName()
+	protected function _getViewClassName()
 	{
 		return 'Europa_View';
 	}
@@ -380,7 +390,7 @@ class Europa_Controller
 	 * 
 	 * @return string
 	 */
-	protected function getLayoutScriptName()
+	protected function _getLayoutScriptName()
 	{
 		$controller = $this->_route->getParam('controller', 'index');
 		
@@ -394,7 +404,7 @@ class Europa_Controller
 	 * 
 	 * @return string
 	 */
-	protected function getViewScriptName()
+	protected function _getViewScriptName()
 	{
 		$route      = $this->getRoute();
 		$controller = $route->getParam('controller', 'index');
