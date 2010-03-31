@@ -114,7 +114,7 @@ class Europa_Route
 	final public function reverseEngineer($params = array())
 	{
 		$parsed = $this->_reverse;
-		$params = array_merge($this->getParams(), $params);
+		$params = array_merge($this->getAllParams(), $params);
 		
 		foreach ($params as $name => $value) {
 			$parsed = str_replace(':' . $name, $value, $parsed);
