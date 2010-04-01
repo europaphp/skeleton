@@ -14,8 +14,8 @@
 </component>
 <component id="sandbox" name="Sandbox">
 	<file>app/controllers/IndexController.php</file>
-	<file>app/views/index.php</file>
 	<file>app/views/index/index.php</file>
+	<file>app/views/index.php</file>
 	<file>index.php</file>
 	<dependency>core</dependency>
 </component>
@@ -35,6 +35,7 @@
 	<file>lib/Europa/Controller/Abstract.php</file>
 	<file>lib/Europa/Controller/Exception.php</file>
 	<file>lib/Europa/Controller.php</file>
+	<dependency>core</dependency>
 </component>
 <!--component id="csv" name="Csv">
 	<file>lib/Europa/Csv/Abstract.php</file>
@@ -74,6 +75,7 @@
 </component>
 <component id="route" name="Route">
 	<file>lib/Europa/Route.php</file>
+	<dependency>core</dependency>
 </component>
 <!--component id="session" name="Session">
 	<file>Europa/Session.php</file>
@@ -88,9 +90,10 @@
 <component id="view" name="View">
 	<file>lib/Europa/View/Abstract.php</file>
 	<file>lib/Europa/View/Php.php</file>
+	<dependency>core</dependency>
 </component>
 <component id="viewExtensions" name="View Extensions">
 	<file>lib/Europa/View/Json.php</file>
 	<file>lib/Europa/View/Xml.php</file>
-	<dependency>view</dependency>
+	<dependency>core</dependency>
 </component>
