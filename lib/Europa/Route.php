@@ -77,7 +77,7 @@ class Europa_Route
 	 * @param string $uri The URI to match against the current route definition.
 	 * @return bool
 	 */
-	final public function match($uri = null)
+	public function match($uri = null)
 	{
 		if (!$uri) {
 			$uri = Europa_Controller::getActiveInstance()->getRequestUri();
@@ -116,7 +116,7 @@ class Europa_Route
 	final public function reverseEngineer($params = array())
 	{
 		$parsed = $this->_uriMap;
-		$params = array_merge($this->getAllParams(), $params);
+		$params = array_merge($this->getParams(), $params);
 		
 		foreach ($params as $name => $value) {
 			$parsed = str_replace(':' . $name, $value, $parsed);
@@ -163,7 +163,7 @@ class Europa_Route
 	 */
 	final public function getParam($name, $defaultValue = null)
 	{
-		$params = $this->getAllParams();
+		$params = $this->getParams();
 		
 		if (array_key_exists($name, $params)) {
 			return $params[$name];
@@ -177,7 +177,7 @@ class Europa_Route
 	 * 
 	 * @return array
 	 */
-	final public function getAllParams()
+	final public function getParams()
 	{
 		static $params;
 		
