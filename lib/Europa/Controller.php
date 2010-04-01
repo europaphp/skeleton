@@ -136,7 +136,7 @@ class Europa_Controller
 			$routeParams      = array();
 			
 			// make route paramters case insensitive
-			foreach ($this->_route->getAllParams() as $name => $value) {
+			foreach ($this->_route->getParams() as $name => $value) {
 				$routeParams[strtolower($name)] = $value;
 			}
 			

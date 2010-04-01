@@ -19,11 +19,11 @@ class Europa_Route
 	 * 
 	 * @var string
 	 */
-	protected $_pattern;
+	protected $_expression;
 	
 	/**
 	 * The array mapping of the parameter names to be parsed out of the URI
-	 * with the pattern in order of appearance.
+	 * with the expression in order of appearance.
 	 * 
 	 * @var array
 	 */
@@ -49,21 +49,21 @@ class Europa_Route
 	/**
 	 * Constructs the route and sets required properties.
 	 * 
-	 * @param string $pattern The regular expression for route matching/parsing.
+	 * @param string $expression The expression for route matching/parsing.
 	 * @param array $map Parameter mapping.
 	 * @param string $reverse The reverse engineering mapping.
 	 * @return Europa_Route
 	 */
-	final public function __construct($pattern, $parameterMap = array(), $uriMap = null)
+	final public function __construct($expression, $parameterMap = array(), $uriMap = null)
 	{
-		// a pattern or parameter map can be the first parameter
-		if (is_array($pattern)) {
+		// an expression or parameter map can be the first parameter
+		if (is_array($expression)) {
 			$uriMap       = $parameterMap;
 			$parameterMap = $pattern;
-			$pattern      = null;
+			$expression   = null;
 		}
 		
-		$this->setPattern($pattern)
+		$this->setExpression($expression)
 		     ->setParameterMap($parameterMap)
 		     ->setUriMap($uriMap);
 	}
@@ -83,7 +83,7 @@ class Europa_Route
 			$uri = Europa_Controller::getActiveInstance()->getRequestUri();
 		}
 		
-		preg_match('#' . $this->_pattern . '#', $uri, $matches);
+		preg_match('#' . $this->_expression . '#', $uri, $matches);
 		
 		if ($matches) {
 			// shift off the full match
@@ -125,9 +125,9 @@ class Europa_Route
 		return $parsed;
 	}
 	
-	final public function setPattern($pattern)
+	final public function setExpression($expression)
 	{
-		$this->_pattern = (string) $pattern;
+		$this->_expression = (string) $expression;
 		
 		return $this;
 	}
