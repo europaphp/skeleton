@@ -1,13 +1,17 @@
 <?php
 
+/**
+ * @author Trey Shugart
+ */
+
+/**
+ * A class for importing and exporting ini data.
+ * 
+ * @package Europa
+ * @subpackage Ini
+ */
 class Europa_Ini
 {
-	/**
-	 * The exception that is thrown when the ini file us unable to be
-	 * parsed.
-	 */
-	const EXCEPTION_UNABLE_TO_PARSE = 99;
-	
 	/**
 	 * Holds the path to the ini file associated with this instance.
 	 * 
@@ -37,10 +41,10 @@ class Europa_Ini
 		} elseif (function_exists('parse_ini_string')) {
 			$this->_vars = parse_ini_string($this->_file, true);
 		} else {
-			Europa_Exception::trigger(
-				'Unable to parse ini file at: ' 
+			throw new Europa_Ini_Exception(
+				'Unable to parse ini file: ' 
 				. $file,
-				self::EXCEPTION_UNABLE_TO_PARSE
+				Europa_Ini_Exception::UNABLE_TO_PARSE
 			);
 		}
 		

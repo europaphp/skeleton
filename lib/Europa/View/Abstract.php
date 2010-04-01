@@ -5,12 +5,12 @@
  */
 
 /**
- * Renders view scripts. Used to render both the layout and view in Europa.
+ * A base class for views in Europa.
  * 
  * @package Europa
  * @subpackage View
  */
-class Europa_View
+abstract class Europa_View_Abstract
 {
 	/**
 	 * Contains the parameters set on the view.
@@ -18,13 +18,6 @@ class Europa_View
 	 * @var array $params
 	 */
 	protected $_params = array();
-	
-	/**
-	 * The script that will be rendered. Set using Europa_View::render().
-	 * 
-	 * @var string $script
-	 */
-	protected $_script = null;
 	
 	/**
 	 * Holds references to all of the plugins that have been called on this
@@ -36,24 +29,11 @@ class Europa_View
 	protected $_plugins = array();
 	
 	/**
-	 * Construct the view and sets defaults.
+	 * Renders the view in whatever way necessary.
 	 * 
-	 * @param string $script The script to render.
-	 * @param array $params The arguments to pass to the script.
-	 * @return Europa_View
+	 * @return string
 	 */
-	public function __construct($script = null, $params = array())
-	{
-		// set a script if defined
-		if ($script) {
-			$this->setScript($script);
-		}
-		
-		// and set arguments
-		if (is_array($params)) {
-			$this->_params = $params;
-		}
-	}
+	abstract public function __toString();
 	
 	/**
 	 * Similar to calling a plugin via Europa_View->__call(), but treats the
@@ -129,58 +109,16 @@ class Europa_View
 		$class = $this->getPluginClassName($func);
 		$class = (string) $class;
 		
-		// istantiate the plugin passing the current view object into the it
-		if (Europa_Loader::loadClass($class)) {
-			$class = new $class($this);
+		// if unable to load, return null
+		if (!Europa_Loader::loadClass($class)) {
+			return null;
 		}
 		
-		// then call the plugin method if it exists
-		if (method_exists($class, 'init')) {
-			return call_user_func_array(array($class, 'init'), $args);
-		}
+		// reflect and invoke with passed args
+		$class = new ReflectionClass($class);
+		$class = $class->newInstanceArgs($args);
 		
 		return $class;
-	}
-	
-	/**
-	 * Parses the view file and returns the result.
-	 * 
-	 * @return string
-	 */
-	public function __toString()
-	{
-		// allows us to return the included file as a string
-		ob_start();
-		
-		// include it
-		include $this->getScriptFullPath();
-		
-		// return the parsed view
-		return ob_get_clean() . "\n";
-	}
-	
-	/**
-	 * Sets the script to be rendered.
-	 * 
-	 * @param String $script The path to the script to be rendered relative 
-	 * to the view path, excluding the extension.
-	 * @return Object Europa_View
-	 */
-	public function setScript($script)
-	{
-		$this->_script = $script;
-		
-		return $this;
-	}
-	
-	/**
-	 * Returns the script that is going to be rendered.
-	 * 
-	 * @return string
-	 */
-	public function getScript()
-	{
-		return $this->_script;
 	}
 	
 	/**
@@ -225,26 +163,5 @@ class Europa_View
 
 		// automate
 		return $root . $uri;
-	}
-	
-	/**
-	 * Returns the full path to the view including extension.
-	 * 
-	 * @return string
-	 */
-	protected function getScriptFullPath()
-	{
-		return realpath('./app/views/' . $this->_script . '.php');
-	}
-	
-	/**
-	 * Returns a plugin class name based on the $name passed in.
-	 * 
-	 * @param string $name The name of the plugin to get the class name of.
-	 * @return string
-	 */
-	protected function getPluginClassName($name)
-	{
-		return (string) Europa_String::create($name)->camelCase(true) . 'Plugin';
 	}
 }

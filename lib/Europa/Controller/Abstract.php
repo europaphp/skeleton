@@ -16,71 +16,43 @@
 abstract class Europa_Controller_Abstract
 {
 	/**
-	 * An instance of the currently dispatching controller.
+	 * Returns the active controller
 	 * 
-	 * @var Europa_Controller
+	 * @return Europa_Controller
 	 */
-	protected $_controller;
-	
-	/**
-	 * An instance of the route that is being dispatched.
-	 * 
-	 * @var Europa_Route
-	 */
-	protected $_route;
-	
-	/**
-	 * An instance of the layout. Generally this is an instance of
-	 * Europa_View.
-	 * 
-	 * @var Europa_View
-	 */
-	protected $_layout;
-	
-	/**
-	 * An instance of the view. Generally this is an instance of 
-	 * Europa_View.
-	 * 
-	 * @var Europa_View
-	 */
-	protected $_view;
-	
-	/**
-	 * Constructs the controller class and sets default properties.
-	 * 
-	 * @return Europa_Controller_Abstract
-	 */
-	public function __construct()
+	public function _getController()
 	{
-		$this->_controller   = Europa_Controller::getActiveInstance();
-		$this->_route        = $this->_controller->getRoute();
-		$this->_layout       = $this->_controller->getLayout();
-		$this->_view         = $this->_controller->getView();
-		$this->_layout->view = $this->_view;
+		return Europa_Controller::getActiveInstance();
 	}
 	
 	/**
-	 * Forwards the current request to a particular action.
+	 * Returns the set layout.
 	 * 
-	 * @param string $action
-	 * @return void
+	 * @return Europa_View_Abstract
 	 */
-	protected function forward($action)
+	public function _getLayout()
 	{
-		// force a route
-		$this->_controller->setRoute(
-			new Europa_Route(
-				array(
-					'controller' => $this->_route->getParam('controller'),
-					'action'     => $action
-				)
-			)
-		);
-		
-		// by dispatching here, it cancels the last dispatch call
-		$this->_controller->dispatch();
-		
-		exit;
+		return $this->_getController()->getLayout();
+	}
+	
+	/**
+	 * Returns the set route.
+	 * 
+	 * @return Europa_Route
+	 */
+	public function _getRoute()
+	{
+		return $this->_getController()->getRoute();
+	}
+	
+	/**
+	 * Returns the set view.
+	 * 
+	 * @return Europa_View_Abstract
+	 */
+	public function _getView()
+	{
+		return $this->_getController()->getView();
 	}
 	
 	/**
@@ -95,10 +67,10 @@ abstract class Europa_Controller_Abstract
 	 * the passed URI into a Europa URI.
 	 * @return void
 	 */
-	protected function redirect($uri = '/', $europaRelative = true)
+	protected function _redirect($uri = '/', $europaRelative = true)
 	{
 		if ($europaRelative) {
-			$uri = $this->_view->uri($uri);
+			$uri = $this->_getView()->uri($uri);
 		}
 		
 		header('Location: ' . $uri);

@@ -12,14 +12,14 @@
 class Europa_Controller
 {
 	/**
-	 * An instance or child of Europa_View which represents the layout.
+	 * A child of Europa_View_Abstract which represents the layout.
 	 * 
 	 * @var $layout
 	 */
 	protected $_layout;
 	
 	/**
-	 * An instance or child of Europa_View which represents the view.
+	 * An child of Europa_View_Abstract which represents the view.
 	 * 
 	 * @var $view
 	 */
@@ -219,10 +219,10 @@ class Europa_Controller
 		
 		// layout ouput assumes the view is output in it
 		if ($this->_layout) {
-			echo $this->_layout;
+			echo $this->_layout->__toString();
 		// if the layout is disabled, we render the view
 		} elseif ($this->_view) {
-			echo $this->_view;
+			echo $this->_view->__toString();
 		}
 		
 		// call a post-rendering hook if it exists
@@ -239,10 +239,10 @@ class Europa_Controller
 	/**
 	 * Sets the layout.
 	 * 
-	 * @param Europa_View $layout
+	 * @param Europa_View_Abstract $layout
 	 * @return unknown_type
 	 */
-	final public function setLayout(Europa_View $layout = null)
+	final public function setLayout(Europa_View_Abstract $layout = null)
 	{
 		$this->_layout = $layout;
 		
@@ -252,7 +252,7 @@ class Europa_Controller
 	/**
 	 * Gets the set layout.
 	 * 
-	 * @return Europa_View|null
+	 * @return Europa_View_Abstract|null
 	 */
 	final public function getLayout()
 	{
@@ -262,11 +262,11 @@ class Europa_Controller
 	/**
 	 * Sets the view.
 	 * 
-	 * @param Europa_View $view
+	 * @param Europa_View_Abstract $view
 	 * 
 	 * @return Europa_Controller
 	 */
-	final public function setView(Europa_View $view = null)
+	final public function setView(Europa_View_Abstract $view = null)
 	{
 		$this->_view = $view;
 		
@@ -276,7 +276,7 @@ class Europa_Controller
 	/**
 	 * Gets the set view.
 	 * 
-	 * @return Europa_View|null
+	 * @return Europa_View_Abstract|null
 	 */
 	final public function getView()
 	{
@@ -371,7 +371,7 @@ class Europa_Controller
 	 */
 	protected function _getLayoutClassName()
 	{
-		return 'Europa_View';
+		return 'Europa_View_Php';
 	}
 
 	/**
@@ -381,7 +381,7 @@ class Europa_Controller
 	 */
 	protected function _getViewClassName()
 	{
-		return 'Europa_View';
+		return 'Europa_View_Php';
 	}
 	
 	/**
@@ -452,11 +452,58 @@ class Europa_Controller
 			$requestUri = isset($_SERVER['HTTP_X_REWRITE_URL'])
 			            ? $_SERVER['HTTP_X_REWRITE_URL']
 				        : $_SERVER['REQUEST_URI'];
-			$requestUri = ltrim($requestUri, '/');
+			$requestUri = trim($requestUri, '/');
 			$requestUri = substr($requestUri, strlen(self::getRootUri()));
+			$requestUri = trim($requestUri, '/');
 		}
 
 		return $requestUri;
+	}
+	
+	/**
+	 * Returns all of the request headers as an array.
+	 * 
+	 * The header names are formatted to appear as normal, not all uppercase
+	 * as in the $_SERVER super-global.
+	 * 
+	 * @return array
+	 */
+	final public static function getRequestHeaders()
+	{
+		static $server;
+		
+		if (!isset($server)) {
+			foreach ($_SERVER as $name => $value) {
+				if (substr($name, 0, 5) === 'HTTP_') {
+					$name = substr($name, 5);
+					$name = strtolower($name);
+					$name = str_replace('_', ' ', $name);
+					$name = ucwords($name);
+					$name = str_replace(' ', '-', $name);
+					
+					$server[$name] = $value;
+				}
+			}
+		}
+		
+		return $server;
+	}
+	
+	/**
+	 * Returns the value of a single request header or null if not found.
+	 * 
+	 * @param string $name The name of the request header to retrieve.
+	 * @return string
+	 */
+	final public static function getRequestHeader($name)
+	{
+		$headers = self::getRequestHeaders();
+		
+		if (isset($headers[$name])) {
+			return $headers[$name];
+		}
+		
+		return null;
 	}
 	
 	/**

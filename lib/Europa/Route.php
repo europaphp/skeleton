@@ -27,7 +27,7 @@ class Europa_Route
 	 * 
 	 * @var array
 	 */
-	protected $_map;
+	protected $_parameterMap;
 	
 	/**
 	 * Since it is very difficult to reverse engineer a regular expression
@@ -36,7 +36,7 @@ class Europa_Route
 	 * 
 	 * @var string
 	 */
-	protected $_reverse;
+	protected $_uriMap;
 	
 	/**
 	 * Contains an associative array of the parameters that were parsed out
@@ -54,18 +54,18 @@ class Europa_Route
 	 * @param string $reverse The reverse engineering mapping.
 	 * @return Europa_Route
 	 */
-	final public function __construct($pattern, $map = array(), $reverse = null)
+	final public function __construct($pattern, $parameterMap = array(), $uriMap = null)
 	{
-		$this->_pattern = $pattern;
-		$this->_map     = (array) $map;
-		$this->_reverse = $reverse;
-		
-		// set default parameters if set
-		foreach ($this->_map as $index => $name) {
-			if (is_string($index)) {
-				$this->_params[$index] = $name;
-			}
+		// a pattern or parameter map can be the first parameter
+		if (is_array($pattern)) {
+			$uriMap       = $parameterMap;
+			$parameterMap = $pattern;
+			$pattern      = null;
 		}
+		
+		$this->setPattern($pattern)
+		     ->setParameterMap($parameterMap)
+		     ->setUriMap($uriMap);
 	}
 	
 	/**
@@ -90,8 +90,10 @@ class Europa_Route
 			array_shift($matches);
 			
 			// override any default/static parameters if they are set
-			foreach ($this->_map as $index => $name) {
-				if (array_key_exists($index, $matches)) {
+			foreach ($this->_parameterMap as $index => $name) {
+				if (is_string($index)) {
+					$this->_params[$index] = $name;
+				} elseif (array_key_exists($index, $matches)) {
 					$this->_params[$name] = $matches[$index];
 				}
 			}
@@ -113,7 +115,7 @@ class Europa_Route
 	 */
 	final public function reverseEngineer($params = array())
 	{
-		$parsed = $this->_reverse;
+		$parsed = $this->_uriMap;
 		$params = array_merge($this->getAllParams(), $params);
 		
 		foreach ($params as $name => $value) {
@@ -121,6 +123,34 @@ class Europa_Route
 		}
 		
 		return $parsed;
+	}
+	
+	final public function setPattern($pattern)
+	{
+		$this->_pattern = (string) $pattern;
+		
+		return $this;
+	}
+	
+	final public function setParameterMap($map)
+	{
+		$this->_parameterMap = (array) $map;
+		
+		return $this;
+	}
+	
+	final public function setUriMap($map)
+	{
+		$this->_uriMap = (string) $map;
+		
+		return $this;
+	}
+	
+	final public function setParam($name, $value)
+	{
+		$this->_params[$name] = $value;
+		
+		return $this;
 	}
 	
 	/**

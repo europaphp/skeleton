@@ -62,7 +62,9 @@
 	<file>lib/Europa/Form.php</file>
 </component-->
 <!--component id="ini" name="Ini">
+	<file>lib/Europa/Ini/Exception.php</file>
 	<file>lib/Europa/Ini.php</file>
+	<dependency>exception</dependency>
 </component-->
 <component id="loader" name="Loader">
 	<file>lib/Europa/Loader.php</file>
@@ -84,5 +86,11 @@
 	<file>lib/Europa/Unit/Group.php</file>
 </component>
 <component id="view" name="View">
-	<file>lib/Europa/View.php</file>
+	<file>lib/Europa/View/Abstract.php</file>
+	<file>lib/Europa/View/Php.php</file>
+</component>
+<component id="viewExtensions" name="View Extensions">
+	<file>lib/Europa/View/Json.php</file>
+	<file>lib/Europa/View/Xml.php</file>
+	<dependency>view</dependency>
 </component>

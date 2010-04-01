@@ -22,7 +22,7 @@ class IndexController extends Europa_Controller_Abstract
 	 */
 	public function __construct()
 	{
-		parent::__construct();
+		// do something cool
 	}
 	
 	/**
@@ -35,9 +35,9 @@ class IndexController extends Europa_Controller_Abstract
 	 */
 	public function __call($name, $args)
 	{
-		$this->layout->title = 'EuropaPHP - 404';
-		$this->view->msg     = 'The page you requested could not be found.';
-		$this->view->setScript('index/index');
+		$this->_getLayout()->title = 'EuropaPHP - 404';
+		$this->_getView()->msg     = 'The page you requested could not be found.';
+		$this->_getView()->setScript('index/index');
 	}
 	
 	/**
@@ -50,7 +50,8 @@ class IndexController extends Europa_Controller_Abstract
 	public function init()
 	{
 		return array(
-			'title' => 'EuropaPHP'
+			'title' => 'EuropaPHP',
+			'view'  => $this->_getView()
 		);
 	}
 	
