@@ -16,8 +16,8 @@ Europa_Loader::addPath(dirname(__FILE__));
 // take off the first element
 array_shift($argv);
 
-if (!count($argv)) {
-	die("You must pass which test controllers to run.\n\n");
+if ($argc < 2) {
+	die("\nYou must pass which test controllers to run.\n");
 }
 
 ?>
