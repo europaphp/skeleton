@@ -1,3 +1,3 @@
 <h1><?php echo $this->title; ?></h1>
 
-<?php echo $this->view; ?>
+<?php echo $this->view;

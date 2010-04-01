@@ -41,4 +41,4 @@ $europa->run();
 
 
 <?php endforeach; ?>
-<?php endforeach; ?>
+<?php endforeach;
