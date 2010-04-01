@@ -39,6 +39,5 @@ $europa->run();
 
   Total: <?php echo $group->countTotal(); ?>
 
-
 <?php endforeach; ?>
 <?php endforeach;
