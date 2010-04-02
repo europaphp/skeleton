@@ -5,12 +5,12 @@
  */
 
 /**
- * The exception class for Europa_Controller.
+ * The exception class for Europa_Request.
  * 
  * @package Europa
- * @subpackage Controller
+ * @subpackage Request
  */
-class Europa_Controller_Exception extends Europa_Exception
+class Europa_Request_Exception extends Europa_Exception
 {
 	/**
 	 * The exception/error code that identifies and exception with a

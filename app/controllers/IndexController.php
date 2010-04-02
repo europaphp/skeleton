@@ -26,6 +26,16 @@ class IndexController extends Europa_Controller_Abstract
 	}
 	
 	/**
+	 * The destructor.
+	 * 
+	 * @return void
+	 */
+	public function __destruct()
+	{
+		
+	}
+	
+	/**
 	 * Traps any calls to an undefined method. This will get called after
 	 * IndexController->init().
 	 * 
@@ -35,9 +45,7 @@ class IndexController extends Europa_Controller_Abstract
 	 */
 	public function __call($name, $args)
 	{
-		$this->_getLayout()->title = 'EuropaPHP - 404';
-		$this->_getView()->msg     = 'The page you requested could not be found.';
-		$this->_getView()->setScript('index/index');
+		// do some more cool stuff
 	}
 	
 	/**
@@ -50,9 +58,29 @@ class IndexController extends Europa_Controller_Abstract
 	public function init()
 	{
 		return array(
-			'title' => 'EuropaPHP',
+			'title' => $this->_getRoute()->getParam('title', 'Thanks for choosing EuropaPHP'),
 			'view'  => $this->_getView()
 		);
+	}
+	
+	/**
+	 * A method that get's called after the action, but before rendering.
+	 * 
+	 * @return void
+	 */
+	public function preRender()
+	{
+		
+	}
+	
+	/**
+	 * A method that gets called after rendering the layout and view.
+	 * 
+	 * @return void
+	 */
+	public function postRender()
+	{
+		
 	}
 	
 	/**
@@ -71,7 +99,7 @@ class IndexController extends Europa_Controller_Abstract
 	 * @param string $msg
 	 * @return array|false|void
 	 */
-	public function indexAction($msg = 'Welcome to EuropaPHP!')
+	public function indexAction($msg = 'You won\'t be sorry')
 	{
 		return array(
 			'msg' => $msg

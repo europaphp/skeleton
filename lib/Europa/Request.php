@@ -9,7 +9,7 @@
  * 
  * @package Europa
  */
-class Europa_Controller
+class Europa_Request
 {
 	/**
 	 * A child of Europa_View_Abstract which represents the layout.
@@ -43,7 +43,7 @@ class Europa_Controller
 	protected $_routes = array();
 	
 	/**
-	 * Contains the instances of all controllers that are currently 
+	 * Contains the instances of all requests that are currently 
 	 * dispatching in chronological order.
 	 * 
 	 * @var $stack
@@ -51,9 +51,9 @@ class Europa_Controller
 	private static $_stack = null;
 	
 	/**
-	 * Constructs the Controller and sets defaults.
+	 * Constructs a new request and sets defaults.
 	 * 
-	 * @return Europa_Controller
+	 * @return Europa_Request
 	 */
 	final public function __construct()
 	{
@@ -70,7 +70,7 @@ class Europa_Controller
 	 * Fires dispatching.
 	 * 
 	 * @param bool $register Whether or not to register this instance in the stack.
-	 * @return Europa_Controller
+	 * @return Europa_Request
 	 */
 	final public function dispatch($register = true)
 	{
@@ -97,7 +97,7 @@ class Europa_Controller
 		
 		// if a route still wasn't found, provide a default
 		if (!$this->_route) {
-			$this->_route = $this->getDefaultRoute();
+			$this->_route = $this->_getDefaultRoute();
 		}
 		
 		// set the controller and action names, and the layout and view
@@ -156,7 +156,7 @@ class Europa_Controller
 				} elseif ($param->isOptional()) {
 					$actionParams[$pos] = $param->getDefaultValue();
 				} else {
-					throw new Europa_Controller_Exception(
+					throw new Europa_Request_Exception(
 						'Required request parameter <strong>$'
 						. $name 
 						. '</strong> for <strong>' 
@@ -164,7 +164,7 @@ class Europa_Controller
 						. '->' 
 						. $actionName
 						. '()</strong> is not set.',
-						Europa_Controller_Exception::REQUIRED_PARAMETER_NOT_DEFINED
+						Europa_Request_Exception::REQUIRED_PARAMETER_NOT_DEFINED
 					);
 				}
 				
@@ -192,13 +192,13 @@ class Europa_Controller
 		} elseif ($controllerReflection->hasMethod('__call')) {
 			$controllerInstance->$actionName();
 		} else {
-			throw new Europa_Controller_Exception(
+			throw new Europa_Request_Exception(
 				'Action <strong>' 
 				. $actionName
 				. '</strong> does not exist in <strong>' 
 				. $controllerName
 				. '</strong> and it was not trapped in <strong>__call</strong>.',
-				Europa_Controller_Exception::ACTION_NOT_FOUND
+				Europa_Request_Exception::ACTION_NOT_FOUND
 			);
 		}
 		
@@ -264,7 +264,7 @@ class Europa_Controller
 	 * 
 	 * @param Europa_View_Abstract $view
 	 * 
-	 * @return Europa_Controller
+	 * @return Europa_Request
 	 */
 	final public function setView(Europa_View_Abstract $view = null)
 	{
@@ -288,7 +288,7 @@ class Europa_Controller
 	 * 
 	 * @param Europa_Route $name
 	 * @param $route
-	 * @return Europa_Controller
+	 * @return Europa_Request
 	 */
 	final public function setRoute($name, Europa_Route $route = null)
 	{
@@ -325,9 +325,9 @@ class Europa_Controller
 	 * 
 	 * @return Europa_Route
 	 */
-	public function getDefaultRoute()
+	protected function _getDefaultRoute()
 	{
-		return new Europa_Route(
+		return new Europa_Request_Route_Regex(
 			'.*',
 			null,
 			'?controller=:controller&action=:action'
@@ -507,7 +507,7 @@ class Europa_Controller
 	}
 	
 	/**
-	 * Returns the Europa_Controller instance that is currently dispatching.
+	 * Returns the Europa_Request instance that is currently dispatching.
 	 * 
 	 * @return mixed
 	 */
@@ -524,7 +524,7 @@ class Europa_Controller
 	}
 	
 	/**
-	 * Returns all Europa_Controller instances that are dispatching,
+	 * Returns all Europa_Request instances that are dispatching,
 	 * in chronological order, as an array.
 	 * 
 	 * @return array

@@ -11,18 +11,18 @@
  * controllers.
  * 
  * @package Europa
- * @subpackage Controller
+ * @subpackage Request
  */
 abstract class Europa_Controller_Abstract
 {
 	/**
 	 * Returns the active controller
 	 * 
-	 * @return Europa_Controller
+	 * @return Europa_Request
 	 */
-	public function _getController()
+	protected function _getRequest()
 	{
-		return Europa_Controller::getActiveInstance();
+		return Europa_Request::getActiveInstance();
 	}
 	
 	/**
@@ -30,9 +30,9 @@ abstract class Europa_Controller_Abstract
 	 * 
 	 * @return Europa_View_Abstract
 	 */
-	public function _getLayout()
+	protected function _getLayout()
 	{
-		return $this->_getController()->getLayout();
+		return $this->_getRequest()->getLayout();
 	}
 	
 	/**
@@ -40,9 +40,9 @@ abstract class Europa_Controller_Abstract
 	 * 
 	 * @return Europa_Route
 	 */
-	public function _getRoute()
+	protected function _getRoute()
 	{
-		return $this->_getController()->getRoute();
+		return $this->_getRequest()->getRoute();
 	}
 	
 	/**
@@ -50,9 +50,9 @@ abstract class Europa_Controller_Abstract
 	 * 
 	 * @return Europa_View_Abstract
 	 */
-	public function _getView()
+	protected function _getView()
 	{
-		return $this->_getController()->getView();
+		return $this->_getRequest()->getView();
 	}
 	
 	/**
