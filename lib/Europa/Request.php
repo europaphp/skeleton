@@ -41,28 +41,21 @@ class Europa_Request
 	protected $_routes = array();
 	
 	/**
+	 * Contains the mapping of Accept request headers to view renderer classes.
+	 * 
+	 * @var array
+	 */
+	protected $_requestViewMap = array(
+		''
+	);
+	
+	/**
 	 * Contains the instances of all requests that are currently 
 	 * dispatching in chronological order.
 	 * 
 	 * @var array
 	 */
 	private static $_stack = array();
-	
-	/**
-	 * Constructs a new request and sets defaults.
-	 * 
-	 * @return Europa_Request
-	 */
-	final public function __construct()
-	{
-		// retrieve class names
-		$layoutClassName = $this->_getLayoutClassName();
-		$viewClassName   = $this->_getViewClassName();
-
-		// initialize layout and viewÃ¥
-		$this->_layout = new $layoutClassName();
-		$this->_view   = new $viewClassName();
-	}
 	
 	/**
 	 * Fires dispatching.
@@ -363,26 +356,6 @@ class Europa_Request
 		       ->__toString()
 		     . 'Action';
 	}
-
-	/**
-	 * Returns the name of the class to be used for the layout.
-	 *
-	 * @return string
-	 */
-	protected function _getLayoutClassName()
-	{
-		return 'Europa_View_Php';
-	}
-
-	/**
-	 * Returns the name of the class to be used for the view.
-	 *
-	 * @return string
-	 */
-	protected function _getViewClassName()
-	{
-		return 'Europa_View_Php';
-	}
 	
 	/**
 	 * Returns the layout script to be set. By default this is mapped to the
@@ -504,6 +477,23 @@ class Europa_Request
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Returns the content types specified in the Accept request header. Each
+	 * value is trimmed for consistency, but no further formatting occurs.
+	 * 
+	 * @return array
+	 */
+	final public static function getAcceptedContentTypes()
+	{
+		$accept = self::getRequestHeader('Accept');
+		$accept = explode(',', $accept);
+		
+		// make sure each value is free leading/trailing whitespace
+		array_walk($accept, 'trim');
+		
+		return $accept;
 	}
 	
 	/**
