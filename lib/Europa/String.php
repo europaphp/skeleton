@@ -27,6 +27,18 @@ class Europa_String
 	 */
 	public function __construct($string = '')
 	{
+		if ($string === true) {
+			$string = 'true';
+		} elseif ($string === false) {
+			$string = 'false';
+		} elseif (is_numeric($string)) {
+			$string = (string) $string;
+		} elseif (is_array($string)) {
+			$string = serialize($string);
+		} elseif (is_null($string)) {
+			$string = 'null';
+		}
+		
 		$this->_string = (string) $string;
 	}
 

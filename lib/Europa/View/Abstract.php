@@ -100,14 +100,13 @@ abstract class Europa_View_Abstract
 	}
 	
 	/**
-	 * Loads a plugin and executes it. Throws an exception if not found.
+	 * Attempts to load a plugin and executes it. Returns null of not found.
 	 * 
 	 * @return mixed
 	 */
 	public function __call($func, $args = array())
 	{
-		$class = $this->getPluginClassName($func);
-		$class = (string) $class;
+		$class = $this->_getPluginClassName($func);
 		
 		// if unable to load, return null
 		if (!Europa_Loader::loadClass($class)) {
@@ -142,12 +141,12 @@ abstract class Europa_View_Abstract
 			return $uri;
 		}
 
-		$controller = Europa_Controller::getActiveInstance();
-		$route      = $controller->getRoute($uri);
+		$request = Europa_Request::getActiveInstance();
+		$route   = $request->getRoute($uri);
 		
 		// if the route was found, reverse engineer it and set it
 		if ($route) {
-			$uri = $route->reverseEngineer($params);
+			$uri = $route->getUri($params);
 		}
 		
 		// make consistent
@@ -156,12 +155,23 @@ abstract class Europa_View_Abstract
 		}
 		
 		// if there is a root uri, add a forward slash to it
-		$root = Europa_Controller::getRootUri();
+		$root = Europa_Request::getRootUri();
 		if ($root) {
 			$root = '/' . $root;
 		}
 
 		// automate
 		return $root . $uri;
+	}
+	
+	/**
+	 * Returns a plugin class name based on the $name passed in.
+	 * 
+	 * @param string $name The name of the plugin to get the class name of.
+	 * @return string
+	 */
+	protected function _getPluginClassName($name)
+	{
+		return (string) Europa_String::create($name)->camelCase(true) . 'Helper';
 	}
 }

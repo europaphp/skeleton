@@ -36,17 +36,11 @@ abstract class Europa_Request_Route_Abstract
 	abstract public function getUri();
 	
 	/**
-	 * Maps the passed parameters based on the expression to the route.
-	 * 
-	 * @return void
-	 */
-	abstract public function mapParams($params);
-	
-	/**
 	 * An algorithm for matching the passed $uri to the expression
 	 * set on the route. Returns an array of matched parameters or
 	 * false on failure.
 	 * 
+	 * @param string $uri The uri to match against the route.
 	 * @return array|bool
 	 */
 	abstract public function match($uri);
@@ -54,7 +48,7 @@ abstract class Europa_Request_Route_Abstract
 	/**
 	 * Constructs a new route and sets the passed in expression.
 	 * 
-	 * @param string $expression
+	 * @param string $expression The expression to use when matching the route.
 	 * @return Europa_Request_Route_Abstract
 	 */
 	public function __construct($expression)
@@ -65,8 +59,8 @@ abstract class Europa_Request_Route_Abstract
 	/**
 	 * Binds a parameter to the route.
 	 * 
-	 * @param string $name
-	 * @param mixed $value
+	 * @param string $name The name of the parameter to set.
+	 * @param mixed $value The value of the parameter.
 	 * @return Europa_Request_Route_Abstract
 	 */
 	final public function setParam($name, $value)
@@ -80,8 +74,9 @@ abstract class Europa_Request_Route_Abstract
 	 * Returns the specified parameter. If the parameter isn't found, then the
 	 * default value is returned.
 	 * 
-	 * @param string $name
-	 * @param mixed $defaultValue
+	 * @param string $name The name of the parameter to get.
+	 * @param mixed $defaultValue A value to return if the parameter is not
+	 * defined.
 	 * @return mixed
 	 */
 	final public function getParam($name, $defaultValue = null)

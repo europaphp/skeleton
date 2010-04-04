@@ -17,6 +17,13 @@
 class Europa_View_Php extends Europa_View_Abstract
 {
 	/**
+	 * The script to be rendered.
+	 * 
+	 * @var string
+	 */
+	protected $_script = null;
+	
+	/**
 	 * Construct the view and sets defaults.
 	 * 
 	 * @param string $script The script to render.
@@ -47,7 +54,11 @@ class Europa_View_Php extends Europa_View_Abstract
 		ob_start();
 		
 		// include it
-		include $this->getScriptFullPath();
+		try {
+			include $this->_getScriptFullPath();
+		} catch (Exception $e) {
+			die($e->getMessage());
+		}
 		
 		// return the parsed view
 		return ob_get_clean() . "\n";
@@ -82,19 +93,8 @@ class Europa_View_Php extends Europa_View_Abstract
 	 * 
 	 * @return string
 	 */
-	protected function getScriptFullPath()
+	protected function _getScriptFullPath()
 	{
 		return realpath('./app/views/' . $this->_script . '.php');
-	}
-	
-	/**
-	 * Returns a plugin class name based on the $name passed in.
-	 * 
-	 * @param string $name The name of the plugin to get the class name of.
-	 * @return string
-	 */
-	protected function getPluginClassName($name)
-	{
-		return (string) Europa_String::create($name)->camelCase(true) . 'Plugin';
 	}
 }

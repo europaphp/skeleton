@@ -14,14 +14,6 @@
 final class Europa_Request_Route_Regex extends Europa_Request_Route_Abstract
 {
 	/**
-	 * The array mapping of the parameter names to be parsed out of the URI
-	 * with the expression in order of appearance.
-	 * 
-	 * @var array
-	 */
-	protected $_parameterMap;
-	
-	/**
 	 * Since it is very difficult to reverse engineer a regular expression
 	 * a reverse engineering string is used to reverse engineer the route
 	 * back into a URI. This allows for fluid links.
@@ -34,18 +26,17 @@ final class Europa_Request_Route_Regex extends Europa_Request_Route_Abstract
 	 * Constructs the route and sets required properties.
 	 * 
 	 * @param string $expression The expression for route matching/parsing.
-	 * @param array $map Parameter mapping.
-	 * @param string $reverse The reverse engineering mapping.
+	 * @param array $uriMap The string to use when reverse engineering the
+	 * $expression in Europa_Reuqest_Route_Regex->getUri().
 	 * @return Europa_Route
 	 */
-	public function __construct($expression, $parameterMap = array(), $uriMap = null)
+	public function __construct($expression, $uriMap = null)
 	{
 		// set expression using the parent
 		parent::__construct($expression);
 		
 		// set additional parameters
-		$this->_parameterMap = (array)  $parameterMap;
-		$this->_uriMap       = (string) $uriMap;
+		$this->_uriMap = (string) $uriMap;
 	}
 	
 	/**
@@ -70,22 +61,6 @@ final class Europa_Request_Route_Regex extends Europa_Request_Route_Abstract
 	}
 	
 	/**
-	 * Maps the passed in parameters based on their index to the paramter
-	 * map given to the route.
-	 * 
-	 * @param array $params
-	 * @return void
-	 */
-	public function mapParams($params)
-	{
-		foreach ($this->_parameterMap as $index => $name) {
-			if (array_key_exists($index, $params)) {
-				$this->setParam($name, $matches[$index]);
-			}
-		}
-	}
-	
-	/**
 	 * Matches the passed URI to the route.
 	 * 
 	 * Can be extended to provide a custom routing algorithm. Returns the
@@ -102,6 +77,13 @@ final class Europa_Request_Route_Regex extends Europa_Request_Route_Abstract
 		if ($matches) {
 			// shift off the full match
 			array_shift($matches);
+			
+			// bind matched parameters
+			foreach ($matches as $name => $value) {
+				if (is_string($name)) {
+					$this->setParam($name, $value);
+				}
+			}
 			
 			return $matches;
 		}

@@ -36,7 +36,7 @@ class Europa_Request
 	
 	/**
 	 * All routes are set to this property. A route must be an instance of
-	 * Europa_Route.
+	 * Europa_Request_Route_Abstract.
 	 * 
 	 * @var $routes
 	 */
@@ -69,7 +69,8 @@ class Europa_Request
 	/**
 	 * Fires dispatching.
 	 * 
-	 * @param bool $register Whether or not to register this instance in the stack.
+	 * @param bool $register Whether or not to register this instance in
+	 * the stack.
 	 * @return Europa_Request
 	 */
 	final public function dispatch($register = true)
@@ -81,7 +82,7 @@ class Europa_Request
 		
 		// if a route is pre-defined, auto-match to define params
 		if ($this->_route) {
-			$this->_route->match();
+			$this->_route->match(self::getRequestUri());
 		}
 		
 		// if the route wasn't already set, find one and set it
@@ -98,6 +99,7 @@ class Europa_Request
 		// if a route still wasn't found, provide a default
 		if (!$this->_route) {
 			$this->_route = $this->_getDefaultRoute();
+			$this->_route->match(self::getRequestUri());
 		}
 		
 		// set the controller and action names, and the layout and view
@@ -146,15 +148,13 @@ class Europa_Request
 				$pos  = $param->getPosition();
 				$name = strtolower($param->getName());
 				
-				// cascade from named parameters to index offsets then to 
-				// default values if a required parameter isn't defined, an 
-				// exception is thrown
+				// apply named parameters
 				if (array_key_exists($name, $routeParams)) {
 					$actionParams[$pos] = $routeParams[$name];
-				} elseif (array_key_exists($pos, $routeParams)) {
-					$actionParams[$pos] = $routeParams[$pos];
+				// set default values
 				} elseif ($param->isOptional()) {
 					$actionParams[$pos] = $param->getDefaultValue();
+				// throw exceptions when required params aren't defined
 				} else {
 					throw new Europa_Request_Exception(
 						'Required request parameter <strong>$'
@@ -163,7 +163,7 @@ class Europa_Request
 						. $controllerName
 						. '->' 
 						. $actionName
-						. '()</strong> is not set.',
+						. '()</strong> is not defined.',
 						Europa_Request_Exception::REQUIRED_PARAMETER_NOT_DEFINED
 					);
 				}
@@ -239,8 +239,8 @@ class Europa_Request
 	/**
 	 * Sets the layout.
 	 * 
-	 * @param Europa_View_Abstract $layout
-	 * @return unknown_type
+	 * @param Europa_View_Abstract $layout The layout to use.
+	 * @return Europa_Request
 	 */
 	final public function setLayout(Europa_View_Abstract $layout = null)
 	{
@@ -262,8 +262,7 @@ class Europa_Request
 	/**
 	 * Sets the view.
 	 * 
-	 * @param Europa_View_Abstract $view
-	 * 
+	 * @param Europa_View_Abstract $view The view to use.
 	 * @return Europa_Request
 	 */
 	final public function setView(Europa_View_Abstract $view = null)
@@ -286,13 +285,15 @@ class Europa_Request
 	/**
 	 * Sets a route.
 	 * 
-	 * @param Europa_Route $name
-	 * @param $route
+	 * @param Europa_Request_Route_Abstract|name $name The name of the route,
+	 * or instance of Europa_Request_Route_Abstract.
+	 * @param Europa_Request_Route_Abstract $route The route to use, if not
+	 * explicity setting through the $name argument.
 	 * @return Europa_Request
 	 */
-	final public function setRoute($name, Europa_Route $route = null)
+	final public function setRoute($name, Europa_Request_Route_Abstract $route = null)
 	{
-		if ($name instanceof Europa_Route) {
+		if ($name instanceof Europa_Request_Route_Abstract) {
 			$this->_route = $name;
 		} else {
 			$this->_routes[$name] = $route;
@@ -304,8 +305,8 @@ class Europa_Request
 	/**
 	 * Gets a specified route or the route which was matched.
 	 * 
-	 * @param $name
-	 * @return Europa_Route
+	 * @param string $name The name of the route to get.
+	 * @return Europa_Request_Route_Abstract
 	 */
 	final public function getRoute($name = null)
 	{
@@ -321,9 +322,10 @@ class Europa_Request
 	}
 	
 	/**
-	 * Provides a default Europa_Route if no route is matched during dispatching.
+	 * Provides a default Europa_Request_Route_Abstract if no route is matched
+	 * during dispatching.
 	 * 
-	 * @return Europa_Route
+	 * @return Europa_Request_Route_Abstract
 	 */
 	protected function _getDefaultRoute()
 	{

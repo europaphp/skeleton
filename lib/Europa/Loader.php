@@ -16,7 +16,7 @@ class Europa_Loader
 	/**
 	 * Contains logging information.
 	 * 
-	 * @var boolean
+	 * @var bool
 	 */
 	protected static $_log = array();
 	
