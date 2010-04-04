@@ -93,6 +93,16 @@ class Europa_Request
 			$this->_route->match(self::getRequestUri());
 		}
 		
+		// get default layout if not set yet
+		if (!isset($this->_layout)) {
+			$this->setLayout($this->_getDefaultLayout());
+		}
+		
+		// get default view
+		if (!isset($this->_view)) {
+			$this->setView($this->_getDefaultView());
+		}
+		
 		// set the controller and action names, and the layout and view
 		$controllerName = $this->_getControllerClassName();
 		$actionName     = $this->_getActionMethodName();
@@ -314,7 +324,7 @@ class Europa_Request
 	
 	/**
 	 * Provides a default Europa_Request_Route_Abstract if no route is matched
-	 * during dispatching.
+	 * during dispatching, or no route is set prior to dispatching.
 	 * 
 	 * @return Europa_Request_Route_Abstract
 	 */
@@ -325,6 +335,26 @@ class Europa_Request
 			null,
 			'?controller=:controller&action=:action'
 		);
+	}
+	
+	/**
+	 * Retrieves the default layout to set if none is set before dispatching.
+	 * 
+	 * @return Europa_View_Abstract
+	 */
+	protected function _getDefaultLayout()
+	{
+		return new Europa_View_Php;
+	}
+	
+	/**
+	 * Retrieves the default view to set if none is set before dispatching.
+	 * 
+	 * @return Europa_View_Abstract
+	 */
+	protected function _getDefaultView()
+	{
+		return new Europa_View_Php;
 	}
 	
 	/**
