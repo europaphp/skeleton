@@ -14,23 +14,21 @@ class Europa_Request
 	/**
 	 * A child of Europa_View_Abstract which represents the layout.
 	 * 
-	 * @var $layout
+	 * @var Europa_View_Abstract
 	 */
 	protected $_layout;
 	
 	/**
 	 * An child of Europa_View_Abstract which represents the view.
 	 * 
-	 * @var $view
+	 * @var Europa_View_Abstract
 	 */
 	protected $_view;
 	
 	/**
-	 * After dispatching, this will contain the route that was used to reach
-	 * the  current page. This can be set before dispatching to force a 
-	 * route to be taken.
+	 * The route that was matched during dispatching.
 	 * 
-	 * @var $route
+	 * @var Europa_Request_Route_Abstract
 	 */
 	protected $_route = null;
 	
@@ -38,7 +36,7 @@ class Europa_Request
 	 * All routes are set to this property. A route must be an instance of
 	 * Europa_Request_Route_Abstract.
 	 * 
-	 * @var $routes
+	 * @var array
 	 */
 	protected $_routes = array();
 	
@@ -46,9 +44,9 @@ class Europa_Request
 	 * Contains the instances of all requests that are currently 
 	 * dispatching in chronological order.
 	 * 
-	 * @var $stack
+	 * @var array
 	 */
-	private static $_stack = null;
+	private static $_stack = array();
 	
 	/**
 	 * Constructs a new request and sets defaults.
