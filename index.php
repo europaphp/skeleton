@@ -21,5 +21,5 @@ try {
 	$europa = new Europa_Request;
 	$europa->dispatch();
 } catch (Exception $e) {
-	throw new Europa_Exception($e->getMessage(), $e->getCode());
+	echo $e->getMessage();
 }

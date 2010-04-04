@@ -54,10 +54,8 @@ class Europa_View_Php extends Europa_View_Abstract
 		ob_start();
 		
 		// include it
-		try {
-			include $this->_getScriptFullPath();
-		} catch (Exception $e) {
-			die($e->getMessage());
+		if ($path = $this->_getScriptFullPath()) {
+			include $path;
 		}
 		
 		// return the parsed view
