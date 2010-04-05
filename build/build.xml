@@ -102,6 +102,6 @@
 </component>
 <component id="viewExtensions">
 	<file>lib/Europa/View/Json.php</file>
-	<file>lib/Europa/View/Xml.php</file>
+	<!--file>lib/Europa/View/Xml.php</file-->
 	<dependency>core</dependency>
 </component>
