@@ -70,6 +70,16 @@ class Europa_Ini
 	}
 	
 	/**
+	 * Returns whether or not the variable is set or not.
+	 * 
+	 * @return bool
+	 */
+	public function __isset($name)
+	{
+		return isset($this->_vars->$name);
+	}
+	
+	/**
 	 * Sets an ini property value.
 	 * 
 	 * @return Europa_Ini

@@ -55,7 +55,16 @@ class Europa_Build
 			
 			// if this component has any dependencies, add them also
 			foreach ($component->find('//dependency') as $dependency) {
-				$this->addComponent($dependency->text());
+				$dep = $dependency->text();
+				
+				// dependency on all components
+				if ($dep === '*') {
+					foreach ($this->_xml->find('//component') as $comp) {
+						$this->addComponent($comp->attr('id'));
+					}
+				} else {
+					$this->addComponent($dep);
+				}
 			}
 		}
 		
@@ -67,7 +76,7 @@ class Europa_Build
 		return $this->zip($as);
 	}
 	
-	public function output($filename)
+	public function push($filename)
 	{
 		// temporary zip file name
 		$tmpZipName = md5(rand() . microtime() . rand());

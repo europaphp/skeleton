@@ -361,6 +361,20 @@ class pQuery implements Iterator
 	}
 	
 	/**
+	 * Extracts part of the selected nodes.
+	 * 
+	 * @param int $start The start index to start slicing from.
+	 * @param int $length The number of items to slice out.
+	 * @return pQuery
+	 */
+	public function slice($start, $len = null)
+	{
+		$items = array_slice($this->nodeList, $start, $len);
+		
+		return new pQuery($items);
+	}
+	
+	/**
 	 * Returns the parent element of the first matched element in the
 	 * current node list. If we are already at the topmost element
 	 * false is returned.

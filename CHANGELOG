@@ -2,11 +2,23 @@
 
 1. Completely re-work architecture. Europa can now be configured - where necessary - by passing arguments, an array of options or by extending and overriding certain methods instead of using Europa_Base as in 1.0.2.
 
-2. Add Europa_Route class which controls route matching and parameter parsing and retrieving.
+2. Create an extensible routing system with Europa_Request_Route_Abstract.
 
-3. Add Europa_String class for fluid string manipulation. It's also an integral part of the core for enforcing naming conventions.
+3. Include an default routing algorithm based on regular expressions called Europa_Request_Route_Regex.
 
-4. Add Europa_Controller_Abstract class for using as a parent class for controllers. It isn't required, but it sets up properties and methods for common tasks.
+4. Add Europa_String class for fluid string manipulation and internal inflection.
+
+5. Include an optional Europa_Controller_Abstract class to setup defaults in controllers.
+
+6. Europa_View_Abstract was created to fascilitate extensible view creation.
+
+7. Renamed Europa_Controller to a more appropriate Europa_Request.
+
+8. Added methods to Europa_Request for retrieving information about the request.
+
+9. Added Europa_Request::getAcceptedContentTypes() for parsing out the Accept request header when RESTfully handling requests.
+
+10. Exceptions are now explicitly thrown wherever an error may occur. Bootstrapping code should be appropriately wrapped in try/catch blocks.
 
 
 

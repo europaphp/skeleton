@@ -169,8 +169,10 @@ class Europa_Request
 					);
 				}
 				
-				// cast the parameter
-				$actionParams[$pos] = Europa_String::create($actionParams[$pos])->cast();
+				// cast the parameter if it is scalar
+				if (is_scalar($actionParams[$pos])) {
+					$actionParams[$pos] = Europa_String::create($actionParams[$pos])->cast();
+				}
 			}
 			
 			// the return value from the action determines the action taken on 
