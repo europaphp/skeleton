@@ -40,41 +40,14 @@
 	<file>lib/Europa/Controller/Abstract.php</file>
 	<dependency>core</dependency>
 </component>
-<!--component id="csv">
-	<file>lib/Europa/Csv/Abstract.php</file>
-	<file>lib/Europa/Csv/Exporter.php</file>
-	<file>lib/Europa/Csv/Importer.php</file>
-</component-->
-<!--component id="db">
-	<file>lib/Europa/Db/Exception.php</file>
-	<file>lib/Europa/Db/Record.php</file>
-	<file>lib/Europa/Db/Select.php</file>
-	<file>lib/Europa/Db.php</file>
-</component-->
 <component id="docs">
 	<file>CHANGELOG</file>
 	<file>LICENSE</file>
 	<file>README</file>
 </component>
-<!--component id="event">
-	<file>lib/Europa/Event/Data.php</file>
-	<file>lib/Europa/Event.php</file>
-</component-->
 <component id="exception">
 	<file>lib/Europa/Exception.php</file>
 </component>
-<!--component id="flash">
-	<file>lib/Europa/Flash.php</file>
-</component-->
-<!--component id="form">
-	<file>lib/Europa/Form/Element.php</file>
-	<file>lib/Europa/Form.php</file>
-</component-->
-<!--component id="ini">
-	<file>lib/Europa/Ini/Exception.php</file>
-	<file>lib/Europa/Ini.php</file>
-	<dependency>exception</dependency>
-</component-->
 <component id="loader">
 	<file>lib/Europa/Loader.php</file>
 </component>
@@ -88,9 +61,6 @@
 	<file>lib/Europa/Request.php</file>
 	<dependency>core</dependency>
 </component>
-<!--component id="session">
-	<file>Europa/Session.php</file>
-</component-->
 <component id="string">
 	<file>lib/Europa/String.php</file>
 </component>
@@ -105,6 +75,5 @@
 </component>
 <component id="viewExtensions">
 	<file>lib/Europa/View/Json.php</file>
-	<!--file>lib/Europa/View/Xml.php</file-->
 	<dependency>core</dependency>
 </component>
