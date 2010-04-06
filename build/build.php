@@ -1,27 +1,31 @@
 #!/usr/bin/php
-
 <?php
 
 // the base directory
 $base = dirname(__FILE__) . DIRECTORY_SEPARATOR;
 
+if ($argc === 1 || in_array($argv[1], array('--help', '-help', '-h', '-?'))):
+
 ?>
 
-<?php if ($argc === 1 || in_array($argv[1], array('--help', '-help', '-h', '-?'))): ?>
-This is a command line script for building EuropaPHP. There should be an
-xml file called "build.xml" in this directory.
+This is a command line script for building EuropaPHP. There should be an xml
+file called "build.xml" in this directory. Dependencies are automatically
+built in depending on the components chosen.
 
   Usage: build.php component1 component2 ...
-  
-  NOTE: That by default, the docs component is always included. This
-  includes files such as CHANGELOG, LICENSE and README.
-<?php exit; endif; ?>
-
-<?php if (!is_file($base . 'build.xml')): ?>
-<?php die('Unable to locate the build file: build.xml'); ?>
-<?php endif; ?>
 
 <?php
+
+	exit;
+endif;
+
+if (!is_file($base . 'build.xml')):
+	die('Unable to locate the build file: build.xml');
+endif;
+
+?>
+
+building...<?php
 
 // loader for easy loading
 require $base . 'lib/pQuery.php';
@@ -38,9 +42,6 @@ $release = new Europa_Build(
 	. DIRECTORY_SEPARATOR
 );
 
-// the docs should be in every build
-$release->addComponent('docs');
-
 // add all passed components
 foreach ($argv as $component) {
 	$release->addComponent($component);
@@ -48,3 +49,8 @@ foreach ($argv as $component) {
 
 // output to browser
 $release->save($base . 'EuropaPHP.zip');
+
+?>done!
+
+Saved as EuropaPHP.zip in build directory.
+
