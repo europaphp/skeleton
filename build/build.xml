@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+<component id="all" macro="true">
+	<dependency>*</dependency>
+</component>
 <component id="core" macro="true">
 	<dependency>exception</dependency>
 	<dependency>loader</dependency>
