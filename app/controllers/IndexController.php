@@ -12,7 +12,7 @@
  * 
  * @package IndexController
  */
-class IndexController extends Europa_Controller_Abstract
+class IndexController extends Europa_Controller
 {
 	/**
 	 * The constructor. Similar to init, but init allows a return value
