@@ -37,7 +37,7 @@
 	<dependency>*</dependency>
 </component>
 <component id="controller">
-	<file>lib/Europa/Controller/Abstract.php</file>
+	<file>lib/Europa/Controller.php</file>
 	<dependency>core</dependency>
 </component>
 <component id="docs">
@@ -55,9 +55,9 @@
 	<file>lib/Europa/Registry.php</file>
 </component>
 <component id="request">
-	<file>lib/Europa/Request/Route/Abstract.php</file>
 	<file>lib/Europa/Request/Route/Regex.php</file>
 	<file>lib/Europa/Request/Exception.php</file>
+	<file>lib/Europa/Request/Route.php</file>
 	<file>lib/Europa/Request.php</file>
 	<dependency>core</dependency>
 </component>
@@ -69,8 +69,8 @@
 	<file>lib/Europa/Unit/Group.php</file>
 </component>
 <component id="view">
-	<file>lib/Europa/View/Abstract.php</file>
 	<file>lib/Europa/View/Php.php</file>
+	<file>lib/Europa/View.php</file>
 	<dependency>core</dependency>
 </component>
 <component id="viewExtensions">
