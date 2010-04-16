@@ -14,7 +14,7 @@
  * @package Europa
  * @subpackage View
  */
-class Europa_View_Php extends Europa_View_Abstract
+class Europa_View_Php extends Europa_View
 {
 	/**
 	 * The script to be rendered.

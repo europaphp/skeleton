@@ -11,7 +11,7 @@
  * @subpackage Request
  * @subpackage Route
  */
-final class Europa_Request_Route_Regex extends Europa_Request_Route_Abstract
+final class Europa_Request_Route_Regex extends Europa_Request_Route
 {
 	/**
 	 * Since it is very difficult to reverse engineer a regular expression

@@ -10,7 +10,7 @@
  * @package Europa
  * @subpackage View
  */
-class Europa_View_Json extends Europa_View_Abstract
+class Europa_View_Json extends Europa_View
 {
 	/**
 	 * Constructs the view and sets parameters.
