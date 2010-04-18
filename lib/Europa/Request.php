@@ -242,10 +242,10 @@ class Europa_Request
 	/**
 	 * Sets the layout.
 	 * 
-	 * @param Europa_View_Abstract $layout The layout to use.
+	 * @param Europa_View $layout The layout to use.
 	 * @return Europa_Request
 	 */
-	final public function setLayout(Europa_View_Abstract $layout = null)
+	final public function setLayout(Europa_View $layout = null)
 	{
 		$this->_layout = $layout;
 		
@@ -265,10 +265,10 @@ class Europa_Request
 	/**
 	 * Sets the view.
 	 * 
-	 * @param Europa_View_Abstract $view The view to use.
+	 * @param Europa_View $view The view to use.
 	 * @return Europa_Request
 	 */
-	final public function setView(Europa_View_Abstract $view = null)
+	final public function setView(Europa_View $view = null)
 	{
 		$this->_view = $view;
 		
@@ -294,9 +294,9 @@ class Europa_Request
 	 * explicity setting through the $name argument.
 	 * @return Europa_Request
 	 */
-	final public function setRoute($name, Europa_Request_Route_Abstract $route = null)
+	final public function setRoute($name, Europa_Request_Route $route = null)
 	{
-		if ($name instanceof Europa_Request_Route_Abstract) {
+		if ($name instanceof Europa_Request_Route) {
 			$this->_route = $name;
 		} else {
 			$this->_routes[$name] = $route;
