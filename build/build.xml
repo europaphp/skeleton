@@ -37,9 +37,9 @@
 	<dependency>*</dependency>
 </component>
 <component id="docs">
-	<file>extras/CHANGELOG</file>
-	<file>extras/LICENSE</file>
-	<file>extras/README</file>
+	<file>extras/docs/changelog.txt</file>
+	<file>extras/docs/license.txt</file>
+	<file>extras/docs/readme.txt</file>
 </component>
 <component id="sniffs">
 	<file>extras/codesniffer/Europa/Sniffs/Functions/FunctionCallSignatureSniff.php</file>
