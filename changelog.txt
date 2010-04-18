@@ -8,7 +8,7 @@
 
 2. Create an extensible routing system with Europa_Request_Route_Abstract.
 
-3. Include an default routing algorithm based on regular expressions called Europa_Request_Route_Regex.
+3. Include a default routing algorithm based on regular expressions called Europa_Request_Route_Regex.
 
 4. Add Europa_String class for fluid string manipulation and internal inflection.
 
