@@ -18,33 +18,33 @@
 	<dependency>controller</dependency>
 </component>
 <component id="build" macro="true">
-	<file>extras/build/lib/Europa/Build/Exception.php</file>
-	<file>extras/build/lib/Europa/Build.php</file>
-	<file>extras/build/lib/pQuery.php</file>
-	<file>extras/build/build.php</file>
-	<file>extras/build/build.xml</file>
+	<file>build/lib/Europa/Build/Exception.php</file>
+	<file>build/lib/Europa/Build.php</file>
+	<file>build/lib/pQuery.php</file>
+	<file>build/build.php</file>
+	<file>build/build.xml</file>
 	<dependency>*</dependency>
 </component>
 <component id="tests" macro="true">
-	<file>extras/tests/EuropaTest/Controller.php</file>
-	<file>extras/tests/EuropaTest/Exception.php</file>
-	<file>extras/tests/EuropaTest/Loader.php</file>
-	<file>extras/tests/EuropaTest/Route.php</file>
-	<file>extras/tests/EuropaTest/String.php</file>
-	<file>extras/tests/EuropaTest/View.php</file>
-	<file>extras/tests/EuropaTest.php</file>
-	<file>extras/tests/run.php</file>
+	<file>tests/EuropaTest/Controller.php</file>
+	<file>tests/EuropaTest/Exception.php</file>
+	<file>tests/EuropaTest/Loader.php</file>
+	<file>tests/EuropaTest/Route.php</file>
+	<file>tests/EuropaTest/String.php</file>
+	<file>tests/EuropaTest/View.php</file>
+	<file>tests/EuropaTest.php</file>
+	<file>tests/run.php</file>
 	<dependency>*</dependency>
 </component>
 <component id="docs">
-	<file>extras/docs/changelog.txt</file>
-	<file>extras/docs/license.txt</file>
-	<file>extras/docs/readme.txt</file>
+	<file>changelog.txt</file>
+	<file>license.txt</file>
+	<file>readme.txt</file>
 </component>
 <component id="sniffs">
-	<file>extras/codesniffer/Europa/Sniffs/Functions/FunctionCallSignatureSniff.php</file>
-	<file>extras/codesniffer/Europa/Sniffs/WhiteSpace/EnforceTabIndentSniff.php</file>
-	<file>extras/codesniffer/Europa/EuropaCodingStandard.php</file>
+	<file>codesniffer/Europa/Sniffs/Functions/FunctionCallSignatureSniff.php</file>
+	<file>codesniffer/Europa/Sniffs/WhiteSpace/EnforceTabIndentSniff.php</file>
+	<file>codesniffer/Europa/EuropaCodingStandard.php</file>
 </component>
 <component id="array">
 	<file>lib/Europa/Array.php</file>
