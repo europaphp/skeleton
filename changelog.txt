@@ -1,6 +1,6 @@
 == 1.2.0 ==
 
-1. Move to PHP 5.3.0 compliance. Rename all _Abstract classes to a more approproate name and implement namespaces.
+1. Move to PHP 5.3.0 compliance. Rename all _Abstract classes to a more appropriate name and implement namespaces.
 
 == 1.1.0 ==
 
@@ -14,7 +14,7 @@
 
 5. Include an optional Europa_Controller_Abstract class to setup defaults in controllers.
 
-6. Europa_View_Abstract was created to fascilitate extensible view creation.
+6. Europa_View_Abstract was created to facilitate extensible view creation.
 
 7. Renamed Europa_Controller to a more appropriate Europa_Request.
 
