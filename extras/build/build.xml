@@ -18,35 +18,58 @@
 	<dependency>controller</dependency>
 </component>
 <component id="build" macro="true">
-	<file>build/lib/Europa/Build/Exception.php</file>
-	<file>build/lib/Europa/Build.php</file>
-	<file>build/lib/pQuery.php</file>
-	<file>build/build.php</file>
-	<file>build/build.xml</file>
+	<file>extras/build/lib/Europa/Build/Exception.php</file>
+	<file>extras/build/lib/Europa/Build.php</file>
+	<file>extras/build/lib/pQuery.php</file>
+	<file>extras/build/build.php</file>
+	<file>extras/build/build.xml</file>
 	<dependency>*</dependency>
 </component>
 <component id="tests" macro="true">
-	<file>tests/EuropaTest/Controller.php</file>
-	<file>tests/EuropaTest/Exception.php</file>
-	<file>tests/EuropaTest/Loader.php</file>
-	<file>tests/EuropaTest/Route.php</file>
-	<file>tests/EuropaTest/String.php</file>
-	<file>tests/EuropaTest/View.php</file>
-	<file>tests/EuropaTest.php</file>
-	<file>tests/run.php</file>
+	<file>extras/tests/EuropaTest/Controller.php</file>
+	<file>extras/tests/EuropaTest/Exception.php</file>
+	<file>extras/tests/EuropaTest/Loader.php</file>
+	<file>extras/tests/EuropaTest/Route.php</file>
+	<file>extras/tests/EuropaTest/String.php</file>
+	<file>extras/tests/EuropaTest/View.php</file>
+	<file>extras/tests/EuropaTest.php</file>
+	<file>extras/tests/run.php</file>
 	<dependency>*</dependency>
+</component>
+<component id="docs">
+	<file>extras/CHANGELOG</file>
+	<file>extras/LICENSE</file>
+	<file>extras/README</file>
+</component>
+<component id="sniffs">
+	<file>extras/codesniffer/Europa/Sniffs/Functions/FunctionCallSignatureSniff.php</file>
+	<file>extras/codesniffer/Europa/Sniffs/WhiteSpace/EnforceTabIndentSniff.php</file>
+	<file>extras/codesniffer/Europa/EuropaCodingStandard.php</file>
+</component>
+<component id="array">
+	<file>lib/Europa/Array.php</file>
 </component>
 <component id="controller">
 	<file>lib/Europa/Controller.php</file>
 	<dependency>core</dependency>
 </component>
-<component id="docs">
-	<file>CHANGELOG</file>
-	<file>LICENSE</file>
-	<file>README</file>
-</component>
 <component id="exception">
 	<file>lib/Europa/Exception.php</file>
+</component>
+<component id="form">
+	<file>lib/Europa/Form/Element/Button.php</file>
+	<file>lib/Europa/Form/Element/Input.php</file>
+	<file>lib/Europa/Form/Element/Password.php</file>
+	<file>lib/Europa/Form/Element/Reset.php</file>
+	<file>lib/Europa/Form/Element/Submit.php</file>
+	<file>lib/Europa/Form/Element/Text.php</file>
+	<file>lib/Europa/Form/Element/Textarea.php</file>
+	<file>lib/Europa/Form/Element.php</file>
+	<file>lib/Europa/Form/ElementList.php</file>
+	<file>lib/Europa/Form/Renderable.php</file>
+	<file>lib/Europa/Form.php</file>
+	<dependency>array</dependency>
+	<dependency>string</dependency>
 </component>
 <component id="loader">
 	<file>lib/Europa/Loader.php</file>

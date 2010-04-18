@@ -6,17 +6,24 @@
  * @category Forms
  * @package  Europa_Form
  * @license  Copyright 2010  Trey Shugart <treshugart@gmail.com>
- * @link     http://europaphp.org/license
+ * @link     http://europaphp.org/license	
  */
 abstract class Europa_Form extends Europa_Form_ElementList
 {
 	/**
+	 * The attributes applied to the form.
 	 * 
+	 * @var array
 	 */
 	protected $_attributes = array();
 	
 	/**
+	 * Sets an attribute.
 	 * 
+	 * @param string $name  The attribute name.
+	 * @param mixed  $value The attribute value.
+	 * 
+	 * @return Europa_Form
 	 */
 	public function __set($name, $value)
 	{
@@ -26,7 +33,11 @@ abstract class Europa_Form extends Europa_Form_ElementList
 	}
 	
 	/**
+	 * Retrieves an attribute value.
 	 * 
+	 * @param string $name The attribute name.
+	 * 
+	 * @return mixed
 	 */
 	public function __get($name)
 	{
@@ -36,7 +47,9 @@ abstract class Europa_Form extends Europa_Form_ElementList
 	}
 	
 	/**
+	 * Renders the form and all of its elements and element lists.
 	 * 
+	 * @return string
 	 */
 	public function __toString()
 	{
@@ -53,7 +66,9 @@ abstract class Europa_Form extends Europa_Form_ElementList
 	}
 	
 	/**
+	 * Returns an array of the attributes applied to the form.
 	 * 
+	 * @return array
 	 */
 	public function getAttributes()
 	{
