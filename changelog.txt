@@ -2,6 +2,12 @@
 
 1. Move to PHP 5.3.0 compliance. Rename all _Abstract classes to a more appropriate name and implement namespaces.
 
+2. Add a Europa_Form component with default element lists and elements.
+
+3. Add Europa_Validator.
+
+
+
 == 1.1.0 ==
 
 1. Completely re-work architecture. Europa can now be configured - where necessary - by passing arguments, an array of options or by extending and overriding certain methods instead of using Europa_Base as in 1.0.2.
