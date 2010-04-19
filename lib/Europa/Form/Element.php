@@ -1,7 +1,27 @@
 <?php
 
-abstract class Europa_Form_Element extends Europa_Array implements Europa_Form_Renderable
+/**
+ * Abstract element class which represents any element on a form.
+ * 
+ * 
+ */
+abstract class Europa_Form_Element extends Europa_Overloader implements Europa_Form_Renderable
 {
+	/**
+	 * Contains instances of Europa_Validator objects representing which
+	 * validators failed.
+	 * 
+	 * @var array
+	 */
+	protected $_errors = array();
+	
+	/**
+	 * Contains the validators applied to the element.
+	 * 
+	 * @var array
+	 */
+	protected $_validators = array();
+	
 	/**
 	 * Initializes the form element and sets its name.
 	 * 
@@ -12,32 +32,6 @@ abstract class Europa_Form_Element extends Europa_Array implements Europa_Form_R
 	public function __construct($name)
 	{
 		$this->name = $name;
-	}
-	
-	/**
-	 * The default name setter.
-	 * 
-	 * @param string $name
-	 * 
-	 * @return Europa_Form_Element
-	 */
-	protected function _setName($name)
-	{
-		// format each part of the name
-		$names = explode('[', $name);
-		foreach ($names as &$name) {
-			$name = Europa_String::create($name)->camelCase();
-		}
-		
-		// build the name
-		$name = array_shift($names);
-		if ($names) {
-			$name .= '[' . implode(']', $names) . ']';
-		}
-		
-		// the id should be the same as the name
-		$this->_array['id']   = (string) Europa_String::create($name->__toString())->camelCase();
-		$this->_array['name'] = (string) $name;
 	}
 	
 	/**
@@ -52,7 +46,7 @@ abstract class Europa_Form_Element extends Europa_Array implements Europa_Form_R
 	 * 
 	 * @return Europa_Form_Element
 	 */
-	final public function fill($values)
+	public function fill($values)
 	{
 		// if no values are set, then do nothing
 		if (!$values) {
@@ -88,5 +82,86 @@ abstract class Europa_Form_Element extends Europa_Array implements Europa_Form_R
 		}
 		
 		return $this;
+	}
+	
+	/**
+	 * Returns whether or not the element has any errors.
+	 * 
+	 * @return bool
+	 */
+	public function hasErrors()
+	{
+		return count($this->getErrors()) > 0;
+	}
+	
+	/**
+	 * Returns all validator instances which failed.
+	 * 
+	 * @return array
+	 */
+	public function getErrors()
+	{
+		return $this->_errors;
+	}
+	
+	/**
+	 * Adds a validator to the element.
+	 * 
+	 * @param Europa_Validator $validator The validator to add.
+	 * 
+	 * @return Europa_Form_Element
+	 */
+	public function addValidator(Europa_Validator $validator)
+	{
+		$this->_validators[] = $validator;
+		
+		return $this;
+	}
+	
+	/**
+	 * Runs all validators against the current value of the element.
+	 * 
+	 * @return Europa_Form_Element
+	 */
+	public function validate()
+	{
+		foreach ($this->_validators as $validator) {
+			if (!$validator->isValid()) {
+				$this->_errors[] = $validator;
+			}
+		}
+		
+		return $this;
+	}
+	
+	/**
+	 * Returns all properties which aren't prefixed with an underscore.
+	 * 
+	 * @return array
+	 */
+	public function getAttributes()
+	{
+		$attributes = array();
+		foreach ($this as $k => $v) {
+			if (strpos($k, '_') === 0) {
+				continue;
+			}
+			$attributes[$k] = $v;
+		}
+		return $attributes;
+	}
+	
+	/**
+	 * Formats the properties of the element as an xml attribute string.
+	 * 
+	 * @return string
+	 */
+	public function getAttributeString()
+	{
+		$attrs = array();
+		foreach ($this->getAttributes() as $k => $v) {
+			$attrs[] = $k . '="' . $v . '"';
+		}
+		return implode(' ', $attrs);
 	}
 }

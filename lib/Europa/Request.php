@@ -188,7 +188,7 @@ class Europa_Request
 			// otherwise it is assumed to be an array of properties to apply to
 			// the view
 			} else {
-				foreach ((array) $actionResult as $k => $v) {
+				foreach ($actionResult as $k => $v) {
 					$this->_view->$k = $v;
 				}
 			}

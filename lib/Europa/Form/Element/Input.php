@@ -21,12 +21,6 @@ class Europa_Form_Element_Input extends Europa_Form_Element
 			$this->type = 'text';
 		}
 		
-		$str = '<input';
-		
-		foreach ($this as $name => $value) {
-			$str .= ' ' . $name . '="' . $value . '"';
-		}
-		
-		return $str . ' />';
+		return '<input ' . $this->getAttributeString() . ' />';
 	}
 }

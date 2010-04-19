@@ -3,49 +3,12 @@
 /**
  * The main form class which is also an element list.
  * 
- * @category Forms
  * @package  Europa_Form
- * @license  Copyright 2010  Trey Shugart <treshugart@gmail.com>
+ * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
  * @link     http://europaphp.org/license	
  */
 abstract class Europa_Form extends Europa_Form_ElementList
 {
-	/**
-	 * The attributes applied to the form.
-	 * 
-	 * @var array
-	 */
-	protected $_attributes = array();
-	
-	/**
-	 * Sets an attribute.
-	 * 
-	 * @param string $name  The attribute name.
-	 * @param mixed  $value The attribute value.
-	 * 
-	 * @return Europa_Form
-	 */
-	public function __set($name, $value)
-	{
-		$this->_attributes[$name] = $value;
-		
-		return $this;
-	}
-	
-	/**
-	 * Retrieves an attribute value.
-	 * 
-	 * @param string $name The attribute name.
-	 * 
-	 * @return mixed
-	 */
-	public function __get($name)
-	{
-		return isset($this->_attributes[$name])
-		     ? $this->_attributes[$name]
-		     : null;
-	}
-	
 	/**
 	 * Renders the form and all of its elements and element lists.
 	 * 
@@ -53,25 +16,42 @@ abstract class Europa_Form extends Europa_Form_ElementList
 	 */
 	public function __toString()
 	{
-		// build attribute list
-		$attributes = '';
-		foreach ($this->getAttributes() as $attr => $value) {
-			$attributes .= ' ' . $attr . '="' . $value . '"';
-		}
-		
 		// build default form structure
-		return '<form' . $attributes . '>'
+		return '<form' 
+		     . $this->getAttributeString()
+		     . '>'
 		     . parent::__toString()
 		     . '</form>';
 	}
 	
 	/**
-	 * Returns an array of the attributes applied to the form.
+	 * Returns all properties which aren't prefixed with an underscore.
 	 * 
 	 * @return array
 	 */
 	public function getAttributes()
 	{
-		return $this->_attributes;
+		$attributes = array();
+		foreach ($this as $k => $v) {
+			if (is_numeric($k) || strpos($k, '_') === 0) {
+				continue;
+			}
+			$attributes[$k] = $v;
+		}
+		return $attributes;
+	}
+	
+	/**
+	 * Formats the properties of the element as an xml attribute string.
+	 * 
+	 * @return string
+	 */
+	public function getAttributeString()
+	{
+		$attrs = array();
+		foreach ($this->getAttributes() as $k => $v) {
+			$attrs[] = $k . '="' . $v . '"';
+		}
+		return implode(' ', $attrs);
 	}
 }
