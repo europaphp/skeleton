@@ -46,9 +46,9 @@
 	<file>codesniffer/Europa/Sniffs/WhiteSpace/EnforceTabIndentSniff.php</file>
 	<file>codesniffer/Europa/EuropaCodingStandard.php</file>
 </component>
-<component id="array">
-	<file>lib/Europa/Array.php</file>
-</component>
+	<component id="cli">
+		<file>lib/Europa/Cli.php</file>
+	</component>
 <component id="controller">
 	<file>lib/Europa/Controller.php</file>
 	<dependency>core</dependency>
@@ -68,11 +68,14 @@
 	<file>lib/Europa/Form/ElementList.php</file>
 	<file>lib/Europa/Form/Renderable.php</file>
 	<file>lib/Europa/Form.php</file>
-	<dependency>array</dependency>
+	<dependency>overloader</dependency>
 	<dependency>string</dependency>
 </component>
 <component id="loader">
 	<file>lib/Europa/Loader.php</file>
+</component>
+<component id="overloader">
+	<file>lib/Europa/Overloader.php</file>
 </component>
 <component id="registry">
 	<file>lib/Europa/Registry.php</file>
