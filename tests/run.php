@@ -10,7 +10,7 @@
 require_once dirname(__FILE__) . '/../lib/Europa/Loader.php';
 
 Europa_Loader::registerAutoload();
-Europa_Loader::addPath(dirname(__FILE__) . '/../lib');
+Europa_Loader::addPath(dirname(__FILE__) . '/../framework/lib');
 Europa_Loader::addPath(dirname(__FILE__));
 
 // take off the first element

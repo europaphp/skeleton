@@ -10,17 +10,16 @@
 	<dependency>view</dependency>
 </component>
 <component id="sandbox" macro="true">
-	<file>app/controllers/IndexController.php</file>
-	<file>app/views/index/index.php</file>
-	<file>app/views/index.php</file>
-	<file>index.php</file>
+	<file>europa/app/controllers/IndexController.php</file>
+	<file>europa/app/views/index/index.php</file>
+	<file>europa/app/views/index.php</file>
+	<file>europa/index.php</file>
 	<dependency>core</dependency>
 	<dependency>controller</dependency>
 </component>
 <component id="build" macro="true">
 	<file>build/lib/Europa/Build/Exception.php</file>
 	<file>build/lib/Europa/Build.php</file>
-	<file>build/lib/pQuery.php</file>
 	<file>build/build.php</file>
 	<file>build/build.xml</file>
 	<dependency>*</dependency>
@@ -41,65 +40,68 @@
 	<file>license.txt</file>
 	<file>readme.txt</file>
 </component>
+<component id="vendors-pquery">
+	<file>vendors/pQuery.php</file>
+</component>
 <component id="sniffs">
 	<file>codesniffer/Europa/Sniffs/Functions/FunctionCallSignatureSniff.php</file>
 	<file>codesniffer/Europa/Sniffs/WhiteSpace/EnforceTabIndentSniff.php</file>
 	<file>codesniffer/Europa/EuropaCodingStandard.php</file>
 </component>
-	<component id="cli">
-		<file>lib/Europa/Cli.php</file>
-	</component>
+<component id="cli">
+	<file>europa/lib/Europa/Cli.php</file>
+</component>
 <component id="controller">
-	<file>lib/Europa/Controller.php</file>
+	<file>europa/lib/Europa/Controller.php</file>
 	<dependency>core</dependency>
 </component>
 <component id="exception">
-	<file>lib/Europa/Exception.php</file>
+	<file>europa/lib/Europa/Exception.php</file>
 </component>
 <component id="form">
-	<file>lib/Europa/Form/Element/Button.php</file>
-	<file>lib/Europa/Form/Element/Input.php</file>
-	<file>lib/Europa/Form/Element/Password.php</file>
-	<file>lib/Europa/Form/Element/Reset.php</file>
-	<file>lib/Europa/Form/Element/Submit.php</file>
-	<file>lib/Europa/Form/Element/Text.php</file>
-	<file>lib/Europa/Form/Element/Textarea.php</file>
-	<file>lib/Europa/Form/Element.php</file>
-	<file>lib/Europa/Form/ElementList.php</file>
-	<file>lib/Europa/Form/Renderable.php</file>
-	<file>lib/Europa/Form.php</file>
+	<file>europa/lib/Europa/Form/Element/Button.php</file>
+	<file>europa/lib/Europa/Form/Element/Input.php</file>
+	<file>europa/lib/Europa/Form/Element/Password.php</file>
+	<file>europa/lib/Europa/Form/Element/Reset.php</file>
+	<file>europa/lib/Europa/Form/Element/Submit.php</file>
+	<file>europa/lib/Europa/Form/Element/Text.php</file>
+	<file>europa/lib/Europa/Form/Element/Textarea.php</file>
+	<file>europa/lib/Europa/Form/Element.php</file>
+	<file>europa/lib/Europa/Form/ElementList.php</file>
+	<file>europa/lib/Europa/Form/Renderable.php</file>
+	<file>europa/lib/Europa/Form.php</file>
 	<dependency>overloader</dependency>
 	<dependency>string</dependency>
 </component>
 <component id="loader">
-	<file>lib/Europa/Loader.php</file>
+	<file>europa/lib/Europa/Loader.php</file>
 </component>
 <component id="overloader">
-	<file>lib/Europa/Overloader.php</file>
+	<file>europa/lib/Europa/Overloader.php</file>
 </component>
 <component id="registry">
-	<file>lib/Europa/Registry.php</file>
+	<file>europa/lib/Europa/Registry.php</file>
 </component>
 <component id="request">
-	<file>lib/Europa/Request/Route/Regex.php</file>
-	<file>lib/Europa/Request/Exception.php</file>
-	<file>lib/Europa/Request/Route.php</file>
-	<file>lib/Europa/Request.php</file>
+	<file>europa/lib/Europa/Request/Route/Regex.php</file>
+	<file>europa/lib/Europa/Request/Exception.php</file>
+	<file>europa/lib/Europa/Request/Route.php</file>
+	<file>europa/lib/Europa/Request.php</file>
 	<dependency>core</dependency>
 </component>
 <component id="string">
-	<file>lib/Europa/String.php</file>
+	<file>europa/lib/Europa/String.php</file>
 </component>
 <component id="unit">
-	<file>lib/Europa/Unit/All.php</file>
-	<file>lib/Europa/Unit/Group.php</file>
+	<file>europa/lib/Europa/Unit/All.php</file>
+	<file>europa/lib/Europa/Unit/Group.php</file>
 </component>
 <component id="view">
-	<file>lib/Europa/View/Php.php</file>
-	<file>lib/Europa/View.php</file>
+	<file>europa/lib/Europa/View/Php.php</file>
+	<file>europa/lib/Europa/View.php</file>
 	<dependency>core</dependency>
 </component>
-<component id="viewExtensions">
-	<file>lib/Europa/View/Json.php</file>
+<component id="views">
+	<file>europa/lib/Europa/View/Json.php</file>
 	<dependency>core</dependency>
 </component>

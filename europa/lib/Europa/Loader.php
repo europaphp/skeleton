@@ -8,8 +8,10 @@
  * Handles class loading in Europa. Uses custom load paths due to the
  * immense performance gain and ease of manipulation.
  * 
- * @package Europa
- * @subpackage Loader
+ * @category Loader
+ * @package  Europa
+ * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @link     http://europaphp.org/license
  */
 class Europa_Loader
 {
@@ -36,7 +38,8 @@ class Europa_Loader
 	 * load paths in an explicit call to loadClass.
 	 * 
 	 * @param string $className The Class to load.
-	 * @param string|array $paths Alternate load paths to search in first.
+	 * @param mixed  $paths     Alternate load paths to search in first.
+	 * 
 	 * @return bool|string
 	 */
 	public static function loadClass($className, $paths = null)
@@ -103,26 +106,30 @@ class Europa_Loader
 	}
 	
 	/**
-	 * If path exists it is added and returned, otherwise false is returned.
-	 * 
-	 * Using load paths in this manner, is far faster than using PHP's built-in
-	 * include paths.
+	 * Adds a path to the load paths. Uses realpath to determine path validity.
+	 * If the path is unable to be resolve, an exception is thrown.
 	 * 
 	 * @param string $path The path to add to the list of load paths.
+	 * 
 	 * @return bool|string
 	 */
 	public static function addPath($path)
 	{
-		$path = realpath($path);
+		$realpath = realpath($path);
 		
 		// the path won't be added if it doesn't exist
-		if (!$path) {
-			return false;
+		if (!$realpath) {
+			// we require the exception files here since they may not be
+			// autoloadable yet
+			require_once realpath(dirname(__FILE__) . '/Exception.php');
+			require_once realpath(dirname(__FILE__) . '/Loader/Exception.php');
+			throw new Europa_Loader_Exception(
+				'Path ' . $path . ' does not exist.',
+				Europa_Loader_Exception::INVALID_PATH
+			);
 		}
 		
-		self::$_paths[] = $path;
-		
-		return $path;
+		self::$_paths[] = $realpath;
 	}
 	
 	/**
@@ -146,21 +153,12 @@ class Europa_Loader
 	}
 	
 	/**
-	 * Registers the auto-load handler. This first looks to see if the
-	 * spl_autoload_register function exists. If so, it is utilized, if not,
-	 * then it falls back to __autoload.
+	 * Registers the auto-load handler.
 	 * 
 	 * @return void
 	 */
 	public static function registerAutoload()
 	{
-		if (function_exists('spl_autoload_register')) {
-			spl_autoload_register(array('Europa_Loader', 'loadClass'));
-		} else {
-			function __autoload($className)
-			{
-				Europa_Loader::loadClass($className);
-			}
-		}
+		spl_autoload_register(array('Europa_Loader', 'loadClass'));
 	}
 }

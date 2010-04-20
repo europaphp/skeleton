@@ -10,6 +10,7 @@
  * as utility methods for controlling application flow from within
  * controllers.
  * 
+ * @category Controller
  * @package  Europa_Controller
  * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
  * @link     http://europaphp.org/license

@@ -27,10 +27,11 @@ endif;
 
 building...<?php
 
-// loader for easy loading
-require $base . 'lib/pQuery.php';
-require $base . 'lib/Europa/Build.php';
-require $base . 'lib/Europa/Build/Exception.php';
+require_once dirname(__FILE__) . '/../europa/lib/Europa/Loader.php';
+Europa_Loader::registerAutoload();
+Europa_Loader::addPath(dirname(__FILE__) . '/lib');
+Europa_Loader::addPath(dirname(__FILE__) . '/../vendor');
+Europa_Loader::addPath(dirname(__FILE__) . '/../europa/lib');
 
 // create a new build
 $release = new Europa_Build(
