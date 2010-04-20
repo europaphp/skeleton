@@ -110,7 +110,10 @@ class Europa_Build
 		
 		// add component files
 		foreach ($this->_components as $component) {
-			foreach ($this->_xml->find('//component[@id="' . $component . '"]/file') as $file) {
+			foreach (
+				$this->_xml->find('//component[@id="' . $component . '"]/file') 
+				as $file
+			) {
 				$file = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $file->text());
 				
 				if (is_file($this->_basePath . $file)) {
