@@ -3,7 +3,11 @@
 /**
  * Abstract element class which represents any element on a form.
  * 
- * 
+ * @category Form
+ * @package  Europa
+ * @author   Trey Shugart
+ * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @link     http://europaphp.org/license
  */
 abstract class Europa_Form_Element extends Europa_Overloader implements Europa_Form_Renderable
 {

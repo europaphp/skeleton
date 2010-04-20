@@ -1,17 +1,16 @@
 <?php
 
 /**
- * @author Trey Shugart
- */
-
-/**
  * Base class for a test group macro.
  * 
  * By extending this class and providing it with test classes, it will run
  * all tests methods in each test class and report on the results.
  * 
- * @package Europa
- * @subpackage Unit
+ * @category Unit
+ * @package  Europa
+ * @author   Trey Shugart
+ * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @link     http://europaphp.org/license
  */
 abstract class Europa_Unit_All
 {

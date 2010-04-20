@@ -3,7 +3,9 @@
 /**
  * A mini framework for handling requests on the command line.
  * 
- * @package  Europa_Cli
+ * @category Cli
+ * @package  Europa
+ * @author   Trey Shugart
  * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
  * @link     http://europaphp.org/license
  */

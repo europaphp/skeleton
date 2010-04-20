@@ -1,15 +1,13 @@
 <?php
 
 /**
- * @author Trey Shugart
- */
-
-/**
  * A route class used for matching via regular expressions.
  * 
- * @package Europa
- * @subpackage Request
- * @subpackage Route
+ * @category Route
+ * @package  Europa_Request
+ * @author   Trey Shugart
+ * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @link     http://europaphp.org/license
  */
 final class Europa_Request_Route_Regex extends Europa_Request_Route
 {

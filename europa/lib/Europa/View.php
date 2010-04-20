@@ -1,14 +1,13 @@
 <?php
 
 /**
- * @author Trey Shugart
- */
-
-/**
  * A base class for views in Europa.
  * 
- * @package Europa
- * @subpackage View
+ * @category View
+ * @package  Europa
+ * @author   Trey Shugart
+ * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @link     http://europaphp.org/license
  */
 abstract class Europa_View
 {

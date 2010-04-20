@@ -1,15 +1,12 @@
 <?php
 
 /**
- * @author Trey Shugart
- */
-
-/**
  * Handles class loading in Europa. Uses custom load paths due to the
  * immense performance gain and ease of manipulation.
  * 
  * @category Loader
  * @package  Europa
+ * @author   Trey Shugart
  * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
  * @link     http://europaphp.org/license
  */

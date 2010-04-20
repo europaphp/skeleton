@@ -1,16 +1,15 @@
 <?php
 
 /**
- * @author Trey Shugart
- */
-
-/**
  * Sets variables to be stored in a common place and accessible from anywhere. 
  * Variable name-spacing can be done any way you want, but it is recommended 
  * to follow a strict convention when doing so.
  * 
- * @package Europa
- * @subpackage Registry
+ * @category Registry
+ * @package  Europa
+ * @author   Trey Shugart
+ * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @link     http://europaphp.org/license
  */
 class Europa_Registry
 {

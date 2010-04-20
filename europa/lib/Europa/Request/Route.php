@@ -7,9 +7,11 @@
 /**
  * Provides a base implementation for routes.
  * 
- * @package Europa
- * @subpackage Request
- * @subpackage Route
+ * @category Route
+ * @package  Europa_Request
+ * @author   Trey Shugart
+ * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @link     http://europaphp.org/license
  */
 abstract class Europa_Request_Route
 {

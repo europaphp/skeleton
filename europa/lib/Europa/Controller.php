@@ -1,17 +1,14 @@
 <?php
 
 /**
- * @author Trey Shugart
- */
-
-/**
  * This is an optional base class for controller instances. it provides
  * a default set of properties accessible within the controller as well
  * as utility methods for controlling application flow from within
  * controllers.
  * 
  * @category Controller
- * @package  Europa_Controller
+ * @package  Europa
+ * @author   Trey Shugart
  * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
  * @link     http://europaphp.org/license
  */

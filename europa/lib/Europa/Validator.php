@@ -3,7 +3,11 @@
 /**
  * An abstract class for validator classes.
  * 
- * 
+ * @category Validator
+ * @package  Europa
+ * @author   Trey Shugart
+ * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @link     http://europaphp.org/license
  */
 abstract class Europa_Validator
 {

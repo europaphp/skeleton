@@ -3,7 +3,11 @@
 /**
  * A class built to automate getters, setters, isset checking and unsetters.
  * 
- * 
+ * @category Overloader
+ * @package  Europa
+ * @author   Trey Shugart
+ * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @link     http://europaphp.org/license
  */
 abstract class Europa_Overloader
 {

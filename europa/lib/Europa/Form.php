@@ -3,9 +3,11 @@
 /**
  * The main form class which is also an element list.
  * 
- * @package  Europa_Form
+ * @category Form
+ * @package  Europa
+ * @author   Trey Shugart
  * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
- * @link     http://europaphp.org/license	
+ * @link     http://europaphp.org/license
  */
 abstract class Europa_Form extends Europa_Form_ElementList
 {

@@ -1,14 +1,13 @@
 <?php
 
 /**
- * @author Trey Shugart
- */
-
-/**
  * The exception class for Europa_Request.
  * 
- * @package Europa
- * @subpackage Request
+ * @category Exception
+ * @package  Europa_Request
+ * @author   Trey Shugart
+ * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @link     http://europaphp.org/license
  */
 class Europa_Request_Exception extends Europa_Exception
 {

@@ -1,18 +1,17 @@
 <?php
 
 /**
- * @author Trey Shugart
- */
-
-/**
  * Class for rendering a basic PHP view script.
  * 
  * If parsing content from a file to render, this class can be overridden
  * to provide base functionality for view manipulation while the __toString
  * method is overridden to provide custom parsing.
  * 
- * @package Europa
- * @subpackage View
+ * @category View
+ * @package  Europa
+ * @author   Trey Shugart
+ * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @link     http://europaphp.org/license
  */
 class Europa_View_Php extends Europa_View
 {
