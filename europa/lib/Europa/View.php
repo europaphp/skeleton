@@ -12,22 +12,6 @@
 abstract class Europa_View
 {
 	/**
-	 * Contains the parameters set on the view.
-	 * 
-	 * @var array $params
-	 */
-	protected $_params = array();
-	
-	/**
-	 * Holds references to all of the plugins that have been called on this
-	 * view instance which are to be treated as singleton plugins for this
-	 * instance only.
-	 * 
-	 * @var array $plugins
-	 */
-	protected $_plugins = array();
-	
-	/**
 	 * Renders the view in whatever way necessary.
 	 * 
 	 * @return string
@@ -40,62 +24,15 @@ abstract class Europa_View
 	 * returned for the duration of the Europa_View object's lifespan.
 	 * 
 	 * @param string $name The name of the plugin to load.
+	 * 
 	 * @return object
 	 */
 	public function __get($name)
 	{
-		// attempt to grab an argument
-		if (isset($this->_params[$name])) {
-			return $this->_params[$name];
-		}
+		$plugin      = $this->__call($name);
+		$this->$name = $plugin ? $plugin : null;
 		
-		if (!isset($this->_plugins[$name])) {
-			$plugin = $this->__call($name);
-			
-			if ($plugin) {
-				$this->_plugins[$name] = $plugin;
-			}
-		}
-		
-		if (isset($this->_plugins[$name])) {
-			return $this->_plugins[$name];
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * When setting a property, it actually maps to the parameter array.
-	 * 
-	 * @param string $name
-	 * @param mixed $value
-	 * @return Europa_View
-	 */
-	public function __set($name, $value)
-	{
-		$this->_params[$name] = $value;
-	}
-	
-	/**
-	 * Returns whether or not the specified variable is set or not.
-	 * 
-	 * @param string $name
-	 * @return boolean;
-	 */
-	public function __isset($name)
-	{
-		return isset($this->_params[$name]);
-	}
-	
-	/**
-	 * Unsets the specified variable.
-	 * 
-	 * @param string $name
-	 * @return void
-	 */
-	public function __unset($name)
-	{
-		unset($this->_params[$name]);
+		return $this->$name;
 	}
 	
 	/**
@@ -114,7 +51,11 @@ abstract class Europa_View
 		
 		// reflect and invoke with passed args
 		$class = new ReflectionClass($class);
-		$class = $class->newInstanceArgs($args);
+		if ($class->hasMethod('__construct')) {
+			$class = $class->newInstanceArgs($args);
+		} else {
+			$class = $class->newInstanceArgs();
+		}
 		
 		return $class;
 	}
