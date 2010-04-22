@@ -29,17 +29,14 @@ class Europa_View_Php extends Europa_View
 	 * @param array $params The arguments to pass to the script.
 	 * @return Europa_View
 	 */
-	public function __construct($script = null, $params = array())
+	public function __construct($script = null, array $params = array())
 	{
 		// set a script if defined
 		if ($script) {
 			$this->setScript($script);
 		}
 		
-		// and set arguments
-		if (is_array($params)) {
-			$this->_params = $params;
-		}
+		$this->setParams($params);
 	}
 	
 	/**

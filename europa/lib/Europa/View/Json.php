@@ -16,9 +16,9 @@ class Europa_View_Json extends Europa_View
 	 * 
 	 * @param array $params
 	 */
-	public function __construct($params = null)
+	public function __construct(array $params = array())
 	{
-		$this->_params = $params;
+		$this->setParams($params);
 	}
 	
 	/**
@@ -28,6 +28,6 @@ class Europa_View_Json extends Europa_View
 	 */
 	public function __toString()
 	{
-		return json_encode($this->_params);
+		return json_encode($this->getParams());
 	}
 }
