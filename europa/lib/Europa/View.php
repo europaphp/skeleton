@@ -3,10 +3,10 @@
 /**
  * A base class for views in Europa.
  * 
- * @category View
+ * @category Views
  * @package  Europa
- * @author   Trey Shugart
- * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
 abstract class Europa_View
@@ -129,8 +129,7 @@ abstract class Europa_View
 	}
 	
 	/**
-	 * Returns the parameters bound to the view. In this case, all parameters
-	 * which are public will be returned.
+	 * Returns the parameters bound to the view.
 	 * 
 	 * In most cases, this is will only be used when determining which
 	 * properties are public internally or when serializing view objects
@@ -141,50 +140,6 @@ abstract class Europa_View
 	public function getParams()
 	{
 		return $this->_params;
-	}
-	
-	/**
-	 * Provides an easy way to reverse engineer a route for the current
-	 * dispatching controller and returns the resulting uri.
-	 * 
-	 * Allows for fluid URIs. If no route is found matching the passed $uri, 
-	 * then the uri is parsed depending on how it is formatted, necessary
-	 * modifications are made, then it is returned.
-	 * 
-	 * @param string $uri The request URI to transform.
-	 * @param array $params Any parameters to use when reverse-engineering.
-	 * @return string
-	 */
-	public function uri($uri = null, $params = array())
-	{
-		$uri = trim($uri);
-
-		// if it has a protocol prepended just return it
-		if (strpos($uri, '://') !== false) {
-			return $uri;
-		}
-
-		$request = Europa_Request::getActiveInstance();
-		$route   = $request->getRoute($uri);
-		
-		// if the route was found, reverse engineer it and set it
-		if ($route) {
-			$uri = $route->getUri($params);
-		}
-		
-		// make consistent
-		if ($uri) {
-			$uri = '/' . ltrim($uri, '/');
-		}
-		
-		// if there is a root uri, add a forward slash to it
-		$root = Europa_Request::getRootUri();
-		if ($root) {
-			$root = '/' . $root;
-		}
-
-		// automate
-		return $root . $uri;
 	}
 	
 	/**

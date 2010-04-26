@@ -30,7 +30,7 @@
 	</head>
 	<body>
 		<h1><?php echo $this->title; ?></h1>
-		<?php echo $this->view; ?>
+		<?php echo Europa_Request_Http::getActiveInstance()->getView(); ?>
 		<div id="footer">
 			Rendered in <?php echo round(microtime() - EUROPA_START_TIME, 4); ?> seconds
 			using <?php echo round(memory_get_peak_usage() / 1024 / 1024, 2); ?> MegaBytes of memory.

@@ -3,10 +3,10 @@
 /**
  * A route class used for matching via regular expressions.
  * 
- * @category Route
- * @package  Europa_Request
- * @author   Trey Shugart
- * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @category Routing
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
 final class Europa_Request_Route_Regex extends Europa_Request_Route
@@ -62,7 +62,7 @@ final class Europa_Request_Route_Regex extends Europa_Request_Route
 	 * Matches the passed URI to the route.
 	 * 
 	 * Can be extended to provide a custom routing algorithm. Returns the
-	 * matched parameters
+	 * matched parameters.
 	 * 
 	 * @param string $uri The URI to match against the current route
 	 * definition.
@@ -70,20 +70,16 @@ final class Europa_Request_Route_Regex extends Europa_Request_Route
 	 */
 	public function match($uri)
 	{
-		preg_match('#' . $this->_expression . '#', $uri, $matches);
-		
-		if ($matches) {
-			// shift off the full match
+		if (preg_match('#' . $this->_expression . '#', $uri, $matches)) {
 			array_shift($matches);
-			
-			// bind matched parameters
+			$params = array();
 			foreach ($matches as $name => $value) {
 				if (is_string($name)) {
-					$this->setParam($name, $value);
+					$params[$name] = $value;
 				}
 			}
 			
-			return $matches;
+			return $params;
 		}
 		
 		return false;

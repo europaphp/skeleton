@@ -3,10 +3,10 @@
 /**
  * Represents a group of form elements.
  * 
- * @category Form
+ * @category Forms
  * @package  Europa
- * @author   Trey Shugart
- * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
 class Europa_Form_ElementList implements Iterator, Europa_Form_Renderable

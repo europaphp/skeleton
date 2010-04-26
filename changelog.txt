@@ -6,6 +6,14 @@
 
 3. Add Europa_Validator.
 
+4. Improve performance over 1.1.0.
+
+5. Lower memory usage.
+
+6. Abstract Europa_Request. Add Europa_Request_Http and Europa_Request_Cli. Abstract appropriate methods and split up methods into specific request objects which don't belong in abstracted class.
+
+7. Lighten up Europa_Request->dispatch().
+
 
 
 == 1.1.0 ==

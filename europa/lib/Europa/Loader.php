@@ -4,10 +4,10 @@
  * Handles class loading in Europa. Uses custom load paths due to the
  * immense performance gain and ease of manipulation.
  * 
- * @category Loader
+ * @category Loading
  * @package  Europa
- * @author   Trey Shugart
- * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
 class Europa_Loader
@@ -64,10 +64,13 @@ class Europa_Loader
 		
 		// if there aren't any paths, die with a message
 		if (!$paths) {
-			die('
-				No load paths are defined. Please define a load path using
-				Europa_Loader::addPath(\'./path/to/files\').
-			');
+			// we require the exception files here since they won't be loadable
+			require_once realpath(dirname(__FILE__) . '/Exception.php');
+			require_once realpath(dirname(__FILE__) . '/Loader/Exception.php');
+			throw new Europa_Loader_Exception(
+				"At least one load path must be defined.",
+				Europa_Loader_Exception::NO_PATHS_DEFINED
+			);
 		}
 		
 		// search for the file

@@ -6,10 +6,10 @@
  * By extending this class and providing it with test classes, it will run
  * all tests methods in each test class and report on the results.
  * 
- * @category Unit
+ * @category UnitTesting
  * @package  Europa
- * @author   Trey Shugart
- * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
 abstract class Europa_Unit_All

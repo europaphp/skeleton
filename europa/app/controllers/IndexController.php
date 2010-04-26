@@ -1,16 +1,16 @@
 <?php
 
 /**
- * @author Trey Shugart
- */
-
-/**
  * An example controller sketching some of the features that can be implemented.
  * 
  * Europa_Controller_Abstract is an optional base class, but provides a few
  * default properties and methods to make your life a bit easier.
  * 
- * @package IndexController
+ * @category  Controllers
+ * @package   Europa
+ * @author    Trey Shugart <treshugart@gmail.com>
+ * @copyright (c) 2010 Trey Shugart
+ * @link      http://europaphp.org/license
  */
 class IndexController extends Europa_Controller
 {
@@ -22,7 +22,9 @@ class IndexController extends Europa_Controller
 	 */
 	public function __construct()
 	{
-		// do something cool
+		$this->request = Europa_Request_Http::getActiveInstance();
+		$this->layout  = $this->request->getLayout();
+		$this->view    = $this->request->getView();
 	}
 	
 	/**
@@ -36,7 +38,7 @@ class IndexController extends Europa_Controller
 	}
 	
 	/**
-	 * Traps any calls to an undefined method. This will get called after
+	 * Traps any calls to an undefined method/action. This will get called after
 	 * IndexController->init().
 	 * 
 	 * @param string $name
@@ -45,7 +47,7 @@ class IndexController extends Europa_Controller
 	 */
 	public function __call($name, $args)
 	{
-		// do some more cool stuff
+		
 	}
 	
 	/**
@@ -57,10 +59,7 @@ class IndexController extends Europa_Controller
 	 */
 	public function init()
 	{
-		return array(
-			'title' => $this->_getRoute()->getParam('title', 'Thanks for choosing EuropaPHP'),
-			'view'  => $this->_getView()
-		);
+		$this->layout->title = 'Thanks for choosing EuropaPHP';
 	}
 	
 	/**
@@ -99,10 +98,8 @@ class IndexController extends Europa_Controller
 	 * @param string $msg
 	 * @return array|false|void
 	 */
-	public function indexAction($msg = 'You won\'t be sorry')
+	public function indexAction($msg = "You won't be sorry")
 	{
-		return array(
-			'msg' => $msg
-		);
+		$this->view->msg = $msg;
 	}
 }

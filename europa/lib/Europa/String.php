@@ -3,10 +3,10 @@
 /**
  * Provides a fluid object oriented way to manipulate strings.
  * 
- * @category String
+ * @category Strings
  * @package  Europa
- * @author   Trey Shugart
- * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
 class Europa_String

@@ -2,11 +2,11 @@
 
 /**
  * Provides a general set of defaults for exception handling and output.
- *
- * @category Exception
+ * 
+ * @category Exceptions
  * @package  Europa
- * @author   Trey Shugart
- * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
 class Europa_Exception extends Exception

@@ -7,10 +7,10 @@
  * to provide base functionality for view manipulation while the __toString
  * method is overridden to provide custom parsing.
  * 
- * @category View
+ * @category Views
  * @package  Europa
- * @author   Trey Shugart
- * @license  (c) 2010 Trey Shugart <treshugart@gmail.com>
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
 class Europa_View_Php extends Europa_View
