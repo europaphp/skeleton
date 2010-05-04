@@ -34,12 +34,62 @@ abstract class Europa_Request
 	protected $_routes = array();
 	
 	/**
+	 * A child of Europa_View_Abstract which represents the layout.
+	 * 
+	 * @var Europa_View
+	 */
+	protected $_layout = null;
+	
+	/**
+	 * An child of Europa_View_Abstract which represents the view.
+	 * 
+	 * @var Europa_View
+	 */
+	protected $_view = null;
+	
+	/**
 	 * Contains the instances of all requests that are currently 
 	 * dispatching in chronological order.
 	 * 
 	 * @var array
 	 */
 	private static $_stack = array();
+	
+	/**
+	 * Returns the string that the routes will match against.
+	 * 
+	 * @return string
+	 */
+	abstract public function getRouteRequestString();
+	
+	/**
+	 * Renders the layout and view or any combination of the two depending on
+	 * if they are enabled/disabled.
+	 * 
+	 * @return string
+	 */
+	public function __toString()
+	{
+		$layout = $this->getLayout();
+		$view   = $this->getView();
+		
+		// set default scripts if not set
+		if ($layout && !$layout->getScript()) {
+			$layout->setScript($this->getLayoutScriptName());
+		}
+		if ($view && !$view->getScript()) {
+			$view->setScript($this->getViewScriptName());
+		}
+		
+		// render
+		if ($layout && $view) {
+			return (string) $layout;
+		} elseif ($view) {
+			return (string) $view;
+		}
+		
+		return null;
+	}
 	
 	/**
 	 * Dispatches the request to the appropriate controller/action combo. If
@@ -49,12 +99,18 @@ abstract class Europa_Request
 	 */
 	public function dispatch()
 	{
-		// register
+		// register the instance in the stack so it can be easily found
 		self::$_stack[] = $this;
 		
-		// if a route hasn't been matched yet, perform matching
+		/*
+		 * If a route hasn't been matched yet, perform matching against the
+		 * Europa request uri and set any matched parameters.
+		 */
 		if (!$this->getRoute()) {
-			$this->route();
+			$params = $this->route();
+			if ($params) {
+				$this->setParams($params);
+			}
 		}
 		
 		// dynamic controllers and actions
@@ -123,19 +179,18 @@ abstract class Europa_Request
 	}
 	
 	/**
-	 * Processes all routes. Upon matching, matched parameters are bound to the
-	 * request and it returns true. If no match is found, it returns false.
+	 * Processes all routes. If a route is matched, the matched parameters are
+	 * returned. If no match is found, false is returned.
 	 * 
-	 * @return bool
+	 * @return bool|array
 	 */
 	public function route()
 	{
 		foreach ($this->_routes as $route) {
-			$match = $route->match(self::getRequestUri());
+			$match = $route->match($this->getRouteMatchSubject());
 			if ($match) {
 				$this->_route = $route;
-				$this->setParams($match);
-				return true;
+				return $match;
 			}
 		}
 		return false;
@@ -144,7 +199,7 @@ abstract class Europa_Request
 	/**
 	 * Sets a route.
 	 * 
-	 * @param Europa_Request_Route|name $name The name of the route.
+	 * @param string $name The name of the route.
 	 * @param Europa_Request_Route $route The route to use.
 	 * @return Europa_Request
 	 */
@@ -261,6 +316,79 @@ abstract class Europa_Request
 		       ->camelCase()
 		       ->__toString()
 		     . 'Action';
+	}
+	
+	/**
+	 * Sets the layout.
+	 * 
+	 * @param Europa_View $layout The layout to use.
+	 * @return Europa_Request
+	 */
+	public function setLayout(Europa_View $layout = null)
+	{
+		$this->_layout = $layout;
+		return $this;
+	}
+
+	/**
+	 * Gets the set layout.
+	 * 
+	 * @return Europa_View_Abstract|null
+	 */
+	public function getLayout()
+	{
+		return $this->_layout;
+	}
+
+	/**
+	 * Sets the view.
+	 * 
+	 * @param Europa_View $view The view to use.
+	 * @return Europa_Request
+	 */
+	public function setView(Europa_View $view = null)
+	{
+		$this->_view = $view;
+		return $this;
+	}
+
+	/**
+	 * Gets the set view.
+	 * 
+	 * @return Europa_View_Abstract|null
+	 */
+	public function getView()
+	{
+		return $this->_view;
+	}
+
+	/**
+	 * Returns the layout script to be set. By default this is mapped to the
+	 * camel-cased name of the controller route parameter.
+	 * 
+	 * @return string
+	 */
+	public function getLayoutScriptName()
+	{
+		$controller = $this->getParam('controller');
+		$controller = $controller ? $controller : 'index';
+		return Europa_String::create($controller)->camelCase(false);
+	}
+
+	/**
+	 * Returns the view script to be set. By default this is mapped to the
+	 * camel-cased name of the controller as the directory and the camel-cased
+	 * action name as the file.
+	 * 
+	 * @return string
+	 */
+	public function getViewScriptName()
+	{
+		$action = $this->getParam('action');
+		$action = $action ? $action : 'index';
+		return $this->getLayoutScriptName()
+		     . '/' 
+		     . Europa_String::create($action)->camelCase(false);
 	}
 	
 	/**
