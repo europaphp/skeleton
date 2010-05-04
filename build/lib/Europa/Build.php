@@ -14,9 +14,9 @@ class Europa_Build
 	{
 		if (!is_file($fromFile)) {
 			throw new Europa_Build_Exception(
-				'Build file <strong>'
+				'Build file '
 				. $fromFile
-				. '</strong> cannot be found.',
+				. ' could not be found.',
 				Europa_Build_Exception::FILE_NOT_FOUND
 			);
 		}
