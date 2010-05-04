@@ -19,14 +19,6 @@ abstract class Europa_Request_Route
 	protected $_expression = null;
 	
 	/**
-	 * Contains an associative array of the parameters that were parsed out
-	 * of the request from the route definition.
-	 * 
-	 * @var array
-	 */
-	protected $_params = array();
-	
-	/**
 	 * A way of retrieving a uri representing the route.
 	 * 
 	 * @return string
@@ -52,55 +44,5 @@ abstract class Europa_Request_Route
 	public function __construct($expression)
 	{
 		$this->_expression = (string) $expression;
-	}
-	
-	/**
-	 * Binds a parameter to the route.
-	 * 
-	 * @param string $name The name of the parameter to set.
-	 * @param mixed $value The value of the parameter.
-	 * @return Europa_Request_Route_Abstract
-	 */
-	final public function setParam($name, $value)
-	{
-		$this->_params[$name] = $value;
-		
-		return $this;
-	}
-	
-	/**
-	 * Returns the specified parameter. If the parameter isn't found, then the
-	 * default value is returned.
-	 * 
-	 * @param string $name The name of the parameter to get.
-	 * @param mixed $defaultValue A value to return if the parameter is not
-	 * defined.
-	 * @return mixed
-	 */
-	final public function getParam($name, $defaultValue = null)
-	{
-		$params = $this->getParams();
-		
-		if (array_key_exists($name, $params)) {
-			return $params[$name];
-		}
-		
-		return $defaultValue;
-	}
-	
-	/**
-	 * Returns all parameters cascading to route params, get, then post.
-	 * 
-	 * @return array
-	 */
-	final public function getParams()
-	{
-		static $params;
-		
-		if (!isset($params)) {
-			$params = array_merge($this->_params, $_GET, $_POST);
-		}
-		
-		return $params;
 	}
 }
