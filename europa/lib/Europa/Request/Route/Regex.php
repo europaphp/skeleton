@@ -32,7 +32,6 @@ final class Europa_Request_Route_Regex extends Europa_Request_Route
 	{
 		// set expression using the parent
 		parent::__construct($expression);
-		
 		// set additional parameters
 		$this->_uriMap = (string) $uriMap;
 	}
@@ -49,12 +48,13 @@ final class Europa_Request_Route_Regex extends Europa_Request_Route
 	public function getUri($params = array())
 	{
 		$parsed = $this->_uriMap;
-		$params = array_merge($this->getParams(), $params);
-		
+		$params = array_merge(
+			Europa_Request::getActiveInstance()->getParams(),
+			$params
+		);
 		foreach ($params as $name => $value) {
 			$parsed = str_replace(':' . $name, $value, $parsed);
 		}
-		
 		return $parsed;
 	}
 	
@@ -78,10 +78,8 @@ final class Europa_Request_Route_Regex extends Europa_Request_Route
 					$params[$name] = $value;
 				}
 			}
-			
 			return $params;
 		}
-		
 		return false;
 	}
 }
