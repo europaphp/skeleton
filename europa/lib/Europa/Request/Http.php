@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The heart of EuropaPHP. This is where it all starts and ends.
+ * The request class representing an HTTP request.
  * 
  * @category Request
  * @package  Europa
@@ -10,44 +10,7 @@
  * @link     http://europaphp.org/license
  */
 class Europa_Request_Http extends Europa_Request
-{
-	/**
-	 * A child of Europa_View_Abstract which represents the layout.
-	 * 
-	 * @var Europa_View
-	 */
-	protected $_layout = null;
-	
-	/**
-	 * An child of Europa_View_Abstract which represents the view.
-	 * 
-	 * @var Europa_View
-	 */
-	protected $_view = null;
-	
-	/**
-	 * The route that was matched during dispatching.
-	 * 
-	 * @var Europa_Request_Route
-	 */
-	protected $_route = null;
-	
-	/**
-	 * All routes are set to this property. A route must be an instance of
-	 * Europa_Request_Route.
-	 * 
-	 * @var array
-	 */
-	protected $_routes = array();
-	
-	/**
-	 * Contains the instances of all requests that are currently 
-	 * dispatching in chronological order.
-	 * 
-	 * @var array
-	 */
-	private static $_stack = array();
-	
+{	
 	/**
 	 * Sets any defaults that may need setting.
 	 * 
@@ -62,104 +25,13 @@ class Europa_Request_Http extends Europa_Request
 	}
 	
 	/**
-	 * Renders the layout and view or any combination of the two depending on
-	 * if they are enabled/disabled.
+	 * Returns the string that routes will be matched against.
 	 * 
 	 * @return string
 	 */
-	public function __toString()
+	public function getRouteRequestString()
 	{
-		$layout = $this->getLayout();
-		$view   = $this->getView();
-		
-		// set default scripts if not set
-		if ($layout && !$layout->getScript()) {
-			$layout->setScript($this->getLayoutScriptName());
-		}
-		if ($view && !$view->getScript()) {
-			$view->setScript($this->getViewScriptName());
-		}
-		
-		// render
-		if ($layout && $view) {
-			return (string) $layout;
-		} elseif ($view) {
-			return (string) $view;
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * Sets the layout.
-	 * 
-	 * @param Europa_View $layout The layout to use.
-	 * @return Europa_Request
-	 */
-	public function setLayout(Europa_View $layout = null)
-	{
-		$this->_layout = $layout;
-		return $this;
-	}
-	
-	/**
-	 * Gets the set layout.
-	 * 
-	 * @return Europa_View_Abstract|null
-	 */
-	public function getLayout()
-	{
-		return $this->_layout;
-	}
-	
-	/**
-	 * Sets the view.
-	 * 
-	 * @param Europa_View $view The view to use.
-	 * @return Europa_Request
-	 */
-	public function setView(Europa_View $view = null)
-	{
-		$this->_view = $view;
-		return $this;
-	}
-	
-	/**
-	 * Gets the set view.
-	 * 
-	 * @return Europa_View_Abstract|null
-	 */
-	public function getView()
-	{
-		return $this->_view;
-	}
-	
-	/**
-	 * Returns the layout script to be set. By default this is mapped to the
-	 * camel-cased name of the controller route parameter.
-	 * 
-	 * @return string
-	 */
-	public function getLayoutScriptName()
-	{
-		$controller = $this->getParam('controller', 'index');
-		return Europa_String::create($controller)->camelCase(false);
-	}
-	
-	/**
-	 * Returns the view script to be set. By default this is mapped to the
-	 * camel-cased name of the controller as the directory and the camel-cased
-	 * action name as the file.
-	 * 
-	 * @return string
-	 */
-	public function getViewScriptName()
-	{
-		$controller = $this->getParam('controller', 'index');
-		$action     = $this->getParam('action', 'index');
-		return Europa_String::create($controller)->camelCase(false)
-		     . '/' 
-		     . Europa_String::create($action)->camelCase(false);
+		return self::getFullUri();
 	}
 
 	/**
@@ -224,7 +96,14 @@ class Europa_Request_Http extends Europa_Request
 	 * Returns the Europa root URI in relation to the file that dispatched
 	 * the controller.
 	 * 
-	 * If running from CLI, '.' will be returned.
+	 * The Europa root URI represents the public folder in which the
+	 * dispatching file resides. If the the full URI is 
+	 * http://localhost/yoursite/subfoler/controller/action and the
+	 * dispatching file is in "subfolder', then this will contain
+	 * "yoursite/subfolder". 
+	 * 
+	 * The root URI is always normalized, meaning that leading and trailing
+	 * slashes are trimmed.
 	 *
 	 * @return string
 	 */
@@ -241,7 +120,14 @@ class Europa_Request_Http extends Europa_Request
 	 * Returns the Europa request URI in relation to the file that dispatched
 	 * the controller.
 	 * 
-	 * If the running from CLI, then false will be returned.
+	 * The Europa request URI represents the part after the public folder in 
+	 * which the dispatching file resides. If the the full URI is 
+	 * http://localhost/yoursite/subfoler/controller/action and the
+	 * dispatching file is in "subfolder', then this will contain
+	 * "controller/action". 
+	 * 
+	 * The request URI is always normalized, meaning that leading and trailing
+	 * slashes are trimmed.
 	 *
 	 * @return string
 	 */
@@ -259,6 +145,39 @@ class Europa_Request_Http extends Europa_Request
 			$requestUri = trim($requestUri, '/');
 		}
 		return $requestUri;
+	}
+	
+	/**
+	 * Returns whether or not the request is being made through SSL.
+	 * 
+	 * @return bool
+	 */
+	public static function isSecure()
+	{
+		return isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+	}
+	
+	/**
+	 * Returns the full URI that was used in the request.
+	 * 
+	 * @return string
+	 */
+	public static function getFullUri()
+	{
+		$protocol = 'http';
+		if (self::isSecure()) {
+			$protocol = 'https';
+		}
+		$port = null;
+		if ($_SERVER['SERVER_PORT'] != 80) {
+			$port = ':' . $_SERVER['SERVER_PORT'];
+		}
+		return $protocol
+		     . '://'
+		     . $_SERVER['HTTP_HOST']
+		     . $port
+		     . '/' . self::getRootUri()
+		     . '/' . self::getRequestUri();
 	}
 	
 	/**
