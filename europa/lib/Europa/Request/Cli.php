@@ -1,7 +1,7 @@
 <?php
 
 /**
- * A request handler for CLI requests.
+ * The request class for representing a CLI request.
  * 
  * @category Request
  * @package  Europa
@@ -12,11 +12,34 @@
 class Europa_Request_Cli extends Europa_Request
 {
 	/**
-	 * Constructs a new cli object and parses out the command parameters.
+	 * Constructs a CLI request and sets defaults. By default, no layout or
+	 * view is rendered.
 	 * 
-	 * @return void
+	 * @return Europa_Request_Cli
 	 */
 	public function __construct()
+	{
+		$this->_parseParams();
+	}
+	
+	/**
+	 * Returns the arguments passed to the cli script as a string including
+	 * the name of the script.
+	 * 
+	 * @return string
+	 */
+	public function getRouteRequestString()
+	{
+		return implode(' ', $_SERVER['argv']);
+	}
+	
+	/**
+	 * Parses out the cli request parameters - in unix style - and sets them on
+	 * the request.
+	 * 
+	 * @return Europa_Request_Cli
+	 */
+	protected function _parseParams()
 	{
 		$args = $_SERVER['argv'];
 		$skip = false;
@@ -42,7 +65,6 @@ class Europa_Request_Cli extends Europa_Request
 				foreach ($flags as $flag) {
 					// set flags
 					$this->setParam($flag, true);
-					
 					// set last flag
 					$lastFlag = $flag;
 				}
@@ -55,10 +77,12 @@ class Europa_Request_Cli extends Europa_Request
 				}
 				continue;
 			}
-
+			// if skipping was set, reset it
 			if ($skip) {
 				$skip = false;
 			}
 		}
+		
+		return $this;
 	}
 }
