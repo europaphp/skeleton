@@ -10,7 +10,7 @@
  * @link     http://europaphp.org/license
  */
 class Europa_Request_Http extends Europa_Request
-{	
+{
 	/**
 	 * Sets any defaults that may need setting.
 	 * 

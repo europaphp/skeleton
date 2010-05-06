@@ -39,7 +39,6 @@ class Europa_Sniffs_Functions_FunctionCallSignatureSniff implements PHP_CodeSnif
 		return array(T_STRING);
 	}
 
-
 	/**
 	 * Processes this test, when one of its tokens is encountered.
 	 *
