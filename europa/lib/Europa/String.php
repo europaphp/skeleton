@@ -1,13 +1,14 @@
 <?php
 
 /**
+ * @author Trey Shugart
+ */
+
+/**
  * Provides a fluid object oriented way to manipulate strings.
- * 
- * @category Strings
- * @package  Europa
- * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ *
+ * @package Europa
+ * @subpackage String
  */
 class Europa_String
 {
@@ -80,13 +81,11 @@ class Europa_String
 		}
 
 		$str = implode('_', $parts);
-
 		if ($autoUcFirst || $ucFirst) {
 			$str = ucfirst($str);
 		} elseif (isset($str{0})) {
 			$str{0} = strtolower($str{0});
 		}
-
 		$this->_string = $str;
 
 		return $this;
@@ -132,6 +131,46 @@ class Europa_String
 	}
 	
 	/**
+	 * Makes the string lowercase.
+	 * 
+	 * @return Europa_String
+	 */
+	public function toLowercase()
+	{
+		$this->_string = strtolower($this->_string);
+		
+		return $this;
+	}
+	
+	/**
+	 * Makes the string uppercase.
+	 * 
+	 * @return Europa_String
+	 */
+	public function toUppercase()
+	{
+		$this->_string = strtoupper($this->_string);
+		
+		return $this;
+	}
+	
+	/**
+	 * Transforms the string into a url slug.
+	 * 
+	 * @return Europa_String
+	 */
+	public function slug($separator = '-')
+	{
+		$str = $this->_string;
+		$str = preg_replace('/[^a-zA-Z0-9]/', $separator, $str);
+		$str = preg_replace('/\\' . $separator . '{2,}/', $separator, $str);
+		$this->_string = $str;
+		$this->trim($separator);
+		
+		return $this;
+	}
+	
+	/**
 	 * Takes a value and type casts it. Strings such as 'true' or 'false' 
 	 * will be converted to a boolean value. Numeric strings will be converted
 	 * to integers or floats and empty strings are converted to NULL values.
@@ -142,19 +181,15 @@ class Europa_String
 	public function cast()
 	{
 		$val = urldecode($this->_string);
-
 		if (strtolower($val) == 'true') {
 			return true;
 		}
-
 		if (strtolower($val) == 'false') {
 			return false;
 		}
-		
 		if (!$val || strtolower($val) == 'null') {
 			return null;
 		}
-
 		if (is_string($val) && is_numeric($val)) {
 			if (strpos($val, '.') === false) {
 				$val = (int) $val;
@@ -162,7 +197,6 @@ class Europa_String
 				$val = (float) $val;
 			}
 		}
-
 		return $val;
 	}
 
