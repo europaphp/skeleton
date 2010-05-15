@@ -22,13 +22,8 @@ abstract class Europa_Unit_All
 	protected $_groups = array();
 	
 	/**
-	 * Returns the paths and class names for the test classes.
-	 * 
-	 * Since Europa Unit is designed to be run from the command line, paths
-	 * to the test classes are given so they can be included on the fly.
-	 * 
-	 * An array representing [class file path] => [class name] should be
-	 * returned.
+	 * Returns the class names for the test classes. Since the classes are
+	 * designed to be autoloaded, no paths are necessary.
 	 * 
 	 * @return array
 	 */
@@ -53,14 +48,17 @@ abstract class Europa_Unit_All
 	 */
 	public function run()
 	{
+		// allow a setup method for all tests
 		if (method_exists($this, 'setUp')) {
 			$this->setUp();
 		}
 		
+		// run each test group
 		foreach ($this->_groups as $class) {
 			$class->run();
 		}
 		
+		// allow a tear-down method for all tests
 		if (method_exists($this, 'tearDown')) {
 			$this->tearDown();
 		}
@@ -85,6 +83,6 @@ abstract class Europa_Unit_All
 	 */
 	public function countGroups()
 	{
-		return count($this->getTestClasses());
+		return count($this->_groups);
 	}
 }
