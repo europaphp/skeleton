@@ -25,50 +25,13 @@ class Europa_Request_Http extends Europa_Request
 	}
 	
 	/**
-	 * Returns the string that routes will be matched against.
+	 * Returns the string that routes will be matched against during routing.
 	 * 
 	 * @return string
 	 */
-	public function getRouteRequestString()
+	public function getRouteSubject()
 	{
 		return self::getFullUri();
-	}
-
-	/**
-	 * Provides an easy way to reverse engineer a route for the current
-	 * dispatching controller and returns the resulting uri.
-	 * 
-	 * Allows for fluid URIs. If no route is found matching the passed $uri, 
-	 * then the uri is parsed depending on how it is formatted, necessary
-	 * modifications are made, then it is returned.
-	 * 
-	 * @param string $uri The request URI to transform.
-	 * @param array $params Any parameters to use when reverse-engineering.
-	 * @return string
-	 */
-	public function getUri($uri = null, $params = array())
-	{
-		$uri = trim($uri);
-		// if it has a protocol prepended just return it
-		if (strpos($uri, '://') !== false) {
-			return $uri;
-		}
-		// if the route was found, reverse engineer it and set it
-		$route = $this->getRoute($uri);
-		if ($route) {
-			$uri = $route->getUri($params);
-		}
-		// make consistent
-		if ($uri) {
-			$uri = '/' . ltrim($uri, '/');
-		}
-		// if there is a root uri, add a forward slash to it
-		$root = self::getRootUri();
-		if ($root) {
-			$root = '/' . $root;
-		}
-		// automate
-		return $root . $uri;
 	}
 
 	/**
@@ -86,7 +49,7 @@ class Europa_Request_Http extends Europa_Request
 	public function redirect($uri = '/', $europaRelative = true)
 	{
 		if ($europaRelative) {
-			$uri = $this->uri($uri);
+			$uri = $this->getUri($uri);
 		}
 		header('Location: ' . $uri);
 		exit;

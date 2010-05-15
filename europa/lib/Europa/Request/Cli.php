@@ -28,7 +28,7 @@ class Europa_Request_Cli extends Europa_Request
 	 * 
 	 * @return string
 	 */
-	public function getRouteRequestString()
+	public function getRouteSubject()
 	{
 		return implode(' ', $_SERVER['argv']);
 	}

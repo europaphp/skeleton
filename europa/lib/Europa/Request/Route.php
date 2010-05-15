@@ -12,37 +12,19 @@
 abstract class Europa_Request_Route
 {
 	/**
-	 * The expression used to match the route.
-	 * 
-	 * @var string
-	 */
-	protected $_expression = null;
-	
-	/**
 	 * A way of retrieving a uri representing the route.
 	 * 
 	 * @return string
 	 */
-	abstract public function getUri();
+	abstract public function getUri(array $params = array());
 	
 	/**
-	 * An algorithm for matching the passed $uri to the expression
+	 * An algorithm for matching the passed $subject to the expression
 	 * set on the route. Returns an array of matched parameters or
 	 * false on failure.
 	 * 
-	 * @param string $uri The uri to match against the route.
+	 * @param string $subject The string to match against the route.
 	 * @return array|bool
 	 */
-	abstract public function match($uri);
-	
-	/**
-	 * Constructs a new route and sets the passed in expression.
-	 * 
-	 * @param string $expression The expression to use when matching the route.
-	 * @return Europa_Request_Route_Abstract
-	 */
-	public function __construct($expression)
-	{
-		$this->_expression = (string) $expression;
-	}
+	abstract public function match($subject);
 }

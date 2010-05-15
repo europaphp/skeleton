@@ -13,7 +13,7 @@ abstract class Europa_Request
 {
 	/**
 	 * The params parsed out of the route and cascaded through the
-	 * superglobals.
+	 * super-globals.
 	 * 
 	 * @var array
 	 */
@@ -60,7 +60,7 @@ abstract class Europa_Request
 	 * 
 	 * @return string
 	 */
-	abstract public function getRouteRequestString();
+	abstract public function getRouteSubject();
 	
 	/**
 	 * Renders the layout and view or any combination of the two depending on
@@ -75,10 +75,10 @@ abstract class Europa_Request
 		
 		// set default scripts if not set
 		if ($layout && !$layout->getScript()) {
-			$layout->setScript($this->getLayoutScriptName());
+			$layout->setScript($this->getLayoutScript());
 		}
 		if ($view && !$view->getScript()) {
-			$view->setScript($this->getViewScriptName());
+			$view->setScript($this->getViewScript());
 		}
 		
 		// render
@@ -149,8 +149,8 @@ abstract class Europa_Request
 				// throw exceptions when required params aren't defined
 				} else {
 					throw new Europa_Request_Exception(
-						"Required request parameter ${$param->getName()} for {$this->getControllerClassName()}->{$actionName}() is"
-						. 'not defined.',
+						"Required request parameter ${$param->getName()} for {$controllerName}->{$actionName}() is not"
+						. 'defined.',
 						Europa_Request_Exception::REQUIRED_PARAMETER_NOT_DEFINED
 					);
 				}
@@ -170,7 +170,8 @@ abstract class Europa_Request
 			$controller->$actionName();
 		} else {
 			throw new Europa_Request_Exception(
-				"Action {$actionName} does not exist in {$this->getControllerClassName()} and it was not trapped in __call.",
+				"Action {$actionName} does not exist in {$this->getControllerClassName()} and it was not trapped in"
+				. ' __call.',
 				Europa_Request_Exception::ACTION_NOT_FOUND
 			);
 		}
@@ -187,7 +188,7 @@ abstract class Europa_Request
 	public function route()
 	{
 		foreach ($this->_routes as $route) {
-			$match = $route->match($this->getRouteMatchSubject());
+			$match = $route->match($this->getRouteSubject());
 			if ($match) {
 				$this->_route = $route;
 				return $match;
@@ -368,11 +369,11 @@ abstract class Europa_Request
 	 * 
 	 * @return string
 	 */
-	public function getLayoutScriptName()
+	public function getLayoutScript()
 	{
 		$controller = $this->getParam('controller');
 		$controller = $controller ? $controller : 'index';
-		return Europa_String::create($controller)->camelCase(false);
+		return Europa_String::create($controller)->camelCase(true);
 	}
 
 	/**
@@ -382,11 +383,11 @@ abstract class Europa_Request
 	 * 
 	 * @return string
 	 */
-	public function getViewScriptName()
+	public function getViewScript()
 	{
 		$action = $this->getParam('action');
 		$action = $action ? $action : 'index';
-		return $this->getLayoutScriptName()
+		return $this->getLayoutScript()
 		     . '/' 
 		     . Europa_String::create($action)->camelCase(false);
 	}
