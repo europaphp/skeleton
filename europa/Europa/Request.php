@@ -149,8 +149,8 @@ abstract class Europa_Request
 				// throw exceptions when required params aren't defined
 				} else {
 					throw new Europa_Request_Exception(
-						"Required request parameter ${$param->getName()} for {$controllerName}->{$actionName}() is not"
-						. 'defined.',
+						"Required request parameter \${$param->getName()} for {$controllerName}->{$actionName}() is"
+						. ' not defined',
 						Europa_Request_Exception::REQUIRED_PARAMETER_NOT_DEFINED
 					);
 				}
