@@ -47,7 +47,9 @@ abstract class Europa_Unit_Suite implements Europa_Unit_Testable
 	 * @return void
 	 */
 	public function setUp()
-	{}
+	{
+		
+	}
 	
 	/**
 	 * Gets run after all tests.
@@ -55,7 +57,9 @@ abstract class Europa_Unit_Suite implements Europa_Unit_Testable
 	 * @return void
 	 */
 	public function tearDown()
-	{}
+	{
+		
+	}
 	
 	/**
 	 * Runs all tests on each group.

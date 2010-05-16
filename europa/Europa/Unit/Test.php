@@ -18,7 +18,9 @@ abstract class Europa_Unit_Test implements Europa_Unit_Testable
 	 * @return void
 	 */
 	public function setUp()
-	{}
+	{
+		
+	}
 	
 	/**
 	 * Gets run after all tests.
@@ -26,7 +28,9 @@ abstract class Europa_Unit_Test implements Europa_Unit_Testable
 	 * @return void
 	 */
 	public function tearDown()
-	{}
+	{
+		
+	}
 	
 	/**
 	 * Returns the name of the test that was run.
