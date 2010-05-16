@@ -1,6 +1,6 @@
 == 1.2.0 ==
 
-1. Move to PHP 5.3.0 compliance. Rename all _Abstract classes to a more appropriate name and implement namespaces.
+1. Move to PHP 5.3.0 compliance. Rename all classes such suffixed with reserved words, such as "Abstract", so errors aren't thrown when implementing namespaces.
 
 2. Add a Europa_Form component with default element lists and elements.
 
@@ -13,6 +13,12 @@
 6. Abstract Europa_Request. Add Europa_Request_Http and Europa_Request_Cli. Abstract appropriate methods and split up methods into specific request objects which don't belong in abstracted class.
 
 7. Lighten up Europa_Request->dispatch().
+
+8. Re-organize directory structure.
+
+9. Add helpers and an extra controllers to the sandbox.
+
+10. Re-work unit test arcitecture.
 
 
 
