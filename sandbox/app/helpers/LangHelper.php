@@ -35,7 +35,7 @@ class LangHelper
 	/**
 	 * Allows a language variable to be called as a method. If the first
 	 * argument is an array, then named parameters are replaced. If not, then
-	 * sprintf() is used to format the value.
+	 * vsprintf() is used to format the value.
 	 * 
 	 * Named parameters are prefixed using a colon (:) in the ini value.
 	 * 
