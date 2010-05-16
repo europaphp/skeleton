@@ -1,18 +1,8 @@
 <?php
 
 /**
- * Base class for a test group.
- * 
- * By default all methods prefixed with 'test' are considered test methods and
- * will be ran and evaluated.
- * 
- * Both a setUp and a tearDown method is available and works as in other unit
- * test frameworks. Europa_Unit_Group->setUp() gets run after __construct(),
- * but before any tests are run. Europa_Unit_Group->tearDown() gets run after
- * the tests are run.
- * 
- * Tests that return true, pass; false, failed; and anything that returns
- * otherwise is considered incomplete.
+ * Base class for a group of test classes. Since this class implements the
+ * testable interface, there can be multiple levels of test groups and tests.
  * 
  * @category UnitTesting
  * @package  Europa
@@ -20,7 +10,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-abstract class Europa_Unit_Group
+abstract class Europa_Unit_Group implements Europa_Unit_Testable
 {
 	/**
 	 * Contains all test names that passed.
@@ -44,57 +34,61 @@ abstract class Europa_Unit_Group
 	protected $_failed = array();
 	
 	/**
-	 * Runs all test methods in the test group.
-	 * 
-	 * @return Europa_Unit
-	 */
-	public function run()
-	{
-		if (method_exists($this, 'setUp')) {
-			$this->setUp();
-		}
-		
-		foreach ($this->getTestMethods() as $method) {
-			$res = $this->$method();
-			
-			if ($res === true) {
-				$this->_passed[] = $method;
-			} elseif ($res === false) {
-				$this->_failed[] = $method;
-			} else {
-				$this->_incomplete[] = $method;
-			}
-		}
-		
-		if (method_exists($this, 'tearDown')) {
-			$this->tearDown();
-		}
-	}
-	
-	/**
-	 * Retrieves all methods from the test group class and filters them
-	 * returning only those which are valid test methods.
+	 * Returns the class names for the test classes. Since the classes are
+	 * designed to be autoloaded, no paths are necessary.
 	 * 
 	 * @return array
 	 */
-	public function getTestMethods()
+	abstract public function getTests();
+	
+	/**
+	 * Gets run before all tests.
+	 * 
+	 * @return void
+	 */
+	public function setUp()
+	{}
+	
+	/**
+	 * Gets run after all tests.
+	 * 
+	 * @return void
+	 */
+	public function tearDown()
+	{}
+	
+	/**
+	 * Runs all tests on each group.
+	 * 
+	 * @return mixed
+	 */
+	public function run()
 	{
-		$class   = new ReflectionClass($this);
-		$methods = array();
-		
-		foreach ($class->getMethods() as $index => $method) {
-			$method = $method->getName();
-			
-			if (strpos($method, 'test') === 0) {
-				$methods[] = $method;
-			}
+		$this->setUp();
+		foreach ($this->getTests() as $class) {
+			$class = new $class;
+			$class->setUp();
+			$result = $class->run();
+			if ($class instanceof Europa_Unit_Group) {
+				$this->_passed     = array_merge($this->_passed, $class->getPassed());
+				$this->_incomplete = array_merge($this->_incomplete, $class->getIncomplete());
+				$this->_failed     = array_merge($this->_failed, $class->getFailed());
+			} else {
+				if ($result === true) {
+					$this->_passed[] = $class;
+				} elseif ($result === false) {
+					$this->_failed[] = $class;
+				} else {		
+					$this->_incomplete[] = $class;
+				}
+			}	
+			$class->tearDown();
 		}
-		
-		return $methods;
+		$this->tearDown();
 	}
 	
 	/**
-	 * Returns the name of the test group. Defaults to the class' name.
+	 * Returns the name of the test group.
 	 * 
 	 * @return string
 	 */
@@ -102,7 +96,7 @@ abstract class Europa_Unit_Group
 	{
 		return get_class($this);
 	}
-	
+
 	/**
 	 * Returns all test names that passed.
 	 * 
@@ -112,7 +106,7 @@ abstract class Europa_Unit_Group
 	{
 		return $this->_passed;
 	}
-	
+
 	/**
 	 * Returns all test names that were incomplete.
 	 * 
@@ -122,7 +116,7 @@ abstract class Europa_Unit_Group
 	{
 		return $this->_incomplete;
 	}
-	
+
 	/**
 	 * Returns all test names that failed.
 	 * 
@@ -132,44 +126,37 @@ abstract class Europa_Unit_Group
 	{
 		return $this->_failed;
 	}
-	
+
 	/**
-	 * Returns the number of tests that passed.
+	 * Returns the number of tests that passed. If tests weren't run yet, then
+	 * 0 will be returned.
 	 * 
 	 * @return int
 	 */
 	public function countPassed()
 	{
-		return count($this->_passed);
+		return count($this->getPassed());
 	}
-	
+
 	/**
-	 * Returns the number of test that were incomplete.
+	 * Returns the number of tests that were incomplete. If tests weren't run
+	 * yet, then 0 will be returned.
 	 * 
 	 * @return int
 	 */
 	public function countIncomplete()
 	{
-		return count($this->_incomplete);
+		return count($this->getIncomplete());
 	}
-	
+
 	/**
-	 * Returns the number of tests that failed.
+	 * Returns the number of tests that failed. If tests weren't run yet, then
+	 * 0 will be returned.
 	 * 
 	 * @return int
 	 */
 	public function countFailed()
 	{
-		return count(``);
-	}
-	
-	/**
-	 * Returns the total number of tests.
-	 * 
-	 * @return int
-	 */
-	public function countTotal()
-	{
-		return count($this->getTestMethods());
+		return count($this->getFailed());
 	}
 }
