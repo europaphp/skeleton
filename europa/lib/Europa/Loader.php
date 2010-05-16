@@ -116,7 +116,6 @@ class Europa_Loader
 	public static function addPath($path)
 	{
 		$realpath = realpath($path);
-		
 		// the path won't be added if it doesn't exist
 		if (!$realpath) {
 			// we require the exception files here since they may not be
@@ -128,7 +127,6 @@ class Europa_Loader
 				Europa_Loader_Exception::INVALID_PATH
 			);
 		}
-		
 		self::$_paths[] = $realpath;
 	}
 	
