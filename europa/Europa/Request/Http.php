@@ -31,7 +31,7 @@ class Europa_Request_Http extends Europa_Request
 	 */
 	public function getRouteSubject()
 	{
-		return self::getFullUri();
+		return self::getRequestUri();
 	}
 	
 	/**

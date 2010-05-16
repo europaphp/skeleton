@@ -20,12 +20,12 @@
 	</package>
 
 	<package id="build" macro="true">
-		<dependency>all</dependency>
+		<dependency>*</dependency>
 		<file>build/*</file>
 	</package>
 
 	<package id="tests" macro="true">
-		<dependency>all</dependency>
+		<dependency>*</dependency>
 		<file>tests/*</file>
 	</package>
 
@@ -35,16 +35,12 @@
 		<file>readme.txt</file>
 	</package>
 
-	<package id="vendors-pquery">
-		<file>vendors/pQuery.php</file>
+	<package id="pQuery">
+		<file>vendor/pQuery.php</file>
 	</package>
 
 	<package id="sniffs">
 		<file>codesniffer/*</file>
-	</package>
-
-	<package id="cli">
-		<file>europa/Europa/Cli.php</file>
 	</package>
 
 	<package id="controller">
@@ -59,6 +55,7 @@
 	<package id="form">
 		<dependency>overloader</dependency>
 		<dependency>string</dependency>
+		<dependency>validator</dependency>
 		<file>europa/Europa/Form/*</file>
 		<file>europa/Europa/Form.php</file>
 	</package>
@@ -87,6 +84,10 @@
 
 	<package id="unit">
 		<file>europa/Europa/Unit/*</file>
+	</package>
+	
+	<package id="validator">
+		<file>europa/Europa/Validator.php</file>
 	</package>
 
 	<package id="view">

@@ -35,7 +35,6 @@ class Europa_View_Php extends Europa_View
 		if ($script) {
 			$this->setScript($script);
 		}
-		
 		$this->setParams($params);
 	}
 	

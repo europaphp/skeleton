@@ -12,6 +12,13 @@
 final class Europa_Request_Route_Regex extends Europa_Request_Route
 {
 	/**
+	 * The expression used to match the route.
+	 * 
+	 * @var string
+	 */
+	protected $_expression;
+	
+	/**
 	 * Since it is very difficult to reverse engineer a regular expression
 	 * a reverse engineering string is used to reverse engineer the route
 	 * back into a URI. This allows for fluid links.
@@ -30,10 +37,8 @@ final class Europa_Request_Route_Regex extends Europa_Request_Route
 	 */
 	public function __construct($expression, $uriMap = null)
 	{
-		// set expression using the parent
-		parent::__construct($expression);
-		// set additional parameters
-		$this->_uriMap = (string) $uriMap;
+		$this->_expression = $expression;
+		$this->_uriMap     = $uriMap;
 	}
 	
 	/**
@@ -45,7 +50,7 @@ final class Europa_Request_Route_Regex extends Europa_Request_Route
 	 * were matched in the request.
 	 * @return string
 	 */
-	public function getUri($params = array())
+	public function getUri(array $params = array())
 	{
 		$parsed = $this->_uriMap;
 		$params = array_merge(
