@@ -26,12 +26,12 @@ abstract class Europa_View
 	abstract public function __toString();
 	
 	/**
-	 * Similar to calling a plugin via Europa_View->__call(), but treats the
-	 * plugin as a singleton and once instantiated, that instance is always
+	 * Similar to calling a helper via Europa_View->__call(), but treats the
+	 * helper as a singleton and once instantiated, that instance is always
 	 * returned for the duration of the Europa_View object's lifespan unless
 	 * unset.
 	 * 
-	 * @param string $name The name of the property to get or plugin to load.
+	 * @param string $name The name of the property to get or helper to load.
 	 * 
 	 * @return mixed
 	 */
@@ -88,27 +88,29 @@ abstract class Europa_View
 	}
 	
 	/**
-	 * Attempts to load a plugin and executes it. Returns null of not found.
+	 * Attempts to load a helper and executes it. Returns null of not found.
 	 * 
 	 * @return mixed
 	 */
 	public function __call($func, $args = array())
 	{
-		$class = $this->_getPluginClassName($func);
+		// format the helper class name for the given method
+		$class = $this->_getHelperClassName($func);
 		
 		// if unable to load, return null
 		if (!Europa_Loader::loadClass($class)) {
 			return null;
 		}
 		
-		// reflect and invoke with passed args
-		$class = new ReflectionClass($class);
-		if ($class->hasMethod('__construct')) {
-			$class = $class->newInstanceArgs($args);
-		} else {
-			$class = $class->newInstanceArgs();
+		// instantiate the helper and pass in the current view
+		$class = new $class($this);
+		
+		// if a helper methods exists, call it with $args and return the value
+		if (method_exists($class, $func)) {
+			return call_user_func_array(array($class, $func), $args);
 		}
 		
+		// or just return the helper instance
 		return $class;
 	}
 	
@@ -143,12 +145,12 @@ abstract class Europa_View
 	}
 	
 	/**
-	 * Returns a plugin class name based on the $name passed in.
+	 * Returns a helper class name based on the $name passed in.
 	 * 
-	 * @param string $name The name of the plugin to get the class name of.
+	 * @param string $name The name of the helper to get the class name of.
 	 * @return string
 	 */
-	protected function _getPluginClassName($name)
+	protected function _getHelperClassName($name)
 	{
 		return (string) Europa_String::create($name)->camelCase(true) . 'Helper';
 	}

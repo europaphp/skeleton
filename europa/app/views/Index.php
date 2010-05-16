@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>EuropaPHP</title>
+		<title><?php echo $this->lang->title ?></title>
 		<style type="text/css">
 			body {
 				font-size: 1em;
@@ -29,11 +29,10 @@
 		</style>
 	</head>
 	<body>
-		<h1><?php echo $this->title; ?></h1>
 		<?php echo Europa_Request_Http::getActiveInstance()->getView(); ?>
 		<div id="footer">
-			Rendered in <?php echo round(microtime() - EUROPA_START_TIME, 4); ?> seconds
-			using <?php echo round(memory_get_peak_usage() / 1024 / 1024, 2); ?> MegaBytes of memory.
+			<?php echo $this->lang->time(round(microtime() - EUROPA_START_TIME, 4)); ?>
+			<?php echo $this->lang->memory(array('megabytes' => round(memory_get_peak_usage() / 1024 / 1024, 2))); ?>
 		</div>
 	</body>
 </html>

@@ -7,10 +7,8 @@ ini_set('display_errors', 'on');
 // for reporting puroses
 define('EUROPA_START_TIME', microtime());
 
-// require the loader
+// require the loader, register autoloading and define load paths
 require 'lib/Europa/Loader.php';
-
-// register autoloading and define paths
 Europa_Loader::registerAutoload();
 Europa_Loader::addPath('./app/controllers');
 Europa_Loader::addPath('./app/helpers');
