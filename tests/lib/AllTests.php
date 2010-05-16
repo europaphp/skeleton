@@ -1,12 +1,12 @@
 <?php
 
-class AllTests extends Europa_Unit_Group
+class AllTests extends Europa_Unit_Suite
 {
 	public function getTests()
 	{
 		return array(
-			'Group_Request',
-			'Group_Loader'
+			'Suite_Loader',
+			'Suite_Request'
 		);
 	}
 }

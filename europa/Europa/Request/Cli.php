@@ -19,8 +19,8 @@ class Europa_Request_Cli extends Europa_Request
 	 */
 	public function __construct()
 	{
-		$this->_parseParams();
-		$this->setLayout(new Europa_View_Php)
+		$this->_parseParams()
+		     ->setLayout(new Europa_View_Php)
 		     ->setView(new Europa_View_Php);
 	}
 	

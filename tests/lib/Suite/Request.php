@@ -1,6 +1,6 @@
 <?php
 
-class Group_Request extends Europa_Unit_Group
+class Suite_Request extends Europa_Unit_Suite
 {
 	public function getTests()
 	{

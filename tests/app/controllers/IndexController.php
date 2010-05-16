@@ -1,20 +1,7 @@
 <?php
 
-class IndexController
+class IndexController extends Europa_Controller
 {
-	private $_request;
-	
-	private $_layout;
-	
-	private $_view;
-	
-	public function __construct()
-	{
-		$this->_request = Europa_Request::getActiveInstance();
-		$this->_layout  = $this->_request->getLayout();
-		$this->_view    = $this->_request->getView();
-	}
-	
 	public function indexAction($test = 'AllTests', $verbose = false)
 	{
 		$class = new $test;

@@ -10,7 +10,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-abstract class Europa_Unit_Group implements Europa_Unit_Testable
+abstract class Europa_Unit_Suite implements Europa_Unit_Testable
 {
 	/**
 	 * Contains all test names that passed.
@@ -84,7 +84,7 @@ abstract class Europa_Unit_Group implements Europa_Unit_Testable
 			$result = $class->run();
 			
 			// all forms of test are either test groups or just tests
-			if ($class instanceof Europa_Unit_Group) {
+			if ($class instanceof Europa_Unit_Suite) {
 				$this->_passed     = array_merge($this->_passed, $class->getPassed());
 				$this->_incomplete = array_merge($this->_incomplete, $class->getIncomplete());
 				$this->_failed     = array_merge($this->_failed, $class->getFailed());
