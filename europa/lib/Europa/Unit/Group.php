@@ -64,11 +64,26 @@ abstract class Europa_Unit_Group implements Europa_Unit_Testable
 	 */
 	public function run()
 	{
+		// pre-test group hook
 		$this->setUp();
+		
+		// run through each test/group and run them
 		foreach ($this->getTests() as $class) {
+			// class names are returned, so instantiate
 			$class = new $class;
+			
+			// test must be testable
+			if (!$class instanceof Europa_Unit_Testable) {
+				throw new Europa_Unit_Exception(
+					get_class($class) . 'must implement Europa_Unit_Testable'
+				);
+			}
+			
+			// pre-test hook and running
 			$class->setUp();
 			$result = $class->run();
+			
+			// all forms of test are either test groups or just tests
 			if ($class instanceof Europa_Unit_Group) {
 				$this->_passed     = array_merge($this->_passed, $class->getPassed());
 				$this->_incomplete = array_merge($this->_incomplete, $class->getIncomplete());
@@ -81,9 +96,13 @@ abstract class Europa_Unit_Group implements Europa_Unit_Testable
 				} else {		
 					$this->_incomplete[] = $class;
 				}
-			}	
+			}
+			
+			// post-test hook
 			$class->tearDown();
 		}
+		
+		// post-test group hook
 		$this->tearDown();
 	}
 	

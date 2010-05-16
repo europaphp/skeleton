@@ -88,7 +88,7 @@ abstract class Europa_Request
 			return (string) $view;
 		}
 		
-		return null;
+		return '';
 	}
 	
 	/**
@@ -373,7 +373,9 @@ abstract class Europa_Request
 	{
 		$controller = $this->getParam('controller');
 		$controller = $controller ? $controller : 'index';
-		return Europa_String::create($controller)->camelCase(true);
+		return Europa_String::create($controller)
+		     ->camelCase(true)
+		     ->__toString();
 	}
 
 	/**
@@ -389,7 +391,9 @@ abstract class Europa_Request
 		$action = $action ? $action : 'index';
 		return $this->getLayoutScript()
 		     . '/' 
-		     . Europa_String::create($action)->camelCase(false);
+		     . Europa_String::create($action)
+		     ->camelCase(false)
+		     ->__toString();
 	}
 	
 	/**
@@ -415,5 +419,15 @@ abstract class Europa_Request
 	public static function getStack()
 	{
 		return self::$_stack;
+	}
+	
+	/**
+	 * Returns whether or not the request is a CLI request or not.
+	 * 
+	 * @return bool
+	 */
+	public static function isCli()
+	{
+		return defined('STDIN');
 	}
 }

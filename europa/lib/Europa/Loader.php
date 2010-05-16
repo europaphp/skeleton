@@ -35,8 +35,7 @@ class Europa_Loader
 	 * load paths in an explicit call to loadClass.
 	 * 
 	 * @param string $className The Class to load.
-	 * @param mixed  $paths     Alternate load paths to search in first.
-	 * 
+	 * @param mixed $paths Alternate load paths to search in first.
 	 * @return bool|string
 	 */
 	public static function loadClass($className, $paths = null)
@@ -110,7 +109,6 @@ class Europa_Loader
 	 * If the path is unable to be resolve, an exception is thrown.
 	 * 
 	 * @param string $path The path to add to the list of load paths.
-	 * 
 	 * @return bool|string
 	 */
 	public static function addPath($path)
