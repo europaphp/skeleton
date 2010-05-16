@@ -10,9 +10,9 @@ if ($argc === 1 || in_array($argv[1], array('--help', '-help', '-h', '-?'))):
 
 This is a command line script for building EuropaPHP. There should be an xml
 file called "build.xml" in this directory. Dependencies are automatically
-built in depending on the components chosen.
+built in depending on the package chosen.
 
-  Usage: build.php component1 component2 ...
+  Usage: build.php package1 package2 ...
 
 <?php
 
@@ -27,11 +27,11 @@ endif;
 
 building...<?php
 
-require_once dirname(__FILE__) . '/../europa/lib/Europa/Loader.php';
+require_once dirname(__FILE__) . '/../europa/Europa/Loader.php';
 Europa_Loader::registerAutoload();
 Europa_Loader::addPath(dirname(__FILE__) . '/lib');
 Europa_Loader::addPath(dirname(__FILE__) . '/../vendor');
-Europa_Loader::addPath(dirname(__FILE__) . '/../europa/lib');
+Europa_Loader::addPath(dirname(__FILE__) . '/../europa');
 
 // create a new build
 $release = new Europa_Build(
@@ -44,8 +44,8 @@ $release = new Europa_Build(
 );
 
 // add all passed components
-foreach ($argv as $component) {
-	$release->addComponent($component);
+foreach ($argv as $package) {
+	$release->addPackage($package);
 }
 
 // output to browser

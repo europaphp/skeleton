@@ -4,7 +4,7 @@ class Europa_Build
 {
 	protected $_xml;
 	
-	protected $_components = array();
+	protected $_packages = array();
 	
 	protected $_basePath;
 	
@@ -40,30 +40,30 @@ class Europa_Build
 		$this->_zipBase  = $zipBase;
 	}
 	
-	public function addComponent($component)
+	public function addPackage($package)
 	{
 		// if it's already added, do nothing
-		if (in_array($component, $this->_components)) {
+		if (in_array($package, $this->_packages)) {
 			return $this;
 		}
 		
-		$component = $this->_xml->find('//component[@id="' . $component . '"]');
+		$package = $this->_xml->find('//package[@id="' . $package . '"]');
 		
-		if ($component->length) {
-			// add to list of components
-			$this->_components[] = $component->attr('id');
+		if ($package->length) {
+			// add to list of packages
+			$this->_packages[] = $package->attr('id');
 			
-			// if this component has any dependencies, add them also
-			foreach ($component->find('//dependency') as $dependency) {
+			// if this package has any dependencies, add them also
+			foreach ($package->find('//dependency') as $dependency) {
 				$dep = $dependency->text();
 				
-				// dependency on all components
+				// dependency on all packages
 				if ($dep === '*') {
-					foreach ($this->_xml->find('//component') as $comp) {
-						$this->addComponent($comp->attr('id'));
+					foreach ($this->_xml->find('//package') as $comp) {
+						$this->addPackage($comp->attr('id'));
 					}
 				} else {
-					$this->addComponent($dep);
+					$this->addPackage($dep);
 				}
 			}
 		}
@@ -96,9 +96,10 @@ class Europa_Build
 	
 	protected function zip($fullpath)
 	{
+		// create a new zip file object
 		$zip = new ZipArchive();
 		
-		// make sure the zip can be created
+		// make sure the zip can be created and open it
 		if (!$zip->open($fullpath, ZipArchive::OVERWRITE)) {
 			throw new Europa_Build_Exception(
 				'Cannot create file '
@@ -108,20 +109,53 @@ class Europa_Build
 			);
 		}
 		
-		// add component files
-		foreach ($this->_components as $component) {
+		// add all package files to the zip file
+		foreach ($this->_packages as $package) {
+			// find all package files
 			foreach (
-				$this->_xml->find('//component[@id="' . $component . '"]/file') 
+				$this->_xml->find('//package[@id="' . $package . '"]/file') 
 				as $file
 			) {
-				$file = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $file->text());
+				$file  = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $file->text());
+				$file  = $this->_basePath . $file;
+				$files = array();
+				$parts = explode(DIRECTORY_SEPARATOR, $file);
 				
-				if (is_file($this->_basePath . $file)) {
-					$zip->addFile($this->_basePath . $file, $this->_zipBase . $file);
+				// allow wildcards
+				if (end($parts) === '*') {
+					array_pop($parts);
+					$dirs = new RecursiveIteratorIterator(
+						new RecursiveDirectoryIterator(implode(DIRECTORY_SEPARATOR, $parts)),
+						RecursiveIteratorIterator::SELF_FIRST
+					);
+					// add each item if it's a file
+					foreach ($dirs as $item) {
+						if ($item->isDir()) {
+							continue;
+						}
+						$files[] = $item->getPathname();
+					}
+				// or absolute file paths
+				} else {
+					$file = realpath($file);
+					if (!$file) {
+						continue;
+					}
+					$files = array($file);
+				}
+				
+				// add each individual file to the zip file
+				foreach ($files as $file) {
+					if (is_file($file)) {
+						// normalize the file so it appears in the intended path in the zip
+						$file = substr($file, strlen($this->_basePath));
+						$zip->addFile($file, $this->_zipBase . $file);
+					}
 				}
 			}
 		}
 		
+		// close the zip file
 		$zip->close();
 		
 		return $this;

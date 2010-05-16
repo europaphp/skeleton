@@ -1,107 +1,97 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<component id="all" macro="true">
-	<dependency>*</dependency>
-</component>
-<component id="core" macro="true">
-	<dependency>exception</dependency>
-	<dependency>loader</dependency>
-	<dependency>request</dependency>
-	<dependency>string</dependency>
-	<dependency>view</dependency>
-</component>
-<component id="sandbox" macro="true">
-	<file>europa/app/controllers/IndexController.php</file>
-	<file>europa/app/views/index/index.php</file>
-	<file>europa/app/views/index.php</file>
-	<file>europa/index.php</file>
-	<dependency>core</dependency>
-	<dependency>controller</dependency>
-</component>
-<component id="build" macro="true">
-	<file>build/lib/Europa/Build/Exception.php</file>
-	<file>build/lib/Europa/Build.php</file>
-	<file>build/build.php</file>
-	<file>build/build.xml</file>
-	<dependency>*</dependency>
-</component>
-<component id="tests" macro="true">
-	<file>tests/EuropaTest/Controller.php</file>
-	<file>tests/EuropaTest/Exception.php</file>
-	<file>tests/EuropaTest/Loader.php</file>
-	<file>tests/EuropaTest/Route.php</file>
-	<file>tests/EuropaTest/String.php</file>
-	<file>tests/EuropaTest/View.php</file>
-	<file>tests/EuropaTest.php</file>
-	<file>tests/run.php</file>
-	<dependency>*</dependency>
-</component>
-<component id="docs">
-	<file>changelog.txt</file>
-	<file>license.txt</file>
-	<file>readme.txt</file>
-</component>
-<component id="vendors-pquery">
-	<file>vendors/pQuery.php</file>
-</component>
-<component id="sniffs">
-	<file>codesniffer/Europa/Sniffs/Functions/FunctionCallSignatureSniff.php</file>
-	<file>codesniffer/Europa/Sniffs/WhiteSpace/EnforceTabIndentSniff.php</file>
-	<file>codesniffer/Europa/EuropaCodingStandard.php</file>
-</component>
-<component id="cli">
-	<file>europa/lib/Europa/Cli.php</file>
-</component>
-<component id="controller">
-	<file>europa/lib/Europa/Controller.php</file>
-	<dependency>core</dependency>
-</component>
-<component id="exception">
-	<file>europa/lib/Europa/Exception.php</file>
-</component>
-<component id="form">
-	<file>europa/lib/Europa/Form/Element/Button.php</file>
-	<file>europa/lib/Europa/Form/Element/Input.php</file>
-	<file>europa/lib/Europa/Form/Element/Password.php</file>
-	<file>europa/lib/Europa/Form/Element/Reset.php</file>
-	<file>europa/lib/Europa/Form/Element/Submit.php</file>
-	<file>europa/lib/Europa/Form/Element/Text.php</file>
-	<file>europa/lib/Europa/Form/Element/Textarea.php</file>
-	<file>europa/lib/Europa/Form/Element.php</file>
-	<file>europa/lib/Europa/Form/ElementList.php</file>
-	<file>europa/lib/Europa/Form/Renderable.php</file>
-	<file>europa/lib/Europa/Form.php</file>
-	<dependency>overloader</dependency>
-	<dependency>string</dependency>
-</component>
-<component id="loader">
-	<file>europa/lib/Europa/Loader.php</file>
-</component>
-<component id="overloader">
-	<file>europa/lib/Europa/Overloader.php</file>
-</component>
-<component id="registry">
-	<file>europa/lib/Europa/Registry.php</file>
-</component>
-<component id="request">
-	<file>europa/lib/Europa/Request/Route/Regex.php</file>
-	<file>europa/lib/Europa/Request/Exception.php</file>
-	<file>europa/lib/Europa/Request/Route.php</file>
-	<file>europa/lib/Europa/Request.php</file>
-	<dependency>core</dependency>
-</component>
-<component id="string">
-	<file>europa/lib/Europa/String.php</file>
-</component>
-<component id="unit">
-	<file>europa/lib/Europa/Unit/All.php</file>
-	<file>europa/lib/Europa/Unit/Group.php</file>
-</component>
-<component id="view">
-	<file>europa/lib/Europa/View/Php.php</file>
-	<file>europa/lib/Europa/View.php</file>
-	<dependency>core</dependency>
-</component>
-<component id="views">
-	<file>europa/lib/Europa/View/Json.php</file>
-	<dependency>core</dependency>
-</component>
+
+<packages>
+	<package id="all" macro="true">
+		<dependency>*</dependency>
+	</package>
+
+	<package id="core" macro="true">
+		<dependency>controller</dependency>
+		<dependency>exception</dependency>
+		<dependency>loader</dependency>
+		<dependency>request</dependency>
+		<dependency>string</dependency>
+		<dependency>view</dependency>
+	</package>
+
+	<package id="sandbox" macro="true">
+		<dependency>core</dependency>
+		<file>sandbox/*</file>
+	</package>
+
+	<package id="build" macro="true">
+		<dependency>all</dependency>
+		<file>build/*</file>
+	</package>
+
+	<package id="tests" macro="true">
+		<dependency>all</dependency>
+		<file>tests/*</file>
+	</package>
+
+	<package id="docs">
+		<file>changelog.txt</file>
+		<file>license.txt</file>
+		<file>readme.txt</file>
+	</package>
+
+	<package id="vendors-pquery">
+		<file>vendors/pQuery.php</file>
+	</package>
+
+	<package id="sniffs">
+		<file>codesniffer/*</file>
+	</package>
+
+	<package id="cli">
+		<file>europa/Europa/Cli.php</file>
+	</package>
+
+	<package id="controller">
+		<dependency>core</dependency>
+		<file>europa/Europa/Controller.php</file>
+	</package>
+
+	<package id="exception">
+		<file>europa/Europa/Exception.php</file>
+	</package>
+
+	<package id="form">
+		<dependency>overloader</dependency>
+		<dependency>string</dependency>
+		<file>europa/Europa/Form/*</file>
+		<file>europa/Europa/Form.php</file>
+	</package>
+
+	<package id="loader">
+		<file>europa/Europa/Loader.php</file>
+	</package>
+
+	<package id="overloader">
+		<file>europa/Europa/Overloader.php</file>
+	</package>
+
+	<package id="registry">
+		<file>europa/Europa/Registry.php</file>
+	</package>
+
+	<package id="request">
+		<dependency>core</dependency>
+		<file>europa/Europa/Request/*</file>
+		<file>europa/Europa/Request.php</file>
+	</package>
+
+	<package id="string">
+		<file>europa/Europa/String.php</file>
+	</package>
+
+	<package id="unit">
+		<file>europa/Europa/Unit/*</file>
+	</package>
+
+	<package id="view">
+		<dependency>core</dependency>
+		<file>europa/Europa/View/*</file>
+		<file>europa/Europa/View.php</file>
+	</package>
+</packages>
