@@ -1,8 +1,7 @@
 <?php
 
 /**
- * An example of an abstract controller to act as a base class for all
- * controllers.
+ * An optional base controller for all controller classes.
  * 
  * @category  Controllers
  * @package   Europa

@@ -1,14 +1,13 @@
 <?php
 
 /**
- * @author Trey Shugart
- */
-
-/**
- * Provides a fluid object oriented way to manipulate strings.
- *
- * @package Europa
- * @subpackage String
+ * Europa fluid string manipulation class.
+ * 
+ * @category String
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  (c) 2010 Trey Shugart
+ * @link     http://europaphp.org/license
  */
 class Europa_String
 {
