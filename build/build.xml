@@ -2,7 +2,7 @@
 
 <packages>
 	<package id="all" macro="true">
-		<dependency>*</dependency>
+		<directory>.</directory>
 	</package>
 
 	<package id="core" macro="true">
@@ -16,17 +16,18 @@
 
 	<package id="sandbox" macro="true">
 		<dependency>core</dependency>
-		<file>sandbox/*</file>
+		<directory>sandbox</directory>
 	</package>
 
 	<package id="build" macro="true">
 		<dependency>*</dependency>
-		<file>build/*</file>
+		<directory>build</directory>
 	</package>
 
 	<package id="tests" macro="true">
 		<dependency>*</dependency>
-		<file>tests/*</file>
+		<directory>lib/Test</directory>
+		<directory>tests</directory>
 	</package>
 
 	<package id="docs">
@@ -35,64 +36,69 @@
 		<file>readme.txt</file>
 	</package>
 
-	<package id="pQuery">
-		<file>vendor/pQuery.php</file>
-	</package>
-
 	<package id="sniffs">
-		<file>codesniffer/*</file>
+		<directory>codesniffer</directory>
 	</package>
 
 	<package id="controller">
 		<dependency>core</dependency>
-		<file>europa/Europa/Controller.php</file>
+		<file>lib/Europa/Controller.php</file>
 	</package>
 
 	<package id="exception">
-		<file>europa/Europa/Exception.php</file>
+		<file>lib/Europa/Exception.php</file>
 	</package>
 
 	<package id="form">
 		<dependency>overloader</dependency>
 		<dependency>string</dependency>
 		<dependency>validator</dependency>
-		<file>europa/Europa/Form/*</file>
-		<file>europa/Europa/Form.php</file>
+		<directory>lib/Europa/Form</directory>
+		<file>lib/Europa/Form.php</file>
 	</package>
 
 	<package id="loader">
-		<file>europa/Europa/Loader.php</file>
+		<file>lib/Europa/Loader.php</file>
 	</package>
 
 	<package id="overloader">
-		<file>europa/Europa/Overloader.php</file>
+		<file>lib/Europa/Overloader.php</file>
+	</package>
+	
+	<package id="package">
+		<dependency>pquery</dependency>
+		<directory>lib/Package</directory>
+	</package>
+
+	<package id="pquery">
+		<file>lib/pQuery.php</file>
 	</package>
 
 	<package id="registry">
-		<file>europa/Europa/Registry.php</file>
+		<file>lib/Europa/Registry.php</file>
 	</package>
 
 	<package id="request">
 		<dependency>core</dependency>
-		<file>europa/Europa/Request/*</file>
-		<file>europa/Europa/Request.php</file>
+		<directory>lib/Europa/Request</directory>
+		<file>lib/Europa/Request.php</file>
 	</package>
 
 	<package id="string">
-		<file>europa/Europa/String.php</file>
+		<file>lib/Europa/String.php</file>
 	</package>
 
 	<package id="unit">
-		<file>europa/Europa/Unit/*</file>
+		<directory>lib/Europa/Unit</directory>
 	</package>
 	
 	<package id="validator">
-		<file>europa/Europa/Validator.php</file>
+		<file>lib/Europa/Validator.php</file>
 	</package>
 
 	<package id="view">
 		<dependency>core</dependency>
-		<file>europa/Europa/View/*</file>
-		<file>europa/Europa/View.php</file>
+		<directory>lib/Europa/View</directory>
+		<file>lib/Europa/View.php</file>
 	</package>
 </packages>

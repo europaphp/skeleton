@@ -3,10 +3,9 @@
 error_reporting(E_ALL ^ E_STRICT);
 ini_set('display_errors', 'on');
 
-require_once dirname(__FILE__) . '/../europa/Europa/Loader.php';
+require_once dirname(__FILE__) . '/../lib/Europa/Loader.php';
 Europa_Loader::registerAutoload();
-Europa_Loader::addPath(dirname(__FILE__) . '/../europa');
-Europa_Loader::addPath(dirname(__FILE__) . '/lib');
+Europa_Loader::addPath(dirname(__FILE__) . '/../lib');
 Europa_Loader::addPath(dirname(__FILE__) . '/app/controllers');
 
 try {

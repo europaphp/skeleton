@@ -23,30 +23,26 @@ if (!is_file($base . 'build.xml')):
 	die('Unable to locate the build file: build.xml');
 endif;
 
+// shift off the script name
+array_shift($argv);
+
 ?>
 
 building...<?php
 
-require_once dirname(__FILE__) . '/../europa/Europa/Loader.php';
+require_once dirname(__FILE__) . '/../lib/Europa/Loader.php';
 Europa_Loader::registerAutoload();
-Europa_Loader::addPath(dirname(__FILE__) . '/lib');
-Europa_Loader::addPath(dirname(__FILE__) . '/../vendor');
-Europa_Loader::addPath(dirname(__FILE__) . '/../europa');
+Europa_Loader::addPath(dirname(__FILE__) . '/../lib');
 
 // create a new build
-$release = new Europa_Build(
-	$base
-	. 'build.xml',
-	$base
-	. DIRECTORY_SEPARATOR
-	. '..'
-	. DIRECTORY_SEPARATOR
-);
+$schema  = new Package_Schema(new pQuery($base . 'build.xml'));
+$release = new Package_Builder($schema, $base . '../');
 
 // add all passed components
 foreach ($argv as $package) {
-	$release->addPackage($package);
+	$release->add($package);
 }
+exit;
 
 // output to browser
 $release->save($base . 'EuropaPHP.zip');
