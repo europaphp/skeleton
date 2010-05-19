@@ -248,7 +248,10 @@ abstract class Europa_Request
 	}
 	
 	/**
-	 * Sets a given parameter's value.
+	 * Sets a given parameter's value. If multiple names are supplied, thier
+	 * values are set to the single passed value. This is useful for example
+	 * for batch setting of default param values, or in CLI mode when you have
+	 * a param '--my-param' which is also aliased as 'm'.
 	 * 
 	 * @param string $names The parameter name or names.
 	 * @param mixed $value The parameter value.
