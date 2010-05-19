@@ -37,7 +37,7 @@ abstract class AbstractController extends Europa_Controller
 		$europa = new Europa_Request_Http;
 		$europa->setParam('controller', 'error')
 		       ->setParam('action', 'notFound');
-		echo $europa->dispatch();
+		echo $europa->dispatch()->toString();
 		exit;
 	}
 }
