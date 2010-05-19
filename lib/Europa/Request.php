@@ -12,6 +12,13 @@
 abstract class Europa_Request
 {
 	/**
+	 * An instance of the controller that was dispatched to.
+	 * 
+	 * @var Europa_Controller
+	 */
+	protected $_controller;
+	
+	/**
 	 * The params parsed out of the route and cascaded through the
 	 * super-globals.
 	 * 
@@ -73,19 +80,31 @@ abstract class Europa_Request
 		$layout = $this->getLayout();
 		$view   = $this->getView();
 		
-		// set default scripts if not set
+		// set default layout if not set
 		if ($layout && !$layout->getScript()) {
 			$layout->setScript($this->getLayoutScript());
 		}
+		
+		// set default view if not set
 		if ($view && !$view->getScript()) {
 			$view->setScript($this->getViewScript());
 		}
 		
-		// render
+		// pre-rendering hook
+		if (method_exists($this->_controller, 'preRender')) {
+			$this->_controller->preRender();
+		}
+		
+		// render if still enabled
 		if ($layout && $view) {
 			return (string) $layout;
 		} elseif ($view) {
 			return (string) $view;
+		}
+		
+		// post-rendering hook
+		if (method_exists($this->_controller, 'postRender')) {
+			$this->_controller->preRender();
 		}
 		
 		return '';
@@ -118,7 +137,14 @@ abstract class Europa_Request
 		
 		// store result of init call
 		if ($controllerReflection->hasMethod('init')) {
-			$controller->init();
+			$init = $controller->init();
+			
+			// handle init return value
+			if ($init === false) {
+				$this->setLayout(null);
+			} else {
+				$this->getLayout()->setParams($init);
+			}
 		}
 		
 		// set parameters
@@ -159,12 +185,12 @@ abstract class Europa_Request
 			}
 			
 			// the return value from the action determines the action taken on the view
-			$actionReflection->invokeArgs(
+			$action = $actionReflection->invokeArgs(
 				$controller, 
 				$actionParams
 			);
 		} elseif ($controllerReflection->hasMethod('__call')) {
-			$controller->$actionName();
+			$action = $controller->$actionName();
 		} else {
 			throw new Europa_Request_Exception(
 				"Action {$actionName} does not exist in {$this->getControllerClassName()} and it was not trapped in"
@@ -172,6 +198,16 @@ abstract class Europa_Request
 				Europa_Request_Exception::ACTION_NOT_FOUND
 			);
 		}
+		
+		// handle action return value
+		if ($action === false) {
+			$this->setView(null);
+		} else {
+			$this->getVIew()->setParams($action);
+		}
+		
+		// controlle can be access by other methods
+		$this->_controller = $controller;
 		
 		return $this;
 	}
@@ -282,10 +318,10 @@ abstract class Europa_Request
 	 * Binds multiple parameters to the request. Overrides any existing
 	 * parameters with the same name.
 	 * 
-	 * @param array $params The params to set.
+	 * @param mixed $params The params to set. Can be any iterable value.
 	 * @return Europa_Request
 	 */
-	public function setParams(array $params)
+	public function setParams($params)
 	{
 		foreach ($params as $k => $v) {
 			$this->setParam($k, $v);

@@ -32,7 +32,6 @@ abstract class Europa_View
 	 * unset.
 	 * 
 	 * @param string $name The name of the property to get or helper to load.
-	 * 
 	 * @return mixed
 	 */
 	public function __get($name)
@@ -54,8 +53,7 @@ abstract class Europa_View
 	 * Sets a parameter.
 	 * 
 	 * @param string $name  The parameter to set.
-	 * @param mixed  $value The value to set.
-	 * 
+	 * @param mixed $value The value to set.
 	 * @return bool
 	 */
 	public function __set($name, $value)
@@ -67,7 +65,6 @@ abstract class Europa_View
 	 * Returns whether a parameter is set or not.
 	 * 
 	 * @param string $name The parameter to check.
-	 * 
 	 * @return bool
 	 */
 	public function __isset($name)
@@ -79,7 +76,6 @@ abstract class Europa_View
 	 * Unsets a parameter
 	 * 
 	 * @param string $name The parameter to unset.
-	 * 
 	 * @return void
 	 */
 	public function __unset($name)
@@ -117,16 +113,14 @@ abstract class Europa_View
 	/**
 	 * Applies a group of parameters to the view.
 	 * 
-	 * @parma array $params The params to set.
-	 * 
+	 * @param mixed $params The params to set. Can be any iterable value.
 	 * @return Europa_View
 	 */
-	public function setParams(array $params)
+	public function setParams($params)
 	{
 		foreach ($params as $name => $value) {
 			$this->$name = $value;
 		}
-		
 		return $this;
 	}
 	
