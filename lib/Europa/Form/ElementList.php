@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-class Europa_Form_ElementList implements Iterator, Europa_Form_Renderable
+class Europa_Form_ElementList extends Europa_Form_Base implements Iterator
 {
 	/**
 	 * Contains the elements and element lists.
@@ -19,20 +19,21 @@ class Europa_Form_ElementList implements Iterator, Europa_Form_Renderable
 	protected $_elements = array();
 	
 	/**
-	 * Converts the list of elements to a string.
+	 * A default way for rendering the form element list.
 	 * 
 	 * @return string
 	 */
-	public function __toString()
+	public function toString()
 	{
-		$str = '<dl>';
+		$str = '<dl' . $this->getAttributeString() . '>';
 		foreach ($this as $element) {
-			$str .= '<dt>'
-			     .  '<label for="' . $element->id . '">'
-			     .  $element->title
-			     .  '</label>'
-			     .  '</dt>'
-			     .  '<dd>' . $element->__toString() . '</dd>';
+			$id   = $element->getAttribute('id');
+			$str .= '<dt><label';
+			if ($id) {
+				$str .= 'for="' . $id . '"';
+			}
+			$str .= '>' . $element->getAttribute('title') . '</label></dt>'
+			     .  '<dd>' . $element->toString() . '</dd>';
 		}
 		return $str . '</dl>';
 	}
@@ -41,13 +42,11 @@ class Europa_Form_ElementList implements Iterator, Europa_Form_Renderable
 	 * Adds a valid renderable element onto the element list.
 	 * 
 	 * @param Europa_Form_Renderable $element The element to add.
-	 * 
 	 * @return Europa_Form_ElementList
 	 */
-	public function addElement(Europa_Form_Renderable $element)
+	public function addElement(Europa_Form_Base $element)
 	{
 		$this->_elements[] = $element;
-		
 		return $this;
 	}
 	
@@ -74,7 +73,6 @@ class Europa_Form_ElementList implements Iterator, Europa_Form_Renderable
 		foreach ($this as $element) {
 			$element->fill($values);
 		}
-
 		return $this;
 	}
 	
@@ -88,7 +86,6 @@ class Europa_Form_ElementList implements Iterator, Europa_Form_Renderable
 		foreach ($this as $element) {
 			$element->validate();
 		}
-		
 		return $this;
 	}
 	
@@ -130,7 +127,6 @@ class Europa_Form_ElementList implements Iterator, Europa_Form_Renderable
 	public function next()
 	{
 		next($this->_elements);
-		
 		return $this;
 	}
 	
@@ -142,7 +138,6 @@ class Europa_Form_ElementList implements Iterator, Europa_Form_Renderable
 	public function rewind()
 	{
 		reset($this->_elements);
-		
 		return $this;
 	}
 

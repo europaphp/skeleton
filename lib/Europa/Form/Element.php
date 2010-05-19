@@ -9,8 +9,22 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-abstract class Europa_Form_Element extends Europa_Overloader implements Europa_Form_Renderable
+abstract class Europa_Form_Element extends Europa_Form_Base
 {
+	/**
+	 * The name of the element.
+	 * 
+	 * @var string
+	 */
+	protected $_name;
+	
+	/**
+	 * The value of the element.
+	 * 
+	 * @var mixed
+	 */
+	protected $_value = null;
+	
 	/**
 	 * Contains instances of Europa_Validator objects representing which
 	 * validators failed.
@@ -33,21 +47,19 @@ abstract class Europa_Form_Element extends Europa_Overloader implements Europa_F
 	 * 
 	 * @return Europa_Form_Element
 	 */
-	public function __construct($name)
+	public function __construct($name, $value = null, array $attributes = array())
 	{
-		$this->name = $name;
+		$this->setName($name);
+		$this->setValue($value);
+		$this->setAttributes($attributes);
 	}
 	
 	/**
 	 * Automatically retrieves the value for the input field base on its name
 	 * from the passed in values.
 	 * 
-	 * @todo Optimize performance.
-	 * @todo Do more security tests on call to eval.
-	 * 
 	 * @param string $name The name of the field to retrieve the value for.
 	 * @param mixed $values The values to find the value in.
-	 * 
 	 * @return Europa_Form_Element
 	 */
 	public function fill($values)
@@ -72,7 +84,7 @@ abstract class Europa_Form_Element extends Europa_Overloader implements Europa_F
 		
 		// if it's just a straight value, set it
 		if (!is_array($values) && !is_object($values)) {
-			$this->value = $values;
+			$this->setValue($values);
 		}
 		
 		// build the parameter to evaluate
@@ -82,7 +94,7 @@ abstract class Europa_Form_Element extends Europa_Overloader implements Europa_F
 		$value = eval("return isset({$evalParam}) ? {$evalParam} : false;");
 		
 		if ($value !== false) {
-			$this->value = $value;
+			$this->setValue($value);
 		}
 		
 		return $this;
@@ -118,7 +130,6 @@ abstract class Europa_Form_Element extends Europa_Overloader implements Europa_F
 	public function addValidator(Europa_Validator $validator)
 	{
 		$this->_validators[] = $validator;
-		
 		return $this;
 	}
 	
@@ -130,42 +141,10 @@ abstract class Europa_Form_Element extends Europa_Overloader implements Europa_F
 	public function validate()
 	{
 		foreach ($this->_validators as $validator) {
-			if (!$validator->isValid()) {
+			if (!$validator->isValid($this->getValue())) {
 				$this->_errors[] = $validator;
 			}
 		}
-		
 		return $this;
-	}
-	
-	/**
-	 * Returns all properties which aren't prefixed with an underscore.
-	 * 
-	 * @return array
-	 */
-	public function getAttributes()
-	{
-		$attributes = array();
-		foreach ($this as $k => $v) {
-			if (strpos($k, '_') === 0) {
-				continue;
-			}
-			$attributes[$k] = $v;
-		}
-		return $attributes;
-	}
-	
-	/**
-	 * Formats the properties of the element as an xml attribute string.
-	 * 
-	 * @return string
-	 */
-	public function getAttributeString()
-	{
-		$attrs = array();
-		foreach ($this->getAttributes() as $k => $v) {
-			$attrs[] = $k . '="' . $v . '"';
-		}
-		return implode(' ', $attrs);
 	}
 }
