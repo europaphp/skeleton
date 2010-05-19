@@ -16,7 +16,7 @@ class Europa_Form_Element_Reset extends Europa_Form_Element_Button
 	 * 
 	 * @return string
 	 */
-	public function __toString()
+	public function toString()
 	{
 		$this->type = 'reset';
 

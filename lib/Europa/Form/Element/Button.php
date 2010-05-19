@@ -16,10 +16,11 @@ class Europa_Form_Element_Button extends Europa_Form_Element_Input
 	 * 
 	 * @return string
 	 */
-	public function __toString()
+	public function toString()
 	{
-		$this->type = 'button';
-		
-		return parent::__toString();
+		if (!$this->getAttribute('type')) {
+			$this->setAttribute('type', 'button');
+		}
+		return parent::toString();
 	}
 }

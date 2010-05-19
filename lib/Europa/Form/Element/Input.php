@@ -16,12 +16,11 @@ class Europa_Form_Element_Input extends Europa_Form_Element
 	 * 
 	 * @return string
 	 */
-	public function __toString()
+	public function toString()
 	{
-		if (!$this->type) {
-			$this->type = 'text';
+		if (!$this->getAttribute('type')) {
+			$this->setAttribute('type', 'text');
 		}
-		
 		return '<input ' . $this->getAttributeString() . ' />';
 	}
 }

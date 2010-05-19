@@ -25,7 +25,7 @@ class Europa_Form_ElementList extends Europa_Form_Base implements Iterator
 	 */
 	public function toString()
 	{
-		$str = '<dl' . $this->getAttributeString() . '>';
+		$str = '<dl ' . $this->getAttributeString() . '>';
 		foreach ($this as $element) {
 			$id   = $element->getAttribute('id');
 			$str .= '<dt><label';
@@ -34,6 +34,11 @@ class Europa_Form_ElementList extends Europa_Form_Base implements Iterator
 			}
 			$str .= '>' . $element->getAttribute('title') . '</label></dt>'
 			     .  '<dd>' . $element->toString() . '</dd>';
+			foreach ($element->getErrors() as $error) {
+				foreach ($error->getMessages() as $message) {
+					echo '<dd class="error">' . $message . '</dd>';
+				}
+			}
 		}
 		return $str . '</dl>';
 	}

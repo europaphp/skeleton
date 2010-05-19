@@ -16,14 +16,12 @@ class Europa_Form_Element_Submit extends Europa_Form_Element_Button
 	 * 
 	 * @return string
 	 */
-	public function __toString()
+	public function toString()
 	{
-		$this->type = 'submit';
-		
-		if (!$this->value) {
-			$this->value = 'Submit';
+		$this->setAttribute('type', 'submit');
+		if (!$this->getValue()) {
+			$this->setValue('Submit');
 		}
-		
-		return parent::__toString();
+		return parent::toString();
 	}
 }

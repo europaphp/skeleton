@@ -12,11 +12,34 @@
 abstract class Europa_Validator
 {
 	/**
-	 * The error message associated to the validator.
+	 * The message level associated to errors.
+	 * 
+	 * @var int
+	 */
+	const LEVEL_ERROR = 3;
+	
+	/**
+	 * The message level associated to warnings.
+	 * 
+	 * @var int
+	 */
+	const LEVEL_WARNING = 2;
+	
+	/**
+	 * The message level associated to successes.
+	 * 
+	 * @var int
+	 */
+	const LEVEL_SUCCESS = 0;
+	
+	/**
+	 * The messages associated to the validator. Messages are organized into
+	 * levels. The default levels are provided as LEVEL_ constants in this
+	 * class.
 	 * 
 	 * @var string
 	 */
-	protected $_message = null;
+	protected $_messages = array();
 	
 	/**
 	 * Performs validation and returns whether or not the value associated to
@@ -29,15 +52,16 @@ abstract class Europa_Validator
 	/**
 	 * Adds a message to the validator for the indicated level.
 	 * 
-	 * @param string $msg   The message to add.
-	 * @param int    $level The level to add the message to.
-	 * 
+	 * @param string $msg The message to add.
+	 * @param int $level The level to add the message to.
 	 * @return Europa_Validator
 	 */
-	public function addMessage($message)
+	public function addMessage($message, $level = Europa_Validator::LEVEL_ERROR)
 	{
-		$this->_message = $message;
-		
+		if (!is_array($this->_messages[$level]) {
+			$this->_messages[$level] = array();
+		}
+		$this->_messages[$level][] = $message;
 		return $this;
 	}
 	
@@ -45,11 +69,13 @@ abstract class Europa_Validator
 	 * Returns a list of messages for the specified level.
 	 * 
 	 * @param int $level The error level to retrieve the messages for.
-	 * 
 	 * @return array
 	 */
-	public function getMessages()
+	public function getMessages($level = Europa_Validator::LEVEL_ERROR)
 	{
-		return $this->_message;
+		if (isset$this->_messages[$level]) {
+			return $this->_messages[$level];
+		}
+		return array();
 	}
 }

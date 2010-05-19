@@ -70,14 +70,25 @@ abstract class Europa_Form_Element extends Europa_Form_Base
 		}
 		
 		$subs = '';
-		$name = $this->name;
+		$name = $this->getName();
 		
 		// parse out the names and format it
 		if (strpos($name, '[') !== false) {
 			$subs = explode('[', $name);
-			$subs = '[' . implode('[', $subs);
-			$subs = str_replace('[', "['", $subs);
-			$subs = str_replace(']', "']", $subs);
+			array_shift($subs);
+			$formatted = array();
+			foreach ($subs as $sub) {
+				$sub = str_replace(']', '', $sub);
+				if ($sub === '') {
+					continue;
+				}
+				if (is_numeric($sub)) {
+					$formatted[] = $sub;
+				} else {
+					$formatted[] = "'{$sub}'";
+				}
+			}
+			$subs = '[' . implode('][', $formatted) . ']';
 		} else {
 			$subs = "['{$name}']";
 		}
@@ -87,17 +98,57 @@ abstract class Europa_Form_Element extends Europa_Form_Base
 			$this->setValue($values);
 		}
 		
-		// build the parameter to evaluate
-		$evalParam = '$values' . $subs;
-		
-		// evaluate the value
-		$value = eval("return isset({$evalParam}) ? {$evalParam} : false;");
+		// build the parameter to evaluate then eval
+		$value = '$values' . $subs;
+		$value = eval("return isset({$value}) ? {$value} : false;");
 		
 		if ($value !== false) {
 			$this->setValue($value);
 		}
 		
 		return $this;
+	}
+	
+	/**
+	 * Sets the name of the element.
+	 * 
+	 * @param string $name The name of the element.
+	 * @return Europa_Form_Element
+	 */
+	public function setName($name)
+	{
+		return $this->setAttribute('name', $name);
+	}
+
+	/**
+	 * Gets the name of the element.
+	 * 
+	 * @return Europa_Form_Element
+	 */
+	public function getName()
+	{
+		return $this->getAttribute('name');
+	}
+	
+	/**
+	 * Sets the value of the element.
+	 * 
+	 * @param string $value The value of the element.
+	 * @return Europa_Form_Element
+	 */
+	public function setValue($value)
+	{
+		return $this->setAttribute('value', $value);
+	}
+
+	/**
+	 * Gets the value of the element.
+	 * 
+	 * @return Europa_Form_Element
+	 */
+	public function getValue()
+	{
+		return $this->getAttribute('value');
 	}
 	
 	/**

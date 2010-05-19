@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-abstract class Europa_Form extends Europa_Form_ElementList
+class Europa_Form extends Europa_Form_ElementList
 {
 	/**
 	 * Renders the form and all of its elements and element lists.
@@ -18,11 +18,16 @@ abstract class Europa_Form extends Europa_Form_ElementList
 	 */
 	public function toString()
 	{
-		// build default form structure
-		return '<form' 
-		     . $this->getAttributeString()
-		     . '>'
-		     . parent::toString()
-		     . '</form>';
+		if (!$this->getAttribute('action')) {
+			$this->setAttribute('action', '');
+		}
+		if (!$this->getAttribute('method')) {
+			$this->setAttribute('method', 'post');
+		}
+		$str = '<form ' . $this->getAttributeString() . '>';
+		foreach ($this->getElements() as $element) {
+			$str .= $element->toString();
+		}
+		return $str . '</form>';
 	}
 }

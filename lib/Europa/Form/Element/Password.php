@@ -16,7 +16,7 @@ class Europa_Form_Element_Password extends Europa_Form_Element_Input
 	 * 
 	 * @return string
 	 */
-	public function __toString()
+	public function toString()
 	{
 		$this->type = 'password';
 		

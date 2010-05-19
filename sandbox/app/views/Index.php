@@ -21,6 +21,9 @@
 				margin: 6px;
 				text-align: center;
 			}
+			#body {
+				text-align: center;
+			}
 			#footer {
 				text-align: center;
 				font-style: italic;
