@@ -39,13 +39,6 @@ abstract class Europa_View
 		if (isset($this->_params[$name])) {
 			return $this->_params[$name];
 		}
-		
-		$helper = $this->__call($name);
-		if ($helper) {
-			$this->_params[$name] = $helper;
-			return $helper;
-		}
-		
 		return null;
 	}
 	
@@ -84,33 +77,6 @@ abstract class Europa_View
 	}
 	
 	/**
-	 * Attempts to load a helper and executes it. Returns null of not found.
-	 * 
-	 * @return mixed
-	 */
-	public function __call($func, $args = array())
-	{
-		// format the helper class name for the given method
-		$class = $this->_getHelperClassName($func);
-		
-		// if unable to load, return null
-		if (!Europa_Loader::loadClass($class)) {
-			return null;
-		}
-		
-		// instantiate the helper and pass in the current view
-		$class = new $class($this);
-		
-		// if a helper methods exists, call it with $args and return the value
-		if (method_exists($class, $func)) {
-			return call_user_func_array(array($class, $func), $args);
-		}
-		
-		// or just return the helper instance
-		return $class;
-	}
-	
-	/**
 	 * Applies a group of parameters to the view.
 	 * 
 	 * @param mixed $params The params to set. Can be any iterable value.
@@ -118,8 +84,10 @@ abstract class Europa_View
 	 */
 	public function setParams($params)
 	{
-		foreach ($params as $name => $value) {
-			$this->$name = $value;
+		if (is_array($params) || is_object($params)) {
+			foreach ($params as $name => $value) {
+				$this->$name = $value;
+			}
 		}
 		return $this;
 	}
