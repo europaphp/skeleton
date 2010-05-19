@@ -203,7 +203,7 @@ class Europa_Request_Http extends Europa_Request
 	 */
 	public static function getHeader($name)
 	{
-		$headers = self::getRequestHeaders();
+		$headers = self::getHeaders();
 		if (isset($headers[$name])) {
 			return $headers[$name];
 		}
@@ -218,7 +218,7 @@ class Europa_Request_Http extends Europa_Request
 	 */
 	public static function getAcceptedContentTypes()
 	{
-		$accept = self::getRequestHeader('Accept');
+		$accept = self::getHeader('Accept');
 		$accept = explode(',', $accept);
 		array_walk($accept, 'trim');
 		return $accept;
