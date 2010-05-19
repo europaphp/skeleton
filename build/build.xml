@@ -50,8 +50,6 @@
 	</package>
 
 	<package id="form">
-		<dependency>overloader</dependency>
-		<dependency>string</dependency>
 		<dependency>validator</dependency>
 		<directory>lib/Europa/Form</directory>
 		<file>lib/Europa/Form.php</file>
@@ -59,10 +57,6 @@
 
 	<package id="loader">
 		<file>lib/Europa/Loader.php</file>
-	</package>
-
-	<package id="overloader">
-		<file>lib/Europa/Overloader.php</file>
 	</package>
 	
 	<package id="package">
