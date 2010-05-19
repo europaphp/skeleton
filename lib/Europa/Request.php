@@ -75,7 +75,7 @@ abstract class Europa_Request
 	 * 
 	 * @return string
 	 */
-	public function __toString()
+	public function toString()
 	{
 		$layout = $this->getLayout();
 		$view   = $this->getView();
@@ -97,9 +97,9 @@ abstract class Europa_Request
 		
 		// render if still enabled
 		if ($layout && $view) {
-			return (string) $layout;
+			return $layout->toString();
 		} elseif ($view) {
-			return (string) $view;
+			return $layout->toString();
 		}
 		
 		// post-rendering hook

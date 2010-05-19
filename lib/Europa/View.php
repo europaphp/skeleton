@@ -23,7 +23,7 @@ abstract class Europa_View
 	 * 
 	 * @return string
 	 */
-	abstract public function __toString();
+	abstract public function toString();
 	
 	/**
 	 * Similar to calling a helper via Europa_View->__call(), but treats the

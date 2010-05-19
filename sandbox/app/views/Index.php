@@ -29,7 +29,7 @@
 		</style>
 	</head>
 	<body>
-		<?php echo Europa_Request_Http::getActiveInstance()->getView(); ?>
+		<?php echo Europa_Request_Http::getActiveInstance()->getView()->toString(); ?>
 		<div id="footer">
 			<?php echo $this->lang->time(round(microtime() - EUROPA_START_TIME, 4)); ?>
 			<?php echo $this->lang->memory(array('megabytes' => round(memory_get_peak_usage() / 1024 / 1024, 2))); ?>

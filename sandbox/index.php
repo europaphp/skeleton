@@ -17,7 +17,7 @@ Europa_Loader::addPath('../lib');
 // dispatch the request catching any exceptions
 try {
 	$europa = new Europa_Request_Http;
-	echo $europa->dispatch();
+	echo $europa->dispatch()->toString();
 } catch (Exception $e) {
 	echo $e->getMessage();
 }

@@ -93,7 +93,7 @@ class Europa_View_Php extends Europa_View
 	 * 
 	 * @return string
 	 */
-	public function __toString()
+	public function toString()
 	{
 		// allows us to return the included file as a string
 		ob_start();
