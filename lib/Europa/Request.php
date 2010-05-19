@@ -206,7 +206,7 @@ abstract class Europa_Request
 			$this->getVIew()->setParams($action);
 		}
 		
-		// controlle can be access by other methods
+		// controller can be access by other methods
 		$this->_controller = $controller;
 		
 		return $this;
@@ -284,7 +284,7 @@ abstract class Europa_Request
 	}
 	
 	/**
-	 * Sets a given parameter's value. If multiple names are supplied, thier
+	 * Sets a given parameter's value. If multiple names are supplied, their
 	 * values are set to the single passed value. This is useful for example
 	 * for batch setting of default param values, or in CLI mode when you have
 	 * a param '--my-param' which is also aliased as 'm'.
@@ -323,8 +323,10 @@ abstract class Europa_Request
 	 */
 	public function setParams($params)
 	{
-		foreach ($params as $k => $v) {
-			$this->setParam($k, $v);
+		if (is_array($params) || is_object($params)) {
+			foreach ($params as $k => $v) {
+				$this->setParam($k, $v);
+			}
 		}
 		return $this;
 	}
