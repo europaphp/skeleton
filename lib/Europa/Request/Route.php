@@ -23,8 +23,8 @@ abstract class Europa_Request_Route
 	 * set on the route. Returns an array of matched parameters or
 	 * false on failure.
 	 * 
-	 * @param string $subject The string to match against the route.
+	 * @param string $subject The string to query against the route.
 	 * @return array|bool
 	 */
-	abstract public function match($subject);
+	abstract public function query($subject);
 }

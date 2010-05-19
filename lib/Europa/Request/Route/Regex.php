@@ -73,7 +73,7 @@ final class Europa_Request_Route_Regex extends Europa_Request_Route
 	 * definition.
 	 * @return array|bool
 	 */
-	public function match($uri)
+	public function query($uri)
 	{
 		if (preg_match('#' . $this->_expression . '#', $uri, $matches)) {
 			array_shift($matches);

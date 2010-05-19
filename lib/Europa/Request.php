@@ -107,10 +107,7 @@ abstract class Europa_Request
 		 * Europa request uri and set any matched parameters.
 		 */
 		if (!$this->getRoute()) {
-			$params = $this->route();
-			if ($params) {
-				$this->setParams($params);
-			}
+			$this->route($this->getRouteSubject());
 		}
 		
 		// dynamic controllers and actions
@@ -183,15 +180,17 @@ abstract class Europa_Request
 	 * Processes all routes. If a route is matched, the matched parameters are
 	 * returned. If no match is found, false is returned.
 	 * 
+	 * @param string $subject The subject to route against.
 	 * @return bool|array
 	 */
-	public function route()
+	public function route($subject)
 	{
 		foreach ($this->_routes as $route) {
-			$match = $route->match($this->getRouteSubject());
-			if ($match) {
+			$params = $route->query($subject);
+			if ($params) {
 				$this->_route = $route;
-				return $match;
+				$this->setParams($params);
+				return true;
 			}
 		}
 		return false;
