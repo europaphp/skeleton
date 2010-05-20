@@ -11,12 +11,17 @@
  */
 class Europa_Validator_Required extends Europa_Validator
 {
+	public function __construct()
+	{
+		$this->addErrorMessage('This field is required.');
+	}
+	
 	/**
 	 * Checks to make sure the specified value is set.
 	 * 
 	 * @return bool
 	 */
-	public function isValid($value)
+	public function validate($value)
 	{
 		return !empty($value);
 	}

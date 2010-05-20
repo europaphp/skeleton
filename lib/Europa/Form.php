@@ -11,23 +11,5 @@
  */
 class Europa_Form extends Europa_Form_ElementList
 {
-	/**
-	 * Renders the form and all of its elements and element lists.
-	 * 
-	 * @return string
-	 */
-	public function toString()
-	{
-		if (!$this->getAttribute('action')) {
-			$this->setAttribute('action', '');
-		}
-		if (!$this->getAttribute('method')) {
-			$this->setAttribute('method', 'post');
-		}
-		$str = '<form ' . $this->getAttributeString() . '>';
-		foreach ($this->getElements() as $element) {
-			$str .= $element->toString();
-		}
-		return $str . '</form>';
-	}
+	
 }

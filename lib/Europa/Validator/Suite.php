@@ -55,6 +55,14 @@ class Europa_Validator_Suite implements Europa_Validator_Validatable
 	}
 	
 	/**
+	 *
+	 */
+	public function getValidators()
+	{
+		return $this->_validators;
+	}
+	
+	/**
 	 * 
 	 */
 	public function getErrors()

@@ -22,7 +22,8 @@
 				text-align: center;
 			}
 			#body {
-				text-align: center;
+				margin: 6px auto;
+				width: 350px;
 			}
 			#footer {
 				text-align: center;

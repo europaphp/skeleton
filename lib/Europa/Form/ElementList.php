@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-class Europa_Form_ElementList extends Europa_Form_Base implements Iterator
+class Europa_Form_ElementList extends Europa_Form_Base implements ArrayAccess, Iterator
 {
 	/**
 	 * Contains the elements and element lists.
@@ -19,37 +19,13 @@ class Europa_Form_ElementList extends Europa_Form_Base implements Iterator
 	protected $_elements = array();
 	
 	/**
-	 * A default way for rendering the form element list.
-	 * 
-	 * @return string
-	 */
-	public function toString()
-	{
-		$str = '<dl ' . $this->getAttributeString() . '>';
-		foreach ($this as $element) {
-			$id   = $element->getAttribute('id');
-			$str .= '<dt><label';
-			if ($id) {
-				$str .= 'for="' . $id . '"';
-			}
-			$str .= '>' . $element->getAttribute('title') . '</label></dt>'
-			     .  '<dd>' . $element->toString() . '</dd>';
-			foreach ($element->getErrors() as $error) {
-				foreach ($error->getMessages() as $message) {
-					echo '<dd class="error">' . $message . '</dd>';
-				}
-			}
-		}
-		return $str . '</dl>';
-	}
-	
-	/**
 	 * Adds a valid renderable element onto the element list.
 	 * 
 	 * @param Europa_Form_Renderable $element The element to add.
+	 * @param mixed $offset The offset to set the element at.
 	 * @return Europa_Form_ElementList
 	 */
-	public function addElement(Europa_Form_Base $element)
+	public function addElement(Europa_Form_Base $element, $offset = null)
 	{
 		$this->_elements[] = $element;
 		return $this;
@@ -70,7 +46,6 @@ class Europa_Form_ElementList extends Europa_Form_Base implements Iterator
 	 * element in the list. Recursively handles nested element lists.
 	 * 
 	 * @param array $values An array of values to search in.
-	 * 
 	 * @return Europa_Form_ElementList
 	 */
 	public function fill($values)
@@ -90,6 +65,57 @@ class Europa_Form_ElementList extends Europa_Form_Base implements Iterator
 	{
 		foreach ($this as $element) {
 			$element->validate();
+		}
+		return $this;
+	}
+	
+	/**
+	 * Returns an element at a particular offset or null if it doesn't exist.
+	 * 
+	 * @param mixed $offset The offset to get.
+	 * @return mixed
+	 */
+	public function offsetGet($offset)
+	{
+		if ($this->offsetExists($offset)) {
+			return $this->_elements[$offset];
+		}
+		return null;
+	}
+	
+	/**
+	 * Adds an element at the given offset.
+	 * 
+	 * @param mixed $offset The offset to set the element at.
+	 * @param Europa_Form_Base $element The element to set.
+	 * @return Europa_Form_ElementList
+	 */
+	public function offsetSet($offset, $element)
+	{
+		return $this->addElement($element, $offset);
+	}
+	
+	/**
+	 * Checks to see if the given offset exists.
+	 * 
+	 * @param mixed $offset The offset to check at.
+	 * @return bool
+	 */
+	public function offsetExists($offset)
+	{
+		return isset($this->_elements[$offset]);
+	}
+	
+	/**
+	 * Removes an element at a particular offset.
+	 * 
+	 * @param mixed $offset The offset to unset.
+	 * @return Europa_Form_ElementList
+	 */
+	public function offsetUnset($offset)
+	{
+		if ($this->offsetExists($offset)) {
+			unset($this->_elements[$offset]);
 		}
 		return $this;
 	}

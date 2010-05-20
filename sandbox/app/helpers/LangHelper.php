@@ -27,7 +27,7 @@ class LangHelper
 	public function __construct(Europa_View $view)
 	{
 		$path = $this->_getIniFullPath($view);
-		if ($path) {
+		if (is_file($path)) {
 			$this->_ini = parse_ini_file($path);
 		}
 	}

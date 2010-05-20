@@ -12,7 +12,7 @@
 abstract class Europa_Form_Base
 {
 	/**
-	 * An array of attributes set on the element.
+	 * The attributes set on the element.
 	 * 
 	 * @var array
 	 */
@@ -23,12 +23,59 @@ abstract class Europa_Form_Base
 	 * 
 	 * @return string
 	 */
-	abstract public function toString();
+	abstract public function __toString();
 	
 	/**
-	 * Sets an attribute.
+	 * Sets an attribute value.
 	 * 
-	 * @return Europa_Form_Element
+	 * @param string $name The name of the attribute.
+	 * @param string $value The value of the attribute.
+	 * @return mixed
+	 */
+	public function __set($name, $value)
+	{
+		return $this->setAttribute($name, $value);
+	}
+	
+	/**
+	 * Returns an attribute value.
+	 * 
+	 * @param string $name The name of the attribute.
+	 * @return mixed
+	 */
+	public function __get($name)
+	{
+		return $this->getAttribute($name);
+	}
+	
+	/**
+	 * Returns whether or not an attribute exists.
+	 * 
+	 * @param string $name The attribute name.
+	 * @return bool
+	 */
+	public function __isset($name)
+	{
+		return $this->hasAttribute($name);
+	}
+
+	/**
+	 * Removes an attribute.
+	 * 
+	 * @param string $name The attribute name.
+	 * @return bool
+	 */
+	public function __unset($name)
+	{
+		return $this->removeAttribute($name);
+	}
+	
+	/**
+	 * Sets an attribute value.
+	 * 
+	 * @param string $name The name of the attribute.
+	 * @param string $value The value of the attribute.
+	 * @return mixed
 	 */
 	public function setAttribute($name, $value)
 	{
@@ -37,9 +84,10 @@ abstract class Europa_Form_Base
 	}
 	
 	/**
-	 * Returns the specified attribute or null if not found.
+	 * Returns an attribute value.
 	 * 
-	 * @return Europa_Form_Element
+	 * @param string $name The name of the attribute.
+	 * @return mixed
 	 */
 	public function getAttribute($name)
 	{
@@ -50,6 +98,31 @@ abstract class Europa_Form_Base
 	}
 	
 	/**
+	 * Returns whether or not an attribute exists.
+	 * 
+	 * @param string $name The attribute name.
+	 * @return bool
+	 */
+	public function hasAttribute($name)
+	{
+		return isset($this->_attributes[$name]);
+	}
+	
+	/**
+	 * Removes an attribute.
+	 * 
+	 * @param string $name The attribute name.
+	 * @return bool
+	 */
+	public function removeAttribute($name)
+	{
+		if (isset($this->_attributes[$name])) {
+			unset($this->_attributes[$name]);
+		}
+		return $this;
+	}
+	
+	/**
 	 * Sets an array of attributes all at once.
 	 * 
 	 * @return Europa_Form_Element
@@ -57,9 +130,9 @@ abstract class Europa_Form_Base
 	public function setAttributes(array $attributes = array())
 	{
 		foreach ($attributes as $name => $value) {
-			$this->_attributes[$name] = $value;
+			$this->$name = $value;
 		}
-		return null;
+		return $this;
 	}
 	
 	/**

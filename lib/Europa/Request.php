@@ -75,7 +75,7 @@ abstract class Europa_Request
 	 * 
 	 * @return string
 	 */
-	public function toString()
+	public function __toString()
 	{
 		$layout = $this->getLayout();
 		$view   = $this->getView();

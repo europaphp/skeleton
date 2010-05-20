@@ -12,20 +12,6 @@
 abstract class Europa_Form_Element extends Europa_Form_Base
 {
 	/**
-	 * The name of the element.
-	 * 
-	 * @var string
-	 */
-	protected $_name;
-	
-	/**
-	 * The value of the element.
-	 * 
-	 * @var mixed
-	 */
-	protected $_value = null;
-	
-	/**
 	 * Contains instances of Europa_Validator objects representing which
 	 * validators failed.
 	 * 
@@ -39,20 +25,6 @@ abstract class Europa_Form_Element extends Europa_Form_Base
 	 * @var array
 	 */
 	protected $_validators = array();
-	
-	/**
-	 * Initializes the form element and sets its name.
-	 * 
-	 * @param string $name The name of the element.
-	 * 
-	 * @return Europa_Form_Element
-	 */
-	public function __construct($name, $value = null, array $attributes = array())
-	{
-		$this->setName($name);
-		$this->setValue($value);
-		$this->setAttributes($attributes);
-	}
 	
 	/**
 	 * Automatically retrieves the value for the input field base on its name
@@ -70,11 +42,8 @@ abstract class Europa_Form_Element extends Europa_Form_Base
 		}
 		
 		$subs = '';
-		$name = $this->getName();
-		
-		// parse out the names and format it
-		if (strpos($name, '[') !== false) {
-			$subs = explode('[', $name);
+		if (strpos($this->name, '[') !== false) {
+			$subs = explode('[', $this->name);
 			array_shift($subs);
 			$formatted = array();
 			foreach ($subs as $sub) {
@@ -90,12 +59,12 @@ abstract class Europa_Form_Element extends Europa_Form_Base
 			}
 			$subs = '[' . implode('][', $formatted) . ']';
 		} else {
-			$subs = "['{$name}']";
+			$subs = "['{$this->name}']";
 		}
 		
 		// if it's just a straight value, set it
 		if (!is_array($values) && !is_object($values)) {
-			$this->setValue($values);
+			$this->value = $values;
 		}
 		
 		// build the parameter to evaluate then eval
@@ -103,52 +72,10 @@ abstract class Europa_Form_Element extends Europa_Form_Base
 		$value = eval("return isset({$value}) ? {$value} : false;");
 		
 		if ($value !== false) {
-			$this->setValue($value);
+			$this->value = $value;
 		}
 		
 		return $this;
-	}
-	
-	/**
-	 * Sets the name of the element.
-	 * 
-	 * @param string $name The name of the element.
-	 * @return Europa_Form_Element
-	 */
-	public function setName($name)
-	{
-		return $this->setAttribute('name', $name);
-	}
-
-	/**
-	 * Gets the name of the element.
-	 * 
-	 * @return Europa_Form_Element
-	 */
-	public function getName()
-	{
-		return $this->getAttribute('name');
-	}
-	
-	/**
-	 * Sets the value of the element.
-	 * 
-	 * @param string $value The value of the element.
-	 * @return Europa_Form_Element
-	 */
-	public function setValue($value)
-	{
-		return $this->setAttribute('value', $value);
-	}
-
-	/**
-	 * Gets the value of the element.
-	 * 
-	 * @return Europa_Form_Element
-	 */
-	public function getValue()
-	{
-		return $this->getAttribute('value');
 	}
 	
 	/**
@@ -192,7 +119,7 @@ abstract class Europa_Form_Element extends Europa_Form_Base
 	public function validate()
 	{
 		foreach ($this->_validators as $validator) {
-			if (!$validator->isValid($this->getValue())) {
+			if (!$validator->validate($this->value)) {
 				$this->_errors[] = $validator;
 			}
 		}

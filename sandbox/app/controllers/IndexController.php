@@ -20,4 +20,9 @@ class IndexController extends AbstractController
 	{
 		
 	}
+	
+	public function formAction()
+	{
+		
+	}
 }
