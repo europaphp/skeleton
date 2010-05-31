@@ -1,7 +1,7 @@
 <?php
 
 /**
- * An optional base controller for all controller classes.
+ * The base controller for all controller classes.
  * 
  * @category  Controllers
  * @package   Europa
@@ -12,35 +12,16 @@
 abstract class Europa_Controller
 {
 	/**
-	 * The Europa_Request instance that initiated dispatching.
+	 * Renders the layout and view or any combination of the two depending on
+	 * if they are enabled/disabled.
 	 * 
-	 * @var Europa_Request
+	 * @return string
 	 */
-	protected $_request;
-	
-	/**
-	 * The Europa_View instance that represents the layout.
-	 * 
-	 * @var Europa_View
-	 */
-	protected $_layout;
-	
-	/**
-	 * The Europa_View instance that represents the view.
-	 * 
-	 * @var Europa_View
-	 */
-	protected $_view;
-	
-	/**
-	 * Constructs and sets class defaults.
-	 * 
-	 * @return AbstractController
-	 */
-	public function __construct()
+	public function __toString()
 	{
-		$this->_request = Europa_Request::getActiveInstance();
-		$this->_layout  = $this->_request->getLayout();
-		$this->_view    = $this->_request->getView();
+		$view = substr(get_class($this), 0, -strlen('Controller'));
+		$view = Europa_String::create($view)->toClass();
+		$view = $view . 'View';
+		return new $view;
 	}
 }

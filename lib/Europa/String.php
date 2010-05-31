@@ -10,7 +10,21 @@
  * @link     http://europaphp.org/license
  */
 class Europa_String
-{
+{	
+	/**
+	 * The opening character in a format replacement.
+	 * 
+	 * @var string
+	 */
+	public static $formatOpenChar = ':';
+	
+	/**
+	 * The closing character in a format replacement.
+	 * 
+	 * @var string
+	 */
+	public static $formatCloseChar = '';
+	
 	/**
 	 * Holds a reference to the current string.
 	 * 
@@ -50,44 +64,80 @@ class Europa_String
 	{
 		return (string) $this->_string;
 	}
-
+	
 	/**
-	 * Camelcases a string to Europa Conventions.
-	 *
-	 * @param boolean $ucFirst Whether or not to capitalize the first letter.
-	 * @return string
+	 * Formats a string based on the replacements.
+	 * 
+	 * @return Europa_String
 	 */
-	public function camelCase($ucFirst = false)
+	public function format(array $replacements, $openChar = null, $closeChar = null)
 	{
-		$str = $this->_string;
-		$str = urldecode($str);
-		$str = str_replace(DIRECTORY_SEPARATOR, '/', $str);
-		$str = trim($str, '/');
-		$str = str_replace('_', '/', $str);
-
-		// if a forward slash is passed, auto ucfirst
-		$autoUcFirst = strpos($str, '/') !== false;
-		$parts		 = explode('/', $str);
-
-		foreach ($parts as $k => $v) {
-			$subParts = preg_split('/[^a-zA-Z0-9]/', $v);
-
-			foreach ($subParts as $kk => $vv) {
-				$subParts[$kk] = ucfirst($vv);
-			}
-
-			$parts[$k] = implode('', $subParts);
+		$openChar  = $openChar  ? $openChar  : self::$formatOpenChar;
+		$closeChar = $closeChar ? $closeChar : self::$formatCloseChar;
+		foreach ($replacements as $name => $value) {
+			$this->_string = str_replace(
+				$openChar . $name . $closeChar,
+				(string) $value,
+				$this->_string
+			);
 		}
-
-		$str = implode('_', $parts);
-		if ($autoUcFirst || $ucFirst) {
-			$str = ucfirst($str);
-		} elseif (isset($str{0})) {
-			$str{0} = strtolower($str{0});
-		}
-		$this->_string = $str;
-
 		return $this;
+	}
+	
+	/**
+	 * Replaces the first replacement with the second replacement. Behaves
+	 * exactly like str_replace() because, well, it uses it.
+	 * 
+	 * @param mixed $search The string(s) to search for.
+	 * @param mixed $replace The string(s) to replace with.
+	 * @return Europa_String
+	 */
+	public function replace($search, $replace)
+	{
+		$this->_string = str_replace($search, $replace, $this->_string);
+		return $this;
+	}
+	
+	/**
+	 * Formats the string into a valid class name according to convention.
+	 * 
+	 * @return Europa_String
+	 */
+	public function toClass()
+	{	
+		$subs = array();
+		$this->_string = str_replace(array(DIRECTORY_SEPARATOR, '/'), '_', $this->_string);
+		$this->_string = preg_replace('/[^a-zA-Z0-9_]/', '', $this->_string);
+		foreach (explode('_', $this->_string) as $sub) {
+			if ($sub = trim($sub)) {
+				$subs[] = ucfirst($sub);
+			}
+		}
+		$this->_string = implode('_', $subs);
+		return $this;
+	}
+	
+	/**
+	 * Formats the string into a valid method name according to convention.
+	 * 
+	 * @return Europa_String
+	 */
+	public function toMethod()
+	{
+		$this->toClass();
+		$this->_string = str_replace('_', '', $this->_string);
+		$this->lcfirst();
+		return $this;
+	}
+	
+	/**
+	 * Formats the string into a valid property name according to convention.
+	 * 
+	 * @return Europa_String
+	 */
+	public function toProperty()
+	{
+		return $this->toMethod();
 	}
 
 	/**
@@ -120,12 +170,33 @@ class Europa_String
 	 * Same as PHP rtrim() function, but put in to allow for chaining.
 	 *
 	 * @param string $charList Same as the charlist in PHP's rtrim() function.
-	 * @return string.
+	 * @return Europa_String
 	 */
 	public function rtrim($charList = null)
 	{
 		$this->_string = rtrim($this->_string, $charList);
-
+		return $this;
+	}
+	
+	/**
+	 * Makes the first letter uppercase.
+	 * 
+	 * @return Europa_String
+	 */
+	public function ucfirst()
+	{
+		$this->_string[0] = strtoupper($this->_string[0]);
+		return $this;
+	}
+	
+	/**
+	 * Makes the first letter lowercase.
+	 * 
+	 * @return Europa_String
+	 */
+	public function lcfirst()
+	{
+		$this->_string[0] = strtolower($this->_string[0]);
 		return $this;
 	}
 	

@@ -19,9 +19,7 @@ class Europa_Request_Http extends Europa_Request
 	public function __construct()
 	{
 		$this->setParams($_POST)
-		     ->setParams($_GET)
-		     ->setLayout(new Europa_View_Php)
-		     ->setView(new Europa_View_Php);
+		     ->setParams($_GET);
 	}
 	
 	/**

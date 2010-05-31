@@ -11,18 +11,5 @@
  */
 class IndexController extends AbstractController
 {
-	/**
-	 * Processes the main page.
-	 * 
-	 * @return void
-	 */
-	public function indexAction()
-	{
-		
-	}
 	
-	public function formAction()
-	{
-		
-	}
 }

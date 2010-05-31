@@ -12,47 +12,26 @@
 abstract class Europa_Request
 {
 	/**
-	 * An instance of the controller that was dispatched to.
-	 * 
-	 * @var Europa_Controller
-	 */
-	protected $_controller;
-	
-	/**
 	 * The params parsed out of the route and cascaded through the
 	 * super-globals.
 	 * 
 	 * @var array
 	 */
-	protected $_params = array();
+	protected $params = array();
 	
 	/**
 	 * The route that was matched.
 	 *
-	 * @var Europa_Route
+	 * @var Europaroute
 	 */
-	protected $_route;
+	protected $route;
 	
 	/**
 	 * The array of routes to match.
 	 * 
 	 * @var array
 	 */
-	protected $_routes = array();
-	
-	/**
-	 * A child of Europa_View_Abstract which represents the layout.
-	 * 
-	 * @var Europa_View
-	 */
-	protected $_layout = null;
-	
-	/**
-	 * An child of Europa_View_Abstract which represents the view.
-	 * 
-	 * @var Europa_View
-	 */
-	protected $_view = null;
+	protected $routes = array();
 	
 	/**
 	 * Contains the instances of all requests that are currently 
@@ -60,7 +39,7 @@ abstract class Europa_Request
 	 * 
 	 * @var array
 	 */
-	private static $_stack = array();
+	private static $stack = array();
 	
 	/**
 	 * Returns the string that the routes will match against.
@@ -70,146 +49,48 @@ abstract class Europa_Request
 	abstract public function getRouteSubject();
 	
 	/**
-	 * Renders the layout and view or any combination of the two depending on
-	 * if they are enabled/disabled.
+	 * Destructs the object and removes it's reference.
 	 * 
-	 * @return string
+	 * @return void
 	 */
-	public function __toString()
+	public function __destruct()
 	{
-		$layout = $this->getLayout();
-		$view   = $this->getView();
-		
-		// set default layout if not set
-		if ($layout && !$layout->getScript()) {
-			$layout->setScript($this->getLayoutScript());
-		}
-		
-		// set default view if not set
-		if ($view && !$view->getScript()) {
-			$view->setScript($this->getViewScript());
-		}
-		
-		// pre-rendering hook
-		if (method_exists($this->_controller, 'preRender')) {
-			$this->_controller->preRender();
-		}
-		
-		// render if still enabled
-		if ($layout && $view) {
-			return $layout->toString();
-		} elseif ($view) {
-			return $layout->toString();
-		}
-		
-		// post-rendering hook
-		if (method_exists($this->_controller, 'postRender')) {
-			$this->_controller->preRender();
-		}
-		
-		return '';
+		// remove the dispatch from the stack
+		array_pop(self::$stack);
 	}
 	
 	/**
 	 * Dispatches the request to the appropriate controller/action combo. If
 	 * route matching hasn't been done yet, it will be done.
 	 * 
-	 * @return Europa_Request
+	 * @return Europa_Controller
 	 */
 	public function dispatch()
 	{
 		// register the instance in the stack so it can be easily found
-		self::$_stack[] = $this;
+		self::$stack[] = $this;
 		
-		/*
-		 * If a route hasn't been matched yet, perform matching against the
-		 * Europa request uri and set any matched parameters.
-		 */
+		// route if it hasn't been done yet
 		if (!$this->getRoute()) {
 			$this->route($this->getRouteSubject());
 		}
 		
-		// dynamic controllers and actions
-		$controllerName       = $this->getControllerClassName();
-		$actionName           = $this->getActionMethodName();
-		$controllerReflection = new ReflectionClass($controllerName);
-		$controller           = $controllerReflection->newInstanceArgs();
+		// routing information
+		$controller = $this->formatController($this->getController());
 		
-		// store result of init call
-		if ($controllerReflection->hasMethod('init')) {
-			$init = $controller->init();
-			
-			// handle init return value
-			if ($init === false) {
-				$this->setLayout(null);
-			} else {
-				$this->getLayout()->setParams($init);
-			}
-		}
-		
-		// set parameters
-		if ($controllerReflection->hasMethod($actionName)) {
-			$actionReflection = $controllerReflection->getMethod($actionName);
-			$actionParams     = array();
-			$requestParams    = array();
-			
-			// make request paramters case insensitive
-			foreach ($this->_params as $name => $value) {
-				$requestParams[strtolower($name)] = $value;
-			}
-			
-			// automatically define the parameters that will be passed to the action
-			foreach ($actionReflection->getParameters() as $paramIndex => $param) {
-				$pos  = $param->getPosition();
-				$name = strtolower($param->getName());
-				
-				// apply named parameters
-				if (array_key_exists($name, $requestParams)) {
-					$actionParams[$pos] = $requestParams[$name];
-				// set default values
-				} elseif ($param->isOptional()) {
-					$actionParams[$pos] = $param->getDefaultValue();
-				// throw exceptions when required params aren't defined
-				} else {
-					throw new Europa_Request_Exception(
-						"Required request parameter \${$param->getName()} for {$controllerName}->{$actionName}() is"
-						. ' not defined',
-						Europa_Request_Exception::REQUIRED_PARAMETER_NOT_DEFINED
-					);
-				}
-				
-				// cast the parameter if it is scalar
-				if (is_scalar($actionParams[$pos])) {
-					$actionParams[$pos] = Europa_String::create($actionParams[$pos])->cast();
-				}
-			}
-			
-			// the return value from the action determines the action taken on the view
-			$action = $actionReflection->invokeArgs(
-				$controller, 
-				$actionParams
-			);
-		} elseif ($controllerReflection->hasMethod('__call')) {
-			$action = $controller->$actionName();
-		} else {
+		// dispatch request
+		if (!Europa_Loader::loadClass($controller)) {
 			throw new Europa_Request_Exception(
-				"Action {$actionName} does not exist in {$this->getControllerClassName()} and it was not trapped in"
-				. ' __call.',
-				Europa_Request_Exception::ACTION_NOT_FOUND
+				'Could not load controller ' . $controller . '.',
+				Europa_Request_Exception::CONTROLLER_NOT_FOUND
 			);
 		}
 		
-		// handle action return value
-		if ($action === false) {
-			$this->setView(null);
-		} else {
-			$this->getVIew()->setParams($action);
-		}
+		// call the controller
+		$controller = new $controller;
 		
-		// controller can be access by other methods
-		$this->_controller = $controller;
-		
-		return $this;
+		// return the action result
+		return $controller;
 	}
 	
 	/**
@@ -221,10 +102,10 @@ abstract class Europa_Request
 	 */
 	public function route($subject)
 	{
-		foreach ($this->_routes as $route) {
+		foreach ($this->routes as $route) {
 			$params = $route->query($subject);
 			if ($params) {
-				$this->_route = $route;
+				$this->route = $route;
 				$this->setParams($params);
 				return true;
 			}
@@ -236,12 +117,12 @@ abstract class Europa_Request
 	 * Sets a route.
 	 * 
 	 * @param string $name The name of the route.
-	 * @param Europa_Request_Route $route The route to use.
+	 * @param Europa_Requestroute $route The route to use.
 	 * @return Europa_Request
 	 */
-	public function setRoute($name, Europa_Request_Route $route)
+	public function setRoute($name, Europa_Requestroute $route)
 	{
-		$this->_routes[$name] = $route;
+		$this->routes[$name] = $route;
 		return $this;
 	}
 
@@ -249,17 +130,17 @@ abstract class Europa_Request
 	 * Gets a specified route or the route which was matched.
 	 * 
 	 * @param string $name The name of the route to get.
-	 * @return Europa_Request_Route
+	 * @return Europa_Requestroute
 	 */
 	public function getRoute($name = null)
 	{
 		if ($name) {
-			if (isset($this->_routes[$name])) {
-				return $this->_routes[$name];
+			if (isset($this->routes[$name])) {
+				return $this->routes[$name];
 			}
 			return false;
 		}
-		return $this->_route;
+		return $this->route;
 	}
 	
 	/**
@@ -276,8 +157,8 @@ abstract class Europa_Request
 			$names = array($names);
 		}
 		foreach ($names as $name) {
-			if (isset($this->_params[$name])) {
-				return $this->_params[$name];
+			if (isset($this->params[$name])) {
+				return $this->params[$name];
 			}
 		}
 		return $default;
@@ -299,7 +180,7 @@ abstract class Europa_Request
 			$names = array($names);
 		}
 		foreach ($names as $name) {
-			$this->_params[$name] = $value;
+			$this->params[$name] = $value;
 		}
 		return $this;
 	}
@@ -311,7 +192,7 @@ abstract class Europa_Request
 	 */
 	public function getParams()
 	{
-		return $this->_params;
+		return $this->params;
 	}
 	
 	/**
@@ -334,106 +215,22 @@ abstract class Europa_Request
 	/**
 	 * Returns the formatted controller name that should be instantiated.
 	 * 
+	 * @param string $controller The controller param to format.
 	 * @return string
 	 */
-	public function getControllerClassName()
+	public function formatController($controller)
 	{
-		$controller = $this->getParam('controller', 'index');
-		return Europa_String::create($controller)
-		       ->camelCase(true)
-		       ->__toString()
-		     . 'Controller';
+		return Europa_String::create($controller)->toClass() . 'Controller';
 	}
 	
 	/**
-	 * Returns the formatted action name that should be called.
-	 * 
+	 * Returns the controller parameter. This is the value that is passed to the
+	 * formatter.
 	 * @return string
 	 */
-	public function getActionMethodName()
+	public function getController()
 	{
-		$action = $this->getParam('action', 'index');
-		return Europa_String::create($action)
-		       ->camelCase()
-		       ->__toString()
-		     . 'Action';
-	}
-	
-	/**
-	 * Sets the layout.
-	 * 
-	 * @param Europa_View $layout The layout to use.
-	 * @return Europa_Request
-	 */
-	public function setLayout(Europa_View $layout = null)
-	{
-		$this->_layout = $layout;
-		return $this;
-	}
-
-	/**
-	 * Gets the set layout.
-	 * 
-	 * @return Europa_View_Abstract|null
-	 */
-	public function getLayout()
-	{
-		return $this->_layout;
-	}
-
-	/**
-	 * Sets the view.
-	 * 
-	 * @param Europa_View $view The view to use.
-	 * @return Europa_Request
-	 */
-	public function setView(Europa_View $view = null)
-	{
-		$this->_view = $view;
-		return $this;
-	}
-
-	/**
-	 * Gets the set view.
-	 * 
-	 * @return Europa_View_Abstract|null
-	 */
-	public function getView()
-	{
-		return $this->_view;
-	}
-
-	/**
-	 * Returns the layout script to be set. By default this is mapped to the
-	 * camel-cased name of the controller route parameter.
-	 * 
-	 * @return string
-	 */
-	public function getLayoutScript()
-	{
-		$controller = $this->getParam('controller');
-		$controller = $controller ? $controller : 'index';
-		return Europa_String::create($controller)
-		     ->camelCase(true)
-		     ->__toString();
-	}
-
-	/**
-	 * Returns the view script to be set. By default this is mapped to the
-	 * camel-cased name of the controller as the directory and the camel-cased
-	 * action name as the file.
-	 * 
-	 * @return string
-	 */
-	public function getViewScript()
-	{
-		$action = $this->getParam('action');
-		$action = $action ? $action : 'index';
-		return $this->getLayoutScript()
-		     . '/' 
-		     . Europa_String::create($action)
-		     ->camelCase(false)
-		     ->__toString();
+		return $this->getParam('controller', 'index');
 	}
 	
 	/**
@@ -443,9 +240,9 @@ abstract class Europa_Request
 	 */
 	public static function getActiveInstance()
 	{
-		$len = count(self::$_stack);
+		$len = count(self::$stack);
 		if ($len) {
-			return self::$_stack[$len - 1];
+			return self::$stack[$len - 1];
 		}
 		return null;
 	}
@@ -458,7 +255,7 @@ abstract class Europa_Request
 	 */
 	public static function getStack()
 	{
-		return self::$_stack;
+		return self::$stack;
 	}
 	
 	/**
