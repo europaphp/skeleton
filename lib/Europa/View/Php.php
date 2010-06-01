@@ -16,6 +16,13 @@
 class Europa_View_Php extends Europa_View
 {
 	/**
+	 * Contains the child of the current view instance.
+	 * 
+	 * @var Europa_View
+	 */
+	protected $_child = null;
+	
+	/**
 	 * The script to be rendered.
 	 * 
 	 * @var string
@@ -55,7 +62,7 @@ class Europa_View_Php extends Europa_View
 		}
 		$helper = $this->__call($name);
 		if ($helper) {
-			$this->_params[$name] = $helper;
+			parent::__set($name, $helper);
 			return $helper;
 		}
 		return null;
@@ -69,7 +76,7 @@ class Europa_View_Php extends Europa_View
 	public function __call($func, $args = array())
 	{
 		// format the helper class name for the given method
-		$class = $this->_getHelperClassName($func);
+		$class = (string) Europa_String::create($func)->toClass();
 
 		// if unable to load, return null
 		if (!Europa_Loader::loadClass($class)) {
@@ -93,18 +100,53 @@ class Europa_View_Php extends Europa_View
 	 * 
 	 * @return string
 	 */
-	public function toString()
+	public function __toString()
 	{
 		// allows us to return the included file as a string
 		ob_start();
 		
 		// include it
-		if ($path = $this->_getScriptFullPath()) {
-			include $path;
+		if ($view = Europa_Loader::search($this->_script)) {
+			include $view;
 		}
 		
 		// return the parsed view
 		return ob_get_clean() . "\n";
+	}
+	
+	/**
+	 * Extends the specified view with the current view. And returns the new
+	 * view.
+	 * 
+	 * @param Europa_View $view The view to extend.
+	 * @return Europa_View
+	 */
+	public function extend(Europa_View $view)
+	{
+		return $view->setChild($this);
+	}
+	
+	/**
+	 * Sets the child view for the current view and returns the current view.
+	 * 
+	 * @param Europa_View $view The view to extend.
+	 * @return Europa_View
+	 */
+	public function setChild(Europa_View $view)
+	{
+		$this->_child = $view;
+		return $this;
+	}
+	
+	/**
+	 * Returns the child of the current view if it exists.
+	 * 
+	 * @param Europa_View $view The view to extend.
+	 * @return Europa_View
+	 */
+	public function getChild()
+	{
+		return $this->_child;
 	}
 	
 	/**
@@ -117,27 +159,16 @@ class Europa_View_Php extends Europa_View
 	public function setScript($script)
 	{
 		$this->_script = $script;
-		
 		return $this;
 	}
 	
 	/**
-	 * Returns the script that is going to be rendered.
+	 * Returns the set script.
 	 * 
 	 * @return string
 	 */
 	public function getScript()
 	{
 		return $this->_script;
-	}
-	
-	/**
-	 * Returns the full path to the view including extension.
-	 * 
-	 * @return string
-	 */
-	protected function _getScriptFullPath()
-	{
-		return realpath('./app/views/' . $this->_script . '.php');
 	}
 }

@@ -20,5 +20,8 @@ try {
 	$europa = new Europa_Request_Http;
 	echo $europa->dispatch();
 } catch (Exception $e) {
-	echo $e->getMessage();
+	$europa = new Europa_Request_Http;
+	$europa->controller = 'error';
+	$europa->exception  = $e;
+	echo $europa->dispatch();
 }

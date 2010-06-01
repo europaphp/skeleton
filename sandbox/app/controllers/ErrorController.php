@@ -12,27 +12,5 @@
  */
 class ErrorController extends AbstractController
 {
-	/**
-	 * Traps any actions called on the error controller and sends it to the
-	 * "not found" action.
-	 * 
-	 * @param string $name The name of the error action called
-	 * @param array $args The request parameters passed.
-	 * @return void
-	 */
-	public function __call($name, $args)
-	{
-		$this->notFoundAction();
-		$this->_view->setScript('Error/notFound');
-	}
 	
-	/**
-	 * The action that gets called whenever something isn't found.
-	 * 
-	 * @return void
-	 */
-	public function notFoundAction()
-	{
-		
-	}
 }

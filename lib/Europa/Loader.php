@@ -13,30 +13,19 @@
 class Europa_Loader
 {
 	/**
-	 * Contains logging information.
-	 * 
-	 * @var bool
-	 */
-	protected static $_log = array();
-	
-	/**
-	 * Contains all load paths that Europa_Loader will use when attempting 
-	 * to load a class.
+	 * Contains all load paths that Europa_Loader will use when searching for a
+	 * file.
 	 * 
 	 * @var array
 	 */
 	protected static $_paths = array();
 	
 	/**
-	 * Loads a class based on the Europa file naming convention. If the class
-	 * is found, it's full path is returned. If not, then false is returned.
+	 * Searches for a class and loads it if it is found.
 	 * 
-	 * Alternate load paths can be specified to search in before the default
-	 * load paths in an explicit call to loadClass.
-	 * 
-	 * @param string $className The Class to load.
-	 * @param mixed $paths Alternate load paths to search in first.
-	 * @return bool|string
+	 * @param string $className The Class to search for.
+	 * @param mixed $paths Alternate search paths to search in first.
+	 * @return bool
 	 */
 	public static function loadClass($className, $paths = null)
 	{
@@ -45,62 +34,64 @@ class Europa_Loader
 			return true;
 		}
 		
-		// for logging purposes
-		$startTime = microtime();
-		
-		// Parse the class name to find the conventional file path relative to
-		// either the passed $path or the load paths.
-		$file  = str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
-		$found = false;
-		
-		// make use of specified paths, but fall back to set paths
+		// format the classname to a file
+		$file = str_replace(array('_', '\\'), DIRECTORY_SEPARATOR, $className);
+		if (self::load($file, $paths) && class_exists($className, false)) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Searches for a file and loads it if it is found.
+	 * 
+	 * @param string $className The Class to search for.
+	 * @param mixed $paths Alternate search paths to search in first.
+	 * @return bool
+	 */
+	public static function load($file, $paths = null)
+	{
+		if ($file = self::search($file, $paths)) {
+			include $file;
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Searches for a file and returns it's path if it is found.
+	 * 
+	 * @param string $file The file to load, relative to the search paths.
+	 * @param mixed $paths Alternate load paths to search in first.
+	 * @return string|false
+	 */
+	public static function search($file, $paths = null)
+	{
+		// make use of specified paths, but fall back to default paths
 		if ($paths) {
 			$paths = array_merge((array) $paths, self::$_paths);
-		// if not just use original paths
 		} else {
 			$paths = self::$_paths;
 		}
 		
-		// if there aren't any paths, die with a message
+		// a path must be defined
 		if (!$paths) {
-			// we require the exception files here since they won't be loadable
+			// we require the exception files here since they won't be autoloadable
 			require_once realpath(dirname(__FILE__) . '/Exception.php');
 			require_once realpath(dirname(__FILE__) . '/Loader/Exception.php');
 			throw new Europa_Loader_Exception(
-				"At least one load path must be defined.",
+				'At least one load path must be defined.',
 				Europa_Loader_Exception::NO_PATHS_DEFINED
 			);
 		}
 		
-		// search for the file
+		// search in all paths and return the fullpath if found
 		foreach ($paths as $path) {
-			$fullPath = $path . DIRECTORY_SEPARATOR . $file;
-			
-			// break if the file is found
+			$fullPath = $path . DIRECTORY_SEPARATOR . $file . '.php';
 			if (is_file($fullPath)) {
-				$found = true;
-				
-				break;
+				return $fullPath;
 			}
 		}
-		
-		// if found, include
-		if ($found) {
-			include $fullPath;
-		}
-		
-		// build logging information
-		self::$_log[] = array(
-			'class' => $className,
-			'path'  => $fullPath,
-			'time'  => microtime() - $startTime,
-			'found' => $found
-		);
-		
-		if ($found) {
-			return $fullPath;
-		}
-		
 		return false;
 	}
 	
@@ -126,26 +117,6 @@ class Europa_Loader
 			);
 		}
 		self::$_paths[] = $realpath;
-	}
-	
-	/**
-	 * Returns an array of all bound load paths.
-	 * 
-	 * @return array
-	 */
-	public static function getPaths()
-	{
-		return self::$_paths;
-	}
-	
-	/**
-	 * Returns a log with information about loaded classes.
-	 * 
-	 * @return array
-	 */
-	public static function getLog()
-	{
-		return self::$_log;
 	}
 	
 	/**

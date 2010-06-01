@@ -17,21 +17,21 @@ abstract class Europa_Request
 	 * 
 	 * @var array
 	 */
-	protected $params = array();
+	protected $_params = array();
 	
 	/**
 	 * The route that was matched.
 	 *
-	 * @var Europaroute
+	 * @var Europa_Route
 	 */
-	protected $route;
+	protected $_route;
 	
 	/**
 	 * The array of routes to match.
 	 * 
 	 * @var array
 	 */
-	protected $routes = array();
+	protected $_routes = array();
 	
 	/**
 	 * Contains the instances of all requests that are currently 
@@ -57,6 +57,29 @@ abstract class Europa_Request
 	{
 		// remove the dispatch from the stack
 		array_pop(self::$stack);
+	}
+	
+	/**
+	 * Returns the specified request parameter.
+	 * 
+	 * @param string $name The name of the parameter.
+	 * @return mixed
+	 */
+	public function __get($name)
+	{
+		return $this->getParam($name);
+	}
+	
+	/**
+	 * Sets the specified request parameter.
+	 * 
+	 * @param string $name The name of the parameter.
+	 * @param mixed $value The value of the parameter.
+	 * @return mixed
+	 */
+	public function __set($name, $value)
+	{
+		$this->setParam($name, $value);
 	}
 	
 	/**
@@ -87,9 +110,9 @@ abstract class Europa_Request
 		}
 		
 		// call the controller
-		$controller = new $controller;
+		$controller = new $controller($this);
 		
-		// return the action result
+		// return the controller
 		return $controller;
 	}
 	
@@ -102,10 +125,10 @@ abstract class Europa_Request
 	 */
 	public function route($subject)
 	{
-		foreach ($this->routes as $route) {
+		foreach ($this->_routes as $route) {
 			$params = $route->query($subject);
 			if ($params) {
-				$this->route = $route;
+				$this->_route = $route;
 				$this->setParams($params);
 				return true;
 			}
@@ -122,7 +145,7 @@ abstract class Europa_Request
 	 */
 	public function setRoute($name, Europa_Requestroute $route)
 	{
-		$this->routes[$name] = $route;
+		$this->_routes[$name] = $route;
 		return $this;
 	}
 
@@ -135,12 +158,12 @@ abstract class Europa_Request
 	public function getRoute($name = null)
 	{
 		if ($name) {
-			if (isset($this->routes[$name])) {
-				return $this->routes[$name];
+			if (isset($this->_routes[$name])) {
+				return $this->_routes[$name];
 			}
 			return false;
 		}
-		return $this->route;
+		return $this->_route;
 	}
 	
 	/**
@@ -157,8 +180,8 @@ abstract class Europa_Request
 			$names = array($names);
 		}
 		foreach ($names as $name) {
-			if (isset($this->params[$name])) {
-				return $this->params[$name];
+			if (isset($this->_params[$name])) {
+				return $this->_params[$name];
 			}
 		}
 		return $default;
@@ -180,7 +203,7 @@ abstract class Europa_Request
 			$names = array($names);
 		}
 		foreach ($names as $name) {
-			$this->params[$name] = $value;
+			$this->_params[$name] = $value;
 		}
 		return $this;
 	}
@@ -192,7 +215,7 @@ abstract class Europa_Request
 	 */
 	public function getParams()
 	{
-		return $this->params;
+		return $this->_params;
 	}
 	
 	/**

@@ -23,7 +23,7 @@ abstract class Europa_View
 	 * 
 	 * @return string
 	 */
-	abstract public function toString();
+	abstract public function __toString();
 	
 	/**
 	 * Similar to calling a helper via Europa_View->__call(), but treats the
@@ -86,7 +86,7 @@ abstract class Europa_View
 	{
 		if (is_array($params) || is_object($params)) {
 			foreach ($params as $name => $value) {
-				$this->$name = $value;
+				$this->_params[$name] = $value;
 			}
 		}
 		return $this;
@@ -104,16 +104,5 @@ abstract class Europa_View
 	public function getParams()
 	{
 		return $this->_params;
-	}
-	
-	/**
-	 * Returns a helper class name based on the $name passed in.
-	 * 
-	 * @param string $name The name of the helper to get the class name of.
-	 * @return string
-	 */
-	protected function _getHelperClassName($name)
-	{
-		return (string) Europa_String::create($name)->camelCase(true) . 'Helper';
 	}
 }
