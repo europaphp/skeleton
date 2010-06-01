@@ -19,8 +19,9 @@ abstract class AbstractController extends Europa_Controller
 	 */
 	public function __toString()
 	{
-		$view = Europa_String::create($this->controller)->toClass() . 'View';
-		$view = new Europa_View_Php($view);
+		$view = $this->_request->getParam('controller', 'index');
+		$view = Europa_String::create($view . 'View')->toClass();
+		$view = new Europa_View_Php((string) $view);
 		return (string) $view->extend(new Europa_View_Php('AbstractView'));
 	}
 }
