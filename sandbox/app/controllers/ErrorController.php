@@ -10,7 +10,17 @@
  * @copyright (c) 2010 Trey Shugart
  * @link      http://europaphp.org/license
  */
-class ErrorController extends AbstractController
+class ErrorController extends Europa_Controller_Basic
 {
+	public function __toString()
+	{	
+		$layout = new Europa_View_Php('IndexView');
+		$view   = new Europa_View_Php('Error/IndexView');
+		return $view->extend($layout)->__toString();
+	}
 	
+	public function action()
+	{
+		
+	}
 }

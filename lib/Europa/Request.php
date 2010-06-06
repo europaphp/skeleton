@@ -12,12 +12,26 @@
 abstract class Europa_Request
 {
 	/**
+	 * The key used to get the controller from the request params.
+	 * 
+	 * @var string
+	 */
+	protected $_controllerKey = 'controller';
+	
+	/**
+	 * The callback to use for formatting the controller parameter.
+	 * 
+	 * @var mixed
+	 */
+	protected $_controllerFormatter = null;
+	
+	/**
 	 * The params parsed out of the route and cascaded through the
-	 * super-globals.
+	 * super-globals. Contains the default controller to use.
 	 * 
 	 * @var array
 	 */
-	protected $_params = array();
+	protected $_params = array('controller' => 'index');
 	
 	/**
 	 * The route that was matched.
@@ -34,19 +48,19 @@ abstract class Europa_Request
 	protected $_routes = array();
 	
 	/**
+	 * The string to use for route matching.
+	 * 
+	 * @var string
+	 */
+	protected $_routeSubject = null;
+	
+	/**
 	 * Contains the instances of all requests that are currently 
 	 * dispatching in chronological order.
 	 * 
 	 * @var array
 	 */
 	private static $stack = array();
-	
-	/**
-	 * Returns the string that the routes will match against.
-	 * 
-	 * @return string
-	 */
-	abstract public function getRouteSubject();
 	
 	/**
 	 * Destructs the object and removes it's reference.
@@ -95,7 +109,9 @@ abstract class Europa_Request
 		
 		// route if it hasn't been done yet
 		if (!$this->getRoute()) {
-			$this->route($this->getRouteSubject());
+			if ($params = $this->route($this->getRouteSubject())) {
+				$this->setParams($params);
+			}
 		}
 		
 		// routing information
@@ -109,8 +125,9 @@ abstract class Europa_Request
 			);
 		}
 		
-		// call the controller
+		// call the controller and action it
 		$controller = new $controller($this);
+		$controller->action();
 		
 		// return the controller
 		return $controller;
@@ -126,11 +143,8 @@ abstract class Europa_Request
 	public function route($subject)
 	{
 		foreach ($this->_routes as $route) {
-			$params = $route->query($subject);
-			if ($params) {
-				$this->_route = $route;
-				$this->setParams($params);
-				return true;
+			if ($params = $route->query($subject)) {
+				return $params;
 			}
 		}
 		return false;
@@ -140,10 +154,10 @@ abstract class Europa_Request
 	 * Sets a route.
 	 * 
 	 * @param string $name The name of the route.
-	 * @param Europa_Requestroute $route The route to use.
+	 * @param Europa_Request_Route $route The route to use.
 	 * @return Europa_Request
 	 */
-	public function setRoute($name, Europa_Requestroute $route)
+	public function setRoute($name, Europa_Request_Route $route)
 	{
 		$this->_routes[$name] = $route;
 		return $this;
@@ -153,7 +167,7 @@ abstract class Europa_Request
 	 * Gets a specified route or the route which was matched.
 	 * 
 	 * @param string $name The name of the route to get.
-	 * @return Europa_Requestroute
+	 * @return Europa_Request_Route
 	 */
 	public function getRoute($name = null)
 	{
@@ -161,9 +175,31 @@ abstract class Europa_Request
 			if (isset($this->_routes[$name])) {
 				return $this->_routes[$name];
 			}
-			return false;
+			return null;
 		}
 		return $this->_route;
+	}
+	
+	/**
+	 * Sets the string to use for route matching.
+	 * 
+	 * @param string $subject The subject to use for route matching.
+	 * @return Europa_Request
+	 */
+	public function setRouteSubject($subject)
+	{
+		$this->_routeSubject = $subject;
+		return $this;
+	}
+	
+	/**
+	 * Returns the string that the routes will match against.
+	 * 
+	 * @return string
+	 */
+	public function getRouteSubject()
+	{
+		return $this->_routeSubject;
 	}
 	
 	/**
@@ -243,7 +279,39 @@ abstract class Europa_Request
 	 */
 	public function formatController($controller)
 	{
+		if ($this->_controllerFormatter) {
+			return call_user_func($this->_controllerFormatter, $controller);
+		}
 		return Europa_String::create($controller)->toClass() . 'Controller';
+	}
+	
+	/**
+	 * Sets the formatter that should be used to format the controller class.
+	 * 
+	 * @param mixed $callback The callback for formatting the controller.
+	 * @return Europa_Request
+	 */
+	public function setControllerFormatter($callback)
+	{
+		if (!is_callable($callback, true)) {
+			throw new Europa_Request_Exception(
+				'The specified controller formatter is not valid.',
+				Europa_Request_Exception::INVALID_CONTROLLER_FORMATTER
+			);
+		}
+		$this->_controllerFormatter = $callback;
+		return $this;
+	}
+	
+	/**
+	 * Sets the controller parameter.
+	 * 
+	 * @param string $controller The controller to set.
+	 * @return Europa_Request
+	 */
+	public function setController($controller)
+	{
+		return $this->setParam($this->getControllerKey(), $controller);
 	}
 	
 	/**
@@ -253,7 +321,84 @@ abstract class Europa_Request
 	 */
 	public function getController()
 	{
-		return $this->getParam('controller', 'index');
+		return $this->getParam($this->getControllerKey());
+	}
+	
+	/**
+	 * Sets the controller key to use for retrieving it from the request.
+	 * 
+	 * @param string $key The key of the controller parameter.
+	 * @return Europa_Request
+	 */
+	public function setControllerKey($newKey)
+	{
+		// retrieve the current key and controller
+		$oldKey = $this->_controllerKey;
+		$oldVal = $this->getParam($oldKey);
+		
+		// set the new key
+		$this->_controllerKey = $newKey;
+		
+		// auto-set the new controller parameter to the old value
+		return $this->setParam($newKey, $oldVal);
+	}
+	
+	/**
+	 * Retrieves the controller key.
+	 * 
+	 * @return string
+	 */
+	public function getControllerKey()
+	{
+		return $this->_controllerKey;
+	}
+
+	/**
+	 * Sniffs the passed in method for any parameters existing in the request
+	 * and returns the appropriate parameters, in the order which they were
+	 * defined in the method. Useful for using in conjunction with
+	 * call_user_func_array().
+	 * 
+	 * If a required parameters is not found, an exception is thrown.
+	 * 
+	 * @param ReflectionMethod $method The method to use.
+	 * @param bool $caseSensitive Whether or not to be case-sensitive or not.
+	 * @return array
+	 */
+	public function getParamsForMethod(ReflectionMethod $method, $caseSensitive = false)
+	{
+		$methodParams  = array();
+		$requestParams = array();
+		foreach ($this->getParams() as $name => $value) {
+			$name = $caseSensitive ? strtolower($name) : $name;
+			$requestParams[$name] = $value;
+		}
+
+		// automatically define the parameters that will be passed to the action
+		foreach ($method->getParameters() as $param) {
+			$pos  = $param->getPosition();
+			$name = strtolower($param->getName());
+
+			// apply named parameters
+			if (array_key_exists($name, $requestParams)) {
+				$methodParams[$pos] = $requestParams[$name];
+			// set default values
+			} elseif ($param->isOptional()) {
+				$methodParams[$pos] = $param->getDefaultValue();
+			// throw exceptions when required params aren't defined
+			} else {
+				throw new Europa_Request_Exception(
+					"A required parameter for {$method->getName()} was not defined.",
+					Europa_Request_Exception::REQUIRED_METHOD_ARGUMENT_NOT_DEFINED
+				);
+			}
+
+			// cast the parameter if it is scalar
+			if (is_scalar($methodParams[$pos])) {
+				$methodParams[$pos] = Europa_String::create($methodParams[$pos])->cast();
+			}
+		}
+		return $methodParams;
 	}
 	
 	/**

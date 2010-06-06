@@ -9,7 +9,10 @@
  * @copyright (c) 2010 Trey Shugart
  * @link      http://europaphp.org/license
  */
-class IndexController extends AbstractController
+class IndexController extends Europa_Controller_Action
 {
-	
+	public function indexAction()
+	{
+		
+	}
 }

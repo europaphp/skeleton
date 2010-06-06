@@ -30,19 +30,24 @@ class Europa_View_Php extends Europa_View
 	protected $_script = null;
 	
 	/**
+	 * The script suffix.
+	 * 
+	 * @var string
+	 */
+	protected $_suffix = 'php';
+	
+	/**
 	 * Construct the view and sets defaults.
 	 * 
 	 * @param string $script The script to render.
 	 * @param array $params The arguments to pass to the script.
 	 * @return Europa_View
 	 */
-	public function __construct($script = null, array $params = array())
+	public function __construct($script = null, $params = null)
 	{
 		// set a script if defined
-		if ($script) {
-			$this->setScript($script);
-		}
-		$this->setParams($params);
+		$this->setScript($script)
+		     ->setParams($params);
 	}
 
 	/**
@@ -106,7 +111,7 @@ class Europa_View_Php extends Europa_View
 		ob_start();
 		
 		// include it
-		if ($view = Europa_Loader::search($this->_script)) {
+		if ($view = Europa_Loader::search($this->getScript() . '.' . $this->getSuffix())) {
 			include $view;
 		}
 		
@@ -170,5 +175,27 @@ class Europa_View_Php extends Europa_View
 	public function getScript()
 	{
 		return $this->_script;
+	}
+	
+	/**
+	 * Sets the view suffix.
+	 * 
+	 * @param string $suffix The suffix to use.
+	 * @return Europa_View_Php
+	 */
+	public function setSuffix($suffix)
+	{
+		$this->_suffix = $suffix;
+		return $this;
+	}
+	
+	/**
+	 * Returns the set suffix.
+	 * 
+	 * @return string
+	 */
+	public function getSuffix()
+	{
+		return $this->_suffix;
 	}
 }

@@ -36,6 +36,7 @@ class Europa_Loader
 		
 		// format the classname to a file
 		$file = str_replace(array('_', '\\'), DIRECTORY_SEPARATOR, $className);
+		$file = $file . '.php';
 		if (self::load($file, $paths) && class_exists($className, false)) {
 			return true;
 		}
@@ -87,7 +88,7 @@ class Europa_Loader
 		
 		// search in all paths and return the fullpath if found
 		foreach ($paths as $path) {
-			$fullPath = $path . DIRECTORY_SEPARATOR . $file . '.php';
+			$fullPath = $path . DIRECTORY_SEPARATOR . $file;
 			if (is_file($fullPath)) {
 				return $fullPath;
 			}

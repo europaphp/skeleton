@@ -17,4 +17,19 @@ class Europa_Request_Exception extends Europa_Exception
 	 * @var int
 	 */
 	const CONTROLLER_NOT_FOUND = 1;
+	
+	/**
+	 * Thrown when an invalid controller formatter is set.
+	 * 
+	 * @var int
+	 */
+	const INVALID_CONTROLLER_FORMATTER = 2;
+	
+	/**
+	 * Thrown when a required method parameter isn't defined when mapping
+	 * request parameters to method parameters.
+	 * 
+	 * @var int
+	 */
+	const REQUIRED_METHOD_ARGUMENT_NOT_DEFINED = 3;
 }
