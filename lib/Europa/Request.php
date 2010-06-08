@@ -38,7 +38,7 @@ abstract class Europa_Request
 	 *
 	 * @var Europa_Route
 	 */
-	protected $_route;
+	protected $_route = null;
 	
 	/**
 	 * The array of routes to match.
@@ -107,6 +107,11 @@ abstract class Europa_Request
 		// register the instance in the stack so it can be easily found
 		self::$stack[] = $this;
 		
+		// if routing hasn't been done yet, _route will be null
+		if (is_null($this->_route)) {
+			$this->route($this->getRouteSubject());
+		}
+		
 		// routing information
 		$controller = $this->formatController($this->getController());
 		
@@ -138,19 +143,23 @@ abstract class Europa_Request
 	}
 	
 	/**
-	 * Processes all routes. If a route is matched, the matched parameters are
-	 * returned. If no match is found, false is returned.
+	 * Processes all routes. If a route is matched, it is set, params are set
+	 * and it returns true. If a route is not matched, the route is set to
+	 * false and it returns false.
 	 * 
 	 * @param string $subject The subject to route against.
-	 * @return bool|array
+	 * @return bool
 	 */
 	public function route($subject)
 	{
 		foreach ($this->_routes as $route) {
 			if ($params = $route->query($subject)) {
-				return $params;
+				$this->_route = $route;
+				$this->setParams($params);
+				return true;
 			}
 		}
+		$this->_route = false;
 		return false;
 	}
 
@@ -168,19 +177,36 @@ abstract class Europa_Request
 	}
 
 	/**
-	 * Gets a specified route or the route which was matched.
+	 * Gets a specified route.
 	 * 
 	 * @param string $name The name of the route to get.
 	 * @return Europa_Request_Route
 	 */
-	public function getRoute($name = null)
+	public function getRoute($name)
 	{
-		if ($name) {
-			if (isset($this->_routes[$name])) {
-				return $this->_routes[$name];
-			}
-			return null;
+		if (isset($this->_routes[$name])) {
+			return $this->_routes[$name];
 		}
+		return false;
+	}
+	
+	/**
+	 * Returns whether or not the request has a route to take.
+	 * 
+	 * @return bool
+	 */
+	public function hasRoute()
+	{
+		return $this->_route instanceof Europa_Request_Route;
+	}
+	
+	/**
+	 * Returns the route that was matched during routing.
+	 * 
+	 * @return null|false|Europa_Request_Route
+	 */
+	public function getMatchedRoute()
+	{
 		return $this->_route;
 	}
 	
