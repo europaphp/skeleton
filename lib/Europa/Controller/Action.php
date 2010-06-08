@@ -51,8 +51,10 @@ abstract class Europa_Controller_Action extends Europa_Controller_Basic
 	 */
 	public function __call($action, $args)
 	{
-		throw new Europa_Exception(
-			"Action {$action}() does not exist."
+		// by default, an action must exist
+		throw new Europa_Controller_Exception(
+			"Action {$action}() does not exist.",
+			Europa_Controller_Exception::ACTION_NOT_FOUND
 		);
 	}
 	

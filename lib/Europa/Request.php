@@ -97,8 +97,8 @@ abstract class Europa_Request
 	}
 	
 	/**
-	 * Dispatches the request to the appropriate controller/action combo. If
-	 * route matching hasn't been done yet, it will be done.
+	 * Dispatches the request to the appropriate controller/action combo.
+	 * Invoking dispatching assumes routing was performed.
 	 * 
 	 * @return Europa_Controller
 	 */
@@ -106,13 +106,6 @@ abstract class Europa_Request
 	{
 		// register the instance in the stack so it can be easily found
 		self::$stack[] = $this;
-		
-		// route if it hasn't been done yet
-		if (!$this->getRoute()) {
-			if ($params = $this->route($this->getRouteSubject())) {
-				$this->setParams($params);
-			}
-		}
 		
 		// routing information
 		$controller = $this->formatController($this->getController());
@@ -125,8 +118,19 @@ abstract class Europa_Request
 			);
 		}
 		
-		// call the controller and action it
+		// instantiate the formatted controller
 		$controller = new $controller($this);
+		
+		// make sure it's a valid instance
+		if (!$controller instanceof Europa_Controller_Basic) {
+			throw new Europa_Request_Exception(
+				'Class ' . get_class($controller) . ' is not a valid controller instance.'
+				. 'Controller classes must derive from Europa_Controller_Basic.',
+				Europa_Request_Exception::INVALID_CONTROLLER
+			);
+		}
+		
+		// action it
 		$controller->action();
 		
 		// return the controller
