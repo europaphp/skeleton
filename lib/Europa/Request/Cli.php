@@ -20,19 +20,7 @@ class Europa_Request_Cli extends Europa_Request
 	public function __construct()
 	{
 		$this->_parseParams()
-		     ->setLayout(new Europa_View_Php)
-		     ->setView(new Europa_View_Php);
-	}
-	
-	/**
-	 * Returns the arguments passed to the cli script as a string including
-	 * the name of the script.
-	 * 
-	 * @return string
-	 */
-	public function getRouteSubject()
-	{
-		return implode(' ', $_SERVER['argv']);
+		     ->setRouteSubject(implode(' ', $_SERVER['argv']));
 	}
 	
 	/**

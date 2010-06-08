@@ -19,17 +19,8 @@ class Europa_Request_Http extends Europa_Request
 	public function __construct()
 	{
 		$this->setParams($_POST)
-		     ->setParams($_GET);
-	}
-	
-	/**
-	 * Returns the string that routes will be matched against during routing.
-	 * 
-	 * @return string
-	 */
-	public function getRouteSubject()
-	{
-		return self::getRequestUri();
+		     ->setParams($_GET)
+		     ->setRouteSubject(self::getRequestUri());
 	}
 	
 	/**
