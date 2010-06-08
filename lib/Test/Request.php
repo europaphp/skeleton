@@ -2,13 +2,11 @@
 
 class Test_Request extends Europa_Unit_Suite
 {
-	public function getTests()
+	public function __construct()
 	{
 		$tests = array(
 			'Dispatch',
-			'Params',
-			'SetLayout',
-			'SetView'
+			'Params'
 		);
 		
 		// test base on test environment for requests
@@ -23,9 +21,8 @@ class Test_Request extends Europa_Unit_Suite
 		
 		// modify prefix
 		foreach ($tests as $k => $test) {
-			$tests[$k] = $prefix . '_' . $test;
+			$test = $prefix . '_' . $test;
+			$this->add(new $test);
 		}
-		
-		return $tests;
 	}
 }

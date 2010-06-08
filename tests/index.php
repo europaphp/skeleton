@@ -7,6 +7,7 @@ require_once dirname(__FILE__) . '/../lib/Europa/Loader.php';
 Europa_Loader::registerAutoload();
 Europa_Loader::addPath(dirname(__FILE__) . '/../lib');
 Europa_Loader::addPath(dirname(__FILE__) . '/app/controllers');
+Europa_Loader::addPath(dirname(__FILE__) . '/app/views');
 
 try {
 	if (Europa_Request::isCli()) {

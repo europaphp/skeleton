@@ -17,14 +17,14 @@ abstract class Europa_Controller_Action extends Europa_Controller_Basic
 	 * 
 	 * @var Europa_View
 	 */
-	private $_layout;
+	protected $_layout;
 	
 	/**
 	 * The view that will be rendered.
 	 * 
 	 * @var Europa_View
 	 */
-	private $_view;
+	protected $_view;
 	
 	/**
 	 * Extends the layout with the view and returns the layout as a string.

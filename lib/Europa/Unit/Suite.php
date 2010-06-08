@@ -13,6 +13,13 @@
 abstract class Europa_Unit_Suite implements Europa_Unit_Testable
 {
 	/**
+	 * Contains the tests to be run.
+	 * 
+	 * @var array
+	 */
+	protected $_tests = array();
+	
+	/**
 	 * Contains all test names that passed.
 	 * 
 	 * @var array
@@ -32,14 +39,6 @@ abstract class Europa_Unit_Suite implements Europa_Unit_Testable
 	 * @var array
 	 */
 	protected $_failed = array();
-	
-	/**
-	 * Returns the class names for the test classes. Since the classes are
-	 * designed to be autoloaded, no paths are necessary.
-	 * 
-	 * @return array
-	 */
-	abstract public function getTests();
 	
 	/**
 	 * Gets run before all tests.
@@ -62,6 +61,28 @@ abstract class Europa_Unit_Suite implements Europa_Unit_Testable
 	}
 	
 	/**
+	 * Returns the name of the current test.
+	 * 
+	 * @return string
+	 */
+	public function getName()
+	{
+		return get_class($this);
+	}
+	
+	/**
+	 * Adds a test to the suite.
+	 * 
+	 * @param Europa_Unit_Testable $test The test/suite to add.
+	 * @return Europa_Unit_Suite
+	 */
+	public function add(Europa_Unit_Testable $test)
+	{
+		$this->_tests[] = $test;
+		return $this;
+	}
+	
+	/**
 	 * Runs all tests on each group.
 	 * 
 	 * @return mixed
@@ -72,17 +93,7 @@ abstract class Europa_Unit_Suite implements Europa_Unit_Testable
 		$this->setUp();
 		
 		// run through each test/group and run them
-		foreach ($this->getTests() as $class) {
-			// class names are returned, so instantiate
-			$class = new $class;
-			
-			// test must be testable
-			if (!$class instanceof Europa_Unit_Testable) {
-				throw new Europa_Unit_Exception(
-					get_class($class) . 'must implement Europa_Unit_Testable'
-				);
-			}
-			
+		foreach ($this->_tests as $class) {
 			// pre-test hook and running
 			$class->setUp();
 			$result = $class->run();
@@ -108,16 +119,6 @@ abstract class Europa_Unit_Suite implements Europa_Unit_Testable
 		
 		// post-test group hook
 		$this->tearDown();
-	}
-	
-	/**
-	 * Returns the name of the test group.
-	 * 
-	 * @return string
-	 */
-	public function getName()
-	{
-		return get_class($this);
 	}
 
 	/**

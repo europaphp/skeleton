@@ -2,11 +2,9 @@
 
 class Test_All extends Europa_Unit_Suite
 {
-	public function getTests()
+	public function __construct()
 	{
-		return array(
-			'Test_Loader',
-			'Test_Request'
-		);
+		$this->add(new Test_Loader)
+		     ->add(new Test_Request);
 	}
 }

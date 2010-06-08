@@ -1,6 +1,6 @@
 <?php
 
-class IndexController extends Europa_Controller
+class IndexController extends Europa_Controller_Action
 {
 	public function indexAction($test = 'Test_All', $verbose = false)
 	{
