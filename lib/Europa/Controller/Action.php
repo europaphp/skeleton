@@ -66,20 +66,20 @@ abstract class Europa_Controller_Action extends Europa_Controller
 	public function action()
 	{
 		// default view scheme
-		$this->_layout = new Europa_View_Php($this->_getDefaultLayoutScript());
-		$this->_view   = new Europa_View_Php($this->_getDefaultViewScript());
+		$this->_layout = new Europa_View_Php($this->_formatLayout());
+		$this->_view   = new Europa_View_Php($this->_formatView());
 		
 		// call the init and handle the return value
-		$params = $this->init();
+		$params = $this->_init();
 		if ($params === false) {
 			$this->_layout = null;
 		} elseif ($this->_layout) {
 			$this->_layout->setParams($params);
 		}
 
-		// call the action
+		// get action parameters
 		$params = array();
-		$action = $this->_getActionMethod();
+		$action = $this->_formatAction();
 		if (method_exists($this, $action)) {
 			$params = $this->_getMappedParams($action);
 		}
@@ -100,7 +100,7 @@ abstract class Europa_Controller_Action extends Europa_Controller
 	 * 
 	 * @return mixed
 	 */
-	public function init()
+	protected function _init()
 	{
 		
 	}
@@ -116,6 +116,40 @@ abstract class Europa_Controller_Action extends Europa_Controller
 		$this->_view = $view;
 		return $this;
 	}
+
+	/**
+	 * Formats the action and returns it.
+	 * 
+	 * @return string
+	 */
+	protected function _formatAction()
+	{
+		$action = $this->_getRequest()->getParam('action', 'index');
+		return Europa_String::create($action)->toClass()->__toString() . 'Action';
+	}
+
+	/**
+	 * Formats the layout and returns it.
+	 * 
+	 * @return string
+	 */
+	protected function _formatLayout()
+	{
+		$layout = Europa_String::create($this->_getRequest()->getController());
+		return $layout->toClass() . 'View';
+	}
+
+	/**
+	 * Formats the view and returns it.
+	 * 
+	 * @return string
+	 */
+	protected function _formatView()
+	{
+		$layout = Europa_String::create($this->_getRequest()->getController());
+		$view   = Europa_String::create($this->_getRequest()->getParam('action', 'index'));
+		return $layout->toClass() . '/' . $view->toClass() . 'View';
+	}
 	
 	/**
 	 * Sets the layout.
@@ -127,44 +161,6 @@ abstract class Europa_Controller_Action extends Europa_Controller
 	{
 		$this->_layout = $layout;
 		return $this;
-	}
-	
-	/**
-	 * Returns the action method that should be called.
-	 * 
-	 * @return string
-	 */
-	protected function _getActionMethod()
-	{
-		$action = $this->_getRequest()->getParam('action', 'index');
-		$action = Europa_String::create($action)->toClass()->__toString();
-		return $action . 'Action';
-	}
-	
-	/**
-	 * Returns the layout script that should be set by default.
-	 * 
-	 * @return string
-	 */
-	protected function _getDefaultLayoutScript()
-	{
-		$controller = $this->_getRequest()->getController();
-		$controller = Europa_String::create($controller)->toClass()->__toString();
-		return $controller . 'View';
-	}
-	
-	/**
-	 * Returns the view script that should be set by default.
-	 * 
-	 * @return string
-	 */
-	protected function _getDefaultViewScript()
-	{
-		$controller = $this->_getRequest()->getController();
-		$controller = Europa_String::create($controller)->toClass()->__toString();
-		$action     = $this->_getRequest()->getParam('action', 'index');
-		$action     = Europa_String::create($action)->toClass()->__toString();
-		return "{$controller}/{$action}View";
 	}
 
 	/**
