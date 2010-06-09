@@ -186,6 +186,17 @@ abstract class Europa_Request
 	}
 	
 	/**
+	 * Clears all parameters from the request. Includes clearing of default values.
+	 * 
+	 * @return Europa_Request
+	 */
+	public function clearParams()
+	{
+		$this->_params = array();
+		return $this;
+	}
+	
+	/**
 	 * Returns the formatted controller name that should be instantiated.
 	 * 
 	 * @param string $controller The controller param to format.
