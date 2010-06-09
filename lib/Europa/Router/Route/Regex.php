@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-final class Europa_Request_Route_Regex extends Europa_Request_Route
+final class Europa_Router_Route_Regex extends Europa_Router_Route
 {
 	/**
 	 * The expression used to match the route.

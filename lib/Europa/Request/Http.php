@@ -19,8 +19,7 @@ class Europa_Request_Http extends Europa_Request
 	public function __construct()
 	{
 		$this->setParams($_POST)
-		     ->setParams($_GET)
-		     ->setRouteSubject(self::getRequestUri());
+		     ->setParams($_GET);
 	}
 	
 	/**

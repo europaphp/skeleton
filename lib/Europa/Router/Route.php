@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-abstract class Europa_Request_Route
+abstract class Europa_Router_Route
 {
 	/**
 	 * A way of retrieving a uri representing the route.
