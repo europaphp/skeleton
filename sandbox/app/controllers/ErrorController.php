@@ -10,7 +10,7 @@
  * @copyright (c) 2010 Trey Shugart
  * @link      http://europaphp.org/license
  */
-class ErrorController extends Europa_Controller_Basic
+class ErrorController extends Europa_Controller
 {
 	public function __toString()
 	{	

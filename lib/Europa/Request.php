@@ -101,10 +101,10 @@ abstract class Europa_Request
 		$controller = new $controller($this);
 		
 		// make sure it's a valid instance
-		if (!$controller instanceof Europa_Controller_Basic) {
+		if (!$controller instanceof Europa_Controller) {
 			throw new Europa_Request_Exception(
 				'Class ' . get_class($controller) . ' is not a valid controller instance.'
-				. 'Controller classes must derive from Europa_Controller_Basic.',
+				. 'Controller classes must derive from Europa_Controller.',
 				Europa_Request_Exception::INVALID_CONTROLLER
 			);
 		}
@@ -276,54 +276,6 @@ abstract class Europa_Request
 	public function getControllerKey()
 	{
 		return $this->_controllerKey;
-	}
-
-	/**
-	 * Sniffs the passed in method for any parameters existing in the request
-	 * and returns the appropriate parameters, in the order which they were
-	 * defined in the method. Useful for using in conjunction with
-	 * call_user_func_array().
-	 * 
-	 * If a required parameters is not found, an exception is thrown.
-	 * 
-	 * @param ReflectionMethod $method The method to use.
-	 * @param bool $caseSensitive Whether or not to be case-sensitive or not.
-	 * @return array
-	 */
-	public function getParamsForMethod(ReflectionMethod $method, $caseSensitive = false)
-	{
-		$methodParams  = array();
-		$requestParams = array();
-		foreach ($this->getParams() as $name => $value) {
-			$name = $caseSensitive ? strtolower($name) : $name;
-			$requestParams[$name] = $value;
-		}
-
-		// automatically define the parameters that will be passed to the action
-		foreach ($method->getParameters() as $param) {
-			$pos  = $param->getPosition();
-			$name = strtolower($param->getName());
-
-			// apply named parameters
-			if (array_key_exists($name, $requestParams)) {
-				$methodParams[$pos] = $requestParams[$name];
-			// set default values
-			} elseif ($param->isOptional()) {
-				$methodParams[$pos] = $param->getDefaultValue();
-			// throw exceptions when required params aren't defined
-			} else {
-				throw new Europa_Request_Exception(
-					"A required parameter for {$method->getName()} was not defined.",
-					Europa_Request_Exception::REQUIRED_METHOD_ARGUMENT_NOT_DEFINED
-				);
-			}
-
-			// cast the parameter if it is scalar
-			if (is_scalar($methodParams[$pos])) {
-				$methodParams[$pos] = Europa_String::create($methodParams[$pos])->cast();
-			}
-		}
-		return $methodParams;
 	}
 	
 	/**
