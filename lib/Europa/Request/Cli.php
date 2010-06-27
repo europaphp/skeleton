@@ -23,6 +23,16 @@ class Europa_Request_Cli extends Europa_Request
 	}
 	
 	/**
+	 * Converts the request back into the original string representation.
+	 * 
+	 * @return string
+	 */
+	public function __toString()
+	{
+		return implode(' ', $_SERVER['argv']);
+	}
+	
+	/**
 	 * Parses out the cli request parameters - in unix style - and sets them on
 	 * the request.
 	 * 

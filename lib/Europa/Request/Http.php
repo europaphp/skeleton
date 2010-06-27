@@ -23,6 +23,16 @@ class Europa_Request_Http extends Europa_Request
 	}
 	
 	/**
+	 * Converts the request back into the original string representation.
+	 * 
+	 * @return string
+	 */
+	public function __toString()
+	{
+		return self::getFullUri();
+	}
+	
+	/**
 	 * Formats the passed in URI. The URI can be a relative path, absolute or
 	 * a named route. Whatever is passed in, it will be normalized and 
 	 * formatted.

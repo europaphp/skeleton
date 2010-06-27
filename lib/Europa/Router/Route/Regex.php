@@ -25,38 +25,30 @@ final class Europa_Router_Route_Regex extends Europa_Router_Route
 	 * 
 	 * @var string
 	 */
-	protected $_uriMap;
+	protected $_map;
 	
 	/**
 	 * Constructs the route and sets required properties.
 	 * 
 	 * @param string $expression The expression for route matching/parsing.
-	 * @param array $uriMap The string to use when reverse engineering the
-	 * $expression in Europa_Reuqest_Route_Regex->getUri().
+	 * @param array $map The string to use when reverse engineering the expression.
 	 * @return Europa_Route
 	 */
-	public function __construct($expression, $uriMap = null)
+	public function __construct($expression, $map = null)
 	{
 		$this->_expression = $expression;
-		$this->_uriMap     = $uriMap;
+		$this->_map        = $map;
 	}
 	
 	/**
-	 * Reverse engineers the current route to produce a formatted URI. This
-	 * allows routes and links to change based on the route name without ever
-	 * having to change the link URI's throughout the application.
+	 * Reverse engineers the current route to produce a formatted string.
 	 * 
-	 * @param array $params Any parameters to substitute for the parameters that
-	 * were matched in the request.
+	 * @param array $params The parameters used to reverse engineer the route.
 	 * @return string
 	 */
-	public function getUri(array $params = array())
+	public function reverse(array $params = array())
 	{
-		$parsed = $this->_uriMap;
-		$params = array_merge(
-			Europa_Request::getActiveInstance()->getParams(),
-			$params
-		);
+		$parsed = $this->_map;
 		foreach ($params as $name => $value) {
 			$parsed = str_replace(':' . $name, $value, $parsed);
 		}
@@ -64,18 +56,16 @@ final class Europa_Router_Route_Regex extends Europa_Router_Route
 	}
 	
 	/**
-	 * Matches the passed URI to the route.
+	 * Matches the passed subject to the route. Can be extended to provide a
+	 * custom routing algorithm. Returns the matched parameters.
 	 * 
-	 * Can be extended to provide a custom routing algorithm. Returns the
-	 * matched parameters.
-	 * 
-	 * @param string $uri The URI to match against the current route
-	 * definition.
+	 * @param string $subject The URI to match against the current route definition.
 	 * @return array|bool
 	 */
-	public function query($uri)
+	public function query($subject)
 	{
-		if (preg_match('#' . $this->_expression . '#', $uri, $matches)) {
+		$subject = (string) $subject;
+		if (preg_match('#' . $this->_expression . '#', $subject, $matches)) {
 			array_shift($matches);
 			$params = array();
 			foreach ($matches as $name => $value) {

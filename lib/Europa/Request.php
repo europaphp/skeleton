@@ -42,15 +42,11 @@ abstract class Europa_Request
 	private static $stack = array();
 	
 	/**
-	 * Destructs the object and removes it's reference.
+	 * Converts the request back into the original string representation.
 	 * 
-	 * @return void
+	 * @return string
 	 */
-	public function __destruct()
-	{
-		// remove the dispatch from the stack
-		array_pop(self::$stack);
-	}
+	abstract public function __toString();
 	
 	/**
 	 * Returns the specified request parameter.
@@ -111,6 +107,9 @@ abstract class Europa_Request
 		
 		// action it
 		$controller->action();
+		
+		// remove the dispatch from the stack
+		array_pop(self::$stack);
 		
 		// return the controller
 		return $controller;

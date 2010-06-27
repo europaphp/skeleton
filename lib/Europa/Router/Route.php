@@ -12,11 +12,11 @@
 abstract class Europa_Router_Route
 {
 	/**
-	 * A way of retrieving a uri representing the route.
+	 * Provides a way to reverse engineer the route using named parameters.
 	 * 
 	 * @return string
 	 */
-	abstract public function getUri(array $params = array());
+	abstract public function reverse(array $params = array());
 	
 	/**
 	 * An algorithm for matching the passed $subject to the expression
