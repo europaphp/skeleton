@@ -242,6 +242,7 @@ abstract class Europa_Request
 	/**
 	 * Returns the controller parameter. This is the value that is passed to the
 	 * formatter.
+	 * 
 	 * @return string
 	 */
 	public function getController()

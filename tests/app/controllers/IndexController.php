@@ -2,7 +2,7 @@
 
 class IndexController extends Europa_Controller_Action
 {
-	public function indexAction($test = 'Test_All', $verbose = false)
+	public function indexAction($test = 'Test', $verbose = false)
 	{
 		$class = new $test;
 		$class->run();

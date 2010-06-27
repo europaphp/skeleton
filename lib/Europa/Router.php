@@ -12,6 +12,13 @@
 class Europa_Router
 {
 	/**
+	 * The parameters that were matched after routing.
+	 * 
+	 * @var array
+	 */
+	protected $_params = array();
+	
+	/**
 	 * The route that was matched.
 	 *
 	 * @var Europa_Route
@@ -44,8 +51,9 @@ class Europa_Router
 	{
 		foreach ($this->_routes as $route) {
 			if ($params = $route->query($subject)) {
-				$this->_route = $route;
-				return $params;
+				$this->_route  = $route;
+				$this->_params = $params;
+				return true;
 			}
 		}
 		$this->_route = false;
@@ -76,7 +84,7 @@ class Europa_Router
 		if (isset($this->_routes[$name])) {
 			return $this->_routes[$name];
 		}
-		return false;
+		return null;
 	}
 	
 	/**
@@ -129,5 +137,15 @@ class Europa_Router
 	public function getRouteSubject()
 	{
 		return $this->_routeSubject;
+	}
+	
+	/**
+	 * Returns all parameters that were matched during routing.
+	 * 
+	 * @return array
+	 */
+	public function getParams()
+	{
+		return $this->_params;
 	}
 }

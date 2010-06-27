@@ -52,4 +52,14 @@ abstract class Europa_Controller
 	{
 		return $this->_request;
 	}
+	
+	protected function _redirect($uri)
+	{
+		return $this->_request->redirect($uri);
+	}
+	
+	protected function _forward()
+	{
+		
+	}
 }

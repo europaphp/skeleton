@@ -28,29 +28,26 @@ class Europa_Request_Http extends Europa_Request
 	 * formatted.
 	 * 
 	 * @param string $uri The URI to format.
-	 * @param array $params The parameters to pass if it is a named route.
 	 * @return string
 	 */
-	public function formatUri($uri = null, array $params = array())
+	public static function formatUri($uri = null)
 	{
 		// if it has a protocol prepended just return it
 		if (strpos($uri, '://') !== false) {
 			return $uri;
 		}
-		// if the route was found, reverse engineer it and set it
-		$route = $this->getRoute($uri);
-		if ($route) {
-			$uri = $route->getUri($params);
-		}
+		
 		// make consistent
 		if ($uri) {
 			$uri = '/' . ltrim($uri, '/');
 		}
+		
 		// if there is a root uri, add a forward slash to it
 		$root = self::getRootUri();
 		if ($root) {
 			$root = '/' . $root;
 		}
+		
 		// automate
 		return $root . $uri;
 	}
@@ -60,12 +57,11 @@ class Europa_Request_Http extends Europa_Request
 	 * Europa_Request_Http->formatUri().
 	 * 
 	 * @param string $uri The URI to redirect to.
-	 * @param bool $params The params to pass if $uri is a route.
 	 * @return void
 	 */
-	public function redirect($uri = '/', array $params = array())
+	public static function redirect($uri = '/')
 	{
-		header('Location: ' . $this->formatUri($uri, $params));
+		header('Location: ' . self::formatUri($uri));
 		exit;
 	}
 	

@@ -104,18 +104,6 @@ abstract class Europa_Controller_Action extends Europa_Controller
 	{
 		
 	}
-	
-	/**
-	 * Sets the view.
-	 * 
-	 * @param Europa_View $view
-	 * @return AbstractController
-	 */
-	protected function _setView(Europa_View $view = null)
-	{
-		$this->_view = $view;
-		return $this;
-	}
 
 	/**
 	 * Formats the action and returns it.
@@ -162,7 +150,19 @@ abstract class Europa_Controller_Action extends Europa_Controller
 		$this->_layout = $layout;
 		return $this;
 	}
-
+	
+	/**
+	 * Sets the view.
+	 * 
+	 * @param Europa_View $view
+	 * @return AbstractController
+	 */
+	protected function _setView(Europa_View $view = null)
+	{
+		$this->_view = $view;
+		return $this;
+	}
+	
 	/**
 	 * Sniffs the passed in method for any parameters existing in the request
 	 * and returns the appropriate parameters, in the order which they were

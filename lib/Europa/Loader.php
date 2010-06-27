@@ -21,6 +21,22 @@ class Europa_Loader
 	protected static $_paths = array();
 	
 	/**
+	 * Searches for a file and loads it if it is found.
+	 * 
+	 * @param string $className The Class to search for.
+	 * @param mixed $paths Alternate search paths to search in first.
+	 * @return bool
+	 */
+	public static function load($file, $paths = null)
+	{
+		if ($file = self::search($file, $paths)) {
+			include $file;
+			return true;
+		}
+		return false;
+	}
+	
+	/**
 	 * Searches for a class and loads it if it is found.
 	 * 
 	 * @param string $className The Class to search for.
@@ -38,22 +54,6 @@ class Europa_Loader
 		$file = str_replace(array('_', '\\'), DIRECTORY_SEPARATOR, $className);
 		$file = $file . '.php';
 		if (self::load($file, $paths) && class_exists($className, false)) {
-			return true;
-		}
-		return false;
-	}
-	
-	/**
-	 * Searches for a file and loads it if it is found.
-	 * 
-	 * @param string $className The Class to search for.
-	 * @param mixed $paths Alternate search paths to search in first.
-	 * @return bool
-	 */
-	public static function load($file, $paths = null)
-	{
-		if ($file = self::search($file, $paths)) {
-			include $file;
 			return true;
 		}
 		return false;
@@ -94,6 +94,20 @@ class Europa_Loader
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Searches for the specified class and returns the file if found or false
+	 * if not found.
+	 * 
+	 * @param string $class The class to search for.
+	 * @param mixed $paths Alternate load paths to search in first.
+	 * @return bool|string
+	 */
+	public static function searchClass($class, $paths = null)
+	{
+		$file = str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
+		return self::search($file, $paths);
 	}
 	
 	/**
