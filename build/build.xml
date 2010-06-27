@@ -42,6 +42,7 @@
 
 	<package id="controller">
 		<dependency>core</dependency>
+		<directory>lib/Europa/Controller</directory>
 		<file>lib/Europa/Controller.php</file>
 	</package>
 
@@ -56,6 +57,7 @@
 	</package>
 
 	<package id="loader">
+		<directory>lib/Europa/Loader</directory>
 		<file>lib/Europa/Loader.php</file>
 	</package>
 	
@@ -77,6 +79,11 @@
 		<directory>lib/Europa/Request</directory>
 		<file>lib/Europa/Request.php</file>
 	</package>
+	
+	<package id="router">
+		<directory>lib/Europa/Router</directory>
+		<file>lib/Europa/Router.php</file>
+	</package>
 
 	<package id="string">
 		<file>lib/Europa/String.php</file>
@@ -87,6 +94,7 @@
 	</package>
 	
 	<package id="validator">
+		<directory>lib/Europa/Validator</directory>
 		<file>lib/Europa/Validator.php</file>
 	</package>
 
