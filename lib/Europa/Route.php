@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-abstract class Europa_Router_Route
+abstract class Europa_Route
 {
 	/**
 	 * Provides a way to reverse engineer the route using named parameters.

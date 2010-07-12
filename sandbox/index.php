@@ -17,26 +17,13 @@ Europa_Loader::addPath('../lib');
 
 // dispatch the request catching any exceptions
 try {
-	$europa = new Europa_Request_Http;
-	$router = new Europa_Router;
-	
-	// add an example route for matching the first part of the query string
-	$router->setRoute(
-		'default',
-		new Europa_Router_Route_Regex(
-			'\?/?(?<controller>[^&]*)',
-			'/?/:controller'
-		)
+	$router = new Europa_Router(new Europa_Request_Http);
+	$router['default'] = new Europa_Route_Regex(
+		'\??/?(?<controller>[^&]+)?',
+		'/?/:controller',
+		array('controller' => 'index')
 	);
-	
-	// set the params matched by the router, if matched
-	// this will also set the controller if found
-	if ($router->route($europa)) {
-		$europa->setParams($router->getParams());
-	}
-	
-	// the dispatch method returns the controller which has  __toString()
-	echo $europa->dispatch();
+	echo $router->setSubject(Europa_Request_Http::getRequestUri())->dispatch();
 } catch (Exception $e) {
 	// if any errors occur, force the request to the error controller
 	$europa = new Europa_Request_Http;

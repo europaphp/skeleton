@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The heart of EuropaPHP. This is where it all starts and ends.
+ * A router which binds a Europa_Request to multiple Europa_Route's.
  * 
  * @category Request
  * @package  Europa
@@ -9,21 +9,14 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-class Europa_Router
+class Europa_Router implements Iterator, ArrayAccess, Countable
 {
 	/**
-	 * The parameters that were matched after routing.
+	 * The request that is to be routed.
 	 * 
-	 * @var array
+	 * @var Europa_Request
 	 */
-	protected $_params = array();
-	
-	/**
-	 * The route that was matched.
-	 *
-	 * @var Europa_Route
-	 */
-	protected $_route = null;
+	protected $_request;
 	
 	/**
 	 * The array of routes to match.
@@ -33,11 +26,22 @@ class Europa_Router
 	protected $_routes = array();
 	
 	/**
-	 * The string to use for route matching.
+	 * The subject that each route is queried against.
 	 * 
 	 * @var string
 	 */
-	protected $_routeSubject = null;
+	protected $_subject;
+	
+	/**
+	 * Constructs a new request router.
+	 * 
+	 * @return Europa_Router
+	 */
+	public function __construct(Europa_Request $request)
+	{
+		$this->_request = $request;
+		$this->_subject = $request->__toString();
+	}
 	
 	/**
 	 * Processes all routes. If a route is matched, it is set, params are set
@@ -47,27 +51,28 @@ class Europa_Router
 	 * @param string $subject The subject to route against.
 	 * @return bool
 	 */
-	public function route($subject)
+	public function dispatch()
 	{
-		foreach ($this->_routes as $route) {
-			if ($params = $route->query($subject)) {
-				$this->_route  = $route;
-				$this->_params = $params;
-				return true;
+		foreach ($this as $route) {
+			$params = $route->query($this->getSubject());
+			if ($params !== false) {
+				return $this->_request->setParams($params)->dispatch();
 			}
 		}
-		$this->_route = false;
-		return false;
+		throw new Europa_Router_Exception(
+			'Unable to match route.',
+			Europa_Router_Exception::NO_MATCH
+		);
 	}
 
 	/**
 	 * Sets a route.
 	 * 
 	 * @param string $name The name of the route.
-	 * @param Europa_Request_Route $route The route to use.
+	 * @param Europa_Route $route The route to use.
 	 * @return Europa_Request
 	 */
-	public function setRoute($name, Europa_Router_Route $route)
+	public function setRoute($name, Europa_Route $route)
 	{
 		$this->_routes[$name] = $route;
 		return $this;
@@ -88,64 +93,85 @@ class Europa_Router
 	}
 	
 	/**
-	 * Returns whether or not the request has a route to take.
+	 * Returns the subject that is queried against each route.
 	 * 
-	 * @return bool
+	 * @return string
 	 */
-	public function hasRoute()
+	public function getSubject()
 	{
-		return $this->_route instanceof Europa_Router_Route;
+		return $this->_subject;
 	}
 	
 	/**
-	 * Returns whether or not the current router has routed.
+	 * Sets the subject that is queried against each route.
 	 * 
-	 * @return bool
+	 * @return Europa_Route
 	 */
-	public function hasRouted()
+	public function setSubject($subject)
 	{
-		return !is_null($this->_route);
-	}
-	
-	/**
-	 * Returns the route that was matched during routing.
-	 * 
-	 * @return null|false|Europa_Request_Route
-	 */
-	public function getMatchedRoute()
-	{
-		return $this->_route;
-	}
-	
-	/**
-	 * Sets the string to use for route matching.
-	 * 
-	 * @param string $subject The subject to use for route matching.
-	 * @return Europa_Request
-	 */
-	public function setRouteSubject($subject)
-	{
-		$this->_routeSubject = $subject;
+		$this->_subject = (string) $subject;
 		return $this;
 	}
 	
 	/**
-	 * Returns the string that the routes will match against.
+	 * Returns the number of routes bound to the router.
 	 * 
-	 * @return string
+	 * @return int
 	 */
-	public function getRouteSubject()
+	public function count()
 	{
-		return $this->_routeSubject;
+		return count($this->_routes);
 	}
 	
 	/**
-	 * Returns all parameters that were matched during routing.
+	 * Returns the current route in the iteration.
 	 * 
-	 * @return array
+	 * @return Europa_Route
 	 */
-	public function getParams()
+	public function current()
 	{
-		return $this->_params;
+		return current($this->_routes);
+	}
+	
+	public function key()
+	{
+		return key($this->_routes);
+	}
+	
+	public function next()
+	{
+		next($this->_routes);
+	}
+	
+	public function rewind()
+	{
+		reset($this->_routes);
+	}
+	
+	public function valid()
+	{
+		return (bool) $this->current();
+	}
+	
+	public function offsetGet($offset)
+	{
+		return $this->getRoute($offset);
+	}
+	
+	public function offsetSet($offset, $route)
+	{
+		$this->setRoute($offset, $route);
+	}
+	
+	public function offsetExists($offset)
+	{
+		return isset($this->_routes);
+	}
+	
+	public function offsetUnset($offset)
+	{
+		if (isset($this->_routes[$offset])) {
+			unset($this->_routes[$offset]);
+		}
 	}
 }
