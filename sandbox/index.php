@@ -8,12 +8,13 @@ ini_set('display_errors', 'on');
 define('EUROPA_START_TIME', microtime());
 
 // require the loader, register autoloading and define load paths
-require dirname(__FILE__) . '/../lib/Europa/Loader.php';
+$base = dirname(__FILE__) . '/';
+require $base . '/../lib/Europa/Loader.php';
 Europa_Loader::registerAutoload();
-Europa_Loader::addPath('./app/controllers');
-Europa_Loader::addPath('./app/views');
-Europa_Loader::addPath('./app/helpers');
-Europa_Loader::addPath('../lib');
+Europa_Loader::addPath($base . 'app/controllers');
+Europa_Loader::addPath($base . 'app/views');
+Europa_Loader::addPath($base . 'app/helpers');
+Europa_Loader::addPath($base . '../lib');
 
 // dispatch the request catching any exceptions
 try {

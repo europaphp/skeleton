@@ -110,7 +110,7 @@ class Europa_String
 		$this->_string = preg_replace('/[^a-zA-Z0-9_]/', '', $this->_string);
 		foreach (explode('_', $this->_string) as $sub) {
 			if ($sub = trim($sub)) {
-				$subs[] = ucfirst(strtolower($sub));
+				$subs[] = ucfirst($sub);
 			}
 		}
 		$this->_string = implode('_', $subs);
