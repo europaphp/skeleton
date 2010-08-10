@@ -250,7 +250,7 @@ class Europa_String
 	 */
 	public function cast()
 	{
-		$val = urldecode($this->_string);
+		$val = $this->_string;
 		if (strtolower($val) == 'true') {
 			return true;
 		}
