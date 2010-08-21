@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-final class Europa_Route_Regex extends Europa_Route
+class Europa_Route_Regex implements Europa_Route
 {
 	/**
 	 * The expression used to match the route.
@@ -38,6 +38,7 @@ final class Europa_Route_Regex extends Europa_Route
 	 * Constructs the route and sets required properties.
 	 * 
 	 * @param string $expression The expression for route matching/parsing.
+	 * @param string $reverse The string used to reverse engineer the route.
 	 * @param array $map The string to use when reverse engineering the expression.
 	 * @return Europa_Route
 	 */
@@ -74,31 +75,33 @@ final class Europa_Route_Regex extends Europa_Route
 	{
 		// we make sure the subject is a string, or can be converted to one
 		$subject = (string) $subject;
-		if (preg_match('#' . $this->_expression . '#', $subject, $matches)) {
-			// the first match is useless to us
-			array_shift($matches);
-			
-			// map default and hardcoded values
-			foreach ($this->_map as $name => $value) {
-				// a string key denotes a hardcoded value
-				if (is_string($name)) {
-					$params[$name] = $value;
-				// a numeric key denotes a value mapped to a matched index
-				} else {
-					$params[$value] = $matches[$name];
-				}
-			}
-			
-			// override any default/hardcoded values with matched values
-			foreach ($matches as $name => $value) {
-				if (is_string($name)) {
-					$params[$name] = $value;
-				}
-			}
-			
-			// return the parameters
-			return $params;
+		
+		if (!preg_match('#' . $this->_expression . '#', $subject, $matches)) {
+			return false;
 		}
-		return false;
+		
+		// the first match is useless to us
+		array_shift($matches);
+		
+		// map default and hardcoded values
+		foreach ($this->_map as $name => $value) {
+			// a string key denotes a hardcoded value
+			if (is_string($name)) {
+				$params[$name] = $value;
+			// a numeric key denotes a value mapped to a matched index
+			} else {
+				$params[$value] = $matches[$name];
+			}
+		}
+		
+		// override any default/hardcoded values with matched values
+		foreach ($matches as $name => $value) {
+			if (is_string($name)) {
+				$params[$name] = $value;
+			}
+		}
+		
+		// return the parameters
+		return $params;
 	}
 }

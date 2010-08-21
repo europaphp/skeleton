@@ -9,14 +9,14 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-abstract class Europa_Route
+interface Europa_Route
 {
 	/**
 	 * Provides a way to reverse engineer the route using named parameters.
 	 * 
 	 * @return string
 	 */
-	abstract public function reverse(array $params = array());
+	public function reverse(array $params = array());
 	
 	/**
 	 * An algorithm for matching the passed $subject to the expression
@@ -26,5 +26,5 @@ abstract class Europa_Route
 	 * @param string $subject The string to query against the route.
 	 * @return array|bool
 	 */
-	abstract public function query($subject);
+	public function query($subject);
 }
