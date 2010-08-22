@@ -1,6 +1,6 @@
 <?php
 
-class Test_Route_Named extends Europa_Unit_Test
+class Test_Route_Simple extends Europa_Unit_Test
 {
 	public function setUp()
 	{
@@ -9,39 +9,39 @@ class Test_Route_Named extends Europa_Unit_Test
 	
 	public function testMatch()
 	{
-		$route = new Europa_Route_Named(':controller/:action');
+		$route = new Europa_Route_Simple(':controller/:action');
 		return $route->query('some-controller/some-action') !== false;
 	}
 	
 	public function testNonMatch()
 	{
-		$route = new Europa_Route_Named(':controller/:action');
+		$route = new Europa_Route_Simple(':controller/:action');
 		return $route->query('some-controller/some-action/some-parameter') === false;
 	}
 	
 	public function testWildcardWithSlash()
 	{
-		$route = new Europa_Route_Named(':controller/:action/*');
+		$route = new Europa_Route_Simple(':controller/:action/*');
 		return $route->query('some-controller/some-action/') !== false
 		    && $route->query('some-controller/some-action/some/other/stuff') !== false;
 	}
 	
 	public function testWildcardWithoutSlash()
 	{
-		$route = new Europa_Route_Named(':controller/:action*');
+		$route = new Europa_Route_Simple(':controller/:action*');
 		return $route->query('some-controller/some-action') !== false
 		    && $route->query('some-controller/some-action/some/other/stuff') !== false;;
 	}
 	
 	public function testRequireEndingSlash()
 	{
-		$route = new Europa_Route_Named(':controller/:action/');
+		$route = new Europa_Route_Simple(':controller/:action/');
 		return $route->query('some-controller/some-action') === false;
 	}
 	
 	public function testParameterBinding()
 	{
-		$route  = new Europa_Route_Named(':controller/:action');
+		$route  = new Europa_Route_Simple(':controller/:action');
 		$params = $route->query('test-controller/test-action');
 		
 		if (!$params) {
@@ -54,7 +54,7 @@ class Test_Route_Named extends Europa_Unit_Test
 	
 	public function testDefaultParameterBinding()
 	{
-		$route = new Europa_Route_Named(
+		$route = new Europa_Route_Simple(
 			'user/:user',
 			array(
 				'controller' => 'test-controller',
@@ -71,9 +71,22 @@ class Test_Route_Named extends Europa_Unit_Test
 		    && $params['action']     === 'test-action';
 	}
 	
+	public function testDynamicParameterBinding()
+	{
+		$route  = new Europa_Route_Simple(':controller/:action*');
+		$params = $route->query('controller/action/param1:value1/param2:value2');
+		
+		if (!$params) {
+			return false;
+		}
+		
+		return $params['param1'] === 'value1'
+		    && $params['param2'] === 'value2';
+	}
+	
 	public function testReverseEngineering()
 	{
-		$route = new Europa_Route_Named('user/:username');
+		$route = new Europa_Route_Simple('user/:username');
 		return $route->reverse(array('username' => 'testuser')) === 'user/testuser';
 	}
 	

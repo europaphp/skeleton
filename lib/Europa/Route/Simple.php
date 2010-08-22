@@ -1,13 +1,45 @@
 <?php
 
-class Europa_Route_Named implements Europa_Route
+/**
+ * A route class that requires URL rewriting that isused for matching via simple expressions.
+ * 
+ * @category Routing
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  (c) 2010 Trey Shugart
+ * @link     http://europaphp.org/license
+ */
+class Europa_Route_Simple implements Europa_Route
 {
+	/**
+	 * Whether or not the curent expression contains a wildcard.
+	 * 
+	 * @var bool
+	 */
 	private $_hasWildcard = false;
 	
+	/**
+	 * The expression to match against each query.
+	 * 
+	 * @var string
+	 */
 	private $_expression;
 	
+	/**
+	 * The default parameters to bind.
+	 * 
+	 * @var array
+	 */
 	private $_defaults;
 	
+	/**
+	 * Constructs a new route and sets the expression and default values. It
+	 * also detects whether or not a wildcard was used in the expression.
+	 * 
+	 * @param string $expression The expression used for matching.
+	 * @param array $defaults The default parameters to bind.
+	 * @return Europa_Route_Simple
+	 */
 	public function __construct($expression, array $defaults = array())
 	{
 		$expressionLength   = strlen($expression);
@@ -18,6 +50,15 @@ class Europa_Route_Named implements Europa_Route
 		                    : $expression;
 	}
 	
+	/**
+	 * @todo Rework logic so it is more readable.
+	 * @todo Thin out logic.
+	 * 
+	 * Maks a query against the subject using the route's expression.
+	 * 
+	 * @param string $subject The subject to query.
+	 * @return array|false
+	 */
 	public function query($subject)
 	{
 		$expressionParts = explode('/', $this->_expression);
@@ -30,11 +71,22 @@ class Europa_Route_Named implements Europa_Route
 		
 		$params = array();
 		
+		// set defaults
+		while (list($name, $value) = each($this->_defaults)) {
+			$params[$name] = $value;
+		}
+		
 		// map paramters from the subject
 		while (list($index, $subjectPart) = each($subjectParts)) {
+			// check for dynamic prameter binding
+			if (strpos($subjectPart, ':') !== false) {
+				list($name, $value) = explode(':', $subjectPart);
+				$params[$name] = $value;
+			}
+			
 			// the subject may be longer than the expression if a wildcard is used
 			if (!isset($expressionParts[$index])) {
-				break;
+				continue;
 			}
 			
 			// grab the part of the expression that corresponds to this subject part
@@ -49,16 +101,15 @@ class Europa_Route_Named implements Europa_Route
 			}
 		}
 		
-		// set defaults
-		while (list($name, $value) = each($this->_defaults)) {
-			if (!isset($params[$name])) {
-				$params[$name] = $value;
-			}
-		}
-		
 		return $params;
 	}
 	
+	/**
+	 * Reverse engineers the expression using the specified parameters.
+	 * 
+	 * @param array $params The parameters to use in the expression.
+	 * @return string
+	 */
 	public function reverse(array $params = array())
 	{
 		$reverse = $this->_expression;
