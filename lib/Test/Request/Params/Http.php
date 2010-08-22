@@ -6,9 +6,9 @@ class Test_Request_Params_Http extends Europa_Unit_Test
 	
 	public function setUp()
 	{
-		$_GET  = array('cascade1' => true, 'controller' => 'customcontroller');
-		$_POST = array('cascade1' => false, 'cascade2' => true);
 		$this->_request = new Europa_Request_Http;
+		$this->_request->setParams(array('cascade1' => false, 'cascade2' => true))
+		               ->setParams(array('cascade1' => true, 'controller' => 'customcontroller'));
 	}
 	
 	public function testHttpParamCascading()

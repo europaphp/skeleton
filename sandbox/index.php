@@ -24,7 +24,7 @@ try {
 		'/?/:controller',
 		array('controller' => 'index')
 	);
-	echo $router->setSubject(Europa_Request_Http::getRequestUri())->dispatch();
+	echo $router->dispatch();
 } catch (Exception $e) {
 	// if any errors occur, force the request to the error controller
 	$europa = new Europa_Request_Http;

@@ -18,8 +18,7 @@ class Europa_Request_Http extends Europa_Request
 	 */
 	public function __construct()
 	{
-		$this->setParams($_POST)
-		     ->setParams($_GET);
+		$this->setParams($_REQUEST);
 	}
 	
 	/**
@@ -29,7 +28,7 @@ class Europa_Request_Http extends Europa_Request
 	 */
 	public function __toString()
 	{
-		return self::getFullUri();
+		return self::getRequestUri();
 	}
 	
 	/**
