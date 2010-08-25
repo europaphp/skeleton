@@ -1,7 +1,7 @@
 <?php
 
 /**
- * An abstract class for validatable validator classes.
+ * An interface for building custom validators.
  * 
  * @category Validation
  * @package  Europa
@@ -11,5 +11,11 @@
  */
 interface Europa_Validator_Validatable
 {
-	
+	/** 
+	 * Validates the passed in value.
+	 * 
+	 * @param mixed $value The value to validate.
+	 * @return bool
+	 */
+	public function isValid($value);
 }

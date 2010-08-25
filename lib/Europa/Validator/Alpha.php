@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-class Europa_Validator_Required implements Europa_Validator_Validatable
+class Europa_Validator_Alpha implements Europa_Validator_Validatable
 {
 	/**
 	 * Checks to make sure the specified value is set.
@@ -18,9 +18,6 @@ class Europa_Validator_Required implements Europa_Validator_Validatable
 	 */
 	public function isValid($value)
 	{
-		if (empty($value)) {
-			return false;
-		}
-		return true;
+		return preg_match('/[a-zA-Z]/', $value);
 	}
 }

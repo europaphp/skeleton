@@ -1,86 +1,76 @@
 <?php
 
-/**
- * An abstract class for validator classes.
- * 
- * @category Validation
- * @package  Europa
- * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
- */
-class Europa_Validator_Suite implements Europa_Validator_Validatable
+class Europa_Validator_Suite implements Europa_Validator_Validatable, ArrayAccess, Iterator
 {
-	/**
-	 * 
-	 */
-	protected $_errors = array();
+	private $_validators = array();
 	
-	/**
-	 * 
-	 */
-	protected $_validators = array();
-	
-	/**
-	 * 
-	 */
-	public function validate(array $data)
+	public function isValid($value)
 	{
-		$valid = true;
-		foreach ($this->_validators as $name => $group) {
-			$value = null;
-			if (isset($data[$name])) {
-				$value = $data[$name];
-			}
-			foreach ($group as $validator) {
-				if (!$validator->validate($value)) {
-					$valid = false;
-					$this->_errors[] = $validator;
-				}
+		foreach ($this as $validator) {
+			if (!$validator->isValid($value)) {
+				return false;
 			}
 		}
-		return $valid;
+		return true;
 	}
 	
-	/**
-	 * 
-	 */
-	public function addValidator($name, Europa_Validator_Validatable $validator)
+	public function current()
 	{
-		if (!isset($this->_validators[$name])) {
-			$this->_validators[$name] = array();
-		}
-		$this->_validators[$name][] = $validator;
+		return current($this->_validators);
+	}
+	
+	public function key()
+	{
+		return key($this->_validators);
+	}
+	
+	public function next()
+	{
+		next($this->_validators);
 		return $this;
 	}
 	
-	/**
-	 *
-	 */
-	public function getValidators()
+	public function rewind()
 	{
-		return $this->_validators;
+		reset($this->_validators);
+		return $this;
 	}
 	
-	/**
-	 * 
-	 */
-	public function getErrors()
+	public function valid()
 	{
-		return $this->_errors;
+		return $this->offsetExists($this->key());
 	}
 	
-	/**
-	 * 
-	 */
-	public function getErrorMessages()
+	public function offsetSet($index, $value)
 	{
-		$messages = array();
-		foreach ($this->getErrors() as $error) {
-			foreach ($error->getErrorMessages() as $message) {
-				$messages[] = $message;
-			}
+		$this->_add($value);
+		return $this;
+	}
+	
+	public function offsetGet($index)
+	{
+		if ($this->offsetExists($index)) {
+			return $this->_validators[$index];
 		}
-		return $messages;
+		return null;
+	}
+	
+	public function offsetExists($index)
+	{
+		return isset($this->_validators[$index]);
+	}
+	
+	public function offsetUnset($index)
+	{
+		if ($this->offsetExists($index)) {
+			unset($this->_validators[$index]);
+		}
+		return $this;
+	}
+	
+	private function _add(Europa_Validator_Validatable $validator)
+	{
+		$this->_validators[] = $validator;
+		return $this;
 	}
 }
