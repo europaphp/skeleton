@@ -21,7 +21,7 @@ class Europa_Form_ElementList extends Europa_Form_Base implements ArrayAccess, I
 	/**
 	 * Adds a valid renderable element onto the element list.
 	 * 
-	 * @param Europa_Form_Renderable $element The element to add.
+	 * @param Europa_Form_Base $element The element to add.
 	 * @param mixed $offset The offset to set the element at.
 	 * @return Europa_Form_ElementList
 	 */

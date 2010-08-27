@@ -82,7 +82,7 @@ class Europa_Router implements Iterator, ArrayAccess, Countable
 	 * Gets a specified route.
 	 * 
 	 * @param string $name The name of the route to get.
-	 * @return Europa_Request_Route
+	 * @return Europa_Route|null
 	 */
 	public function getRoute($name)
 	{
