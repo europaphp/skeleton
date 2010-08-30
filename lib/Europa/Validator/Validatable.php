@@ -19,5 +19,10 @@ interface Europa_Validator_Validatable
 	 */
 	public function isValid($value);
 	
+	/**
+	 * Returns the messages associated to the validatable object.
+	 * 
+	 * @return array
+	 */
 	public function getMessages();
 }

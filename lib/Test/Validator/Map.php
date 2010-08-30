@@ -67,9 +67,9 @@ class Test_Validator_Map extends Europa_Unit_Test
 		$this->_validator['dob']  = new Europa_Validator_Required;
 		
 		// and add error messages
-		$this->_validator['name']->addMessage(new Europa_Validator_Message(self::NAME_ERROR));
-		$this->_validator['age']->addMessage(new Europa_Validator_Message(self::AGE_ERROR));
-		$this->_validator['dob']->addMessage(new Europa_Validator_Message(self::DOB_ERROR));
+		$this->_validator['name']->addMessage(self::NAME_ERROR);
+		$this->_validator['age']->addMessage(self::AGE_ERROR);
+		$this->_validator['dob']->addMessage(self::DOB_ERROR);
 	}
 	
 	/**
