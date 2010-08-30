@@ -176,9 +176,16 @@ class Europa_Validator_Suite implements Europa_Validator_Validatable, ArrayAcces
 	 */
 	public function offsetUnset($index)
 	{
+		// remove the validator
 		if ($this->offsetExists($index)) {
 			unset($this->_validators[$index]);
 		}
+		
+		// remove any errors associated to the valdiator
+		if (isset($this->_errors[$index])) {
+			unset($this->_errors[$index]);
+		}
+		
 		return $this;
 	}
 	

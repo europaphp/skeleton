@@ -67,9 +67,9 @@ class Test_Validator_Map extends Europa_Unit_Test
 		$this->_validator['dob']  = new Europa_Validator_Required;
 		
 		// and add error messages
-		$this->_validator['name']['required'] = new Europa_Validator_Message(self::NAME_ERROR);
-		$this->_validator['age']['range']     = new Europa_Validator_Message(self::AGE_ERROR);
-		$this->_validator['dob']['required']  = new Europa_Validator_Message(self::DOB_ERROR);
+		$this->_validator['name']->addMessage(new Europa_Validator_Message(self::NAME_ERROR));
+		$this->_validator['age']->addMessage(new Europa_Validator_Message(self::AGE_ERROR));
+		$this->_validator['dob']->addMessage(new Europa_Validator_Message(self::DOB_ERROR));
 	}
 	
 	/**
@@ -80,17 +80,5 @@ class Test_Validator_Map extends Europa_Unit_Test
 	public function testValidation()
 	{
 		return $this->_validator->isValid($this->_data);
-	}
-	
-	/**
-	 * Tests mapped error messages.
-	 * 
-	 * @return bool
-	 */
-	public function testMessages()
-	{
-		return (string) $this->_validator['name']['required'] === self::NAME_ERROR
-		    && (string) $this->_validator['age']['range']     === self::AGE_ERROR
-		    && (string) $this->_validator['dob']['required']  === self::DOB_ERROR;
 	}
 }
