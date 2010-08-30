@@ -29,6 +29,6 @@ class Europa_Validator_Map extends Europa_Validator_Suite
 				$this->_errors[] = $index;
 			}
 		}
-		return $this->hasErrors();
+		return !$this->hasErrors();
 	}
 }

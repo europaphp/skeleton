@@ -39,7 +39,7 @@ class Europa_Validator_Suite implements Europa_Validator_Validatable, ArrayAcces
 				$this->_errors[] = $index;
 			}
 		}
-		return $this->hasErrors();
+		return !$this->hasErrors();
 	}
 	
 	/**
@@ -49,7 +49,17 @@ class Europa_Validator_Suite implements Europa_Validator_Validatable, ArrayAcces
 	 */
 	public function hasErrors()
 	{
-		return count($this->_errors) === 0;
+		return $this->countErrors() > 0;
+	}
+	
+	/**
+	 * Returns the number of errors.
+	 * 
+	 * @return int
+	 */
+	public function countErrors()
+	{
+		return count($this->_errors);
 	}
 	
 	/**
