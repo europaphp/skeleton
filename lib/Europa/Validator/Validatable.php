@@ -18,4 +18,6 @@ interface Europa_Validator_Validatable
 	 * @return bool
 	 */
 	public function isValid($value);
+	
+	public function getMessages();
 }
