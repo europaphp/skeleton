@@ -12,7 +12,7 @@
 interface Europa_Validator_Validatable
 {
 	/** 
-	 * Validates the passed in value.
+	 * Tells whether the last validation was successful or not.
 	 * 
 	 * @param mixed $value The value to validate.
 	 * @return bool

@@ -1,7 +1,21 @@
 <?php
 
+/**
+ * Tests for validating Europa_Validator.
+ * 
+ * @category Tests
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  (c) 2010 Trey Shugart
+ * @link     http://europaphp.org/license
+ */
 class Test_Validator_Validator extends Europa_Unit_Test
 {
+	/**
+	 * Tests the required validator.
+	 * 
+	 * @return bool
+	 */
 	public function testRequired()
 	{
 		$required = new Europa_Validator_Required;
@@ -13,6 +27,11 @@ class Test_Validator_Validator extends Europa_Unit_Test
 		    && !$required->isValid(array());
 	}
 	
+	/**
+	 * Tests the number validator.
+	 * 
+	 * @return bool
+	 */
 	public function testNumber()
 	{
 		$number = new Europa_Validator_Number;
@@ -25,6 +44,11 @@ class Test_Validator_Validator extends Europa_Unit_Test
 		    && !$number->isValid(true);
 	}
 	
+	/**
+	 * Tests the number range validator.
+	 * 
+	 * @return bool
+	 */
 	public function testNumberRange()
 	{
 		$range = new Europa_Validator_NumberRange(1, 10);
@@ -32,6 +56,11 @@ class Test_Validator_Validator extends Europa_Unit_Test
 		    && $range->isValid(10);
 	}
 	
+	/**
+	 * Tests the alpha character validator.
+	 * 
+	 * @return bool
+	 */
 	public function testAlpha()
 	{
 		$alpha = new Europa_Validator_Alpha;
@@ -39,6 +68,11 @@ class Test_Validator_Validator extends Europa_Unit_Test
 		    && !$alpha->isValid('s0m3th1ng');
 	}
 	
+	/**
+	 * Tests the alpha-numeric character validator.
+	 * 
+	 * @return bool
+	 */
 	public function testAlphaNumeric()
 	{
 		$alnum = new Europa_Validator_AlphaNumeric;

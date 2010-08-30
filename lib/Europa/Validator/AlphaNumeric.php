@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-class Europa_Validator_AlphaNumeric implements Europa_Validator_Validatable
+class Europa_Validator_AlphaNumeric extends Europa_Validator
 {
 	/**
 	 * Checks to make sure the value is alpha-numeric
@@ -18,6 +18,6 @@ class Europa_Validator_AlphaNumeric implements Europa_Validator_Validatable
 	 */
 	public function isValid($value)
 	{
-		return preg_match('/[a-zA-Z0-9]/', $value);
+		return (bool) preg_match('/^[a-zA-Z0-9]*$/', $value);
 	}
 }

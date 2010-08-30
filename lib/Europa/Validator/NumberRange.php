@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-class Europa_Validator_NumberRange implements Europa_Validator_Validatable
+class Europa_Validator_NumberRange extends Europa_Validator
 {
 	/**
 	 * The minimum value.

@@ -1,17 +1,58 @@
 <?php
 
-class Europa_Validator_Suite implements Europa_Validator_Validatable, ArrayAccess, Iterator
+class Europa_Validator_Suite implements Europa_Validator_Validatable, ArrayAccess, Iterator, Countable
 {
-	private $_validators = array();
+	protected $_failed = array();
+	
+	protected $_passed = array();
+	
+	protected $_validators = array();
 	
 	public function isValid($value)
 	{
-		foreach ($this as $validator) {
-			if (!$validator->isValid($value)) {
-				return false;
+		$this->_passed = array();
+		$this->_failed = array();
+		foreach ($this as $index => $validator) {
+			if ($validator->isValid($value)) {
+				$this->_passed[] = $index;
+			} else {
+				$this->_failed[] = $index;
 			}
 		}
-		return true;
+		return count($this->_failed) === 0;
+	}
+	
+	/**
+	 * Returns the validators that failed.
+	 * 
+	 * @return array
+	 */
+	public function getFailed()
+	{
+		$failed = array();
+		foreach ($this->_failed as $index) {
+			$failed[$index] = $this[$index];
+		}
+		return $failed;
+	}
+	
+	/**
+	 * Returns the validators that passed.
+	 * 
+	 * @return array
+	 */
+	public function getPassed()
+	{
+		$passed = array();
+		foreach ($this->_passed as $index) {
+			$passed[$index] = $this[$index];
+		}
+		return $passed;
+	}
+	
+	public function count()
+	{
+		return count($this->_validators);
 	}
 	
 	public function current()
@@ -43,7 +84,7 @@ class Europa_Validator_Suite implements Europa_Validator_Validatable, ArrayAcces
 	
 	public function offsetSet($index, $value)
 	{
-		$this->_add($value);
+		$this->_add($index, $value);
 		return $this;
 	}
 	
@@ -68,9 +109,12 @@ class Europa_Validator_Suite implements Europa_Validator_Validatable, ArrayAcces
 		return $this;
 	}
 	
-	private function _add(Europa_Validator_Validatable $validator)
+	private function _add($index, Europa_Validator_Validatable $validator)
 	{
-		$this->_validators[] = $validator;
+		if (is_null($index)) {
+			$index = $this->count();
+		}
+		$this->_validators[$index] = $validator;
 		return $this;
 	}
 }

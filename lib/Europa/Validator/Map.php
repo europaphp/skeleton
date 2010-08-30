@@ -12,20 +12,6 @@
 class Europa_Validator_Map extends Europa_Validator_Suite
 {
 	/**
-	 * Contains a mapping to the failed validators.
-	 * 
-	 * @var array
-	 */
-	private $_failed = array();
-	
-	/**
-	 * Contains a mapping to the passed validators.
-	 * 
-	 * @var array
-	 */
-	private $_passed = array();
-	
-	/**
 	 * Validates the suite based on the attached validators to the passed data.
 	 * 
 	 * @param mixed $data The data to validate.
@@ -36,47 +22,16 @@ class Europa_Validator_Map extends Europa_Validator_Suite
 		if (!is_array($data)) {
 			throw new Europa_Validator_Exception('The data being validated must be an array.');
 		}
-		
 		$this->_passed = array();
 		$this->_failed = array();
-		foreach ($this as $name => $validator) {
-			$value = isset($data[$name]) ? $data[$name] : null;
+		foreach ($this as $index => $validator) {
+			$value = isset($data[$index]) ? $data[$index] : null;
 			if ($validator->isValid($value)) {
-				$this->_passed[] = $name;
+				$this->_passed[] = $index;
 			} else {
-				$this->_failed[] = $name;
+				$this->_failed[] = $index;
 			}
 		}
-		
-		// return whether or not there were any failed validations
 		return count($this->_failed) === 0;
-	}
-	
-	/**
-	 * Returns the validators that failed.
-	 * 
-	 * @return array
-	 */
-	public function getFailed()
-	{
-		$failed = array();
-		foreach ($this->_failed as $name) {
-			$failed[$name] = $this[$name];
-		}
-		return $failed;
-	}
-	
-	/**
-	 * Returns the validators that passed.
-	 * 
-	 * @return array
-	 */
-	public function getPassed()
-	{
-		$passed = array();
-		foreach ($this->_passed as $name) {
-			$passed[$name] = $this[$name];
-		}
-		return $passed;
 	}
 }

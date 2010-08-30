@@ -13,27 +13,6 @@
 class Europa_Validator_Message
 {
 	/**
-	 * The error type.
-	 * 
-	 * @var int
-	 */
-	const ERROR = -1;
-	
-	/**
-	 * The warning type.
-	 * 
-	 * @var int
-	 */
-	const WARNING = 0;
-	
-	/**
-	 * The success type.
-	 * 
-	 * @var int
-	 */
-	const SUCCESS = 1;
-	
-	/**
 	 * The message string.
 	 * 
 	 * @var int
@@ -41,22 +20,14 @@ class Europa_Validator_Message
 	private $_message = null;
 	
 	/**
-	 * The message type.
-	 * 
-	 * @var int
-	 */
-	private $_type;
-	
-	/**
 	 * Constructs a new error message.
 	 * 
 	 * @param string $message The message string.
-	 * @param string $type The message type.
 	 * @return Europa_Validator_Message
 	 */
-	public function __construct($message = null, $type = self::ERROR)
+	public function __construct($message = null)
 	{
-		$this->setMessage($message)->setType($type);
+		$this->_message = $message;
 	}
 	
 	/**
@@ -66,50 +37,6 @@ class Europa_Validator_Message
 	 */
 	public function __toString()
 	{
-		return $this->getMessage();
-	}
-	
-	/**
-	 * Sets the message.
-	 * 
-	 * @param string $message The message to set.
-	 * @return Europa_Validator_Message
-	 */
-	public function setMessage($message)
-	{
-		$this->_message = $message;
-		return $this;
-	}
-	
-	/**
-	 * Returns the message.
-	 * 
-	 * @return string
-	 */
-	public function getMessage()
-	{
 		return $this->_message;
-	}
-	
-	/**
-	 * Sets the message type.
-	 * 
-	 * @param int $type The message type.
-	 * @return Europa_Validator_Message
-	 */
-	public function setType($type)
-	{
-		$this->_type = $type;
-		return $this;
-	}
-	
-	/**
-	 * Returns the message type.
-	 * 
-	 * @return int
-	 */
-	public function getType()
-	{
-		return $this->_type;
 	}
 }
