@@ -17,18 +17,15 @@ class Europa_Validator_Map extends Europa_Validator_Suite
 	 * @param mixed $data The data to validate.
 	 * @return bool
 	 */
-	public function isValid($data)
+	public function validate($data)
 	{
 		if (!is_array($data)) {
 			throw new Europa_Validator_Exception('The data being validated must be an array.');
 		}
-		$this->_errors = array();
 		foreach ($this as $index => $validator) {
 			$value = isset($data[$index]) ? $data[$index] : null;
-			if (!$validator->isValid($value)) {
-				$this->_errors[] = $index;
-			}
+			$validator->validate($value);
 		}
-		return !$this->hasErrors();
+		return $this;
 	}
 }

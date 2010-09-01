@@ -14,10 +14,16 @@ class Europa_Validator_AlphaNumeric extends Europa_Validator
 	/**
 	 * Checks to make sure the value is alpha-numeric
 	 * 
-	 * @return bool
+	 * @param mixed $value The value to validate.
+	 * @return Europa_Validator_AlphaNumeric
 	 */
-	public function isValid($value)
+	public function validate($value)
 	{
-		return (bool) preg_match('/^[a-zA-Z0-9]*$/', $value);
+		if (preg_match('/^[a-zA-Z0-9]*$/', $value)) {
+			$this->pass();
+		} else {
+			$this->fail();
+		}
+		return $this;
 	}
 }

@@ -12,6 +12,14 @@
 abstract class Europa_Validator implements Europa_Validator_Validatable
 {
 	/**
+	 * Whether or not the last validation was successful. Defaults to true; innocent until
+	 * proven guilty.
+	 * 
+	 * @var bool
+	 */
+	private $_isValid = true;
+	
+	/**
 	 * The messages associated to the validator.
 	 * 
 	 * @var array
@@ -31,12 +39,47 @@ abstract class Europa_Validator implements Europa_Validator_Validatable
 	}
 	
 	/**
-	 * Returns all messages associated to the validator.
+	 * Returns all messages associated to the validator if the validation was not successful.
 	 * 
 	 * @return array
 	 */
 	public function getMessages()
 	{
-		return $this->_messages;
+		if (!$this->isValid()) {
+			return $this->_messages;
+		}
+		return array();
+	}
+	
+	/**
+	 * Returns whether or not the last validation was successful.
+	 * 
+	 * @return bool
+	 */
+	public function isValid()
+	{
+		return $this->_isValid;
+	}
+	
+	/**
+	 * Fails validation.
+	 * 
+	 * @return Europa_Validator
+	 */
+	public function fail()
+	{
+		$this->_isValid = false;
+		return $this;
+	}
+	
+	/**
+	 * Passes validation.
+	 * 
+	 * @return Europa_Validator
+	 */
+	public function pass()
+	{
+		$this->_isValid = true;
+		return $this;
 	}
 }

@@ -41,16 +41,22 @@ class Europa_Validator_NumberRange extends Europa_Validator
 	/**
 	 * Checks to make sure the specified value is set.
 	 * 
-	 * @param mixed The value to validate.
-	 * @return bool
+	 * @param mixed $value The value to validate.
+	 * @return Europa_Validator_NumberRange
 	 */
-	public function isValid($value)
+	public function validate($value)
 	{
 		if (!is_numeric($value)) {
-			return false;
+			$this->fail();
+			return $this;
 		}
 		
 		$value = (float) $value;
-		return $value >= $this->_min && $value <= $this->_max;
+		if ($value >= $this->_min && $value <= $this->_max) {
+			$this->pass();
+		} else {
+			$this->fail();
+		}
+		return $this;
 	}
 }

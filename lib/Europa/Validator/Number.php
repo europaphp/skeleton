@@ -14,10 +14,16 @@ class Europa_Validator_Number extends Europa_Validator
 	/**
 	 * Checks to make sure the specified value is a number.
 	 * 
-	 * @return bool
+	 * @param mixed $value The value to validate.
+	 * @return Europa_Validator_Number
 	 */
-	public function isValid($value)
+	public function validate($value)
 	{
-		return is_numeric($value);
+		if (is_numeric($value)) {
+			$this->pass();
+		} else {
+			$this->fail();
+		}
+		return $this;
 	}
 }

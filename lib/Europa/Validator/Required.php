@@ -14,13 +14,16 @@ class Europa_Validator_Required extends Europa_Validator
 	/**
 	 * Checks to make sure the specified value is set.
 	 * 
-	 * @return bool
+	 * @param mixed $value The value to validate.
+	 * @return Europa_Validator_Required
 	 */
-	public function isValid($value)
+	public function validate($value)
 	{
 		if (empty($value)) {
-			return false;
+			$this->fail();
+		} else {
+			$this->pass();
 		}
-		return true;
+		return $this;
 	}
 }

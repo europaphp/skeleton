@@ -12,13 +12,6 @@
 class Europa_Validator_Suite implements Europa_Validator_Validatable, ArrayAccess, Iterator, Countable
 {
 	/**
-	 * Contains the indexes of the failed validators.
-	 * 
-	 * @var array
-	 */
-	protected $_errors = array();
-	
-	/**
 	 * Contains all validators attached to the suite.
 	 * 
 	 * @var array
@@ -26,40 +19,58 @@ class Europa_Validator_Suite implements Europa_Validator_Validatable, ArrayAcces
 	protected $_validators = array();
 	
 	/**
-	 * Validates and returns whether or not the validator passed validation.
+	 * Validates the value against all validators in the suite.
 	 * 
 	 * @param mixed $value The value to validate.
+	 * @return Europa_Validator_Suite
+	 */
+	public function validate($value)
+	{
+		foreach ($this as $validator) {
+			$validator->validate($value);
+		}
+		return $this;
+	}
+	
+	/**
+	 * Returns whether or not the last validation was successful.
+	 * 
 	 * @return bool
 	 */
-	public function isValid($value)
+	public function isValid()
 	{
-		$this->_errors = array();
 		foreach ($this as $index => $validator) {
-			if (!$validator->isValid($value)) {
-				$this->_errors[] = $index;
+			if (!$validator->isValid()) {
+				return false;
 			}
 		}
-		return !$this->hasErrors();
+		return true;
 	}
 	
 	/**
-	 * Returns whether or not the suite has errors.
+	 * Fails validation.
 	 * 
-	 * @return bool
+	 * @return Europa_Validator_Validatable
 	 */
-	public function hasErrors()
+	public function fail()
 	{
-		return $this->countErrors() > 0;
+		foreach ($this as $validator) {
+			$validator->fail();
+		}
+		return $this;
 	}
 	
 	/**
-	 * Returns the number of errors.
+	 * Fails validation.
 	 * 
-	 * @return int
+	 * @return Europa_Validator_Validatable
 	 */
-	public function countErrors()
+	public function pass()
 	{
-		return count($this->_errors);
+		foreach ($this as $validator) {
+			$validator->pass();
+		}
+		return $this;
 	}
 	
 	/**
@@ -70,10 +81,8 @@ class Europa_Validator_Suite implements Europa_Validator_Validatable, ArrayAcces
 	public function getMessages()
 	{
 		$messages = array();
-		foreach ($this->_errors as $index) {
-			foreach ($this[$index]->getMessages() as $message) {
-				$messages[] = $message;
-			}
+		foreach ($this as $validator) {
+			$messages = array_merge($messages, $validator->getMessages());
 		}
 		return $messages;
 	}

@@ -11,13 +11,21 @@
  */
 interface Europa_Validator_Validatable
 {
+	/**
+	 * Performs validation on the specified value.
+	 * 
+	 * @param mixed $value The value to validate.
+	 * @return Europa_Validator_Validatable
+	 */
+	public function validate($value);
+	
 	/** 
 	 * Tells whether the last validation was successful or not.
 	 * 
 	 * @param mixed $value The value to validate.
 	 * @return bool
 	 */
-	public function isValid($value);
+	public function isValid();
 	
 	/**
 	 * Returns the messages associated to the validatable object.
@@ -25,4 +33,18 @@ interface Europa_Validator_Validatable
 	 * @return array
 	 */
 	public function getMessages();
+	
+	/**
+	 * Fails validation.
+	 * 
+	 * @return Europa_Validator_Validatable
+	 */
+	public function fail();
+	
+	/**
+	 * Fails validation.
+	 * 
+	 * @return Europa_Validator_Validatable
+	 */
+	public function pass();
 }
