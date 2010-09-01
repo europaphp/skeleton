@@ -42,7 +42,7 @@ interface Europa_Validator_Validatable
 	public function fail();
 	
 	/**
-	 * Fails validation.
+	 * Passes validation.
 	 * 
 	 * @return Europa_Validator_Validatable
 	 */
