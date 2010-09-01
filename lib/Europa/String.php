@@ -201,6 +201,17 @@ class Europa_String
 	}
 	
 	/**
+	 * Makes each word start with an uppercase character.
+	 * 
+	 * @return Europa_String
+	 */
+	public function ucwords()
+	{
+		$this->_string = ucwords($this->_string);
+		return $this;
+	}
+	
+	/**
 	 * Makes the string lowercase.
 	 * 
 	 * @return Europa_String
