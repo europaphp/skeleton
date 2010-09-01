@@ -18,10 +18,10 @@ class Test_Validator_Suite extends Europa_Unit_Test
 	 */
 	public function testFailAllValidators()
 	{
-		$suite = new Europa_Validator_Suite;
+		$suite   = new Europa_Validator_Suite;
 		$suite[] = new Europa_Validator_Required;
 		$suite[] = new Europa_Validator_Number;
-		return $suite->isValid(null) === false;
+		return $suite->validate(null)->isValid() === false;
 	}
 	
 	/**
@@ -31,10 +31,10 @@ class Test_Validator_Suite extends Europa_Unit_Test
 	 */
 	public function testPassAllValidators()
 	{
-		$suite = new Europa_Validator_Suite;
+		$suite   = new Europa_Validator_Suite;
 		$suite[] = new Europa_Validator_Required;
 		$suite[] = new Europa_Validator_Number;
-		return $suite->isValid('1') === true;
+		return $suite->validate('1')->isValid() === true;
 	}
 	
 	/**
@@ -44,9 +44,9 @@ class Test_Validator_Suite extends Europa_Unit_Test
 	 */
 	public function testPassOneValidator()
 	{
-		$suite = new Europa_Validator_Suite;
+		$suite   = new Europa_Validator_Suite;
 		$suite[] = new Europa_Validator_Required;
 		$suite[] = new Europa_Validator_Number;
-		return $suite->isValid('something') === false;
+		return $suite->validate('something')->isValid() === false;
 	}
 }
