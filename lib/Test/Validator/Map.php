@@ -79,6 +79,6 @@ class Test_Validator_Map extends Europa_Unit_Test
 	 */
 	public function testValidation()
 	{
-		return $this->_validator->isValid($this->_data);
+		return $this->_validator->validate($this->_data)->isValid();
 	}
 }
