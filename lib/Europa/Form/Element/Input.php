@@ -18,10 +18,13 @@ class Europa_Form_Element_Input extends Europa_Form_Element
 	 */
 	public function __toString()
 	{
+		// by default, it's a text field
 		if (!$this->type) {
 			$this->type = 'text';
 		}
-		
-		return '<input ' . $this->getAttributeString() . ' />';
+		$attr = $this->getAttributeString();
+		return '<input'
+		     . ($attr ? ' ' . $attr : '')
+		     . ' />';
 	}
 }

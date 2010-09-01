@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-class Europa_Form_ElementList extends Europa_Form_Base implements ArrayAccess, Iterator
+abstract class Europa_Form_ElementList extends Europa_Form_Base implements Europa_Form_Listable
 {
 	/**
 	 * Contains the elements and element lists.
@@ -27,7 +27,16 @@ class Europa_Form_ElementList extends Europa_Form_Base implements ArrayAccess, I
 	 */
 	public function addElement(Europa_Form_Base $element, $offset = null)
 	{
-		$this->_elements[] = $element;
+		// append if offset is null
+		if (is_null($offset)) {
+			$this->_elements[] = $element;
+		} else {
+			// automate field naming if a string is passed
+			if (is_string($offset)) {
+				$element->name = $offset;
+			}
+			$this->_elements[$offset] = $element;
+		}
 		return $this;
 	}
 	
@@ -57,7 +66,7 @@ class Europa_Form_ElementList extends Europa_Form_Base implements ArrayAccess, I
 	}
 	
 	/**
-	 * Validates each field in the list.
+	 * Validates each elemtent.
 	 * 
 	 * @return Europa_Form_ElementList
 	 */
@@ -67,6 +76,35 @@ class Europa_Form_ElementList extends Europa_Form_Base implements ArrayAccess, I
 			$element->validate();
 		}
 		return $this;
+	}
+	
+	/**
+	 * Validates each field in the list.
+	 * 
+	 * @return Europa_Form_ElementList
+	 */
+	public function isValid()
+	{
+		foreach ($this as $element) {
+			if (!$element->isValid()) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Returns the messages from the invalid elements.
+	 * 
+	 * @return array
+	 */
+	public function getMessages()
+	{
+		$messages = array();
+		foreach ($this as $element) {
+			$messages = array_merge($messages, $element->getMessages());
+		}
+		return $messages;
 	}
 	
 	/**

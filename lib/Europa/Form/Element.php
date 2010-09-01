@@ -12,19 +12,11 @@
 abstract class Europa_Form_Element extends Europa_Form_Base
 {
 	/**
-	 * Contains instances of Europa_Validator objects representing which
-	 * validators failed.
-	 * 
-	 * @var array
-	 */
-	protected $_errors = array();
-	
-	/**
 	 * Contains the validators applied to the element.
 	 * 
 	 * @var array
 	 */
-	protected $_validators = array();
+	protected $_validator;
 	
 	/**
 	 * Automatically retrieves the value for the input field base on its name
@@ -79,50 +71,54 @@ abstract class Europa_Form_Element extends Europa_Form_Base
 	}
 	
 	/**
-	 * Returns whether or not the element has any errors.
-	 * 
-	 * @return bool
-	 */
-	public function hasErrors()
-	{
-		return count($this->getErrors()) > 0;
-	}
-	
-	/**
-	 * Returns all validator instances which failed.
-	 * 
-	 * @return array
-	 */
-	public function getErrors()
-	{
-		return $this->_errors;
-	}
-	
-	/**
-	 * Adds a validator to the element.
+	 * Adds a validator or validation suite to the element.
 	 * 
 	 * @param Europa_Validator $validator The validator to add.
-	 * 
 	 * @return Europa_Form_Element
 	 */
-	public function addValidator(Europa_Validator $validator)
+	public function setValidator(Europa_Validator_Validatable $validator)
 	{
-		$this->_validators[] = $validator;
+		$this->_validator = $validator;
 		return $this;
 	}
 	
 	/**
-	 * Runs all validators against the current value of the element.
+	 * Validates the element's value against the validator.
 	 * 
 	 * @return Europa_Form_Element
 	 */
 	public function validate()
 	{
-		foreach ($this->_validators as $validator) {
-			if (!$validator->validate($this->value)) {
-				$this->_errors[] = $validator;
-			}
+		if ($this->_validator) {
+			$this->_validator->validate($this->value);
 		}
 		return $this;
+	}
+	
+	/**
+	 * Returns whether or not the last validation was successful. If no
+	 * validation was run, then it automatically returns true.
+	 * 
+	 * @return bool
+	 */
+	public function isValid()
+	{
+		if ($this->_validator) {
+			return $this->_validator->isValid();
+		}
+		return true;
+	}
+	
+	/**
+	 * Returns the messages for the validator if validation failed.
+	 * 
+	 * @return array
+	 */
+	public function getMessages()
+	{
+		if ($this->_validator) {
+			return $this->_validator->getMessages();
+		}
+		return array();
 	}
 }

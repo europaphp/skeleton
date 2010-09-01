@@ -18,8 +18,9 @@ class Europa_Form_Element_Textarea extends Europa_Form_Element
 	 */
 	public function __toString()
 	{
-		return '<textarea '
-		     . $this->getAttributeString()
+		$attr = $this->getAttributeString();
+		return '<textarea'
+		     . ($attr ? ' ' . $attr : '')
 		     . '>'
 		     . $this->value
 		     . '</textarea>';

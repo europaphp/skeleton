@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The main form class which is also an element list.
+ * The base interface for all renderable form elements.
  * 
  * @category Forms
  * @package  Europa
@@ -9,15 +9,8 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-abstract class Europa_Form_Base implements Europa_Form_Renderable, Europa_Form_Validatable
+interface Europa_Form_Renderable
 {
-	/**
-	 * The attributes set on the element.
-	 * 
-	 * @var array
-	 */
-	protected $_attributes = array();
-	
 	/**
 	 * Sets an attribute value.
 	 * 
@@ -25,10 +18,7 @@ abstract class Europa_Form_Base implements Europa_Form_Renderable, Europa_Form_V
 	 * @param string $value The value of the attribute.
 	 * @return mixed
 	 */
-	public function __set($name, $value)
-	{
-		return $this->setAttribute($name, $value);
-	}
+	public function __set($name, $value);
 	
 	/**
 	 * Returns an attribute value.
@@ -36,10 +26,7 @@ abstract class Europa_Form_Base implements Europa_Form_Renderable, Europa_Form_V
 	 * @param string $name The name of the attribute.
 	 * @return mixed
 	 */
-	public function __get($name)
-	{
-		return $this->getAttribute($name);
-	}
+	public function __get($name);
 	
 	/**
 	 * Returns whether or not an attribute exists.
@@ -47,10 +34,7 @@ abstract class Europa_Form_Base implements Europa_Form_Renderable, Europa_Form_V
 	 * @param string $name The attribute name.
 	 * @return bool
 	 */
-	public function __isset($name)
-	{
-		return $this->hasAttribute($name);
-	}
+	public function __isset($name);
 
 	/**
 	 * Removes an attribute.
@@ -58,10 +42,7 @@ abstract class Europa_Form_Base implements Europa_Form_Renderable, Europa_Form_V
 	 * @param string $name The attribute name.
 	 * @return bool
 	 */
-	public function __unset($name)
-	{
-		return $this->removeAttribute($name);
-	}
+	public function __unset($name);
 	
 	/**
 	 * Sets an attribute value.
@@ -70,11 +51,7 @@ abstract class Europa_Form_Base implements Europa_Form_Renderable, Europa_Form_V
 	 * @param string $value The value of the attribute.
 	 * @return mixed
 	 */
-	public function setAttribute($name, $value)
-	{
-		$this->_attributes[$name] = $value;
-		return $this;
-	}
+	public function setAttribute($name, $value);
 	
 	/**
 	 * Returns an attribute value.
@@ -82,13 +59,7 @@ abstract class Europa_Form_Base implements Europa_Form_Renderable, Europa_Form_V
 	 * @param string $name The name of the attribute.
 	 * @return mixed
 	 */
-	public function getAttribute($name)
-	{
-		if (isset($this->_attributes[$name])) {
-			return $this->_attributes[$name];
-		}
-		return null;
-	}
+	public function getAttribute($name);
 	
 	/**
 	 * Returns whether or not an attribute exists.
@@ -96,10 +67,7 @@ abstract class Europa_Form_Base implements Europa_Form_Renderable, Europa_Form_V
 	 * @param string $name The attribute name.
 	 * @return bool
 	 */
-	public function hasAttribute($name)
-	{
-		return isset($this->_attributes[$name]);
-	}
+	public function hasAttribute($name);
 	
 	/**
 	 * Removes an attribute.
@@ -107,48 +75,26 @@ abstract class Europa_Form_Base implements Europa_Form_Renderable, Europa_Form_V
 	 * @param string $name The attribute name.
 	 * @return bool
 	 */
-	public function removeAttribute($name)
-	{
-		if (isset($this->_attributes[$name])) {
-			unset($this->_attributes[$name]);
-		}
-		return $this;
-	}
+	public function removeAttribute($name);
 	
 	/**
 	 * Sets an array of attributes all at once.
 	 * 
 	 * @return Europa_Form_Element
 	 */
-	public function setAttributes(array $attributes = array())
-	{
-		foreach ($attributes as $name => $value) {
-			$this->$name = $value;
-		}
-		return $this;
-	}
+	public function setAttributes(array $attributes = array());
 	
 	/**
 	 * Returns the attributes.
 	 * 
 	 * @return Europa_Form_Element
 	 */
-	public function getAttributes()
-	{
-		return $this->_attributes;
-	}
+	public function getAttributes();
 
 	/**
 	 * Formats the properties of the element as an xml attribute string.
 	 * 
 	 * @return string
 	 */
-	public function getAttributeString()
-	{
-		$attrs = array();
-		foreach ($this->getAttributes() as $k => $v) {
-			$attrs[] = $k . '="' . $v . '"';
-		}
-		return implode(' ', $attrs);
-	}
+	public function getAttributeString();
 }
