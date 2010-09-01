@@ -44,11 +44,23 @@ abstract class Europa_Controller
 	}
 	
 	/**
+	 * Sets the request the controller should use.
+	 * 
+	 * @param Europa_Request $request The request to use.
+	 * @return Europa_Controller
+	 */
+	public function setRequest(Europa_Request $request)
+	{
+		$this->_request = $request;
+		return $this;
+	}
+	
+	/**
 	 * Returns the request being used.
 	 * 
 	 * @return Europa_Request
 	 */
-	protected function _getRequest()
+	public function getRequest()
 	{
 		return $this->_request;
 	}
@@ -59,7 +71,7 @@ abstract class Europa_Controller
 	 * @param string $uri The uri to redirect to.
 	 * @return void
 	 */
-	protected function _redirect($uri)
+	public function redirect($uri)
 	{
 		$this->_request->redirect($uri);
 	}
@@ -70,7 +82,7 @@ abstract class Europa_Controller
 	 * @param string $to The controller to forward the request to.
 	 * @return Europa_Controller
 	 */
-	protected function _forward($to)
+	public function forward($to)
 	{
 		$to = Europa_String::create($to)->toClass();
 		$to = new $to($this->_request);
@@ -94,7 +106,7 @@ abstract class Europa_Controller
 	{
 		$methodParams  = array();
 		$requestParams = array();
-		foreach ($this->_getRequest()->getParams() as $name => $value) {
+		foreach ($this->_request->getParams() as $name => $value) {
 			$name = $caseSensitive ? strtolower($name) : $name;
 			$requestParams[$name] = $value;
 		}

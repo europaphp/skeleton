@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-abstract class Europa_View
+abstract class Europa_View implements ArrayAccess, Iterator
 {
 	/**
 	 * The parameters and helpers bound to the view.
@@ -104,5 +104,52 @@ abstract class Europa_View
 	public function getParams()
 	{
 		return $this->_params;
+	}
+	
+	public function offsetSet($index, $value)
+	{
+		$this->$index = $value;
+		return $this;
+	}
+	
+	public function offsetGet($index)
+	{
+		return $this->$index;
+	}
+	
+	public function offsetExists($index)
+	{
+		return isset($this->$index);
+	}
+	
+	public function offsetUnset($index)
+	{
+		unset($this->$index);
+		return $this;
+	}
+	
+	public function current()
+	{
+		return current($this->_params);
+	}
+	
+	public function key()
+	{
+		return key($this->_params);
+	}
+	
+	public function next()
+	{
+		return next($this->_params);
+	}
+	
+	public function rewind()
+	{
+		return reset($this->_params);
+	}
+	
+	public function valid()
+	{
+		return isset($this->{$this->key()});
 	}
 }

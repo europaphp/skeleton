@@ -112,7 +112,7 @@ abstract class Europa_Controller_Action extends Europa_Controller
 	 */
 	protected function _formatAction()
 	{
-		$action = $this->_getRequest()->getParam('action', 'index');
+		$action = $this->getRequest()->getParam('action', 'index');
 		return Europa_String::create($action)->toClass()->__toString() . 'Action';
 	}
 
@@ -123,7 +123,7 @@ abstract class Europa_Controller_Action extends Europa_Controller
 	 */
 	protected function _formatLayout()
 	{
-		$layout = Europa_String::create($this->_getRequest()->getController());
+		$layout = Europa_String::create($this->getRequest()->getController());
 		return $layout->toClass() . 'View';
 	}
 
@@ -134,8 +134,8 @@ abstract class Europa_Controller_Action extends Europa_Controller
 	 */
 	protected function _formatView()
 	{
-		$layout = Europa_String::create($this->_getRequest()->getController());
-		$view   = Europa_String::create($this->_getRequest()->getParam('action', 'index'));
+		$layout = Europa_String::create($this->getRequest()->getController());
+		$view   = Europa_String::create($this->getRequest()->getParam('action', 'index'));
 		return $layout->toClass() . '/' . $view->toClass() . 'View';
 	}
 	
