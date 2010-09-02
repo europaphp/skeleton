@@ -36,7 +36,6 @@ abstract class Europa_Form_Element extends Europa_Form_Base
 		$subs = '';
 		if (strpos($this->name, '[') !== false) {
 			$subs = explode('[', $this->name);
-			array_shift($subs);
 			$formatted = array();
 			foreach ($subs as $sub) {
 				$sub = str_replace(']', '', $sub);
@@ -68,6 +67,33 @@ abstract class Europa_Form_Element extends Europa_Form_Base
 		}
 		
 		return $this;
+	}
+	
+	/**
+	 * Based on the name of the element, it's value will be converted
+	 * to an array.
+	 * 
+	 * @return array
+	 */
+	public function toArray()
+	{
+		if (strpos($this->name, '[') !== false) {
+			$subs      = explode('[', $this->name);
+			$formatted = array();
+			$count     = 0;
+			foreach ($subs as $sub) {
+				$sub = str_replace(']', '', $sub);
+				if ($sub === '') {
+					continue;
+				}
+				$formatted[] = "array('{$sub}'";
+				++$count;
+			}
+			$subs = implode(' => ', $formatted) . " => '{$this->value}'" . str_repeat(')', $count);
+		} else {
+			$subs = "array('{$this->name}' => '{$this->value}')";
+		}
+		return eval("return {$subs};");
 	}
 	
 	/**

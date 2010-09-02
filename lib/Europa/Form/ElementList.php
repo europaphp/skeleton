@@ -66,6 +66,20 @@ abstract class Europa_Form_ElementList extends Europa_Form_Base implements Europ
 	}
 	
 	/**
+	 * Converts the list to an array of name/value pairs.
+	 * 
+	 * @return array
+	 */
+	public function toArray()
+	{
+		$arr = array();
+		foreach ($this as $element) {
+			$arr = array_merge_recursive($arr, $element->toArray());
+		}
+		return $arr;
+	}
+	
+	/**
 	 * Validates each elemtent.
 	 * 
 	 * @return Europa_Form_ElementList
