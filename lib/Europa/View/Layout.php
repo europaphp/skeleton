@@ -63,6 +63,20 @@ class Europa_View_Layout extends Europa_View
 		return '';
 	}
 	
+	public function __set($name, $value)
+	{
+		parent::__set($name, $value);
+		$this->_layout->$name = $value;
+		$this->_view->$name   = $value;
+	}
+	
+	public function __unset($name)
+	{
+		parent::__unset($name);
+		unset($this->_layout->$name);
+		unset($this->_view->$name);
+	}
+	
 	/**
 	 * Sets the layout to use.
 	 * 
