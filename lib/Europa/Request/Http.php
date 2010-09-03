@@ -91,11 +91,14 @@ class Europa_Request_Http extends Europa_Request
 	 */
 	public static function getRootUri()
 	{
-		static $rootUri;
-		if (!isset($rootUri)) {
-			$rootUri = trim(dirname($_SERVER['PHP_SELF']), '/');
+		static $root;
+		if (!isset($root)) {
+			$path = $_SERVER['DOCUMENT_ROOT'];
+			$file = dirname($_SERVER['SCRIPT_FILENAME']);
+			$root = substr($file, strlen($path));
+			$root = trim($root, '/');
 		}
-		return $rootUri;
+		return $root;
 	}
 
 	/**
