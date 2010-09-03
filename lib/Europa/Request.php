@@ -83,7 +83,7 @@ abstract class Europa_Request
 		self::$stack[] = $this;
 		
 		// routing information
-		$controller = $this->formatController($this->getController());
+		$controller = $this->formatController();
 		
 		// dispatch request
 		if (!Europa_Loader::loadClass($controller)) {
@@ -198,15 +198,14 @@ abstract class Europa_Request
 	/**
 	 * Returns the formatted controller name that should be instantiated.
 	 * 
-	 * @param string $controller The controller param to format.
 	 * @return string
 	 */
-	public function formatController($controller)
+	public function formatController()
 	{
 		if ($this->_controllerFormatter) {
-			return call_user_func($this->_controllerFormatter, $controller);
+			return call_user_func($this->_controllerFormatter, $this);
 		}
-		return Europa_String::create($controller)->toClass() . 'Controller';
+		return Europa_String::create($this->getController())->toClass() . 'Controller';
 	}
 	
 	/**
