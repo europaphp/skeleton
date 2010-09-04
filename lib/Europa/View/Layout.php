@@ -63,6 +63,13 @@ class Europa_View_Layout extends Europa_View
 		return '';
 	}
 	
+	/**
+	 * Sets a property on both the layout and the view.
+	 * 
+	 * @param string $name The name of the parameter to set.
+	 * @param mixed $value The value being set.
+	 * @return void
+	 */
 	public function __set($name, $value)
 	{
 		parent::__set($name, $value);
@@ -70,6 +77,12 @@ class Europa_View_Layout extends Europa_View
 		$this->_view->$name   = $value;
 	}
 	
+	/**
+	 * Unsets the specified property on both the layout and the view.
+	 * 
+	 * @param string $name The property to unset.
+	 * @return void
+	 */
 	public function __unset($name)
 	{
 		parent::__unset($name);

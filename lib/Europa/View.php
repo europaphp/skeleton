@@ -86,7 +86,7 @@ abstract class Europa_View implements ArrayAccess, Iterator
 	{
 		if (is_array($params) || is_object($params)) {
 			foreach ($params as $name => $value) {
-				$this->_params[$name] = $value;
+				$this->$name = $value;
 			}
 		}
 		return $this;
