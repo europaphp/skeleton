@@ -9,7 +9,7 @@
  * @copyright (c) 2010 Trey Shugart
  * @link      http://europaphp.org/license
  */
-class ErrorController extends Europa_Controller_Standard
+class ErrorController extends AbstractController
 {
 	public function action()
 	{
