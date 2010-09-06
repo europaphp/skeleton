@@ -160,16 +160,14 @@ abstract class Europa_Controller_Action extends Europa_Controller
 	 * If required parameters is not found, an exception is thrown.
 	 * 
 	 * @param string $action The action to map the parameters for.
-	 * @param bool $caseSensitive Whether or not to be case-sensitive or not.
 	 * @return array
 	 */
-	protected function _getMappedParams($action, $caseSensitive = false)
+	protected function _getMappedParams($action)
 	{
 		$methodParams  = array();
 		$requestParams = array();
-		foreach ($this->_request->getParams() as $name => $value) {
-			$name = $caseSensitive ? strtolower($name) : $name;
-			$requestParams[$name] = $value;
+		foreach ($this->getRequest()->getParams() as $name => $value) {
+			$requestParams[strtolower($name)] = $value;
 		}
 		
 		// create a reflection method
@@ -179,7 +177,7 @@ abstract class Europa_Controller_Action extends Europa_Controller
 		foreach ($method->getParameters() as $param) {
 			$pos  = $param->getPosition();
 			$name = strtolower($param->getName());
-
+			
 			// apply named parameters
 			if (array_key_exists($name, $requestParams)) {
 				$methodParams[$pos] = $requestParams[$name];
@@ -188,8 +186,9 @@ abstract class Europa_Controller_Action extends Europa_Controller
 				$methodParams[$pos] = $param->getDefaultValue();
 			// throw exceptions when required params aren't defined
 			} else {
+				$class = get_class($this);
 				throw new Europa_Request_Exception(
-					"A required parameter for {$method->getName()} was not defined.",
+					"Parameter {$param->getName()} for {$class}->{$method->getName()}() was not defined.",
 					Europa_Request_Exception::REQUIRED_METHOD_ARGUMENT_NOT_DEFINED
 				);
 			}
