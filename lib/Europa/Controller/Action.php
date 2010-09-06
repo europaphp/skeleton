@@ -70,7 +70,7 @@ abstract class Europa_Controller_Action extends Europa_Controller
 		$this->_view   = new Europa_View_Php($this->_formatView());
 		
 		// call the init and handle the return value
-		$params = $this->_init();
+		$params = $this->init();
 		if ($params === false) {
 			$this->_layout = null;
 		} elseif ($this->_layout) {
@@ -91,18 +91,6 @@ abstract class Europa_Controller_Action extends Europa_Controller
 		} elseif ($this->_view) {
 			$this->_view->setParams($params);
 		}
-	}
-	
-	/**
-	 * Initializes the controller. If it returns false, the layout is disabled.
-	 * If an array or object is returned, it is iterated over and applied to
-	 * the layout.
-	 * 
-	 * @return mixed
-	 */
-	protected function _init()
-	{
-		
 	}
 
 	/**
@@ -161,5 +149,56 @@ abstract class Europa_Controller_Action extends Europa_Controller
 	{
 		$this->_view = $view;
 		return $this;
+	}
+	
+	/**
+	 * Sniffs the passed in method for any parameters existing in the request
+	 * and returns the appropriate parameters, in the order which they were
+	 * defined in the action. Useful for using in conjunction with
+	 * call_user_func_array().
+	 * 
+	 * If required parameters is not found, an exception is thrown.
+	 * 
+	 * @param string $action The action to map the parameters for.
+	 * @param bool $caseSensitive Whether or not to be case-sensitive or not.
+	 * @return array
+	 */
+	protected function _getMappedParams($action, $caseSensitive = false)
+	{
+		$methodParams  = array();
+		$requestParams = array();
+		foreach ($this->_request->getParams() as $name => $value) {
+			$name = $caseSensitive ? strtolower($name) : $name;
+			$requestParams[$name] = $value;
+		}
+		
+		// create a reflection method
+		$method = new ReflectionMethod($this, $action);
+
+		// automatically define the parameters that will be passed to the action
+		foreach ($method->getParameters() as $param) {
+			$pos  = $param->getPosition();
+			$name = strtolower($param->getName());
+
+			// apply named parameters
+			if (array_key_exists($name, $requestParams)) {
+				$methodParams[$pos] = $requestParams[$name];
+			// set default values
+			} elseif ($param->isOptional()) {
+				$methodParams[$pos] = $param->getDefaultValue();
+			// throw exceptions when required params aren't defined
+			} else {
+				throw new Europa_Request_Exception(
+					"A required parameter for {$method->getName()} was not defined.",
+					Europa_Request_Exception::REQUIRED_METHOD_ARGUMENT_NOT_DEFINED
+				);
+			}
+
+			// cast the parameter if it is scalar
+			if (is_scalar($methodParams[$pos])) {
+				$methodParams[$pos] = Europa_String::create($methodParams[$pos])->cast();
+			}
+		}
+		return $methodParams;
 	}
 }

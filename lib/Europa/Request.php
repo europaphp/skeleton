@@ -39,7 +39,7 @@ abstract class Europa_Request
 	 * 
 	 * @var array
 	 */
-	private static $stack = array();
+	private static $_stack = array();
 	
 	/**
 	 * Converts the request back into the original string representation.
@@ -80,7 +80,7 @@ abstract class Europa_Request
 	public function dispatch()
 	{
 		// register the instance in the stack so it can be easily found
-		self::$stack[] = $this;
+		self::$_stack[] = $this;
 		
 		// routing information
 		$controller = $this->formatController();
@@ -109,7 +109,7 @@ abstract class Europa_Request
 		$controller->action();
 		
 		// remove the dispatch from the stack
-		array_pop(self::$stack);
+		array_pop(self::$_stack);
 		
 		// return the controller
 		return $controller;
@@ -284,9 +284,9 @@ abstract class Europa_Request
 	 */
 	public static function getActiveInstance()
 	{
-		$len = count(self::$stack);
+		$len = count(self::$_stack);
 		if ($len) {
-			return self::$stack[$len - 1];
+			return self::$_stack[$len - 1];
 		}
 		return null;
 	}
@@ -299,7 +299,7 @@ abstract class Europa_Request
 	 */
 	public static function getStack()
 	{
-		return self::$stack;
+		return self::$_stack;
 	}
 	
 	/**

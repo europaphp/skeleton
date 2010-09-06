@@ -10,7 +10,7 @@
  * @link      http://europaphp.org/license
  */
 class IndexController extends Europa_Controller_Standard
-{	
+{
 	public function action()
 	{
 		
