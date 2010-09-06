@@ -108,11 +108,14 @@ abstract class Europa_Request
 		// action it
 		$controller->action();
 		
+		// execute the rendering process
+		$rendered = $controller->__toString();
+		
 		// remove the dispatch from the stack
 		array_pop(self::$_stack);
 		
-		// return the controller
-		return $controller;
+		// return the rendered result
+		return $rendered;
 	}
 	
 	/**
