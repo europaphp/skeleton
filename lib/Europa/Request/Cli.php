@@ -12,6 +12,13 @@
 class Europa_Request_Cli extends Europa_Request
 {
 	/**
+	 * Holds the commands that were executed, not arguments.
+	 * 
+	 * @var array
+	 */
+	protected $_commands = array();
+	
+	/**
 	 * Constructs a CLI request and sets defaults. By default, no layout or
 	 * view is rendered.
 	 * 
@@ -29,7 +36,7 @@ class Europa_Request_Cli extends Europa_Request
 	 */
 	public function __toString()
 	{
-		return implode(' ', $_SERVER['argv']);
+		return implode(' ', $this->_commands);
 	}
 	
 	/**
@@ -61,6 +68,8 @@ class Europa_Request_Cli extends Europa_Request
 				} else {
 					$this->setParam($param, true);
 				}
+			} else {
+				$this->_commands[] = $param;
 			}
 		}
 		
