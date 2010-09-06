@@ -91,16 +91,6 @@ abstract class Europa_Controller
 	}
 	
 	/**
-	 * Returns the request being used.
-	 * 
-	 * @return Europa_Request
-	 */
-	public function getRequest()
-	{
-		return $this->_request;
-	}
-	
-	/**
 	 * Forwards the request to the specified controller.
 	 * 
 	 * @param string $to The controller to forward the request to.
