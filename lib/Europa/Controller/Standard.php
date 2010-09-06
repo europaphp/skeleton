@@ -13,13 +13,6 @@
 abstract class Europa_Controller_Standard extends Europa_Controller
 {
 	/**
-	 * The view rendering the page.
-	 * 
-	 * @var Europa_View
-	 */
-	private $_view;
-	
-	/**
 	 * Constructs the controller and sets the request to use.
 	 * 
 	 * @param Europa_Request $request The request to use.
@@ -27,55 +20,11 @@ abstract class Europa_Controller_Standard extends Europa_Controller
 	 */
 	public function __construct($request)
 	{
-		// make sure defaults are set from parent
+		// parent stuff
 		parent::__construct($request);
 		
 		// map properties
-		$this->_mapRequestToProperties();
-		
-		// format the controller
-		$controller = $request->getController();
-		$controller = Europa_String::create($controller)->toClass()->replace('_', DIRECTORY_SEPARATOR);
-		
-		// set views
-		$this->_view = new Europa_View_Layout;
-		$this->_view->setLayout(new Europa_View_Php('IndexLayout'));
-		$this->_view->setView(new Europa_View_Php($controller . 'View'));
-	}
-	
-	/**
-	 * Renders the view.
-	 * 
-	 * @return string
-	 */
-	public function __toString()
-	{
-		$this->preRender();
-		$view = $this->_view->__toString();
-		$this->postRender();
-		return $view;
-	}
-	
-	/**
-	 * Sets the view to use.
-	 * 
-	 * @param Europa_View $view The view to use.
-	 * @return Europa_Controller_Standard
-	 */
-	public function setView(Europa_View $view = null)
-	{
-		$this->_view = $view;
-		return $this;
-	}
-	
-	/**
-	 * Returns the view being used.
-	 * 
-	 * @return Europa_View
-	 */
-	public function getView()
-	{
-		return $this->_view;
+		$this->_mapRequestToProperties($request);
 	}
 	
 	/**
@@ -85,9 +34,9 @@ abstract class Europa_Controller_Standard extends Europa_Controller
 	 * 
 	 * @return void
 	 */
-	protected function _mapRequestToProperties()
+	protected function _mapRequestToProperties(Europa_Request $request)
 	{
-		$params = $this->getRequest()->getParams();
+		$params = $request->getParams();
 		foreach ($params as &$param) {
 			$param = strtolower($param);
 		}

@@ -19,11 +19,11 @@ abstract class Europa_Controller
 	private $_request;
 	
 	/**
-	 * Renders the set view.
+	 * The view rendering the page.
 	 * 
-	 * @return string
+	 * @var Europa_View
 	 */
-	abstract public function __toString();
+	private $_view;
 	
 	/**
 	 * Handles action dispatching.
@@ -31,6 +31,19 @@ abstract class Europa_Controller
 	 * @return mixed
 	 */
 	abstract public function action();
+	
+	/**
+	 * Renders the set view.
+	 * 
+	 * @return string
+	 */
+	public function __toString()
+	{
+		if ($this->_view) {
+			return $this->_view->__toString();
+		}
+		return '';
+	}
 	
 	/**
 	 * Constructs a new controller using the specified request.
@@ -43,19 +56,26 @@ abstract class Europa_Controller
 		$this->_request = $request;
 	}
 	
-	public function init()
+	/**
+	 * Sets the view to use.
+	 * 
+	 * @param Europa_View $view The view to use.
+	 * @return Europa_Controller_Standard
+	 */
+	public function setView(Europa_View $view = null)
 	{
-		
+		$this->_view = $view;
+		return $this;
 	}
 	
-	public function preRender()
+	/**
+	 * Returns the view being used.
+	 * 
+	 * @return Europa_View
+	 */
+	public function getView()
 	{
-		
-	}
-	
-	public function postRender()
-	{
-		
+		return $this->_view;
 	}
 	
 	/**
