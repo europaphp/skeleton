@@ -6,7 +6,15 @@ class IndexController extends Europa_Controller_Action
 	{
 		$class = new $test;
 		$class->run();
-		$this->_view->test    = $class;
-		$this->_view->verbose = $verbose;
+		
+		$view = new Europa_View_Php('TestView');
+		$view->setParams(
+			array(
+				'test'    => $class,
+				'verbose' => $verbose
+			)
+		);
+		
+		$this->setView($view);
 	}
 }
