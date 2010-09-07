@@ -79,15 +79,13 @@ abstract class Europa_Controller
 	}
 	
 	/**
-	 * Sets the request the controller should use.
+	 * Returns the request being used.
 	 * 
-	 * @param Europa_Request $request The request to use.
-	 * @return Europa_Controller
+	 * @return Europa_Request
 	 */
-	public function setRequest(Europa_Request $request)
+	public function getRequest()
 	{
-		$this->_request = $request;
-		return $this;
+		return $this->_request;
 	}
 	
 	/**
