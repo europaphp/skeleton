@@ -37,7 +37,7 @@ abstract class Europa_Controller_Action extends Europa_Controller
 	public function action()
 	{
 		$action = $this->_formatAction();
-		call_user_func_array(array($this, $action), $this->_mapActionArguments($action));
+		return call_user_func_array(array($this, $action), $this->_mapActionArguments($action));
 	}
 
 	/**
