@@ -10,7 +10,7 @@
  * @link     http://europaphp.org/license
  */
 class Europa_String
-{	
+{
 	/**
 	 * The opening character in a format replacement.
 	 * 
@@ -104,16 +104,33 @@ class Europa_String
 	 * @return Europa_String
 	 */
 	public function toClass()
-	{	
-		$subs = array();
+	{
+		// normalize namespace separators
 		$this->_string = str_replace(array(DIRECTORY_SEPARATOR, '/'), '_', $this->_string);
-		$this->_string = preg_replace('/[^a-zA-Z0-9_]/', '', $this->_string);
-		foreach (explode('_', $this->_string) as $sub) {
-			if ($sub = trim($sub)) {
-				$subs[] = ucfirst($sub);
+		
+		// split into class namespaces
+		$parts     = explode('_', $this->_string);
+		$partsTemp = array();
+		foreach ($parts as $part) {
+			$part = trim($part);
+			if (!$part) {
+				continue;
 			}
+			
+			// only allow alpha-numeric characters
+			$subParts     = preg_split('/[^a-zA-Z0-9]/', $part);
+			$subPartsTemp = array();
+			foreach ($subParts as $subPart) {
+				$subPart = trim($subPart);
+				if (!$subPart) {
+					continue;
+				}
+				$subPartsTemp[] = ucfirst($subPart);
+			}
+			$partsTemp[] = implode('', $subPartsTemp);
 		}
-		$this->_string = implode('_', $subs);
+		
+		$this->_string = implode('_', $partsTemp);
 		return $this;
 	}
 	
