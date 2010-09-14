@@ -11,5 +11,5 @@
  */
 class Europa_File_Exception extends Europa_Exception
 {
-	
+    
 }

@@ -11,17 +11,17 @@
  */
 class Europa_Rsa_Exception extends Europa_Exception
 {
-	/**
-	 * Invalid private key.
-	 * 
-	 * @var int
-	 */
-	const INVALID_PRIVATE_KEY = 1;
-	
-	/**
-	 * Invalid public key.
-	 * 
-	 * @var int
-	 */
-	const INVALID_PUBLIC_KEY = 2;
+    /**
+     * Invalid private key.
+     * 
+     * @var int
+     */
+    const INVALID_PRIVATE_KEY = 1;
+    
+    /**
+     * Invalid public key.
+     * 
+     * @var int
+     */
+    const INVALID_PUBLIC_KEY = 2;
 }

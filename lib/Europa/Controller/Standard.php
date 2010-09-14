@@ -12,51 +12,51 @@
  */
 abstract class Europa_Controller_Standard extends Europa_Controller
 {
-	/**
-	 * Constructs the controller and sets the request to use.
-	 * 
-	 * @param Europa_Request $request The request to use.
-	 * @return Europa_Controller_Standard
-	 */
-	public function __construct($request)
-	{
-		// parent stuff
-		parent::__construct($request);
-		
-		// map properties
-		$this->_mapRequestToProperties($request);
-	}
-	
-	/**
-	 * Sets properties from the request onto the class. If a property exists that
-	 * doesn't have a default value and it doesn't exist in the request, then an
-	 * exception is thrown.
-	 * 
-	 * @return void
-	 */
-	protected function _mapRequestToProperties(Europa_Request $request)
-	{
-		$params = $request->getParams();
-		foreach ($params as &$param) {
-			$param = strtolower($param);
-		}
-		
-		$class = new ReflectionClass($this);
-		foreach ($class->getProperties() as $property) {
-			$normalcase = $property->getName();
-			$lowercase  = strtolower($normalcase);
-			if (isset($params[$lowercase])) {
-				$this->$normalcase = $params[$lowercase];
-			} elseif (!isset($this->$normalcase)) {
-				throw new Europa_Controller_Exception(
-					"Required request parameter {$normalcase} was not defined."
-				);
-			}
-			
-			// cast the parameter if it is scalar
-			if (is_scalar($this->$normalcase)) {
-				$this->$normalcase = Europa_String::create($this->$normalcase)->cast();
-			}
-		}
-	}
+    /**
+     * Constructs the controller and sets the request to use.
+     * 
+     * @param Europa_Request $request The request to use.
+     * @return Europa_Controller_Standard
+     */
+    public function __construct($request)
+    {
+        // parent stuff
+        parent::__construct($request);
+        
+        // map properties
+        $this->_mapRequestToProperties($request);
+    }
+    
+    /**
+     * Sets properties from the request onto the class. If a property exists that
+     * doesn't have a default value and it doesn't exist in the request, then an
+     * exception is thrown.
+     * 
+     * @return void
+     */
+    protected function _mapRequestToProperties(Europa_Request $request)
+    {
+        $params = $request->getParams();
+        foreach ($params as &$param) {
+            $param = strtolower($param);
+        }
+        
+        $class = new ReflectionClass($this);
+        foreach ($class->getProperties() as $property) {
+            $normalcase = $property->getName();
+            $lowercase  = strtolower($normalcase);
+            if (isset($params[$lowercase])) {
+                $this->$normalcase = $params[$lowercase];
+            } elseif (!isset($this->$normalcase)) {
+                throw new Europa_Controller_Exception(
+                    "Required request parameter {$normalcase} was not defined."
+                );
+            }
+            
+            // cast the parameter if it is scalar
+            if (is_scalar($this->$normalcase)) {
+                $this->$normalcase = Europa_String::create($this->$normalcase)->cast();
+            }
+        }
+    }
 }

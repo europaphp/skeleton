@@ -12,50 +12,50 @@
  */
 abstract class Europa_Unit_Test extends Europa_Unit_Testable
 {
-	public function __construct()
-	{
-		$class = new ReflectionClass($this);
-		foreach ($class->getMethods() as $method) {
-			$method = $method->getName();
-			if ($this->_isTestMethod($method)) {
-				$this[] = $method;
-			}
-		}
-	}
-	
-	public function offsetSet($offset, $test)
-	{
-		if (!$this->_isTestMethod($test)) {
-			throw new Europa_Unit_Exception(
-				'Invalid test added to ' . get_class($this) . '.',
-				Europa_Unit_Exception::INVALID_TEST_METHOD
-			);
-		}
-		if (is_null($offset)) {
-			$offset = $this->count();
-		}
-		$this->_tests[] = $test;
-	}
-	
-	public function run()
-	{
-		$this->setUp();
-		foreach ($this as $test) {
-			$result = $this->$test();
-			if ($result === true) {
-				$this->_passed[] = $test;
-			} elseif ($result === false) {
-				$this->_failed[] = $test;
-			} else {
-				$this->_incomplete[] = $test;
-			}
-		}
-		$this->tearDown();
-		return $this;
-	}
-	
-	protected function _isTestMethod($method)
-	{
-		return substr($method, 0, 4) === 'test' && method_exists($this, $method);
-	}
+    public function __construct()
+    {
+        $class = new ReflectionClass($this);
+        foreach ($class->getMethods() as $method) {
+            $method = $method->getName();
+            if ($this->_isTestMethod($method)) {
+                $this[] = $method;
+            }
+        }
+    }
+    
+    public function offsetSet($offset, $test)
+    {
+        if (!$this->_isTestMethod($test)) {
+            throw new Europa_Unit_Exception(
+                'Invalid test added to ' . get_class($this) . '.',
+                Europa_Unit_Exception::INVALID_TEST_METHOD
+            );
+        }
+        if (is_null($offset)) {
+            $offset = $this->count();
+        }
+        $this->_tests[] = $test;
+    }
+    
+    public function run()
+    {
+        $this->setUp();
+        foreach ($this as $test) {
+            $result = $this->$test();
+            if ($result === true) {
+                $this->_passed[] = $test;
+            } elseif ($result === false) {
+                $this->_failed[] = $test;
+            } else {
+                $this->_incomplete[] = $test;
+            }
+        }
+        $this->tearDown();
+        return $this;
+    }
+    
+    protected function _isTestMethod($method)
+    {
+        return substr($method, 0, 4) === 'test' && method_exists($this, $method);
+    }
 }

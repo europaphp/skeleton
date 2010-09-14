@@ -11,19 +11,19 @@
  */
 class Europa_Form_Element_Reset extends Europa_Form_Element_Button
 {
-	/**
-	 * Renders the reset element.
-	 * 
-	 * @return string
-	 */
-	public function __toString()
-	{
-		$this->type = 'reset';
+    /**
+     * Renders the reset element.
+     * 
+     * @return string
+     */
+    public function __toString()
+    {
+        $this->type = 'reset';
 
-		if (!$this->value) {
-			$this->value = 'Reset';
-		}
+        if (!$this->value) {
+            $this->value = 'Reset';
+        }
 
-		return parent::__toString();
-	}
+        return parent::__toString();
+    }
 }

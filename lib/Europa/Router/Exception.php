@@ -11,10 +11,10 @@
  */
 class Europa_Router_Exception extends Europa_Exception
 {
-	/**
-	 * Thrown when no route is matched.
-	 * 
-	 * @var int
-	 */
-	const NO_MATCH = 1;
+    /**
+     * Thrown when no route is matched.
+     * 
+     * @var int
+     */
+    const NO_MATCH = 1;
 }

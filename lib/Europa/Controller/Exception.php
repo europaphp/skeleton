@@ -12,11 +12,11 @@
  */
 class Europa_Controller_Exception extends Europa_Exception
 {
-	/**
-	 * Thrown when an action is not found by default in
-	 * Europa_Controller_Action.
-	 * 
-	 * @var int
-	 */
-	const ACTION_NOT_FOUND = 1;
+    /**
+     * Thrown when an action is not found by default in
+     * Europa_Controller_Action.
+     * 
+     * @var int
+     */
+    const ACTION_NOT_FOUND = 1;
 }

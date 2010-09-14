@@ -11,15 +11,15 @@
  */
 class Europa_Form_Element_Button extends Europa_Form_Element_Input
 {
-	/**
-	 * Renders the reset element.
-	 * 
-	 * @return string
-	 */
-	public function __toString()
-	{
-		$this->type = 'button';
-		
-		return parent::__toString();
-	}
+    /**
+     * Renders the reset element.
+     * 
+     * @return string
+     */
+    public function __toString()
+    {
+        $this->type = 'button';
+        
+        return parent::__toString();
+    }
 }

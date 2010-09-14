@@ -11,19 +11,19 @@
  */
 class Europa_Validator_Required extends Europa_Validator
 {
-	/**
-	 * Checks to make sure the specified value is set.
-	 * 
-	 * @param mixed $value The value to validate.
-	 * @return Europa_Validator_Required
-	 */
-	public function validate($value)
-	{
-		if (empty($value)) {
-			$this->fail();
-		} else {
-			$this->pass();
-		}
-		return $this;
-	}
+    /**
+     * Checks to make sure the specified value is set.
+     * 
+     * @param mixed $value The value to validate.
+     * @return Europa_Validator_Required
+     */
+    public function validate($value)
+    {
+        if (empty($value)) {
+            $this->fail();
+        } else {
+            $this->pass();
+        }
+        return $this;
+    }
 }

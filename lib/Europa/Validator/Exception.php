@@ -11,5 +11,5 @@
  */
 class Europa_Validator_Exception extends Europa_Exception
 {
-	
+    
 }

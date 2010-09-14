@@ -11,19 +11,19 @@
  */
 class Europa_Validator_Number extends Europa_Validator
 {
-	/**
-	 * Checks to make sure the specified value is a number.
-	 * 
-	 * @param mixed $value The value to validate.
-	 * @return Europa_Validator_Number
-	 */
-	public function validate($value)
-	{
-		if (is_numeric($value)) {
-			$this->pass();
-		} else {
-			$this->fail();
-		}
-		return $this;
-	}
+    /**
+     * Checks to make sure the specified value is a number.
+     * 
+     * @param mixed $value The value to validate.
+     * @return Europa_Validator_Number
+     */
+    public function validate($value)
+    {
+        if (is_numeric($value)) {
+            $this->pass();
+        } else {
+            $this->fail();
+        }
+        return $this;
+    }
 }

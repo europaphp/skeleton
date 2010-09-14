@@ -11,5 +11,5 @@
  */
 class Europa_Form_Element_Text extends Europa_Form_Element_Input
 {
-	
+    
 }

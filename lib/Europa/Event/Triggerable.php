@@ -11,10 +11,10 @@
  */
 interface Europa_Event_Triggerable
 {
-	/**
-	 * Ensures the event manager knows what to do.
-	 * 
-	 * @return bool
-	 */
-	public function trigger(array $data = array());
+    /**
+     * Ensures the event manager knows what to do.
+     * 
+     * @return bool
+     */
+    public function trigger(array $data = array());
 }

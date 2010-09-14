@@ -11,21 +11,21 @@
  */
 class Europa_Validator_Map extends Europa_Validator_Suite
 {
-	/**
-	 * Validates the suite based on the attached validators to the passed data.
-	 * 
-	 * @param mixed $data The data to validate.
-	 * @return bool
-	 */
-	public function validate($data)
-	{
-		if (!is_array($data)) {
-			throw new Europa_Validator_Exception('The data being validated must be an array.');
-		}
-		foreach ($this as $index => $validator) {
-			$value = isset($data[$index]) ? $data[$index] : null;
-			$validator->validate($value);
-		}
-		return $this;
-	}
+    /**
+     * Validates the suite based on the attached validators to the passed data.
+     * 
+     * @param mixed $data The data to validate.
+     * @return bool
+     */
+    public function validate($data)
+    {
+        if (!is_array($data)) {
+            throw new Europa_Validator_Exception('The data being validated must be an array.');
+        }
+        foreach ($this as $index => $validator) {
+            $value = isset($data[$index]) ? $data[$index] : null;
+            $validator->validate($value);
+        }
+        return $this;
+    }
 }

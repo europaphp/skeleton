@@ -11,23 +11,23 @@
  */
 class Europa_View_Json extends Europa_View
 {
-	/**
-	 * Constructs the view and sets parameters.
-	 * 
-	 * @param array $params
-	 */
-	public function __construct(array $params = array())
-	{
-		$this->setParams($params);
-	}
-	
-	/**
-	 * JSON encodes the parameters on the view and returns them.
-	 * 
-	 * @return string
-	 */
-	public function __toString()
-	{
-		return json_encode($this->getParams());
-	}
+    /**
+     * Constructs the view and sets parameters.
+     * 
+     * @param array $params
+     */
+    public function __construct(array $params = array())
+    {
+        $this->setParams($params);
+    }
+    
+    /**
+     * JSON encodes the parameters on the view and returns them.
+     * 
+     * @return string
+     */
+    public function __toString()
+    {
+        return json_encode($this->getParams());
+    }
 }

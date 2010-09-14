@@ -11,19 +11,19 @@
  */
 class Europa_Form_Element_Submit extends Europa_Form_Element_Button
 {
-	/**
-	 * Renders the reset element.
-	 * 
-	 * @return string
-	 */
-	public function __toString()
-	{
-		$this->type = 'submit';
-		
-		if (!$this->value) {
-			$this->value = 'Submit';
-		}
-		
-		return parent::__toString();
-	}
+    /**
+     * Renders the reset element.
+     * 
+     * @return string
+     */
+    public function __toString()
+    {
+        $this->type = 'submit';
+        
+        if (!$this->value) {
+            $this->value = 'Submit';
+        }
+        
+        return parent::__toString();
+    }
 }

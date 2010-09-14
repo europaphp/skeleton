@@ -11,5 +11,5 @@
  */
 class Europa_Directory_Exception extends Europa_Exception
 {
-	
+    
 }
