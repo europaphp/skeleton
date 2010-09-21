@@ -141,12 +141,7 @@ class Europa_String
      */
     public function toMethod()
     {
-        $this->toLowercase();
-        $this->toClass();
-        $this->lcfirst();
-        $this->_string = str_replace('_', '', $this->_string);
-
-        return $this;
+        return $this->toLowercase()->toClass()->lcfirst()->replace('_', '');
     }
     
     /**
