@@ -75,6 +75,7 @@ class Europa_Route_Regex implements Europa_Route
     {
         // we make sure the subject is a string, or can be converted to one
         $subject = (string) $subject;
+        $params  = array();
         
         if (!preg_match('#' . $this->_expression . '#', $subject, $matches)) {
             return false;
