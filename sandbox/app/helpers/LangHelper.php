@@ -11,6 +11,13 @@
  */
 class LangHelper
 {
+    /**
+     * The language to use.
+     * 
+     * @var string
+     */
+    private static $_lang = 'en_US';
+    
 	/**
 	 * Contains the ini values parsed out of the ini file.
 	 * 
@@ -79,7 +86,19 @@ class LangHelper
 	protected function _getIniFullPath(Europa_View $view)
 	{
 		return dirname(__FILE__) . '/../lang/'
+		     . self::$_lang
+		     . '/'
 		     . $view->getScript()
 		     . '.ini';
+	}
+	
+	/**
+	 * Sets the language to use.
+	 * 
+	 * @return void
+	 */
+	static public function set($language)
+	{
+	    self::$_lang = $language;
 	}
 }
