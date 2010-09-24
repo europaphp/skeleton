@@ -1,12 +1,12 @@
 <?php
 
-class CssHelper
+class CssHelper implements Europa_View_Helper
 {
 	protected $_layout;
 	
 	protected $_view;
 	
-	public function __construct(Europa_View $view)
+	public function __construct(Europa_View $view, array $args = array())
 	{
 		$request = new Europa_Request_Http;
 		$this->_layout = './css/' . $view->getScript() . '.css';

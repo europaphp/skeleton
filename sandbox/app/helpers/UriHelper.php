@@ -9,18 +9,25 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-class UriHelper
+class UriHelper implements Europa_View_Helper
 {
-	/**
-	 * Formats a URI using the active request instance.
-	 * 
-	 * @param string $uri The URI to format.
-	 * @param array $params The params, if any, to pass to the route.
-	 * @return UriHelper
-	 */
-	public function uri($uri = null, array $params = array())
-	{
-		return Europa_Request_Http::getActiveInstance()
-		     ->formatUri($uri, $params);
-	}
+    private $_uri = null;
+    
+    private $_params = array();
+    
+    public function __construct(Europa_View $view, array $args = array())
+    {
+        if (isset($args[0])) {
+            $this->_uri = $args[0];
+        }
+        
+        if (isset($args[1])) {
+            $this->_uri = $args[1];
+        }
+    }
+    
+    public function __toString()
+    {
+        return Europa_Request_Http::getActiveInstance()->formatUri($this->_uri, $this->_params);
+    }
 }

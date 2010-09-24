@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-class LangHelper
+class LangHelper implements Europa_View_Helper
 {
     /**
      * The language to use.
@@ -31,7 +31,7 @@ class LangHelper
 	 * @param Europa_View $view The view that called the helper.
 	 * @return LangHelper
 	 */
-	public function __construct(Europa_View $view)
+	public function __construct(Europa_View $view, array $args = array())
 	{
 		$path = $this->_getIniFullPath($view);
 		if (is_file($path)) {
