@@ -89,11 +89,13 @@ class Europa_View_Php extends Europa_View
         }
 
         // instantiate the helper and pass in the current view
-        $class = new $class($this);
-
-        // if a helper methods exists, call it with $args and return the value
-        if (method_exists($class, $func)) {
-            return call_user_func_array(array($class, $func), $args);
+        $class = new $class($this, $args);
+        
+        // helper must implement the helper interface
+        if (!$class instanceof Europa_View_Helper) {
+            throw new Europa_View_Exception_InvalidHelperInstance(
+                'Helper ' . get_class($class) . ' must implement Europa_View_Helper.'
+            );
         }
 
         // or just return the helper instance
