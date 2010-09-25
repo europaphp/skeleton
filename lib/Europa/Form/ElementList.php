@@ -34,7 +34,7 @@ abstract class Europa_Form_ElementList extends Europa_Form_Base implements Europ
             // automate field naming if a string is passed
             if (is_string($offset)) {
                 if (!$element->id) {
-                    $element->id   = Europa_String::create($offset)->toProperty();
+                    $element->id = (string) Europa_String::create($offset)->toProperty();
                 }
                 if (!$element->name) {
                     $element->name = $offset;

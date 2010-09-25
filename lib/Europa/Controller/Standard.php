@@ -36,9 +36,9 @@ abstract class Europa_Controller_Standard extends Europa_Controller
      */
     protected function _mapRequestToProperties(Europa_Request $request)
     {
-        $params = $request->getParams();
-        foreach ($params as &$param) {
-            $param = strtolower($param);
+        $params = array();
+        foreach ($request->getParams() as $name => $param) {
+            $params[strtolower($name)] = $param;
         }
         
         $class = new ReflectionClass($this);

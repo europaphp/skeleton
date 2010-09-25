@@ -12,14 +12,14 @@
 class Europa_Form_Element_Button extends Europa_Form_Element_Input
 {
     /**
-     * Renders the reset element.
+     * Constructs and sets defaults.
      * 
-     * @return string
+     * @return Europa_Form_Element_Button
      */
-    public function __toString()
+    public function __construct()
     {
-        $this->type = 'button';
-        
-        return parent::__toString();
+        parent::__construct();
+        $this->type  = 'button';
+        $this->value = 'Button';
     }
 }

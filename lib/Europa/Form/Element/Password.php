@@ -12,14 +12,13 @@
 class Europa_Form_Element_Password extends Europa_Form_Element_Input
 {
     /**
-     * Renders the password input element.
+     * Constructs and sets defaults.
      * 
-     * @return string
+     * @return Europa_Form_Element_Password
      */
-    public function __toString()
+    public function __construct()
     {
+        parent::__construct();
         $this->type = 'password';
-        
-        return parent::__toString();
     }
 }

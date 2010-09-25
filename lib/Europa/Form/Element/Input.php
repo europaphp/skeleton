@@ -12,6 +12,16 @@
 class Europa_Form_Element_Input extends Europa_Form_Element
 {
     /**
+     * Constructs and sets defaults.
+     * 
+     * @return Europa_Form_Element_Input
+     */
+    public function __construct()
+    {
+        $this->type = 'text';
+    }
+    
+    /**
      * Renders the reset element.
      * 
      * @return string
@@ -19,9 +29,6 @@ class Europa_Form_Element_Input extends Europa_Form_Element
     public function __toString()
     {
         // by default, it's a text field
-        if (!$this->type) {
-            $this->type = 'text';
-        }
         $attr = $this->getAttributeString();
         return '<input'
              . ($attr ? ' ' . $attr : '')

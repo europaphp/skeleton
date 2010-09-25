@@ -1,7 +1,7 @@
 <?php
 
 /**
- * A default form submit button.
+ * A hidden form input.
  * 
  * @category Forms
  * @package  Europa
@@ -9,17 +9,16 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-class Europa_Form_Element_Submit extends Europa_Form_Element_Button
+class Europa_Form_Element_Hidden extends Europa_Form_Element_Input
 {
     /**
      * Constructs and sets defaults.
      * 
-     * @return Europa_Form_Element_Submit
+     * @return Europa_Form_Element_Hidden
      */
     public function __construct()
     {
         parent::__construct();
-        $this->type  = 'submit';
-        $this->value = 'Submit';
+        $this->type = 'hidden';
     }
 }
