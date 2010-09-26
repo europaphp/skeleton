@@ -50,6 +50,16 @@ class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
         return $this;
     }
     
+    public function preSave()
+    {
+    
+    }
+    
+    public function postSave()
+    {
+    
+    }
+    
     /**
      * Saves the current document to the database. If any options
      * are passed, they are merged with options set at a document
