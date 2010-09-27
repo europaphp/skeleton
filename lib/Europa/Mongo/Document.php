@@ -188,7 +188,23 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
      */
     public function load()
     {
-        $criteria = array('_id' => $this->_id);
+        // if no id is found, do nothing
+        if (!$this->_id) {
+            return $this;
+        }
+        
+        // load by id
+        return $this->find(array('_id' => $this->_id));
+    }
+    
+    /**
+     * Attempts to find the document and fills the instance.
+     * 
+     * @param array $criteria The criteria to search with.
+     * @return Euorpa_Mongo_Document
+     */
+    public function find(array $criteria)
+    {
         return $this->fill($this->getCollection()->findOne($criteria));
     }
     
