@@ -34,6 +34,13 @@ abstract class Europa_Request
     protected $_params = array('controller' => 'index');
     
     /**
+     * The router, if any to process the request.
+     * 
+     * @var Europa_Router|null
+     */
+    protected $_router = null;
+    
+    /**
      * Contains the instances of all requests that are currently 
      * dispatching in chronological order.
      * 
@@ -72,6 +79,45 @@ abstract class Europa_Request
     }
     
     /**
+     * Binds a router to the request.
+     * 
+     * @param Europa_Router $router The router to bind.
+     * @return Europa_Request
+     */
+    public function setRouter(Europa_Router $router)
+    {
+        $this->_router = $router;
+        return $this;
+    }
+    
+    /**
+     * Returns the router that was set on the request.
+     * 
+     * @return Europa_Router
+     */
+    public function getRouter()
+    {
+        return $this->_router;
+    }
+    
+    /**
+     * Processes routes against the request.
+     * 
+     * @return Europa_Request
+     */
+    public function route()
+    {
+        $params = $this->_router->query($this);
+        if ($params === false) {
+            throw new Europa_Request_Exception(
+                'Unable to match a route.',
+                Europa_Request_Exception::NO_ROUTE_MATCHED
+            );
+        }
+        return $this->setParams($params);
+    }
+    
+    /**
      * Dispatches the request to the appropriate controller/action combo.
      * Invoking dispatching assumes routing was performed.
      * 
@@ -85,7 +131,7 @@ abstract class Europa_Request
         // routing information
         $controller = $this->formatController();
         
-        // dispatch request
+        // make sure the controller is loadable
         if (!Europa_Loader::loadClass($controller)) {
             throw new Europa_Request_Exception(
                 'Could not load controller ' . $controller . '.',

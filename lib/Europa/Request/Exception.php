@@ -40,4 +40,11 @@ class Europa_Request_Exception extends Europa_Exception
      * @var int
      */
     const REQUIRED_METHOD_ARGUMENT_NOT_DEFINED = 4;
+    
+    /**
+     * Thrown when a router is set and a route cannot be matched.
+     * 
+     * @var int
+     */
+    const NO_ROUTE_MATCHED = 5;
 }

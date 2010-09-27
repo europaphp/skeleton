@@ -46,7 +46,7 @@ class Europa_Route_Simple implements Europa_Route
         $this->_defaults    = $defaults;
         $this->_hasWildcard = $expression[$expressionLength - 1] === '*';
         $this->_expression  = $this->_hasWildcard 
-                            ? substr($expression, 0, $expressionLength - 2) 
+                            ? substr($expression, 0, $expressionLength - 1) 
                             : $expression;
     }
     
@@ -64,14 +64,21 @@ class Europa_Route_Simple implements Europa_Route
         $expressionParts = explode('/', $this->_expression);
         $subjectParts    = explode('/', $subject);
         
-        // if they aren't the same length, then they don't match
-        if (!$this->_hasWildcard && count($expressionParts) !== count($subjectParts)) {
+        // if the expression is longer than the subject, then
+        // they don't match
+        if (count($expressionParts) > count($subjectParts)) {
             return false;
         }
         
-        $params = array();
+        // if the expression is shorter than the subject, the
+        // expression must have a wildcard
+        if (count($expressionParts) < count($subjectParts) && !$this->_hasWildcard) {
+            return false;
+        }
+        
         
         // set defaults
+        $params = array();
         while (list($name, $value) = each($this->_defaults)) {
             $params[$name] = $value;
         }

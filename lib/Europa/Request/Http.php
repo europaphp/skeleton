@@ -39,11 +39,19 @@ class Europa_Request_Http extends Europa_Request
      * @param string $uri The URI to format.
      * @return string
      */
-    public static function formatUri($uri = null)
+    public function formatUri($uri = null, array $params = array())
     {
         // if it has a protocol prepended just return it
         if (strpos($uri, '://') !== false) {
             return $uri;
+        }
+        
+        // check for a router/route
+        if ($this->_router) {
+            $route = $this->_router->getRoute($uri);
+            if ($route) {
+                $uri = $route->reverse($params);
+            }
         }
         
         // make consistent
@@ -68,9 +76,9 @@ class Europa_Request_Http extends Europa_Request
      * @param string $uri The URI to redirect to.
      * @return void
      */
-    public static function redirect($uri = '/')
+    public function redirect($uri = '/', array $params = array())
     {
-        header('Location: ' . self::formatUri($uri));
+        header('Location: ' . $this->formatUri($uri, $params));
         exit;
     }
     

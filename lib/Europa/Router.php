@@ -1,7 +1,7 @@
 <?php
 
 /**
- * A router which binds a Europa_Request to multiple Europa_Route's.
+ * A router which can dispatch to a request or match a given subject.
  * 
  * @category Request
  * @package  Europa
@@ -12,11 +12,11 @@
 class Europa_Router implements Iterator, ArrayAccess, Countable
 {
     /**
-     * The request that is to be routed.
+     * The route that is matched upon querying.
      * 
-     * @var Europa_Request
+     * @var Europa_Route|null
      */
-    protected $_request;
+    private $_route = null;
     
     /**
      * The array of routes to match.
@@ -26,43 +26,21 @@ class Europa_Router implements Iterator, ArrayAccess, Countable
     protected $_routes = array();
     
     /**
-     * The subject that each route is queried against.
+     * Performs route matching. The parameters are returned if matched.
      * 
-     * @var string
+     * @param string $subject The subject to match.
+     * @return bool|false
      */
-    protected $_subject;
-    
-    /**
-     * Constructs a new request router.
-     * 
-     * @return Europa_Router
-     */
-    public function __construct(Europa_Request $request)
-    {
-        $this->_request = $request;
-        $this->_subject = $request->__toString();
-    }
-    
-    /**
-     * Processes all routes. If a route is matched, it is set, params are set
-     * and it returns true. If a route is not matched, the route is set to
-     * false and it returns false.
-     * 
-     * @param string $subject The subject to route against.
-     * @return bool
-     */
-    public function dispatch()
+    public function query($subject)
     {
         foreach ($this as $route) {
-            $params = $route->query($this->getSubject());
+            $params = $route->query($subject);
             if ($params !== false) {
-                return $this->_request->setParams($params)->dispatch();
+                $this->_matched = $route;
+                return $params;
             }
         }
-        throw new Europa_Router_Exception(
-            'Unable to match route.',
-            Europa_Router_Exception::NO_MATCH
-        );
+        return false;
     }
 
     /**
@@ -70,7 +48,7 @@ class Europa_Router implements Iterator, ArrayAccess, Countable
      * 
      * @param string $name The name of the route.
      * @param Europa_Route $route The route to use.
-     * @return Europa_Request
+     * @return Europa_Router
      */
     public function setRoute($name, Europa_Route $route)
     {
@@ -84,32 +62,30 @@ class Europa_Router implements Iterator, ArrayAccess, Countable
      * @param string $name The name of the route to get.
      * @return Europa_Route|null
      */
-    public function getRoute($name)
+    public function getRoute($name = null)
     {
+        // if a name isn't specified, return the matched route
+        if (!$name) {
+            return $this->_route;
+        }
+        
+        // if a name is specified, return that route
         if (isset($this->_routes[$name])) {
             return $this->_routes[$name];
         }
+        
+        // by default return nothing
         return null;
     }
     
     /**
-     * Returns the subject that is queried against each route.
+     * Clears the route that was matched by the query.
      * 
-     * @return string
+     * @return Europa_Router
      */
-    public function getSubject()
+    public function clearRoute()
     {
-        return $this->_subject;
-    }
-    
-    /**
-     * Sets the subject that is queried against each route.
-     * 
-     * @return Europa_Route
-     */
-    public function setSubject($subject)
-    {
-        $this->_subject = (string) $subject;
+        $this->_route = null;
         return $this;
     }
     
@@ -133,41 +109,86 @@ class Europa_Router implements Iterator, ArrayAccess, Countable
         return current($this->_routes);
     }
     
+    /**
+     * Returns the name/index of the current route.
+     * 
+     * @return mixed
+     */
     public function key()
     {
         return key($this->_routes);
     }
     
+    /**
+     * Moves to the next route.
+     * 
+     * @return void
+     */
     public function next()
     {
         next($this->_routes);
     }
     
+    /**
+     * Resets to the first route.
+     * 
+     * @return void
+     */
     public function rewind()
     {
         reset($this->_routes);
     }
     
+    /**
+     * Returns whether or not there is another route.
+     * 
+     * @return bool
+     */
     public function valid()
     {
         return (bool) $this->current();
     }
     
+    /**
+     * Returns the specified route.
+     * 
+     * @param mixed $offset The route to get.
+     * @return Europa_Route|null
+     */
     public function offsetGet($offset)
     {
         return $this->getRoute($offset);
     }
     
+    /**
+     * Sets the specified route.
+     * 
+     * @param mixed $offset The name of the route.
+     * @param Europa_Route $route The route to set.
+     * @return void
+     */
     public function offsetSet($offset, $route)
     {
         $this->setRoute($offset, $route);
     }
     
+    /**
+     * Checks to see if a route exists.
+     * 
+     * @param mixed $offset The route to check for.
+     * @return bool
+     */
     public function offsetExists($offset)
     {
         return isset($this->_routes);
     }
     
+    /**
+     * Removes a route.
+     * 
+     * @param mixed $offset The route to remove.
+     * @return void
+     */
     public function offsetUnset($offset)
     {
         if (isset($this->_routes[$offset])) {
