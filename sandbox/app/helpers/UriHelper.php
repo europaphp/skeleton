@@ -22,12 +22,15 @@ class UriHelper implements Europa_View_Helper
         }
         
         if (isset($args[1])) {
-            $this->_uri = $args[1];
+            $this->_params = $args[1];
         }
     }
     
     public function __toString()
     {
-        return Europa_Request_Http::getActiveInstance()->formatUri($this->_uri, $this->_params);
+        return Europa_Request::getActiveInstance()->formatUri(
+            $this->_uri,
+            $this->_params
+        );
     }
 }

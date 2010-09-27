@@ -99,6 +99,11 @@ class Europa_Route_Simple implements Europa_Route
             // grab the part of the expression that corresponds to this subject part
             $expressionPart = $expressionParts[$index];
             
+            // if the expression part is empty, then just continue on
+            if (!$expressionPart) {
+                continue;
+            }
+            
             // if we are on a named parameter, then set it
             if ($expressionPart[0] === ':') {
                 $params[substr($expressionPart, 1)] = $subjectPart;

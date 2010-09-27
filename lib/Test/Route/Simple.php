@@ -2,11 +2,6 @@
 
 class Test_Route_Simple extends Europa_Unit_Test
 {
-	public function setUp()
-	{
-		
-	}
-	
 	public function testMatch()
 	{
 		$route = new Europa_Route_Simple(':controller/:action');
@@ -68,7 +63,8 @@ class Test_Route_Simple extends Europa_Unit_Test
 		}
 		
 		return $params['controller'] === 'test-controller'
-		    && $params['action']     === 'test-action';
+		    && $params['action']     === 'test-action'
+		    && $params['user']       === 'testuser';
 	}
 	
 	public function testDynamicParameterBinding()
@@ -88,10 +84,5 @@ class Test_Route_Simple extends Europa_Unit_Test
 	{
 		$route = new Europa_Route_Simple('user/:username');
 		return $route->reverse(array('username' => 'testuser')) === 'user/testuser';
-	}
-	
-	public function tearDown()
-	{
-		
 	}
 }
