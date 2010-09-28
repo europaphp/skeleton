@@ -16,6 +16,10 @@ class Europa_Mongo_Collection extends MongoCollection
      */
     private $_name;
     
+    private $_query = array();
+    
+    private $_fields = array();
+    
     public function __construct(Europa_Mongo_Db $db, $name)
     {
         parent::__construct($db, $name);
@@ -23,8 +27,24 @@ class Europa_Mongo_Collection extends MongoCollection
         $this->_name = $name;
     }
     
+    public function __call($name, $args)
+    {
+        $field   = $args[0];
+        $command = '$' . $name;
+        $args    = $args[1];
+        
+        if (!isset($this->_query[$field])) {
+            $this->_query[$field] = array();
+        }
+        
+        $this->_query[$field][$args[0]] = $args[1];
+        
+        return $this;
+    }
+    
     public function find(array $query = array(), array $fields = array())
     {
+        $query = array_merge($this->_query, $query);
         return new Europa_Mongo_Cursor($this->getDb()->getConnection(), $this->__toString(), $query, $fields);
     }
     

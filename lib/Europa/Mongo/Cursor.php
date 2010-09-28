@@ -278,15 +278,18 @@ class Europa_Mongo_Cursor extends MongoCursor implements ArrayAccess, Countable
             $this->rewind();
         }
         
+        // get the current element
+        $current = parent::current();
+        
         // if no class is specified, just return an array
-        if (!$this->_class) {
-            return parent::current();
+        if (!$this->_class || !$current) {
+            return $current;
         }
         
         // if a class is specified, instantiate it, fill it and return it
         $class = $this->_class;
         $class = new $class;
-        return $class->setConnection($this->getConnection())->fill(parent::current());
+        return $class->setConnection($this->getConnection())->fill($current);
     }
     
     /**

@@ -103,6 +103,13 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
     private $_exists;
     
     /**
+     * Any modifiers applied to the fields in this document.
+     * 
+     * @var array
+     */
+    private $_modifiers = array();
+    
+    /**
      * Sets a document parameter.
      * 
      * @param string $name The name of the parameter.
@@ -148,6 +155,23 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
     }
     
     /**
+     * Applies a modifier to the particular field.
+     * 
+     * @param string $name The modifier to apply.
+     * @param array $args The arguments provided.
+     * @return Europa_Mongo_Document
+     */
+    public function __call($name, $args)
+    {
+        $name = '$' . $name;
+        if (!isset($this->_modifiers[$name])) {
+            $this->_modifiers[$name] = array();
+        }
+        $this->_modifiers[$name][$args[0]] = $args[1];
+        return $this;
+    }
+    
+    /**
      * Fills the current document with the specified data.
      * 
      * @param mixed $data The data to fill the document with.
@@ -184,28 +208,25 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
      * Loads the document from the database and applies the properties
      * to the current instance.
      * 
+     * @param array $criteria Any criteria to search by other than what
+     * is currently in the document.
      * @return Europa_Mongo_Document
      */
-    public function load()
+    public function load(array $criteria = array(), array $fields = array())
     {
-        // if no id is found, do nothing
-        if (!$this->_id) {
+        // merge criteria
+        $this->fill($criteria);
+        
+        // make sure it's a mongo array
+        $criteria = $this->toArray();
+        
+        // if there is no criteria, do nothing
+        if (!$criteria) {
             return $this;
         }
         
         // load by id
-        return $this->find(array('_id' => $this->_id));
-    }
-    
-    /**
-     * Attempts to find the document and fills the instance.
-     * 
-     * @param array $criteria The criteria to search with.
-     * @return Euorpa_Mongo_Document
-     */
-    public function find(array $criteria)
-    {
-        return $this->fill($this->getCollection()->findOne($criteria));
+        return $this->fill($this->getCollection()->findOne($criteria, $fields));
     }
     
     /**
@@ -241,7 +262,7 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
      */
     public function save(array $options = array())
     {
-        // id it's not modified we don't do anything
+        // if it's not modified we don't do anything
         if (!$this->isModified()) {
             return $this;
         }
@@ -326,7 +347,7 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
         // pre-event check
         if ($this->preRemove() !== false) {
             $options = array_merge($this->getRemoveOptions(), $options);
-            if (!$this->getCollection()->remove(array('_id' => $this->_id), $options)) {
+            if (!$this->getCollection()->remove($this->toArray(), $options)) {
                 throw new Europa_Mongo_Exception(
                     'Could not remove ' . get_class($this) . ' from the database.'
                 );
@@ -509,13 +530,11 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
         // call the setter or just set the value
         if (method_exists($this, $method)) {
             $this->$method($value);
+        } elseif ($this->_hasOne($name)) {
+            $this->_data[$name] = $this->_getHasOne($name, $value);
+        } elseif ($this->_hasMany($name)) {
+            $this->_data[$name] = $this->_getHasMany($name, $value);
         } else {
-            // handle has-one and has-many relationships
-            if ($this->_hasOne($name)) {
-                $value = $this->_getHasOne($name, $value);
-            } elseif ($this->_hasMany($name)) {
-                $value = $this->_getHasMany($name, $value);
-            }
             $this->_data[$name] = $value;
         }
         
@@ -782,7 +801,7 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
             // handle normal values
             $array[$name] = $value;
         }
-        return $array;
+        return array_merge($array, $this->_modifiers);
     }
     
     /**
