@@ -12,6 +12,20 @@
 class Europa_Mongo_Cursor extends MongoCursor implements ArrayAccess, Countable
 {
     /**
+     * Constnat for sort ascending.
+     * 
+     * @var int
+     */
+    const SORT_ASC = 1;
+    
+    /**
+     * Constant for sort descending.
+     * 
+     * @var int
+     */
+    const SORT_DESC = -1;
+    
+    /**
      * The position of the cursor.
      * 
      * @var int
@@ -38,6 +52,27 @@ class Europa_Mongo_Cursor extends MongoCursor implements ArrayAccess, Countable
      * @var Europa_Mongo_Connection
      */
     private $_connection;
+    
+    /**
+     * The result limit.
+     * 
+     * @var int|null
+     */
+    private $_limit = null;
+    
+    /**
+     * The results to skip.
+     * 
+     * @var int|null
+     */
+    private $_skip = null;
+    
+    /**
+     * The current page of results.
+     * 
+     * @var int|null
+     */
+    private $_page = null;
     
     /**
      * Constructs a new cursor so we can track the connection and set a default class.
@@ -73,20 +108,161 @@ class Europa_Mongo_Cursor extends MongoCursor implements ArrayAccess, Countable
     }
     
     /**
-     * Overridden to mark the cursor as executed and to rewind it if it
-     * is on it's initial execution. This doesn't do anything if it's
-     * already been executed.
+     * Limits the results. The limit is tracked to provide paging information.
      * 
+     * @param int $limit The limit.
      * @return Europa_Mongo_Cursor
      */
-    public function doQuery()
+    public function limit($limit)
     {
-        if (!$this->isExecuted()) {
-            parent::doQuery();
-            $this->rewind();
-            $this->_isExecuted = true;
-        }
+        $this->_limit = is_null($limit) ? $limit : (int) $limit;
         return $this;
+    }
+    
+    /**
+     * Tracks the skipping of results. Overrides the set page.
+     * 
+     * @param int $offset The amount to skip.
+     * @return Europa_Mongo_Cursor
+     */
+    public function skip($offset)
+    {
+        $this->_page = null;
+        $this->_skip = is_null($offset) ? $offset : (int) $offset;
+        return $this; 
+    }
+    
+    /**
+     * Sets the page to return. Overrides the set skip.
+     * 
+     */
+    public function page($page)
+    {
+        $this->_page = is_null($page) ? $page : (int) $page;
+        $this->_skip = null;
+        return $this;
+    }
+    
+    /**
+     * Returns the set limit. If no limit is set, then it is equal
+     * to the total number of results.
+     * 
+     * @return int
+     */
+    public function getLimit()
+    {
+        if (is_null($this->_limit)) {
+            return $this->count();
+        }
+        return $this->_limit;
+    }
+    
+    /**
+     * Returnst the starting offset.
+     * 
+     * @return int
+     */
+    public function getStartOffset()
+    {
+        if (!is_null($this->_skip)) {
+            return $this->_skip;
+        }
+        
+        if (!is_null($this->_page)) {
+            $limit = $this->getLimit();
+            return $this->_page * $limit - $limit;
+        }
+        
+        return 0;
+    }
+    
+    /**
+     * Returns the ending offset.
+     * 
+     * @return int
+     */
+    public function getEndOffset()
+    {
+        $start = $this->getStartOffset();
+        $limit = $this->getLimit();
+        $count = $this->count();
+        return $limit < $count ? $limit : $count - $start;
+    }
+    
+    /**
+     * Returns the current page number.
+     * 
+     * @return int
+     */
+    public function getPage()
+    {
+        $limit = $this->getLimit();
+        $start = $this->getStartOffset();
+        if (!$limit || !$start) {
+            return 1;
+        }
+        return $limit > $start ? ceil($limit / $start) + 1 : ceil($start / $limit) + 1;
+    }
+    
+    /**
+     * Returns the total number of pages.
+     * 
+     * @return int
+     */
+    public function getTotalPages()
+    {
+        return ceil($this->count() / $this->getLimit());
+    }
+    
+    /**
+     * Returns the starting page up to the specified range. If you are on page 3
+     * and specify 5, then 1 will be returned. If you are on page 10 and specify
+     * 5, 5 will be returned.
+     * 
+     * @param int $range
+     * @return int
+     */
+    public function getStartPage($range)
+    {
+        $page = $this->getPage();
+        if ($range >= $page) {
+            return 1;
+        }
+        return $page - $range;
+    }
+    
+    /**
+     * Returns the ending page up to the specified range. If you are on page 3
+     * and specify 5, then 8 will be returned. If you specify the same settings
+     * but only have a total of 6 pages, then 6 will be returned.
+     * 
+     * @param int $range
+     * @return int
+     */
+    public function getEndPage($range)
+    {
+        $sum   = $this->getPage() + $range;
+        $total = $this->getTotalPages();
+        if ($sum >= $total) {
+            return $total;
+        }
+        return $sum;
+    }
+    
+    /**
+     * Overridden to provide implementation for overridden limiting and
+     * skipping.
+     * 
+     * @param bool $foundOnly Whether or not to send limit/skip info to count.
+     * @return int
+     */
+    public function count($foundOnly = false)
+    {
+        if ($foundOnly) {
+            parent::limit($this->getLimit());
+            parent::skip($this->getStartoffset());
+        }
+        return parent::count($foundOnly);
     }
     
     /**
@@ -98,7 +274,9 @@ class Europa_Mongo_Cursor extends MongoCursor implements ArrayAccess, Countable
      */
     public function current()
     {
-        $this->doQuery();
+        if (!$this->isExecuted()) {
+            $this->rewind();
+        }
         
         // if no class is specified, just return an array
         if (!$this->_class) {
@@ -123,12 +301,19 @@ class Europa_Mongo_Cursor extends MongoCursor implements ArrayAccess, Countable
     }
     
     /**
-     * Overridden to reset the internal position tracker.
+     * Overridden to reset the internal position tracker and process limits and offsets
+     * before the iteration starts and cursor is executed. This also sets the interal
+     * execution flag as to tell if the cursor has been executed yet.
      * 
      * @return void
      */
     public function rewind()
     {
+        if (!$this->isExecuted()) {
+            parent::limit($this->getLimit());
+            parent::skip($this->getStartOffset());
+            $this->_isExecuted = true;
+        }
         $this->_position = 0;
         parent::rewind();
     }

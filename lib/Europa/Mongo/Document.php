@@ -209,48 +209,6 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
     }
     
     /**
-     * Gets called prior to inserting. If it returns false, then saving
-     * does not continue.
-     * 
-     * @return mixed
-     */
-    public function preInsert()
-    {
-        
-    }
-    
-    /**
-     * Gets called after inserting.
-     * 
-     * @return mixed
-     */
-    public function postInsert()
-    {
-        
-    }
-    
-    /**
-     * Gets called prior to updating. If it returns false, then saving
-     * does not continue.
-     * 
-     * @return mixed
-     */
-    public function preUpdate()
-    {
-        
-    }
-    
-    /**
-     * Gets called after updating.
-     * 
-     * @return mixed
-     */
-    public function postUpdate()
-    {
-        
-    }
-    
-    /**
      * Gets called prior to saving/updating/inserting. If it returns
      * false, then saving does not continue.
      * 
@@ -290,32 +248,27 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
         
         // only proceed if preSave is not false
         if ($this->preSave() !== false) {
-            // trigger other pre-events
-            if (!$this->exists()) {
-                $this->preInsert();
-            } else {
-                $this->preUpdate();
-            }
-            
-            // save the object
             $options = array_merge($this->getSaveOptions(), $options);
-            if (!$this->getCollection()->save($this->toArray(), $options)) {
+            $array   = $this->toArray();
+            
+            // save and throw an exception if it can't be saved
+            if (!$this->getCollection()->save($array, $options)) {
                 throw new Europa_Mongo_Exception(
                     'Could not save ' . get_class($this) . ' to the database.'
                 );
             }
             
-            // trigger post-events
-            $this->postSave();
-            if (!$this->exists()) {
-                $this->postInsert();
-            } else {
-                $this->postUpdate();
-            }
+            // re-fill with any data that was modified by the save
+            $this->fill($array);
             
             // mark as exists
             $this->_exists = true;
+            
+            // trigger post-events
+            $this->postSave();
         }
+        
+        // chain
         return $this;
     }
     
@@ -787,7 +740,11 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
         }
         
         // apply aliases
-        $this->_aliases[$name][] = $alias;
+        foreach ($aliases as $alias) {
+            $this->_aliases[$name][] = $alias;
+        }
+        
+        // chain
         return $this;
     }
     
