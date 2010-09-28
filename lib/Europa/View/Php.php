@@ -114,7 +114,11 @@ class Europa_View_Php extends Europa_View
         
         // include it
         if ($view = Europa_Loader::search($this->getScript() . '.' . $this->getSuffix())) {
-            include $view;
+            try {
+                include $view;
+            } catch (Exception $e) {
+                trigger_error((string) $e, E_USER_ERROR);
+            }
         }
         
         // return the parsed view
