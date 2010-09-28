@@ -42,7 +42,7 @@ abstract class Europa_Controller
         if ($this->_view) {
             return $this->_view->__toString();
         }
-        return '';
+        return null;
     }
     
     /**
