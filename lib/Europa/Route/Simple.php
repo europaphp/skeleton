@@ -77,13 +77,8 @@ class Europa_Route_Simple implements Europa_Route
         }
         
         
-        // set defaults
-        $params = array();
-        while (list($name, $value) = each($this->_defaults)) {
-            $params[$name] = $value;
-        }
-        
         // map paramters from the subject
+        $params = $this->_defaults;
         while (list($index, $subjectPart) = each($subjectParts)) {
             // check for dynamic prameter binding
             if (strpos($subjectPart, ':') !== false) {
@@ -125,6 +120,7 @@ class Europa_Route_Simple implements Europa_Route
     public function reverse(array $params = array())
     {
         $reverse = $this->_expression;
+        $params  = array_merge($this->_defaults, $params);
         while (list($name, $value) = each($params)) {
             $reverse = str_replace(':' . $name, $value, $reverse);
         }
