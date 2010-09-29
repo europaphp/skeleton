@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The main document class used for MongoDB document manipulation.
+ * The main document class used for MongoDB top-level document manipulation.
  * 
  * @category Mongo
  * @package  Europa
@@ -9,15 +9,8 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
+abstract class Europa_Mongo_Document extends Europa_Mongo_DocumentAbstract
 {
-    /**
-     * The data on in the document.
-     * 
-     * @var array
-     */
-    private $_data = array();
-    
     /**
      * The MongoDB connection that is being used.
      * 
@@ -54,138 +47,11 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
     private $_removeOptions = array();
     
     /**
-     * Whitelisted properties.
-     * 
-     * @var array
-     */
-    private $_whitelist = array();
-    
-    /**
-     * Blacklisted properties.
-     * 
-     * @var array
-     */
-    private $_blacklist = array();
-    
-    /**
-     * Contains the has one relationships.
-     * 
-     * @var array
-     */
-    private $_hasOne = array();
-    
-    /**
-     * Contains the has many relationships.
-     * 
-     * @var array
-     */
-    private $_hasMany = array();
-    
-    /**
-     * Property aliases.
-     * 
-     * @var array
-     */
-    private $_aliases = array();
-    
-    /**
-     * Whether or not the document has changed.
-     * 
-     * @var bool
-     */
-    private $_modified = array();
-    
-    /**
      * Whether or not the current document exists in a collection.
      * 
      * @var bool
      */
     private $_exists;
-    
-    /**
-     * Any modifiers applied to the fields in this document.
-     * 
-     * @var array
-     */
-    private $_modifiers = array();
-    
-    /**
-     * Sets a document parameter.
-     * 
-     * @param string $name The name of the parameter.
-     * @param mixed $value The value of the parameter.
-     * @return Europa_Mongo_Document
-     */
-    final public function __set($name, $value)
-    {
-        return $this->set($name, $value);
-    }
-    
-    /**
-     * Returns a document parameter.
-     * 
-     * @param string $name The name of the parameter to get.
-     * @return mixed
-     */
-    final public function __get($name)
-    {
-        return $this->get($name);
-    }
-    
-    /**
-     * Returns whether or not a particular parameter is set.
-     * 
-     * @param string $name The name of the parameter to check.
-     * @return bool
-     */
-    final public function __isset($name)
-    {
-        return $this->has($name);
-    }
-    
-    /**
-     * Removes the specified parameter.
-     * 
-     * @param string $name The parameter to remove.
-     * @return Europa_Mongo_Document
-     */
-    final public function __unset($name)
-    {
-        return $this->clear($name);
-    }
-    
-    /**
-     * Applies a modifier to the particular field.
-     * 
-     * @param string $name The modifier to apply.
-     * @param array $args The arguments provided.
-     * @return Europa_Mongo_Document
-     */
-    public function __call($name, $args)
-    {
-        $name = '$' . $name;
-        if (!isset($this->_modifiers[$name])) {
-            $this->_modifiers[$name] = array();
-        }
-        $this->_modifiers[$name][$args[0]] = $args[1];
-        return $this;
-    }
-    
-    /**
-     * Fills the current document with the specified data.
-     * 
-     * @param mixed $data The data to fill the document with.
-     * @return Europa_Mongo_Document
-     */
-    public function fill($data)
-    {
-        if (is_array($data) || is_object($data)) {
-            foreach ($data as $name => $value) {
-                $this->set($name, $value);
-            }
-        }
-        return $this;
-    }
     
     /**
      * Returns whether or not the specified record exists.
@@ -210,6 +76,8 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
      * 
      * @param array $criteria Any criteria to search by other than what
      * is currently in the document.
+     * @param array $fields The fields to return and fill the document
+     * with.
      * @return Europa_Mongo_Document
      */
     public function load(array $criteria = array(), array $fields = array())
@@ -230,27 +98,6 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
     }
     
     /**
-     * Gets called prior to saving/updating/inserting. If it returns
-     * false, then saving does not continue.
-     * 
-     * @return mixed
-     */
-    public function preSave()
-    {
-    
-    }
-    
-    /**
-     * Gets called after saving.
-     * 
-     * @return mixed
-     */
-    public function postSave()
-    {
-    
-    }
-    
-    /**
      * Saves the current document to the database. If any options
      * are passed, they are merged with options set at a document
      * level to be passed on every save using setSaveOptions().
@@ -268,25 +115,39 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
         }
         
         // only proceed if preSave is not false
-        if ($this->preSave() !== false) {
+        if ($this->_preSave() !== false) {
             $options = array_merge($this->getSaveOptions(), $options);
-            $array   = $this->toArray();
+            
+            // set a default id if it doesn't exist
+            if (!$this->_id) {
+                $this->_id = new MongoId;
+            }
+            
+            // force upsert
+            $options['upsert'] = true;
+            
+            // save relationships
+            foreach ($this->_data as $item) {
+                if (
+                    $item instanceof Europa_Mongo_MainDocument
+                    || $item instanceof Europa_Mongo_DocumentSet
+                ) {
+                    $item->save($options);
+                }
+            }
             
             // save and throw an exception if it can't be saved
-            if (!$this->getCollection()->save($array, $options)) {
+            if (!$this->getCollection()->update(array('_id' => $this->_id), $this->toMongoArray(), $options)) {
                 throw new Europa_Mongo_Exception(
                     'Could not save ' . get_class($this) . ' to the database.'
                 );
             }
             
-            // re-fill with any data that was modified by the save
-            $this->fill($array);
-            
             // mark as exists
             $this->_exists = true;
             
             // trigger post-events
-            $this->postSave();
+            $this->_postSave();
         }
         
         // chain
@@ -310,30 +171,9 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
      * 
      * @return array
      */
-    public function getSaveOptions()
+    protected function getSaveOptions()
     {
         return $this->_saveOptions;
-    }
-    
-    /**
-     * Gets called prior to removing. If it returns false, then the
-     * document is not removed.
-     * 
-     * @return mixed
-     */
-    public function preRemove()
-    {
-        
-    }
-    
-    /**
-     * Gets called after removing.
-     * 
-     * @return mixed
-     */
-    public function postRemove()
-    {
-        
     }
     
     /**
@@ -345,7 +185,7 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
     public function remove(array $options = array())
     {
         // pre-event check
-        if ($this->preRemove() !== false) {
+        if ($this->_preRemove() !== false) {
             $options = array_merge($this->getRemoveOptions(), $options);
             if (!$this->getCollection()->remove($this->toArray(), $options)) {
                 throw new Europa_Mongo_Exception(
@@ -357,7 +197,7 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
             $this->_exists = false;
             
             // post-event
-            $this->postRemove();
+            $this->_postRemove();
         }
         return $this;
     }
@@ -382,223 +222,6 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
     public function getRemoveOptions()
     {
         return $this->_removeOptions;
-    }
-    
-    /**
-     * Returns the current parameter in the iteration.
-     * 
-     * @return mixed
-     */
-    public function current()
-    {
-        return current($this->_data);
-    }
-    
-    /**
-     * Returns the parameter name of the current parameter in the
-     * iteration.
-     * 
-     * @return string
-     */
-    public function key()
-    {
-        return key($this->_data);
-    }
-    
-    /**
-     * Moves the current element to the next in the iteration.
-     * 
-     * @return Europa_Mongo_Document
-     */
-    public function next()
-    {
-        next($this->_data);
-        return $this;
-    }
-    
-    /**
-     * Resets the internal pointer of the parameters in the iteration.
-     * 
-     * @return Europa_Mongo_Document
-     */
-    public function rewind()
-    {
-        reset($this->_data);
-        return $this;
-    }
-    
-    /**
-     * Returns whether or not the iteration can proceed.
-     * 
-     * @return bool
-     */
-    public function valid()
-    {
-        return isset($this->_data[key($this->_data)]);
-    }
-    
-    /**
-     * Allows array-like setting of parameters.
-     * 
-     * @param string $name The name of the parmaeter to set.
-     * @param mixed $value The value of the parameter to set.
-     * @return Europa_Mongo_Document
-     */
-    public function offsetSet($name, $value)
-    {
-        return $this->set($name, $value);
-    }
-    
-    /**
-     * Allows array-like getting of parameters.
-     * 
-     * @param string $name The parameter to get.
-     * @return mixed
-     */
-    public function offsetGet($name)
-    {
-        return $this->get($name);
-    }
-    
-    /**
-     * Array-like way for checking parameter existence.
-     * 
-     * @param string $name THe name of the parameter to check.
-     * @return mixed
-     */
-    public function offsetExists($name)
-    {
-        return $this->has($name);
-    }
-    
-    /**
-     * Array-like way of removing the specified parameter.
-     * 
-     * @param string $name The parameter to remove.
-     * @return Europa_Mongo_Document
-     */
-    public function offsetUnset($name)
-    {
-        return $this->clear($name);
-    }
-    
-    /**
-     * Counts the number of parameters in the document.
-     * 
-     * @return int
-     */
-    public function count()
-    {
-        return count($this->_data);
-    }
-    
-    /**
-     * Sets the specified parameter's value.
-     * 
-     * @param string $name The parameter to set.
-     * @param mixed $value The value to give the parameter.
-     * @return Europa_Mongo_Document
-     */
-    public function set($name, $value)
-    {
-        // get real name
-        $name = $this->_getPropertyFromAlias($name);
-        
-        // only whitelisted properties can be set
-        // if there isn't a whitelist, then it can be set
-        if ($this->_whitelist && !$this->_isWhitelisted($name)) {
-            return $this;
-        }
-        
-        // if the property isn't blacklisted, set it
-        if ($this->_isBlacklisted($name)) {
-            return $this;
-        }
-        
-        // flag the field as modfied
-        $this->_modified[] = $name;
-        
-        // the magic setter method
-        $method = '__set' . $name;
-        
-        // make sure if it's the "_id" that it's a MongoId
-        if ($name === '_id') {
-            $value = $value instanceof MongoId ? $value : new MongoId($value);
-            $this->_data['_id'] = $value;
-        }
-        
-        // call the setter or just set the value
-        if (method_exists($this, $method)) {
-            $this->$method($value);
-        } elseif ($this->_hasOne($name)) {
-            $this->_data[$name] = $this->_getHasOne($name, $value);
-        } elseif ($this->_hasMany($name)) {
-            $this->_data[$name] = $this->_getHasMany($name, $value);
-        } else {
-            $this->_data[$name] = $value;
-        }
-        
-        return $this;
-    }
-    
-    /**
-     * Gets the specified parameter's value.
-     * 
-     * @param string $name The name of the parameter to get.
-     * @return mixed
-     */
-    public function get($name)
-    {
-        // get real name
-        $name = $this->_getPropertyFromAlias($name);
-        
-        // the magic getter method
-        $method = '__get' . $name;
-        
-        // if the method exists, just return it's value
-        if (method_exists($this, $method)) {
-            return $this->$method();
-        }
-        
-        // if the property is set, return it
-        if (isset($this->_data[$name])) {
-            return $this->_data[$name];
-        }
-        
-        return null;
-    }
-    
-    /**
-     * Returns whether or not the specified parameter exists.
-     * 
-     * @param string $name The parameter to check for.
-     * @return bool
-     */
-    public function has($name)
-    {
-        // get real name
-        $name = $this->_getPropertyFromAlias($name);
-        
-        return isset($this->_data[$name]);
-    }
-    
-    /**
-     * Removes the specified parameter.
-     * 
-     * @param string $name The parameter to remove.
-     * @return bool
-     */
-    public function clear($name)
-    {
-        // get real name
-        $name = $this->_getPropertyFromAlias($name);
-        
-        // unset only if set
-        if (isset($this->_data[$name])) {
-            unset($this->_data[$name]);
-        }
-        
-        return $this;
     }
     
     /**
@@ -654,6 +277,7 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
     public function setDb(Europa_Mongo_Db $db)
     {
         $this->_db = $db;
+        $this->setConnection($db->getConnection());
         return $this;
     }
     
@@ -699,6 +323,7 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
     public function setCollection(Europa_Mongo_Collection $collection)
     {
         $this->_collection = $collection;
+        $this->setDb($collection->getDb());
         return $this;
     }
     
@@ -740,233 +365,44 @@ abstract class Europa_Mongo_Document implements Iterator, ArrayAccess, Countable
     }
     
     /**
-     * Sets one or more aliases for a property.
+     * Gets called prior to saving/updating/inserting. If it returns
+     * false, then saving does not continue.
      * 
-     * @param string $name The property name.
-     * @param mixed $aliases A string or array of aliases.
-     * @return Europa_Mongo_Document
+     * @return mixed
      */
-    public function alias($name, $aliases)
+    protected function _preSave()
     {
-        // make sure it's an array
-        if (!isset($this->_aliases[$name])) {
-            $this->_aliases[$name][] = array();
-        }
         
-        // normalize
-        if (!is_array($aliases)) {
-            $aliases = array($aliases);
-        }
+    }
+    
+    /**
+     * Gets called after saving.
+     * 
+     * @return mixed
+     */
+    protected function _postSave()
+    {
         
-        // apply aliases
-        foreach ($aliases as $alias) {
-            $this->_aliases[$name][] = $alias;
-        }
+    }
+    
+    /**
+     * Gets called prior to removing. If it returns false, then the
+     * document is not removed.
+     * 
+     * @return mixed
+     */
+    protected function _preRemove()
+    {
         
-        // chain
-        return $this;
     }
     
     /**
-     * Converts the class to a mongo array that is safe for passing
-     * to a mongo query.
+     * Gets called after removing.
      * 
-     * @return array
+     * @return mixed
      */
-    public function toArray()
+    protected function _postRemove()
     {
-        $array = array();
-        foreach ($this->_data as $name => $value) {
-            // handle has one
-            if ($this->_hasOne($name)) {
-                $array[$name] = new MongoId($value->_id);
-                continue;
-            }
-            
-            // handle has many
-            if ($this->_hasMany($name)) {
-                $array[$name] = array();
-                $class = $this->_hasMany[$name];
-                $class = new $class;
-                foreach ($value as $ref) {
-                    $array[$name] = MongoDBRef::create(
-                        $class->getCollection()->getName(),
-                        $ref->_id,
-                        $class->getDb()->getName()
-                    );
-                }
-                continue;
-            }
-            
-            // handle normal values
-            $array[$name] = $value;
-        }
-        return array_merge($array, $this->_modifiers);
-    }
-    
-    /**
-     * Applies a has one relationship to the document.
-     * 
-     * @param string $name The name of the property.
-     * @param string $class The name of the class to use.
-     * @return Europa_Mongo_Document
-     */
-    public function hasOne($name, $class = null)
-    {
-        $this->_hasOne[$name] = $class ? $class : $name;
-        return $this;
-    }
-    
-    /**
-     * Applies a has many relationship to the document.
-     * 
-     * @param string $name The name of the property.
-     * @param string $class The name of the class to use.
-     * @return Europa_Mongo_Document
-     */
-    public function hasMany($name, $class = null)
-    {
-        $this->_hasMany[$name] = $class ? $class : $name;
-        return $this;
-    }
-    
-    /**
-     * Whitelists a particular property.
-     * 
-     * @param string $names The property to whitelist.
-     * @return Europa_Mongo_Document
-     */
-    public function whitelist($names)
-    {
-        if (!is_array($names)) {
-            $names = array($names);
-        }
-        foreach ($names as $name) {
-            $name = $this->_getPropertyFromAlias($name);
-            $this->_whitelist[] = $name;
-        }
-        return $this;
-    }
-    
-    /**
-     * Blacklists a particular property.
-     * 
-     * @param string $names The property to blacklist.
-     * @return Europa_Mongo_Document
-     */
-    public function blacklist($names)
-    {
-        if (!is_array($names)) {
-            $names = array($names);
-        }
-        foreach ($names as $name) {
-            $name = $this->_getPropertyFromAlias($name);
-            $this->_blacklist[] = $name;
-        }
-        return $this;
-    }
-    
-    /**
-     * Returns whether or not the document has changed.
-     * 
-     * @return bool
-     */
-    public function isModified($field = null)
-    {
-        if ($field) {
-            return in_array($field, $this->_modified);
-        }
-        return count($this->_modified);
-    }
-    
-    /**
-     * Returns the name of the property that matches the alias. If no
-     * matching alias is found, then the alias is just returned.
-     * 
-     * @param string $alias The alias to search for.
-     * @return string
-     */
-    protected function _getPropertyFromAlias($alias)
-    {
-        foreach ($this->_aliases as $name => $aliases) {
-            if (in_array($alias, $aliases)) {
-                return $name;
-            }
-        }
-        return $alias;
-    }
-    
-    /**
-     * Checks to see if a particular property is whitelisted.
-     * 
-     * @param string $name The name to check for.
-     * @return bool
-     */
-    protected function _isWhitelisted($name)
-    {
-        $name = $this->_getPropertyFromAlias($name);
-        return in_array($name, $this->_whitelist);
-    }
-    
-    /**
-     * Checks to see if a particular property is blacklisted.
-     * 
-     * @param string $name The name to check for.
-     * @return bool
-     */
-    protected function _isBlacklisted($name)
-    {
-        $name = $this->_getPropertyFromAlias($name);
-        return in_array($name, $this->_blacklist);
-    }
-    
-    /**
-     * Returns the actual document of the specified has-one.
-     * 
-     * @param string $name The name of the relationship.
-     * @param mixed $value
-     * @return Europa_Mongo_Document
-     */
-    protected function _getHasOne($name, MongoId $value)
-    {
-        $class = $this->_hasOne[$name];
-        $class = new $class;
-        return $class->fill($class->getCollection()->findOne(array('_id' => $value)));
-    }
-    
-    /**
-     * Returns the actual cursor of the specified has-many.
-     * 
-     * @param string $name The name of the relationship.
-     * @param mixed $value
-     * @return Europa_Mongo_Document
-     */
-    protected function _getHasMany($name, Europa_Mongo_Cursor $value)
-    {
-        $class = $this->_hasMany[$name];
-        $class = new $class;
-        return $class->getCollection()->find(array('_id' => array('$in' => array())));
-    }
-    
-    /**
-     * Returns whether or not the specified has-one relationship exists.
-     * 
-     * @param string $name The relationship name.
-     * @return bool
-     */
-    protected function _hasOne($name)
-    {
-        return in_array($name, $this->_hasOne);
-    }
-    
-    /**
-     * Returns whether or not the specified has-many relationship exists.
-     * 
-     * @param string $name The relationship name.
-     * @return bool
-     */
-    protected function _hasMany($name)
-    {
-        return in_array($name, $this->_hasMany);
+        
     }
 }
