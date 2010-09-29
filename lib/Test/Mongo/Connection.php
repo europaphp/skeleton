@@ -13,4 +13,25 @@ class Test_Mongo_Connection extends Europa_Unit_Test
         }
         return true;
     }
+    
+    public function testDefaultConnectionUponConstruction()
+    {
+        return Europa_Mongo_Connection::hasDefault();
+    }
+    
+    public function testConnectionSetting()
+    {
+        Europa_Mongo_Connection::set('testconnection', new Europa_Mongo_Connection);
+        return Europa_Mongo_Connection::has('testconnection');
+    }
+    
+    public function testGetDb()
+    {
+        return $this->_mongo->testdb instanceof Europa_Mongo_Db;
+    }
+    
+    public function tearDown()
+    {
+        $this->_mongo->testdb->drop();
+    }
 }

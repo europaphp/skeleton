@@ -86,43 +86,6 @@ class Europa_Mongo_Connection extends Mongo
     }
     
     /**
-     * Returns whether or not the specified connection exists.
-     * 
-     * @param string $name
-     * @return bool
-     */
-    public static function exists($name)
-    {
-        return isset(self::$_connections[$name]);
-    }
-    
-    /**
-     * Returns the specified connection.
-     * 
-     * @param string $name
-     * @return Europa_Mongo_Connection
-     */
-    public static function get($name)
-    {
-        if (!self::exists($name)) {
-            throw new Europa_Mongo_Exception(
-                'Cannot get connection ' . $name . '. It doesn\'t exist!'
-            );
-        }
-        return self::$_connections[$name];
-    }
-    
-    /**
-     * Returns whether or not there is a default connection.
-     * 
-     * @return bool
-     */
-    public static function hasDefault()
-    {
-        return self::$_defaultConnection instanceof self;
-    }
-    
-    /**
      * Sets the specified connection.
      * 
      * @param string $name
@@ -133,6 +96,33 @@ class Europa_Mongo_Connection extends Mongo
     {
         self::$_connections[$name] = $connection;
         return $connection;
+    }
+    
+    /**
+     * Returns the specified connection.
+     * 
+     * @param string $name
+     * @return Europa_Mongo_Connection
+     */
+    public static function get($name)
+    {
+        if (!self::has($name)) {
+            throw new Europa_Mongo_Exception(
+                'Cannot get connection ' . $name . '. It doesn\'t exist!'
+            );
+        }
+        return self::$_connections[$name];
+    }
+    
+    /**
+     * Returns whether or not the specified connection exists.
+     * 
+     * @param string $name
+     * @return bool
+     */
+    public static function has($name)
+    {
+        return isset(self::$_connections[$name]);
     }
     
     /**
@@ -155,6 +145,16 @@ class Europa_Mongo_Connection extends Mongo
     public static function getDefault()
     {
         return self::$_defaultConnection;
+    }
+    
+    /**
+     * Returns whether or not there is a default connection.
+     * 
+     * @return bool
+     */
+    public static function hasDefault()
+    {
+        return self::getDefault() instanceof self;
     }
     
     /**

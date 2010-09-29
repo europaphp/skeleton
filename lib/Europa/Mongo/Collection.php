@@ -72,21 +72,28 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      * 
      * @var int|null
      */
-    private $_limit = null;
+    private $_limit = 0;
     
     /**
      * The results to skip.
      * 
      * @var int|null
      */
-    private $_skip = null;
+    private $_skip = 0;
     
     /**
      * The current page of results.
      * 
      * @var int|null
      */
-    private $_page = null;
+    private $_page = 0;
+    
+    /**
+     * Whether or not to re-execute the query when accessed.
+     * 
+     * @var bool
+     */
+    private $_refresh = false;
     
     /**
      * Constructs a new collection and sets defaults.
@@ -112,6 +119,8 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      */
     public function where($field, $value)
     {
+        $this->refresh();
+        
         // if the value is an array then it's an operator
         if (is_array($value)) {
             // make sure the value is an array, or it's overwritten
@@ -158,8 +167,8 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      */
     public function limit($limit)
     {
-        $this->_limit = is_null($limit) ? $limit : (int) $limit;
-        return $this;
+        $this->_limit = (int) $limit;
+        return $this->refresh();
     }
     
     /**
@@ -170,9 +179,9 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      */
     public function skip($offset)
     {
-        $this->_page = null;
-        $this->_skip = is_null($offset) ? $offset : (int) $offset;
-        return $this;
+        $this->_page = 0;
+        $this->_skip = (int) $offset;
+        return $this->refresh();
     }
     
     /**
@@ -183,9 +192,9 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      */
     public function page($page)
     {
-        $this->_page = is_null($page) ? $page : (int) $page;
-        $this->_skip = null;
-        return $this;
+        $this->_page = (int) $page;
+        $this->_skip = 0;
+        return $this->refresh();
     }
     
     /**
@@ -196,24 +205,24 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      */
     public function getLimit()
     {
-        if (is_null($this->_limit)) {
-            return $this->count();
+        if ($this->_limit === 0) {
+            return parent::count();
         }
         return $this->_limit;
     }
     
     /**
-     * Returns the starting offset.
+     * Returns the offset no matter of skip or page was set.
      * 
      * @return int
      */
-    public function getStartOffset()
+    public function getOffset()
     {
-        if (!is_null($this->_skip)) {
+        if ($this->_skip > 0) {
             return $this->_skip;
         }
         
-        if (!is_null($this->_page)) {
+        if ($this->_page > 0) {
             $limit = $this->getLimit();
             return $this->_page * $limit - $limit;
         }
@@ -222,16 +231,30 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
     }
     
     /**
-     * Returns the ending offset.
+     * Returns the starting offset. Generally, this is 1
+     * greater than the return value of getOffset.
+     * 
+     * @return int
+     */
+    public function getStartOffset()
+    {
+        return $this->getOffset() + 1;
+    }
+    
+    /**
+     * Returns the ending offset. This is generally the
+     * limit amount on top of the starting offset up to
+     * the total number of results.
      * 
      * @return int
      */
     public function getEndOffset()
     {
-        $start = $this->getStartOffset();
-        $limit = $this->getLimit();
-        $count = $this->count();
-        return $limit < $count ? $limit : $count - $start;
+        $start  = $this->getOffset();
+        $limit  = $this->getLimit();
+        $count  = $this->total();
+        $offset = $start + $limit;
+        return $offset < $count ? $offset : $count;
     }
     
     /**
@@ -246,7 +269,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
         if (!$limit || !$start) {
             return 1;
         }
-        return $limit > $start ? ceil($limit / $start) + 1 : ceil($start / $limit) + 1;
+        return (int) ($limit > $start ? ceil($limit / $start) : ceil($start / $limit));
     }
     
     /**
@@ -256,7 +279,19 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      */
     public function getTotalPages()
     {
-        return ceil($this->count() / $this->getLimit());
+        $limit  = $this->getLimit();
+        $total  = $this->total();
+        $offset = $this->getOffset();
+        
+        if ($limit) {
+            return (int) ceil($total / $limit);
+        }
+        
+        if ($offset) {
+            return 2;
+        }
+        
+        return 1;
     }
     
     /**
@@ -267,7 +302,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      * @param int $range
      * @return int
      */
-    public function getStartPage($range)
+    public function getStartPage($range = 0)
     {
         $page = $this->getPage();
         if ($range >= $page) {
@@ -284,7 +319,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      * @param int $range
      * @return int
      */
-    public function getEndPage($range)
+    public function getEndPage($range = 0)
     {
         $sum   = $this->getPage() + $range;
         $total = $this->getTotalPages();
@@ -295,19 +330,21 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
     }
     
     /**
-     * Overridden to provide implementation for overridden limiting and
-     * skipping.
+     * Counts the current number of items in the iteration.
      * 
-     * @param bool $foundOnly Whether or not to send limit/skip info to count.
      * @return int
      */
-    public function count($foundOnly = false)
+    public function count()
     {
-        if ($foundOnly) {
-            $this->getCursor()->limit($this->getLimit());
-            $this->getCursor()->skip($this->getStartoffset());
-        }
-        return $this->getCursor()->count($foundOnly);
+        return parent::count($this->_query, $this->getLimit(), $this->getOffset());
+    }
+    
+    /**
+     * Counts the total in the collection with the query applied.
+     */
+    public function total()
+    {
+        return parent::count($this->_query);
     }
     
     /**
@@ -338,18 +375,30 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
         return $array;
     }
     
+    /**
+     * Executes the current query.
+     * 
+     * @param array $query
+     * @param array $fields
+     * @return Europa_Mongo_Colelction
+     */
     public function execute(array $query = array(), array $fields = array())
     {
         // build the query
-        $query = array_merge($this->_lastQuery, $this->_query, $query);
+        $query  = array_merge($this->_query, $query);
+        $fields = array_merge($this->_fields, $fields);
+        
+        // apply it to the cursor
+        $this->_cursor = $this->find($query, $fields)->limit($this->getLimit())->skip($this->getOffset());
+        
+        // rewind to make sure the cursor is reset
+        $this->_cursor->rewind();
         
         // set the last query as to re-use any settings
         $this->_lastQuery = $query;
         
-        // apply it to the cursor
-        $this->_cursor = $this->find($this->_query, $this->_fields);
-        
-        return $this;
+        // mark as refreshed and return the collection
+        return $this->stop();
     }
     
     /**
@@ -359,7 +408,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      */
     final public function getCursor()
     {
-        if (!$this->_cursor) {
+        if (!$this->_cursor || $this->hasPendingRefresh()) {
             $this->execute();
         }
         return $this->_cursor;
@@ -372,13 +421,10 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      */
     final public function current()
     {
-        // get the current element
         $current = $this->getCursor()->current();
-        
-        // if a class is specified, instantiate it, fill it and return it
-        $class = $this->_class;
-        $class = new $class;
-        return $class->setConnection($this->getDb()->getConnection())->fill($current);
+        $class   = $this->_class;
+        $class   = new $class;
+        return $class->setCollection($this)->fill($current);
     }
     
     /**
@@ -510,6 +556,38 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
     public function getPosition()
     {
         return $this->_position;
+    }
+    
+    /**
+     * Sets the refresh flag to true.
+     * 
+     * @return Europa_Mongo_Collection
+     */
+    public function refresh()
+    {
+        $this->_refresh = true;
+        return $this;
+    }
+    
+    /**
+     * Sets the refresh flag to false.
+     * 
+     * @return Europa_Mongo_Collection
+     */
+    public function stop()
+    {
+        $this->_refresh = false;
+        return $this;
+    }
+    
+    /**
+     * Whether or not the refresh flag is set to true.
+     * 
+     * @return bool
+     */
+    protected function hasPendingRefresh()
+    {
+        return $this->_refresh;
     }
     
     /**
