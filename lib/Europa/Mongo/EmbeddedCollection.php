@@ -25,11 +25,13 @@ class Europa_Mongo_EmbeddedCollection implements Europa_Mongo_Accessible
      * @param array $documents
      * @return Europa_Mongo_DocumentSet
      */
-    public function __construct($instance, array $documents = array())
+    public function __construct($instance, $documents = array())
     {
-        foreach ($documents as $document) {
-            $document = new $instance($document);
-            $this->_set($document);
+        if (is_array($documents) || is_object($documents)) {
+            foreach ($documents as $document) {
+                $document = new $instance($document);
+                $this->_set($document);
+            }
         }
     }
     
@@ -82,7 +84,7 @@ class Europa_Mongo_EmbeddedCollection implements Europa_Mongo_Accessible
      */
     public function valid()
     {
-        return !is_null($this->current());
+        return $this->current() !== false;
     }
     
     /**
@@ -156,7 +158,7 @@ class Europa_Mongo_EmbeddedCollection implements Europa_Mongo_Accessible
      */
     public function save(array $options = array())
     {
-        foreach ($item as $document) {
+        foreach ($this as $document) {
             if ($document instanceof Europa_Mongo_Document) {
                 $document->save($options);
             }
@@ -174,7 +176,7 @@ class Europa_Mongo_EmbeddedCollection implements Europa_Mongo_Accessible
      */
     public function remove(array $options = array())
     {
-        foreach ($item as $offset => $document) {
+        foreach ($this as $offset => $document) {
             if ($document instanceof Europa_Mongo_Document) {
                 $document->remove($options);
             }

@@ -263,7 +263,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
         $name = $this->_getPropertyFromAlias($name);
         
         // filter the value
-        $method = '_set' . $name;
+        $method = '__set' . $name;
         if (method_exists($this, $method)) {
             $value = $this->$method($value);
         }
@@ -274,7 +274,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
             $value = new $class($value);
         } elseif (isset($this->_hasMany[$name])) {
             $class = $this->_hasMany[$name];
-            $class = new Europa_Mongo_EmbeddedCollection($class, $value);
+            $value = new Europa_Mongo_EmbeddedCollection($class, $value);
         }
         
         // set the value
@@ -300,12 +300,28 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
         $name = $this->_getPropertyFromAlias($name);
         
         // filter the value
-        $method = '_get' . $name;
+        $method = '__get' . $name;
         if (method_exists($this, $method)) {
             return $this->$method($value);
         }
         
-        return isset($this->_data[$name]) ? $this->_data[$name] : null;
+        // if the value exists, return it
+        if (isset($this->_data[$name])) {
+            return $this->_data[$name];
+        }
+        
+        // handle singular relations
+        if (isset($this->_hasOne[$name])) {
+            $class = $this->_hasOne[$name];
+            return new $class;
+        }
+        
+        // handle multiple relations
+        if (isset($this->_hasMany[$name])) {
+            return new Europa_Mongo_EmbeddedCollection($this->_hasMany[$name]);
+        }
+        
+        return null;
     }
     
     /**
@@ -419,19 +435,32 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     {
         $array = array();
         foreach ($this->_data as $name => $item) {
+            // force a mongo id to be an instance of MongoId
+            if ($name === '_id') {
+                $array[$name] = new MongoId((string) $item);
+                continue;
+            }
+            
             // handle has one
             if (isset($this->_hasOne[$name])) {
                 if ($item instanceof Europa_Mongo_EmbeddedDocument) {
                     $array[$name] = $item->toMongoArray();
                 } else {
-                    $array[$name] = new MongoId($item->_id);
+                    $array[$name] = new MongoId((string) $item->_id);
                 }
                 continue;
             }
             
             // handle has many
             if (isset($this->_hasMany[$name])) {
-                $array[$name] = $item->toMongoArray();
+                $array[$name] = array();
+                foreach ($item as $subItem) {
+                    if ($subItem instanceof Europa_Mongo_EmbeddedDocument) {
+                        $array[$name][] = $subItem->toMongoArray();
+                    } else {
+                        $array[$name][] = new MongoId((string) $subItem->_id);
+                    }
+                }
                 continue;
             }
             
@@ -451,7 +480,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
         if ($field) {
             return in_array($field, $this->_modified);
         }
-        return count($this->_modified);
+        return count($this->_modified) > 0;
     }
     
     /**

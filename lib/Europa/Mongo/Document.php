@@ -109,37 +109,37 @@ abstract class Europa_Mongo_Document extends Europa_Mongo_DocumentAbstract
      */
     public function save(array $options = array())
     {
-        // if it's not modified we don't do anything
-        if (!$this->isModified()) {
+        // if it exists and is not modified we don't do anything
+        if ($this->exists() && !$this->isModified()) {
+            var_dump('arg');
             return $this;
         }
         
         // only proceed if preSave is not false
         if ($this->_preSave() !== false) {
-            $options = array_merge($this->getSaveOptions(), $options);
+            $options = array_merge($this->getSaveOptions(), $options, array('upsert' => true));
             
             // set a default id if it doesn't exist
             if (!$this->_id) {
                 $this->_id = new MongoId;
             }
             
-            // force upsert
-            $options['upsert'] = true;
-            
-            // save relationships
+            // save referenes first
             foreach ($this as $item) {
                 if (
-                    $item instanceof Europa_Mongo_MainDocument
-                    || $item instanceof Europa_Mongo_DocumentSet
+                    $item instanceof Europa_Mongo_Document
+                    || $item instanceof Europa_Mongo_EmbeddedCollection
                 ) {
                     $item->save($options);
                 }
             }
             
-            // save and throw an exception if it can't be saved
-            if (!$this->getCollection()->update(array('_id' => $this->_id), $this->toMongoArray(), $options)) {
+            try {
+                $this->getCollection()->update(array('_id' => $this->_id), $this->toMongoArray(), $options);
+            } catch (Exception $e) {
                 throw new Europa_Mongo_Exception(
-                    'Could not save ' . get_class($this) . ' to the database.'
+                    'Could not save ' . get_class($this) . ' to the database with message: '
+                    . $e->getMessage()
                 );
             }
             
@@ -225,96 +225,6 @@ abstract class Europa_Mongo_Document extends Europa_Mongo_DocumentAbstract
     }
     
     /**
-     * Sets a specific connection to use.
-     * 
-     * @param Europa_Mongo_Connection $connection The connection to use.
-     * @return Europa_Mongo_Document
-     */
-    public function setConnection(Europa_Mongo_Connection $connection)
-    {
-        $this->_connection = $connection;
-        return $this;
-    }
-    
-    /**
-     * Returns the connection to use. If no connection is set, then it
-     * attempts to create one using the default settings. If a
-     * connection cannot be established, then an exception is thrown.
-     * 
-     * @return Europa_Mongo_Connection
-     */
-    public function getConnection()
-    {
-        // if no conenction link exists, try to create a default one
-        if (!$this->_connection) {
-            try {
-                $this->_connection = new Europa_Mongo_Connection;
-            } catch (Europa_Mongo_Exception $e) {
-                $class = get_class($this);
-                throw new Europa_Mongo_Exception(
-                    'Could not create a default connection for '
-                    . $class
-                    . '. Please either set a connection using '
-                    . $class
-                    . '->setConnection(Europa_Mongo_Connection $connection) '
-                    . 'or return one by overriding '
-                    . $class
-                    . '->getConnection(), to return the desired connection. '
-                    . 'Message: '
-                    . $e->getMessage()
-                );
-            }
-        }
-        return $this->_connection;
-    }
-    
-    /**
-     * Sets the database to use.
-     * 
-     * @param Europa_Mongo_Db $db The database to use.
-     * @return Europa_Mongo_Database
-     */
-    public function setDb(Europa_Mongo_Db $db)
-    {
-        $this->_db = $db;
-        $this->setConnection($db->getConnection());
-        return $this;
-    }
-    
-    /**
-     * Returns the database to use. If no database is set, then it
-     * attempts to create an instance of a default one.
-     * 
-     * @return Europa_Mongo_Db
-     */
-    public function getDb()
-    {
-        // if not database link exists, create a default one
-        if (!$this->_db) {
-            $parts = explode('_', get_class($this));
-            $parts[0][0] = strtolower($parts[0][0]);
-            try {
-                $this->_db = new Europa_Mongo_Db($this->getConnection(), strtolower($parts[0]));
-            } catch (Europa_Mongo_Exception $e) {
-                $class = get_class($this);
-                throw new Europa_Mongo_Exception(
-                    'Could not create a default database for '
-                    . $class
-                    . '. Please either set a database using '
-                    . $class
-                    . '->setDb(Europa_Mongo_Db $db) '
-                    . 'or return one by overriding '
-                    . $class
-                    . '->getDb(), to return the desired database. '
-                    . 'Message: '
-                    . $e->getMessage()
-                );
-            }
-        }
-        return $this->_db;
-    }
-    
-    /**
      * Sets the collection to use.
      * 
      * @param Europa_Mongo_Collection $collection The collection to use.
@@ -323,7 +233,6 @@ abstract class Europa_Mongo_Document extends Europa_Mongo_DocumentAbstract
     public function setCollection(Europa_Mongo_Collection $collection)
     {
         $this->_collection = $collection;
-        $this->setDb($collection->getDb());
         return $this;
     }
     
@@ -334,17 +243,21 @@ abstract class Europa_Mongo_Document extends Europa_Mongo_DocumentAbstract
      */
     public function getCollection()
     {
-        // if no collection link exists, create a default one
+        // if no collection link exists, attempt to auto-detect
         if (!$this->_collection) {
             $collection = get_class($this);
             $parts = explode('_', $collection);
             foreach ($parts as &$part) {
                 $part[0] = strtolower($part[0]);
             }
-            array_shift($parts);
+            
+            $connection = Europa_Mongo_Connection::getDefault();
+            $connection = $connection ? $connection : new Europa_Mongo_Connection;
+            $database   = new Europa_Mongo_Db($connection, array_shift($parts));
             $collection = implode('.', $parts);
+            
             try {
-                $this->_collection = new Europa_Mongo_Collection($this->getDb(), $collection);
+                $this->_collection = new Europa_Mongo_Collection($database, $collection);
             } catch (Europa_Mongo_Exception $e) {
                 $class = get_class($this);
                 throw new Europa_Mongo_Exception(
