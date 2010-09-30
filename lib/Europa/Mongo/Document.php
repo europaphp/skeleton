@@ -127,7 +127,7 @@ abstract class Europa_Mongo_Document extends Europa_Mongo_DocumentAbstract
             $options['upsert'] = true;
             
             // save relationships
-            foreach ($this->_data as $item) {
+            foreach ($this as $item) {
                 if (
                     $item instanceof Europa_Mongo_MainDocument
                     || $item instanceof Europa_Mongo_DocumentSet
@@ -187,7 +187,7 @@ abstract class Europa_Mongo_Document extends Europa_Mongo_DocumentAbstract
         // pre-event check
         if ($this->_preRemove() !== false) {
             $options = array_merge($this->getRemoveOptions(), $options);
-            if (!$this->getCollection()->remove($this->toArray(), $options)) {
+            if (!$this->getCollection()->remove($this->toMongoArray(), $options)) {
                 throw new Europa_Mongo_Exception(
                     'Could not remove ' . get_class($this) . ' from the database.'
                 );

@@ -336,7 +336,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      */
     public function count()
     {
-        return parent::count($this->_query, $this->getLimit(), $this->getOffset());
+        return $this->getCursor()->count(true);
     }
     
     /**
@@ -344,7 +344,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      */
     public function total()
     {
-        return parent::count($this->_query);
+        return $this->getCursor()->count(false);
     }
     
     /**
@@ -478,13 +478,14 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      */
     final public function offsetSet($offset, $document)
     {
-        if (!$document instanceof Europa_Mongo_MainDocument) {
+        $class = $this->getClass();
+        if (!$document instanceof $class) {
             throw new Europa_Mongo_Exception(
-                'Only instances of Europa_Mongo_MainDocument can be applied to a Europa_Mongo_Collection.'
+                'Only instances of ' . $this->getClass() . ' can be applied to collection ' . $this->getName() . '.'
             );
         }
         $document->setCollection($this)->save();
-        return $this->execute();
+        return $this->refresh();
     }
     
     /**
@@ -521,7 +522,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
     final public function offsetUnset($offset)
     {
         $this->offsetGet($offset)->remove();
-        return $this;
+        return $this->refresh();
     }
     
     /**
@@ -585,7 +586,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      * 
      * @return bool
      */
-    protected function hasPendingRefresh()
+    public function hasPendingRefresh()
     {
         return $this->_refresh;
     }
@@ -601,5 +602,15 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
     {
         $this->_class = (string) $class;
         return $this;
+    }
+    
+    /**
+     * Returns the class that each document must derive from.
+     * 
+     * @return string
+     */
+    public function getClass()
+    {
+        return $this->_class;
     }
 }
