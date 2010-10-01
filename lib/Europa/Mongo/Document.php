@@ -111,7 +111,6 @@ abstract class Europa_Mongo_Document extends Europa_Mongo_DocumentAbstract
     {
         // if it exists and is not modified we don't do anything
         if ($this->exists() && !$this->isModified()) {
-            var_dump('arg');
             return $this;
         }
         
