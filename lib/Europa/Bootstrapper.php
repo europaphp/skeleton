@@ -13,8 +13,8 @@
 abstract class Europa_Bootstrapper
 {
     /**
-     * Goes through each method in the extending class and calls it
-     * in them in the order in which they were defined.
+     * Goes through each method in the extending class and calls them
+     * in the order in which they were defined.
      * 
      * @return void
      */
@@ -23,7 +23,7 @@ abstract class Europa_Bootstrapper
         $class = new ReflectionClass($this);
         foreach ($class->getMethods() as $method) {
             $name = $method->getName();
-            if ($name === __FUNCTION__) {
+            if ($name === __FUNCTION__ || strpos($name, '__') === 0) {
                 continue;
             }
             $this->$name();

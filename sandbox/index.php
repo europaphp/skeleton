@@ -14,17 +14,17 @@ Europa_Loader::registerAutoload();
 Europa_Loader::addPath($base . 'app/controllers');
 Europa_Loader::addPath($base . 'app/views');
 Europa_Loader::addPath($base . 'app/helpers');
-Europa_Loader::addPath($base . '../lib');
 
 // dispatch the request catching any exceptions
 try {
-	$router = new Europa_Router(new Europa_Request_Http);
+    $request = new Europa_Request_Http;
+	$router  = new Europa_Router();
 	$router['default'] = new Europa_Route_Regex(
 		'\??/?(?<controller>[^&]+)?',
 		'/?/:controller',
 		array('controller' => 'index')
 	);
-	echo $router->dispatch();
+	echo $request->setRouter($router)->dispatch();
 } catch (Exception $e) {
 	// if any errors occur, force the request to the error controller
 	$europa = new Europa_Request_Http;

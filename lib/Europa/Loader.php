@@ -135,12 +135,14 @@ class Europa_Loader
     }
     
     /**
-     * Registers the auto-load handler.
+     * Registers the auto-load handler and automatically registers the
+     * Europa install path to the load paths.
      * 
      * @return void
      */
     public static function registerAutoload()
     {
         spl_autoload_register(array('Europa_Loader', 'loadClass'));
+        Europa_Loader::addPath(dirname(__FILE__) . '/../');
     }
 }

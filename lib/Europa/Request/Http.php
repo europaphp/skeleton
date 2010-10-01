@@ -46,12 +46,10 @@ class Europa_Request_Http extends Europa_Request
             return $uri;
         }
         
-        // check for a router/route
-        if ($this->_router) {
-            $route = $this->_router->getRoute($uri);
-            if ($route) {
-                $uri = $route->reverse($params);
-            }
+        // check for a router/route and use it'a parameters if found
+        $router = $this->getRouter();
+        if ($router && $route = $router->getRoute($uri)) {
+            $uri = $route->reverse($params);
         }
         
         // make consistent

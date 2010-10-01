@@ -84,7 +84,7 @@ abstract class Europa_Request
      * @param Europa_Router $router The router to bind.
      * @return Europa_Request
      */
-    public function setRouter(Europa_Router $router)
+    public function setRouter(Europa_Router $router = null)
     {
         $this->_router = $router;
         return $this;
@@ -101,25 +101,7 @@ abstract class Europa_Request
     }
     
     /**
-     * Processes routes against the request.
-     * 
-     * @return Europa_Request
-     */
-    public function route()
-    {
-        $params = $this->_router->query($this);
-        if ($params === false) {
-            throw new Europa_Request_Exception(
-                'Unable to match a route.',
-                Europa_Request_Exception::NO_ROUTE_MATCHED
-            );
-        }
-        return $this->setParams($params);
-    }
-    
-    /**
-     * Dispatches the request to the appropriate controller/action combo.
-     * Invoking dispatching assumes routing was performed.
+     * Directly dispatches the request
      * 
      * @return Europa_Controller
      */
@@ -127,6 +109,18 @@ abstract class Europa_Request
     {
         // register the instance in the stack so it can be easily found
         self::$_stack[] = $this;
+        
+        // route if a router was set
+        if ($this->_router) {
+            $params = $this->_router->query($this);
+            if ($params === false) {
+                throw new Europa_Request_Exception(
+                    'Unable to match a route.',
+                    Europa_Request_Exception::NO_ROUTE_MATCHED
+                );
+            }
+            $this->setParams($params);
+        }
         
         // routing information
         $controller = $this->formatController();
