@@ -14,7 +14,8 @@ class Test_Mongo_Collection extends Europa_Unit_Test
         for ($i = 1; $i <= 10; $i++) {
             $this->_db->collectiontest->insert(
                 array(
-                    'field' => 'val' . $i
+                    'field'      => 'val' . $i,
+                    'otherfield' => 'otherval' . $i
                 )
             );
         }
@@ -115,6 +116,48 @@ class Test_Mongo_Collection extends Europa_Unit_Test
         return $this->_db->collectiontest->limit(5)->count() === 5;
     }
     
+    public function testSelectOneField()
+    {
+        $coll = $this->_db->collectiontest;
+        $coll = $coll->select('otherfield')->where('field', 'val1');
+        
+        return !isset($coll[0]->field) && $coll[0]->otherfield === 'otherval1';
+    }
+    
+    public function testSelectAllFields()
+    {
+        // first we try and select only one field
+        $coll = $this->_db->collectiontest;
+        $coll = $coll->select('otherfield')->where('field', 'val1');
+        
+        // nah wait, what if we want all fields
+        $coll->select();
+        
+        return isset($coll[0]->field) && isset($coll[0]->otherfield);
+    }
+    
+    public function testSetLimit()
+    {
+        $coll = $this->_db->collectiontest;
+        $coll->limit(5);
+        return $coll->limit() === 5;
+    }
+    
+    public function testSetSkip()
+    {
+        $coll = $this->_db->collectiontest;
+        $coll->skip(2);
+        return $coll->skip() === 2;
+    }
+    
+    public function testSetPage()
+    {
+        $coll = $this->_db->collectiontest;
+        $coll->limit(10);
+        $coll->page(2);
+        return $coll->page() === 2;
+    }
+    
     public function testSkip()
     {
         $page = $this->_db->collectiontest->limit(1)->skip(2);
@@ -127,77 +170,6 @@ class Test_Mongo_Collection extends Europa_Unit_Test
         return $page[0]->field === 'val6';
     }
     
-    public function testGetLimit()
-    {
-        return $this->_db->collectiontest->limit(7)->getLimit() === 7
-            && $this->_db->collectiontest->limit(0)->getLimit() === 10;
-    }
-    
-    public function testGetOffsetWithSkip()
-    {
-        return $this->_db->collectiontest->limit(2)->skip(2)->getOffset() === 2;
-    }
-    
-    public function testGetOffsetWithPage()
-    {
-        return $this->_db->collectiontest->limit(3)->page(3)->getOffset() === 6;
-    }
-    
-    public function testGetStartOffsetWithSkip()
-    {
-        return $this->_db->collectiontest->skip(5)->getStartOffset() === 6;
-    }
-    
-    public function testGetStartoffsetWithLimitAndPage()
-    {
-        return $this->_db->collectiontest->limit(3)->page(3)->getStartOffset() === 7;
-    }
-    
-    public function testGetEndOffsetWithLimitLessThanCount()
-    {
-        return $this->_db->collectiontest->limit(5)->getEndOffset() === 5;
-    }
-    
-    public function testGetEndOffsetWithLimitAndPage()
-    {
-        return $this->_db->collectiontest->limit(4)->page(2)->getEndOffset() === 8;
-    }
-    
-    public function testGetPage()
-    {
-        return $this->_db->collectiontest->limit(5)->skip(2)->getPage() === 2;
-    }
-    
-    public function testGetTotalPagesWithLimit()
-    {
-        return $this->_db->collectiontest->limit(3)->getTotalPages() === 4;
-    }
-    
-    public function testGetTotalPagesWithNoLimit()
-    {
-        return $this->_db->collectiontest->getTotalPages() === 1;
-    }
-    
-    public function testGetStartPageWithLimit()
-    {
-        return $this->_db->collectiontest->limit(3)->skip(7)->getStartPage(1) === 2;
-    }
-    
-    public function testGetStartPageWithNoLimit()
-    {
-        return $this->_db->collectiontest->skip(7)->getStartPage() === 2;
-    }
-    
-    public function testGetEndPageWithLimit()
-    {
-        return $this->_db->collectiontest->limit(3)->skip(7)->getEndPage(1) === 4;
-    }
-    
-    public function testGetEndPageWithNoLimit()
-    {
-        return $this->_db->collectiontest->skip(7)->getEndPage() === 2;
-    }
-    
     public function testCount()
     {
         return $this->_db->collectiontest->limit(1)->count() === 1;
@@ -206,6 +178,11 @@ class Test_Mongo_Collection extends Europa_Unit_Test
     public function testTotal()
     {
         return $this->_db->collectiontest->limit(2)->page(3)->total() === 10;
+    }
+    
+    public function testPages()
+    {
+        return $this->_db->collectiontest->limit(3)->pages() === 4;
     }
     
     public function testToArray()

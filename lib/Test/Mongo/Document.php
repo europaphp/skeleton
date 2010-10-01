@@ -5,7 +5,7 @@ class Test_Mongo_Document extends Europa_Unit_Test
     public function tearDown()
     {
         $obj = new TestDb_TestDoc;
-        return $obj->getCollection()->getDb()->drop();
+        $obj->getCollection()->getDb()->drop();
     }
     
     public function testFill()
@@ -145,14 +145,36 @@ class Test_Mongo_Document extends Europa_Unit_Test
         return $obj->getCollection()->where('test', 'test1')->count() === 1;
     }
     
+    public function testSingleLevelSaveWithOneEmbedded()
+    {
+        $obj = new TestDb_TestDoc;
+        $obj->embed = array('oneEmbed' => true);
+        $obj->save();
+        
+        return $obj->getCollection()->where('embed.oneEmbed', true)->count() === 1;
+    }
+    
+    public function testMultiLevelSaveWithMultipleEmbedded()
+    {
+        $obj = new TestDb_TestDoc;
+        $obj->embeds = array(
+            array('multiEmbed' => true),
+            array('multiEmbed' => true)
+        );
+        $obj->save();
+        
+        $coll = $obj->getCollection()->where('embeds.multiEmbed', true);
+        return $coll[0]->embeds->count() === 2;
+    }
+    
     public function testMultiLevelSaveWithOneReference()
     {
         $obj = new TestDb_TestDoc;
-        //$obj->load(array('test' => 'test1'));
+        $obj->load(array('test' => 'test1'));
         $obj->reference = array('test' => 'test2');
         $obj->save();
         
-        $ref = $obj->getCollection()->where('test', 'test2')->offsetGet(0);
+        $ref = $obj->getCollection()->getDb()->testReference->where('test', 'test2')->offsetGet(0);
         return $ref instanceof Europa_Mongo_Document
             && $ref->test === 'test2';
     }
@@ -168,7 +190,7 @@ class Test_Mongo_Document extends Europa_Unit_Test
         );
         $obj->save();
         
-        return $obj->getCollection()->where('test', array('$in' => array('test3', 'test4')))->count() === 2;
+        return $obj->getCollection()->getDb()->testReference->where('test', array('$in' => array('test3', 'test4')))->count() === 2;
     }
 }
 
