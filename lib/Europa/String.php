@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-class Europa_String
+class Europa_String implements Countable
 {
     /**
      * The opening character in a format replacement.
@@ -304,5 +304,15 @@ class Europa_String
     public static function create($string = '')
     {
         return new self($string);
+    }
+    
+    /**
+     * Multi-byte safe. Calculates and returns number of characters in a string.
+     * 
+     * @return int
+     */
+    public function count()
+    {
+        return mb_strlen($this->_string);
     }
 }
