@@ -198,10 +198,10 @@ class TestDb_TestDoc extends Europa_Mongo_Document
 {
     public function _preConstruct()
     {
-        $this->_hasOne('embed', 'TestDb_TestDoc_TestEmbed');
-        $this->_hasOne('reference', 'TestDb_TestReference');
-        $this->_hasMany('embeds', 'TestDb_TestDoc_TestEmbed');
-        $this->_hasMany('references', 'TestDb_TestReference');
+        $this->hasOne('embed', 'TestDb_TestDoc_TestEmbed');
+        $this->hasOne('reference', 'TestDb_TestReference');
+        $this->hasMany('embeds', 'TestDb_TestDoc_TestEmbed');
+        $this->hasMany('references', 'TestDb_TestReference');
     }
 }
 

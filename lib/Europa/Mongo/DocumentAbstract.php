@@ -490,7 +490,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * @param string $class The name of the class to use.
      * @return Europa_Mongo_Document
      */
-    protected function _hasOne($name, $class = null)
+    public function hasOne($name, $class = null)
     {
         $this->_hasOne[$name] = $class ? $class : $name;
         return $this;
@@ -503,7 +503,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * @param string $class The name of the class to use.
      * @return Europa_Mongo_Document
      */
-    protected function _hasMany($name, $class = null)
+    public function hasMany($name, $class = null)
     {
         $this->_hasMany[$name] = $class ? $class : $name;
         return $this;
