@@ -16,8 +16,9 @@ class Europa_Form_Element_Input extends Europa_Form_Element
      * 
      * @return Europa_Form_Element_Input
      */
-    public function __construct()
+    public function __construct(array $attributes = array())
     {
+        parent::__construct($attributes);
         $this->type = 'text';
     }
     

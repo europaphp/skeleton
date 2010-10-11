@@ -19,6 +19,17 @@ abstract class Europa_Form_Element extends Europa_Form_Base
     protected $_validator;
     
     /**
+     * Initializes the form element and sets any default attributes.
+     * 
+     * @param array $attributes An array of name/value attribues to set.
+     * @return Europa_Form_Element
+     */
+    public function __construct(array $attributes = array())
+    {
+        $this->setAttributes($attributes);
+    }
+    
+    /**
      * Automatically retrieves the value for the input field base on its name
      * from the passed in values.
      * 

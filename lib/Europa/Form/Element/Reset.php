@@ -16,10 +16,10 @@ class Europa_Form_Element_Reset extends Europa_Form_Element_Button
      * 
      * @return Europa_Form_Element_Reset
      */
-    public function __construct()
+    public function __construct(array $attributes = array())
     {
-        parent::__construct();
-        $this->type  = 'reset';
-        $this->value = 'Reset';
+        parent::__construct($attributes);
+            $this->type  = 'reset';
+            $this->value = 'Reset';
+        }
     }
-}

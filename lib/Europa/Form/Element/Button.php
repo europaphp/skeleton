@@ -16,9 +16,9 @@ class Europa_Form_Element_Button extends Europa_Form_Element_Input
      * 
      * @return Europa_Form_Element_Button
      */
-    public function __construct()
+    public function __construct(array $attributes = array())
     {
-        parent::__construct();
+        parent::__construct($attributes);
         $this->type  = 'button';
         $this->value = 'Button';
     }

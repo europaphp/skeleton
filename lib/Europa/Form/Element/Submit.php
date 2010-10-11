@@ -16,10 +16,10 @@ class Europa_Form_Element_Submit extends Europa_Form_Element_Button
      * 
      * @return Europa_Form_Element_Submit
      */
-    public function __construct()
+    public function __construct(array $attributes = array())
     {
-        parent::__construct();
-        $this->type  = 'submit';
-        $this->value = 'Submit';
+        parent::__construct($attributes);
+            $this->type  = 'submit';
+            $this->value = 'Submit';
+        }
     }
-}

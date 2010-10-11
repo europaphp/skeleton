@@ -16,9 +16,9 @@ class Europa_Form_Element_Hidden extends Europa_Form_Element_Input
      * 
      * @return Europa_Form_Element_Hidden
      */
-    public function __construct()
+    public function __construct(array $attributes = array())
     {
-        parent::__construct();
+        parent::__construct($attributes);
         $this->type = 'hidden';
     }
 }
