@@ -62,8 +62,8 @@ class Europa_View_Php extends Europa_View
      */
     public function __get($name)
     {
-        if ($value = parent::__get($name)) {
-            return $value;
+        if (parent::__isset($name)) {
+            return parent::__get($name);
         }
         $helper = $this->__call($name);
         if ($helper) {
