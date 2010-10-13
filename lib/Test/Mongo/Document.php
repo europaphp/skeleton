@@ -81,7 +81,7 @@ class Test_Mongo_Document extends Europa_Unit_Test
         return count($obj) === 2;
     }
     
-    public function TestDb_TestDoc_TestEmbedDocumentSetting()
+    public function testEmbedDocumentSetting()
     {
         $obj = new TestDb_TestDoc;
         $obj->embed = array('test' => 'test');
@@ -89,7 +89,7 @@ class Test_Mongo_Document extends Europa_Unit_Test
             && $obj->embed->test === 'test';
     }
     
-    public function TestDb_TestReferenceDocumentSetting()
+    public function testReferenceDocumentSetting()
     {
         $obj = new TestDb_TestDoc;
         $obj->reference = array('test' => 'test');
@@ -97,7 +97,7 @@ class Test_Mongo_Document extends Europa_Unit_Test
             && $obj->reference->test === 'test';
     }
     
-    public function TestDb_TestDoc_TestEmbedCollectionSettingWithEmbeddedDocument()
+    public function testEmbedCollectionSettingWithEmbeddedDocument()
     {
         $obj = new TestDb_TestDoc;
         $obj->embeds = array(
@@ -111,7 +111,7 @@ class Test_Mongo_Document extends Europa_Unit_Test
             && $obj->embeds[1]->test === 'test2';
     }
     
-    public function TestDb_TestDoc_TestEmbedCollectionSettingWithEmbeddedReference()
+    public function testEmbedCollectionSettingWithEmbeddedReference()
     {
         $obj = new TestDb_TestDoc;
         $obj->references = array(
@@ -150,7 +150,6 @@ class Test_Mongo_Document extends Europa_Unit_Test
         $obj = new TestDb_TestDoc;
         $obj->embed = array('oneEmbed' => true);
         $obj->save();
-        
         return $obj->getCollection()->where('embed.oneEmbed', true)->count() === 1;
     }
     
