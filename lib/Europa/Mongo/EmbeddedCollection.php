@@ -20,17 +20,25 @@ class Europa_Mongo_EmbeddedCollection implements Europa_Mongo_Accessible
     private $_items = array();
     
     /**
+     * The class to use for the items in the collection.
+     * 
+     * @var string
+     */
+    private $_class;
+    
+    /**
      * Constructs a new document set and adds any documents that were passed.
      * 
-     * @param array $documents
+     * @param string $class The class name to use for the documents.
+     * @param array $documents The documents to add, if any.
      * @return Europa_Mongo_DocumentSet
      */
-    public function __construct($instance, $documents = array())
+    public function __construct($class, $documents = array())
     {
+        $this->_class = $class;
         if (is_array($documents) || is_object($documents)) {
-            foreach ($documents as $document) {
-                $document = new $instance($document);
-                $this->_set($document);
+            foreach ($documents as $offset => $document) {
+                $this->offsetSet($offset, $document);
             }
         }
     }
@@ -96,7 +104,19 @@ class Europa_Mongo_EmbeddedCollection implements Europa_Mongo_Accessible
      */
     public function offsetSet($offset, $document)
     {
-        return $this->_set($document, $offset);
+        // if the document isn't an instance of the specified class, make it one
+        $class = $this->_class;
+        if (!$document instanceof $class) {
+            $document = new $class($document);
+        }
+        
+        // default to appending if a null offset is passed
+        if (!is_numeric($offset)) {
+            $offset = $this->count();
+        }
+        
+        $this->_items[$offset] = $document;
+        return $this;
     }
     
     /**
@@ -212,21 +232,5 @@ class Europa_Mongo_EmbeddedCollection implements Europa_Mongo_Accessible
             $array[] = $document->toMongoArray();
         }
         return $array;
-    }
-    
-    /**
-     * Inserts the specified document into the current collection.
-     * 
-     * @param Europa_Mongo_DocumentAbstract $document
-     * @param mixed $offset
-     * @return Europa_Mongo_EmbeddedCollection
-     */
-    private function _set(Europa_Mongo_DocumentAbstract $document, $offset = null)
-    {
-        if (is_null($offset)) {
-            $offset = $this->count();
-        }
-        $this->_items[$offset] = $document;
-        return $this;
     }
 }

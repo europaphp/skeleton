@@ -313,12 +313,16 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
         // handle singular relations
         if (isset($this->_hasOne[$name])) {
             $class = $this->_hasOne[$name];
-            return new $class;
+            $class = new $class;
+            $this->_data[$name] = $class;
+            return $class;
         }
         
         // handle multiple relations
         if (isset($this->_hasMany[$name])) {
-            return new Europa_Mongo_EmbeddedCollection($this->_hasMany[$name]);
+            $class = new Europa_Mongo_EmbeddedCollection($this->_hasMany[$name]);
+            $this->_data[$name] = $class;
+            return $class;
         }
         
         return null;

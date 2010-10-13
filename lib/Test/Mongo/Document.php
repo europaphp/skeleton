@@ -114,13 +114,13 @@ class Test_Mongo_Document extends Europa_Unit_Test
     public function testEmbedCollectionAppendingWithEmbeddedDocument()
     {
         $obj = new TestDb_TestDoc;
-        $obj->embeds[] = array('test' => 'test3');
-        $obj->embeds[] = array('test' => 'test4');
+        $obj->embeds[] = array('test' => 'test1');
+        $obj->embeds[] = array('test' => 'test2');
         return $obj->embeds instanceof Europa_Mongo_EmbeddedCollection
-            && $obj->embeds[2] instanceof TestDb_TestDoc_TestEmbed
-            && $obj->embeds[3] instanceof TestDb_TestDoc_TestEmbed
-            && $obj->embeds[2]->test === 'test3'
-            && $obj->embeds[3]->test === 'test4';
+            && $obj->embeds[0] instanceof TestDb_TestDoc_TestEmbed
+            && $obj->embeds[1] instanceof TestDb_TestDoc_TestEmbed
+            && $obj->embeds[0]->test === 'test1'
+            && $obj->embeds[1]->test === 'test2';
     }
     
     public function testEmbedCollectionSettingWithEmbeddedReference()
@@ -130,7 +130,7 @@ class Test_Mongo_Document extends Europa_Unit_Test
             array('test' => 'test1'),
             array('test' => 'test2')
         );
-        return $obj->references instanceof Europa_Mongo_EmbeddedCollection
+        return $obj->references    instanceof Europa_Mongo_EmbeddedCollection
             && $obj->references[0] instanceof TestDb_TestReference
             && $obj->references[1] instanceof TestDb_TestReference
             && $obj->references[0]->test === 'test1'
@@ -140,13 +140,13 @@ class Test_Mongo_Document extends Europa_Unit_Test
     public function testEmbedCollectionAppendingWithEmbeddedReference()
     {
         $obj = new TestDb_TestDoc;
-        $obj->references[] = array('test' => 'test3');
-        $obj->references[] = array('test' => 'test4');
-        return $obj->embeds instanceof Europa_Mongo_EmbeddedCollection
-            && $obj->embeds[2] instanceof TestDb_TestReference
-            && $obj->embeds[3] instanceof TestDb_TestReference
-            && $obj->embeds[2]->test === 'test3'
-            && $obj->embeds[3]->test === 'test4';
+        $obj->references[] = array('test' => 'test1');
+        $obj->references[] = array('test' => 'test2');
+        return $obj->references    instanceof Europa_Mongo_EmbeddedCollection
+            && $obj->references[0] instanceof TestDb_TestReference
+            && $obj->references[1] instanceof TestDb_TestReference
+            && $obj->references[0]->test === 'test1'
+            && $obj->references[1]->test === 'test2';
     }
     
     public function testNonExistentSingularRelationshipGetting()
