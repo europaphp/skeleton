@@ -297,7 +297,6 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
             
             // if it's a directory, flatten it
             if (is_dir($item)) {
-                
                 // Add it to the items array
                 $this->_items[] = $item;
                 
@@ -308,7 +307,6 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
                 foreach ($item->flatten() as $sub) {
                     $this->_items[] = $sub->getPathname();
                 }
-            
             // if it's a file just add it
             } else {
                 $this->_items[] = $item;
@@ -339,6 +337,17 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
                 $this->_items[] = $item;
             }
         }
+        return $this;
+    }
+    
+    /**
+     * Sorts the items.
+     * 
+     * @return Europa_Directory
+     */
+    public function sort()
+    {
+        sort($this->_items);
         return $this;
     }
     

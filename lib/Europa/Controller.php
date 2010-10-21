@@ -96,7 +96,7 @@ abstract class Europa_Controller
      */
     public function forward($to)
     {
-        $to = Europa_String::create($to)->toClass();
+        $to = (string) Europa_String::create($to)->toClass();
         $to = new $to($this->_request);
         $to->action();
         return $to;

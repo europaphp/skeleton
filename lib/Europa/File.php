@@ -12,6 +12,38 @@
 class Europa_File extends SplFileObject
 {
     /**
+     * Returns the file contents instead of the file path.
+     * 
+     * @return string
+     */
+    public function __toString()
+    {
+        echo $this->getContents();
+    }
+    
+    /**
+     * Retrieves the contents of the file.
+     * 
+     * @return string
+     */
+    public function getContents()
+    {
+        return file_get_contents($this->getPathname());
+    }
+    
+    /**
+     * Sets the contents of the file.
+     * 
+     * @param string $contents The contents to set to the file.
+     * @return Europa_File
+     */
+    public function setContents($contents)
+    {
+        file_put_contents($this->getPathname(), $contents);
+        return self::open($this->getPathname());
+    }
+    
+    /**
      * Chunks the current file into base64 encoded chunks and returns them as an
      * array.
      * 
@@ -24,7 +56,7 @@ class Europa_File extends SplFileObject
     }
     
     /**
-     * Delets the current file. Throws an exception if the file couldn't be
+     * Deletes the current file. Throws an exception if the file couldn't be
      * deleted.
      * 
      * @return void
@@ -190,8 +222,7 @@ class Europa_File extends SplFileObject
     public static function overwrite($file, $mask = 0777)
     {
         if (is_file($file)) {
-            $file = new Europa_File($file);
-            $file->delete();
+            Europa_File::open($file)->delete();
         }
         return self::create($file, $mask);
     }
