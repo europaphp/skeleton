@@ -100,7 +100,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
         parent::__construct($db, $name);
         $this->_db   = $db;
         $this->_name = $name;
-        $this->setClass(Europa_String::create($db->getName() . '.' . $name)->replace('.', '_')->toClass());
+        $this->setClass(Europa_String::create($db->getName() . '_' . $name)->toClass()->__toString());
     }
     
     /**

@@ -8,7 +8,7 @@ class Test_Mongo_Collection extends Europa_Unit_Test
     
     public function setUp()
     {
-        $this->_mongo = new Europa_Mongo_Connection;
+        $this->_mongo = Europa_Mongo_Connection::getDefault();
         $this->_db    = $this->_mongo->collectiontest;
         
         for ($i = 1; $i <= 10; $i++) {

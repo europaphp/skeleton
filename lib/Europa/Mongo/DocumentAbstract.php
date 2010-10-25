@@ -76,9 +76,9 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      */
     public function __construct($params = array())
     {
-        $this->_preConstruct();
+        $this->preConstruct();
         $this->fill($params);
-        $this->_postConstruct();
+        $this->postConstruct();
     }
     
     /**
@@ -505,6 +505,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * 
      * @param string $name The name of the property.
      * @param string $class The name of the class to use.
+     * 
      * @return Europa_Mongo_Document
      */
     public function hasMany($name, $class = null)
@@ -518,6 +519,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * matching alias is found, then the alias is just returned.
      * 
      * @param string $alias The alias to search for.
+     * 
      * @return string
      */
     protected function _getPropertyFromAlias($alias)
@@ -535,7 +537,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * 
      * @return mixed
      */
-    protected function _preConstruct()
+    protected function preConstruct()
     {
         
     }
@@ -545,7 +547,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * 
      * @return mixed
      */
-    protected function _postConstruct()
+    protected function postConstruct()
     {
         
     }

@@ -2,6 +2,11 @@
 
 class Test_Mongo_Document extends Europa_Unit_Test
 {
+    public function setUp()
+    {
+        $this->bench = new Europa_Bench;
+    }
+    
     public function tearDown()
     {
         $obj = new TestDb_TestDoc;
@@ -219,7 +224,7 @@ class Test_Mongo_Document extends Europa_Unit_Test
 
 class TestDb_TestDoc extends Europa_Mongo_Document
 {
-    public function _preConstruct()
+    public function preConstruct()
     {
         $this->hasOne('embed', 'TestDb_TestDoc_TestEmbed');
         $this->hasOne('reference', 'TestDb_TestReference');

@@ -29,8 +29,9 @@ class Europa_Mongo_Connection extends Mongo
     /**
      * Constructs a new connection and sets defaults.
      * 
-     * @param string $dsn
-     * @param array $options
+     * @param string $dsn     The DSN to use for connecting.
+     * @param array  $options The options to use for the connection.
+     * 
      * @return Europa_Mongo_Connection
      */
     public function __construct($dsn = 'localhost:27017', array $options = array())
@@ -40,21 +41,16 @@ class Europa_Mongo_Connection extends Mongo
             parent::__construct($dsn, $options);
         } catch (Exception $e) {
             throw new Europa_Mongo_Exception(
-                'Could not connect to database with message: ' . $e->getMessage(),
-                $e->getCode()
+                "Could not connect to {$dsn}. Mesage: {$e->getMessage()}"
             );
-        }
-        
-        // set a default connection
-        if (!self::hasDefault()) {
-            self::setDefault($this);
         }
     }
     
     /**
      * Returns the specified database.
      * 
-     * @param string $name
+     * @param string $name The name of the database to return.
+     * 
      * @return Europa_Mongo_Db
      */
     public function __get($name)
@@ -65,7 +61,8 @@ class Europa_Mongo_Connection extends Mongo
     /**
      * Returns the specified database.
      * 
-     * @param string $name
+     * @param string $name The name of the database to return.
+     * 
      * @return Europa_Mongo_Db
      */
     public function selectDb($name)
@@ -76,8 +73,9 @@ class Europa_Mongo_Connection extends Mongo
     /**
      * Selects the specified collection.
      * 
-     * @param string $dbName
-     * @param string $collectionName
+     * @param string $dbName         The name of the database the collection belongs to.
+     * @param string $collectionName The name of the collection.
+     * 
      * @return Europa_Mongo_Collection
      */
     public function selectCollection($dbName, $collectionName)
@@ -88,8 +86,9 @@ class Europa_Mongo_Connection extends Mongo
     /**
      * Sets the specified connection.
      * 
-     * @param string $name
-     * @param Europa_Mongo_Connection $connection
+     * @param string                  $name       The name of the connection.
+     * @param Europa_Mongo_Connection $connection The connection to set.
+     * 
      * @return Europa_Mongo_Connection
      */
     public static function set($name, Europa_Mongo_Connection $connection)
@@ -108,7 +107,7 @@ class Europa_Mongo_Connection extends Mongo
     {
         if (!self::has($name)) {
             throw new Europa_Mongo_Exception(
-                'Cannot get connection ' . $name . '. It doesn\'t exist!'
+                "Cannot get connection {$name}. It doesn't exist!"
             );
         }
         return self::$_connections[$name];
@@ -117,7 +116,8 @@ class Europa_Mongo_Connection extends Mongo
     /**
      * Returns whether or not the specified connection exists.
      * 
-     * @param string $name
+     * @param string $name The connection name to check for.
+     * 
      * @return bool
      */
     public static function has($name)
@@ -128,7 +128,8 @@ class Europa_Mongo_Connection extends Mongo
     /**
      * Sets the default connection.
      * 
-     * @param Europa_Mongo_Connection $connection
+     * @param Europa_Mongo_Connection $connection The connection to use as the default.
+     * 
      * @return Europa_Mongo_Connection
      */
     public static function setDefault(Europa_Mongo_Connection $connection)
@@ -138,12 +139,21 @@ class Europa_Mongo_Connection extends Mongo
     }
     
     /**
-     * Returns the default connection.
+     * Returns the default connection. If no deafult connection exists, one is created.
      * 
      * @return Europa_Mongo_Connection
      */
     public static function getDefault()
     {
+        if (!self::hasDefault()) {
+            try {
+                self::setDefault(new self);
+            } catch (Exception $e) {
+                throw new Europa_Mongo_Exception(
+                    "A default connection could not be established. Message: {$e->getMessage()}"
+                );
+            }
+        }
         return self::$_defaultConnection;
     }
     
@@ -154,14 +164,15 @@ class Europa_Mongo_Connection extends Mongo
      */
     public static function hasDefault()
     {
-        return self::getDefault() instanceof self;
+        return self::$_defaultConnection instanceof self;
     }
     
     /**
      * Normalizes the dsn. Makes for passing a simpler DSN to
      * the constructor.
      * 
-     * @param string $dsn
+     * @param string $dsn The DSN to format.
+     * 
      * @return string
      */
     private function _formatDsn($dsn)

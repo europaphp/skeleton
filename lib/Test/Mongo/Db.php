@@ -6,7 +6,12 @@ class Test_Mongo_Db extends Europa_Unit_Test
     
     public function setUp()
     {
-        $this->_mongo = new Europa_Mongo_Connection;
+        $this->_mongo = Europa_Mongo_Connection::getDefault();
+    }
+    
+    public function tearDown()
+    {
+        $this->_mongo->testdb->drop();
     }
     
     public function testGetCollection()
@@ -23,10 +28,5 @@ class Test_Mongo_Db extends Europa_Unit_Test
     public function testGetConnection()
     {
         return $this->_mongo->testdb->getConnection() instanceof Europa_Mongo_Connection;
-    }
-    
-    public function tearDown()
-    {
-        $this->_mongo->testdb->drop();
     }
 }
