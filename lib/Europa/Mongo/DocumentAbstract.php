@@ -12,6 +12,13 @@
 abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
 {
     /**
+     * Any modifiers applied to the fields in this document.
+     * 
+     * @var array
+     */
+    protected $modifiers = array();
+    
+    /**
      * The data on in the document.
      * 
      * @var array
@@ -45,13 +52,6 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * @var bool
      */
     private $_modified = array();
-    
-    /**
-     * Any modifiers applied to the fields in this document.
-     * 
-     * @var array
-     */
-    private $_modifiers = array();
     
     /**
      * Contains the has one relationships.
@@ -124,6 +124,23 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     final public function __unset($name)
     {
         return $this->clear($name);
+    }
+    
+    /**
+     * Assumes a modifier is being called.
+     * 
+     * @param string $name The name of the modifier.
+     * @param array  $args The arguments being sent to the modifier.
+     * 
+     * @return Europa_Mongo_DocumentAbstract
+     */
+    final public function __call($name, array $args = array())
+    {
+        // handle a single modifier or multiple modifiers
+        if (!is_array($args[0])) {
+            $args[0] = array($args[0] => $args[1]);
+        }
+        return $this->setModifier($name, $args[0]);
     }
     
     /**
@@ -365,20 +382,29 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     /**
      * Applies a modifier to the particular field.
      * 
-     * @param string $name The modifier to apply.
-     * @param array $args The arguments provided.
+     * @param string $modifier The modifier to apply.
+     * @param array  $args     The arguments provided.
+     * 
      * @return Europa_Mongo_Document
      */
-    public function setModifier($name, $args)
+    public function setModifier($modifier, array $args = array())
     {
-        // mark the field as modified
-        $this->_modified[] = $args[0];
-        
-        $name = '$' . $name;
-        if (!isset($this->_modifiers[$name])) {
-            $this->_modifiers[$name] = array();
+        $modifier = '$' . $modifier;
+        if (!isset($this->modifiers[$modifier])) {
+            $this->modifiers[$modifier] = array();
         }
-        $this->_modifiers[$name][$args[0]] = $args[1];
+        foreach ($args as $name => $value) {
+            // mark as modified
+            $this->_modified[] = $name;
+            
+            // see if it's accesible, if so, make it a mongo array
+            if ($value instanceof Europa_Mongo_Accessible) {
+                $value = $value->toMongoArray();
+            }
+            
+            // add the modifier
+            $this->modifiers[$modifier][$name] = $value;
+        }
         return $this;
     }
     
@@ -437,7 +463,10 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      */
     public function toMongoArray()
     {
+        // the prepared array
         $array = array();
+        
+        // sift through the data
         foreach ($this->_data as $name => $item) {
             // force a mongo id to be an instance of MongoId
             if ($name === '_id') {
@@ -471,6 +500,8 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
             // handle normal values
             $array[$name] = $item;
         }
+        
+        // return the prepared array
         return $array;
     }
     

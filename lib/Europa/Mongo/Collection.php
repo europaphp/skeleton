@@ -104,6 +104,19 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
     }
     
     /**
+     * Calls a command using where.
+     * 
+     * @param string $name The name of the command.
+     * @param array  $args The arguments to pass to the command.
+     * 
+     * @return Europa_Mongo_Collection
+     */
+    public function __call($name, array $args = array())
+    {
+        return $this->where($args[0], array('$' . $name => $args[1]));
+    }
+    
+    /**
      * Returns the db instance to use.
      * 
      * @return Europa_Mongo_Db
@@ -170,6 +183,10 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
             }
         // handle straight values
         } else {
+            // make sure the value is a mongo id if the field is _id
+            if ($field === '_id' && !$value instanceof MongoId) {
+                $value = new MongoID($value);
+            }
             $this->_query[$field] = $value;
         }
         return $this;
