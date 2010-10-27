@@ -374,7 +374,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
         }
         
         // unset it from the document
-        $this->setModifier('unset', $name, 1);
+        $this->setModifier('unset', array($name => 1));
         
         return $this;
     }
