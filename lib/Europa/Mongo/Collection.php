@@ -65,7 +65,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      * 
      * @var string
      */
-    private $_class;
+    private $_class = null;
     
     /**
      * The result limit.
@@ -100,7 +100,6 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
         parent::__construct($db, $name);
         $this->_db   = $db;
         $this->_name = $name;
-        $this->setClass(Europa_String::create($db->getName() . '_' . $name)->toClass()->__toString());
     }
     
     /**
@@ -355,7 +354,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
     final public function current()
     {
         $current = $this->getCursor()->current();
-        $class   = $this->_class;
+        $class   = $this->getClass();
         $class   = new $class;
         return $class->setCollection($this)->fill($current);
     }
@@ -525,15 +524,20 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
     }
     
     /**
-     * Sets which class to use for each document. If set to a false value,
-     * then the default array will be returned.
+     * Sets which class to use for each document.
      * 
-     * @param string $class The class to use. Null/false/0 for none.
+     * @param string $class The class to use.
+     * 
      * @return Europa_Mongo_Cursor
      */
     public function setClass($class)
     {
-        $this->_class = (string) $class;
+        if (!$class || !is_string($class)) {
+            throw new Europa_Mongo_Exception(
+                'Specified class name must be a string.'
+            );
+        }
+        $this->_class = $class;
         return $this;
     }
     
@@ -544,6 +548,21 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      */
     public function getClass()
     {
+        if (!$this->_class) {
+            $this->setClass($this->getDefaultClass());
+        }
         return $this->_class;
+    }
+    
+    /**
+     * Returns the default class.
+     * 
+     * @return string
+     */
+    public function getDefaultClass()
+    {
+        $database   = $this->getDb()->getName();
+        $collection = $this->getName();
+        return ucfirst($database) . '_' . ucfirst($collection);
     }
 }

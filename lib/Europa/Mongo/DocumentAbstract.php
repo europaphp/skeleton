@@ -47,13 +47,6 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     private $_aliases = array();
     
     /**
-     * Whether or not the document has changed.
-     * 
-     * @var bool
-     */
-    private $_modified = array();
-    
-    /**
      * Contains the has one relationships.
      * 
      * @var array
@@ -277,13 +270,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     public function set($name, $value)
     {
         // get real name
-        $name = $this->_getPropertyFromAlias($name);
-        
-        // filter the value
-        $method = '__set' . $name;
-        if (method_exists($this, $method)) {
-            $value = $this->$method($value);
-        }
+        $name = $this->getPropertyFromAlais($name);
         
         // force has-one to be a Europa_Mongo_Document
         if (isset($this->_hasOne[$name])) {
@@ -297,11 +284,6 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
         // set the value
         $this->_data[$name] = $value;
         
-        // flag the field as modfied if it hasn't been yet
-        if (!in_array($name, $this->_modified)) {
-            $this->_modified[] = $name;
-        }
-        
         return $this;
     }
     
@@ -314,13 +296,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     public function get($name)
     {
         // get real name
-        $name = $this->_getPropertyFromAlias($name);
-        
-        // filter the value
-        $method = '__get' . $name;
-        if (method_exists($this, $method)) {
-            return $this->$method($value);
-        }
+        $name = $this->getPropertyFromAlais($name);
         
         // if the value exists, return it
         if (isset($this->_data[$name])) {
@@ -353,7 +329,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      */
     public function has($name)
     {
-        $name = $this->_getPropertyFromAlias($name);
+        $name = $this->getPropertyFromAlais($name);
         return isset($this->_data[$name]);
     }
     
@@ -366,7 +342,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     public function clear($name)
     {
         // get real name
-        $name = $this->_getPropertyFromAlias($name);
+        $name = $this->getPropertyFromAlais($name);
         
         // unset only if set
         if (isset($this->_data[$name])) {
@@ -390,13 +366,12 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     public function setModifier($modifier, array $args = array())
     {
         $modifier = '$' . $modifier;
+        
         if (!isset($this->modifiers[$modifier])) {
             $this->modifiers[$modifier] = array();
         }
+        
         foreach ($args as $name => $value) {
-            // mark as modified
-            $this->_modified[] = $name;
-            
             // see if it's accesible, if so, make it a mongo array
             if ($value instanceof Europa_Mongo_Accessible) {
                 $value = $value->toMongoArray();
@@ -405,32 +380,22 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
             // add the modifier
             $this->modifiers[$modifier][$name] = $value;
         }
+        
         return $this;
     }
     
     /**
      * Sets one or more aliases for a property.
      * 
-     * @param string $name The property name.
-     * @param mixed $aliases A string or array of aliases.
+     * @param string $name  The property name.
+     * @param string $alias The property alias.
+     * 
      * @return Europa_Mongo_Document
      */
-    public function alias($name, $aliases)
+    public function alias($name, $alias)
     {
-        // make sure it's an array
-        if (!isset($this->_aliases[$name])) {
-            $this->_aliases[$name][] = array();
-        }
-        
-        // normalize
-        if (!is_array($aliases)) {
-            $aliases = array($aliases);
-        }
-        
-        // apply aliases
-        foreach ($aliases as $alias) {
-            $this->_aliases[$name][] = $alias;
-        }
+        // set the alias
+        $this->_aliases[$alias] = $name;
         
         // chain
         return $this;
@@ -506,19 +471,6 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     }
     
     /**
-     * Returns whether or not the document has changed.
-     * 
-     * @return bool
-     */
-    public function isModified($field = null)
-    {
-        if ($field) {
-            return in_array($field, $this->_modified);
-        }
-        return count($this->_modified) > 0;
-    }
-    
-    /**
      * Applies a has one relationship to the document.
      * 
      * @param string $name The name of the property.
@@ -553,12 +505,10 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * 
      * @return string
      */
-    protected function _getPropertyFromAlias($alias)
+    protected function getPropertyFromAlais($alias)
     {
-        foreach ($this->_aliases as $name => $aliases) {
-            if (in_array($alias, $aliases)) {
-                return $name;
-            }
+        if (isset($this->_aliases[$alias])) {
+            return $this->_aliases[$alias];
         }
         return $alias;
     }

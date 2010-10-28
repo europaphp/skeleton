@@ -17,14 +17,23 @@ class Europa_Mongo_Connection extends Mongo
      * 
      * @var array
      */
-    private static $_connections = array();
+    private static $_connections = array(
+        'default' => array('dsn' => 'localhost:27017', 'options' => array('persist' => true))
+    );
     
     /**
-     * The default connection.
      * 
-     * @var Europa_Mongo_Connection
      */
-    private static $_defaultConnection;
+    private static $_connectionInstances = array();
+    
+    /**
+     * 
+     */
+    private static $_defaultName = 'default';
+    
+    private static $_defaultDsn = 'localhost:27017';
+    
+    private static $_defaultOptions = array();
     
     /**
      * Constructs a new connection and sets defaults.
@@ -34,9 +43,18 @@ class Europa_Mongo_Connection extends Mongo
      * 
      * @return Europa_Mongo_Connection
      */
-    public function __construct($dsn = 'localhost:27017', array $options = array())
+    public function __construct($dsn = null, array $options = array())
     {
-        $dsn = $this->_formatDsn($dsn);
+        // the DSN is the default if not specified
+        $dsn = $dsn ? self::_formatDsn($dsn) : self::getDefaultDsn();
+        
+        // merge the default options
+        $options = array_merge(self::getDefaultOptions(), $options);
+        
+        // force persistent connections
+        $options['persist'] = $dsn;
+        
+        // connect
         try {
             parent::__construct($dsn, $options);
         } catch (Exception $e) {
@@ -44,6 +62,16 @@ class Europa_Mongo_Connection extends Mongo
                 "Could not connect to {$dsn}. Mesage: {$e->getMessage()}"
             );
         }
+    }
+    
+    /**
+     * Ensures that the connection is closed upon garbage collection.
+     * 
+     * @return void
+     */
+    public function __destruct()
+    {
+        $this->close();
     }
     
     /**
@@ -84,33 +112,82 @@ class Europa_Mongo_Connection extends Mongo
     }
     
     /**
-     * Sets the specified connection.
+     * Sets the specified connection information.
      * 
-     * @param string                  $name       The name of the connection.
-     * @param Europa_Mongo_Connection $connection The connection to set.
+     * @param string $name    The name of the connection.
+     * @param string $dsn     The connection to set.
+     * @param array  $options The options to use.
      * 
-     * @return Europa_Mongo_Connection
+     * @return void
      */
-    public static function set($name, Europa_Mongo_Connection $connection)
+    public static function set($name = null, $dsn = null, array $options = array())
     {
-        self::$_connections[$name] = $connection;
-        return $connection;
+        // default name
+        if (!$name) {
+            $name = self::getDefaultName();
+        }
+        
+        // default dsn
+        if (!$dsn) {
+            $dsn = self::getDefaultDsn();
+        }
+        
+        // default options
+        $options = array_merge(self::getDefaultOptions(), $options);
+        
+        // set the connection
+        self::$_connections[$name] = array('dsn' => $dsn, 'options' => $options);
     }
     
     /**
-     * Returns the specified connection.
+     * Returns the specified connection instance.
      * 
-     * @param string $name
+     * @param string $name The name of the connection. If no connections are present, one is
+     *                     created using the given name.
+     * 
      * @return Europa_Mongo_Connection
      */
-    public static function get($name)
+    public static function get($name = null)
     {
+        // default name
+        if (!$name) {
+            $name = self::getDefaultName();
+        }
+        
+        // set a default connection if none exist
+        if (!self::$_connections) {
+            self::set($name);
+        }
+        
+        // check to make sure the connection exists
         if (!self::has($name)) {
             throw new Europa_Mongo_Exception(
                 "Cannot get connection {$name}. It doesn't exist!"
             );
         }
-        return self::$_connections[$name];
+        
+        // connect and return
+        $conn = self::$_connections[$name];
+        return new self($conn['dsn'], $conn['options']);
+    }
+    
+    /**
+     * Removes the specified connection.
+     * 
+     * @param string $name The name of the connection to remove.
+     * 
+     * @return void
+     */
+    public static function remove($name = null)
+    {
+        // default name
+        if (!$name) {
+            $name = self::getDefaultName();
+        }
+        
+        if (self::has($name)) {
+            unset(self::$_connections[$name]);
+        }
     }
     
     /**
@@ -120,51 +197,75 @@ class Europa_Mongo_Connection extends Mongo
      * 
      * @return bool
      */
-    public static function has($name)
+    public static function has($name = 'default')
     {
         return isset(self::$_connections[$name]);
     }
     
     /**
-     * Sets the default connection.
+     * Sets a default connection name to use if none is specified.
      * 
-     * @param Europa_Mongo_Connection $connection The connection to use as the default.
+     * @param string $name The name of the default connection.
      * 
-     * @return Europa_Mongo_Connection
+     * @return void
      */
-    public static function setDefault(Europa_Mongo_Connection $connection)
+    public static function setDefaultName($name)
     {
-        self::$_defaultConnection = $connection;
-        return $connection;
+        self::$_defaultName = $name;
     }
     
     /**
-     * Returns the default connection. If no deafult connection exists, one is created.
+     * Returns the name of the default connection.
      * 
-     * @return Europa_Mongo_Connection
+     * @return string
      */
-    public static function getDefault()
+    public static function getDefaultName()
     {
-        if (!self::hasDefault()) {
-            try {
-                self::setDefault(new self);
-            } catch (Exception $e) {
-                throw new Europa_Mongo_Exception(
-                    "A default connection could not be established. Message: {$e->getMessage()}"
-                );
-            }
-        }
-        return self::$_defaultConnection;
+        return self::$_defaultName;
     }
     
     /**
-     * Returns whether or not there is a default connection.
+     * Sets the default DSN string.
      * 
-     * @return bool
+     * @param string $dsn The default DSN string to use.
+     * 
+     * @return void
      */
-    public static function hasDefault()
+    public static function setDefaultDsn($dsn)
     {
-        return self::$_defaultConnection instanceof self;
+        self::$_defaultDsn = $dsn;
+    }
+    
+    /**
+     * Returns the default DSN string.
+     * 
+     * @return string
+     */
+    public static function getDefaultDsn()
+    {
+        return self::$_defaultDsn;
+    }
+    
+    /**
+     * Sets the default options.
+     * 
+     * @param array $options The default options to use.
+     * 
+     * @return void
+     */
+    public static function setDefaultOptions(array $options)
+    {
+        self::$_defaultOptions = $options;
+    }
+    
+    /**
+     * Returns the default options.
+     * 
+     * @return array
+     */
+    public static function getDefaultOptions()
+    {
+        return self::$_defaultOptions;
     }
     
     /**
@@ -175,7 +276,7 @@ class Europa_Mongo_Connection extends Mongo
      * 
      * @return string
      */
-    private function _formatDsn($dsn)
+    private static function _formatDsn($dsn)
     {
         $dsn = str_replace('mongodb://', '', $dsn);
         $dsn = trim($dsn, '/');

@@ -114,11 +114,6 @@ abstract class Europa_Mongo_Document extends Europa_Mongo_DocumentAbstract
      */
     final public function save(array $options = array())
     {
-        // if it exists and is not modified, we don't do anything
-        if ($this->_id && !$this->isModified()) {
-            return $this;
-        }
-        
         // save referenes first
         foreach ($this as $item) {
             if ($item instanceof Europa_Mongo_Document || $item instanceof Europa_Mongo_EmbeddedCollection) {
