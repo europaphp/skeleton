@@ -50,7 +50,7 @@ class Europa_Bench
     }
     
     /**
-     * Rerturns the amount of time as a string.
+     * Returns the time and memory as a string.
      * 
      * @return string
      */
@@ -60,7 +60,7 @@ class Europa_Bench
         if (!$this->isStopped()) {
             $this->stop();
         }
-        return $this->getTime() . ' ~ ' . $this->getMemory();
+        return $this->getTime() . ' seconds';
     }
     
     /**
