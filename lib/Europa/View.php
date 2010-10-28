@@ -62,7 +62,7 @@ abstract class Europa_View implements ArrayAccess, Iterator
      */
     public function __isset($name)
     {
-        return isset($this->_params[$name]);
+        return array_key_exists($name, $this->_params);
     }
     
     /**
