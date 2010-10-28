@@ -17,23 +17,42 @@ class Europa_Mongo_Connection extends Mongo
      * 
      * @var array
      */
-    private static $_connections = array(
-        'default' => array('dsn' => 'localhost:27017', 'options' => array('persist' => true))
-    );
+    private static $_connections = array();
     
     /**
+     * Contains the name of the default connection.
      * 
-     */
-    private static $_connectionInstances = array();
-    
-    /**
-     * 
+     * @var string
      */
     private static $_defaultName = 'default';
     
-    private static $_defaultDsn = 'localhost:27017';
+    /**
+     * Contains the default DSN string.
+     * 
+     * @var string
+     */
+    private static $_defaultDsn = 'mongodb://localhost:27017';
     
+    /**
+     * Contains the default options.
+     * 
+     * @var array
+     */
     private static $_defaultOptions = array();
+    
+    /**
+     * The DSN associated to this connection.
+     * 
+     * @var string
+     */
+    private $_dsn;
+    
+    /**
+     * The options associated to this connection.
+     * 
+     * @var array
+     */
+    private $_options;
     
     /**
      * Constructs a new connection and sets defaults.
@@ -46,20 +65,25 @@ class Europa_Mongo_Connection extends Mongo
     public function __construct($dsn = null, array $options = array())
     {
         // the DSN is the default if not specified
-        $dsn = $dsn ? self::_formatDsn($dsn) : self::getDefaultDsn();
+        if (!$dsn) {
+            $dsn = self::getDefaultDsn();
+        }
+        
+        // set the DSN
+        $this->_dsn = $dsn;
         
         // merge the default options
-        $options = array_merge(self::getDefaultOptions(), $options);
+        $this->_options = array_merge(self::getDefaultOptions(), $options);
         
         // force persistent connections
-        $options['persist'] = $dsn;
+        $this->_options['persist'] = $this->_dsn;
         
         // connect
         try {
-            parent::__construct($dsn, $options);
+            parent::__construct($this->_dsn, $this->_options);
         } catch (Exception $e) {
             throw new Europa_Mongo_Exception(
-                "Could not connect to {$dsn}. Mesage: {$e->getMessage()}"
+                "Could not connect to {$this->_dsn}. Mesage: {$e->getMessage()}"
             );
         }
     }
@@ -84,6 +108,26 @@ class Europa_Mongo_Connection extends Mongo
     public function __get($name)
     {
         return $this->selectDb($name);
+    }
+    
+    /**
+     * Returns the DSN associated to this connection.
+     * 
+     * @return string
+     */
+    public function getDsn()
+    {
+        return $this->_dsn;
+    }
+    
+    /**
+     * Returns the options associated to this connection.
+     * 
+     * @return array
+     */
+    public function getOptions()
+    {
+        return $this->_options;
     }
     
     /**
@@ -266,20 +310,5 @@ class Europa_Mongo_Connection extends Mongo
     public static function getDefaultOptions()
     {
         return self::$_defaultOptions;
-    }
-    
-    /**
-     * Normalizes the dsn. Makes for passing a simpler DSN to
-     * the constructor.
-     * 
-     * @param string $dsn The DSN to format.
-     * 
-     * @return string
-     */
-    private static function _formatDsn($dsn)
-    {
-        $dsn = str_replace('mongodb://', '', $dsn);
-        $dsn = trim($dsn, '/');
-        return 'mongodb://' . $dsn;
     }
 }

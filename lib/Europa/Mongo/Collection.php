@@ -310,8 +310,9 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
     /**
      * Executes the current query.
      * 
-     * @param array $query
-     * @param array $fields
+     * @param array $query  Any additional query params to use.
+     * @param array $fields Any specific fields to pass back.
+     * 
      * @return Europa_Mongo_Colelction
      */
     public function execute(array $query = array(), array $fields = array())
