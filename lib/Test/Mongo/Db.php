@@ -6,7 +6,7 @@ class Test_Mongo_Db extends Europa_Unit_Test
     
     public function setUp()
     {
-        $this->_mongo = Europa_Mongo_Connection::getDefault();
+        $this->_mongo = Europa_Mongo_Connection::get();
     }
     
     public function tearDown()

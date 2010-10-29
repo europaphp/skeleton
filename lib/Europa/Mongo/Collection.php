@@ -357,7 +357,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
         $current = $this->getCursor()->current();
         $class   = $this->getClass();
         $class   = new $class;
-        return $class->setCollection($this)->fill($current);
+        return $class->setCollection($this->getName())->fill($current);
     }
     
     /**
@@ -417,7 +417,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
                 'Only instances of ' . $this->getClass() . ' can be applied to collection ' . $this->getName() . '.'
             );
         }
-        $document->setCollection($this)->save();
+        $document->setCollection($this->getName())->save();
         return $this->refresh();
     }
     

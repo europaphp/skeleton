@@ -8,7 +8,7 @@ class Test_Mongo_Collection extends Europa_Unit_Test
     
     public function setUp()
     {
-        $this->_mongo = Europa_Mongo_Connection::getDefault();
+        $this->_mongo = Europa_Mongo_Connection::get();
         $this->_db    = $this->_mongo->collectiontest;
         
         for ($i = 1; $i <= 10; $i++) {
@@ -227,10 +227,18 @@ class Test_Mongo_Collection extends Europa_Unit_Test
 
 class Collectiontest_Collectiontest extends Europa_Mongo_Document
 {
-    
+    public function preConstruct()
+    {
+        $this->setDb('collectiontest');
+        $this->setCollection('collectiontest');
+    }
 }
 
 class Collectiontest_WrongDocument extends Europa_Mongo_Document
 {
-    
+    public function preConstruct()
+    {
+        $this->setDb('collectiontest');
+        $this->setCollection('wrongDocument');
+    }
 }

@@ -226,6 +226,9 @@ class TestDb_TestDoc extends Europa_Mongo_Document
 {
     public function preConstruct()
     {
+        $this->setDb('testDb');
+        $this->setCollection('testDoc');
+        
         $this->hasOne('embed', 'TestDb_TestDoc_TestEmbed');
         $this->hasOne('reference', 'TestDb_TestReference');
         $this->hasMany('embeds', 'TestDb_TestDoc_TestEmbed');
@@ -240,5 +243,9 @@ class TestDb_TestDoc_TestEmbed extends Europa_Mongo_EmbeddedDocument
 
 class TestDb_TestReference extends Europa_Mongo_Document
 {
-    
+    public function preConstruct()
+    {
+        $this->setDb('testDb');
+        $this->setCollection('testReference');
+    }
 }
