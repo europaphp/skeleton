@@ -265,6 +265,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * 
      * @param string $name The parameter to set.
      * @param mixed $value The value to give the parameter.
+     * 
      * @return Europa_Mongo_Document
      */
     public function set($name, $value)
@@ -277,8 +278,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
             $class = $this->_hasOne[$name];
             $value = new $class($value);
         } elseif (isset($this->_hasMany[$name])) {
-            $class = $this->_hasMany[$name];
-            $value = new Europa_Mongo_EmbeddedCollection($class, $value);
+            $value = new Europa_Mongo_EmbeddedCollection($this->_hasMany[$name], $value);
         }
         
         // set the value
@@ -313,9 +313,8 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
         
         // handle multiple relations
         if (isset($this->_hasMany[$name])) {
-            $class = new Europa_Mongo_EmbeddedCollection($this->_hasMany[$name]);
-            $this->_data[$name] = $class;
-            return $class;
+            $this->_data[$name] = new Europa_Mongo_EmbeddedCollection($this->_hasMany[$name]);
+            return $this->_data[$name];
         }
         
         return null;
