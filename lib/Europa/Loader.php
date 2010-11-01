@@ -24,7 +24,8 @@ class Europa_Loader
      * Searches for a file and loads it if it is found.
      * 
      * @param string $className The Class to search for.
-     * @param mixed $paths Alternate search paths to search in first.
+     * @param mixed  $paths     Alternate search paths to search in first.
+     * 
      * @return bool
      */
     public static function load($file, $paths = null)
@@ -40,7 +41,8 @@ class Europa_Loader
      * Searches for a class and loads it if it is found.
      * 
      * @param string $className The Class to search for.
-     * @param mixed $paths Alternate search paths to search in first.
+     * @param mixed  $paths     Alternate search paths to search in first.
+     * 
      * @return bool
      */
     public static function loadClass($className, $paths = null)
@@ -62,9 +64,10 @@ class Europa_Loader
     /**
      * Searches for a file and returns it's path if it is found.
      * 
-     * @param string $file The file to load, relative to the search paths.
-     * @param mixed $paths Alternate load paths to search in first.
-     * @return string|false
+     * @param string $file  The file to load, relative to the search paths.
+     * @param mixed  $paths Alternate load paths to search in first.
+     * 
+     * @return mixed
      */
     public static function search($file, $paths = null)
     {
@@ -101,7 +104,8 @@ class Europa_Loader
      * if not found.
      * 
      * @param string $class The class to search for.
-     * @param mixed $paths Alternate load paths to search in first.
+     * @param mixed  $paths Alternate load paths to search in first.
+     * 
      * @return bool|string
      */
     public static function searchClass($class, $paths = null)
@@ -115,7 +119,8 @@ class Europa_Loader
      * If the path is unable to be resolve, an exception is thrown.
      * 
      * @param string $path The path to add to the list of load paths.
-     * @return bool|string
+     * 
+     * @return mixed
      */
     public static function addPath($path)
     {
@@ -138,11 +143,17 @@ class Europa_Loader
      * Registers the auto-load handler and automatically registers the
      * Europa install path to the load paths.
      * 
+     * @param mixed $callback The custom callback function to register, if any. If not
+     *                        specified, then it defaults to "loadClass".
+     * 
      * @return void
      */
-    public static function registerAutoload()
+    public static function registerAutoload($callback = null)
     {
-        spl_autoload_register(array('Europa_Loader', 'loadClass'));
+        if (!$callback) {
+            $callback = array('Europa_Loader', 'loadClass');
+        }
+        spl_autoload_register($callback);
         Europa_Loader::addPath(dirname(__FILE__) . '/../');
     }
 }
