@@ -556,14 +556,13 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
     }
     
     /**
-     * Returns the default class.
+     * Returns the default class name. Unless overridden, this is the class-formatted
+     * name of the collection.
      * 
      * @return string
      */
     public function getDefaultClass()
     {
-        $database   = $this->getDb()->getName();
-        $collection = $this->getName();
-        return ucfirst($database) . '_' . ucfirst($collection);
+        return Europa_String::create($this->getName())->toClass()->__toString();
     }
 }

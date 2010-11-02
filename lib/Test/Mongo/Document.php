@@ -9,34 +9,34 @@ class Test_Mongo_Document extends Europa_Unit_Test
     
     public function tearDown()
     {
-        $obj = new TestDb_TestDoc;
+        $obj = new TestDoc;
         $obj->getCollection()->getDb()->drop();
     }
     
     public function testFill()
     {
-        $obj = new TestDb_TestDoc;
+        $obj = new TestDoc;
         $obj->fill(array('test' => 'test'));
         return $obj->test === 'test';
     }
     
     public function testFillOnConstruction()
     {
-        $obj = new TestDb_TestDoc(array('yomama' => 'issostupid', 'shefell' => 'offthefloor'));
+        $obj = new TestDoc(array('yomama' => 'issostupid', 'shefell' => 'offthefloor'));
         return $obj->yomama  === 'issostupid'
             && $obj->shefell === 'offthefloor';
     }
     
     public function testSetAndGet()
     {
-        $obj = new TestDb_TestDoc;
+        $obj = new TestDoc;
         $obj->test = 'test';
         return $obj->test === 'test';
     }
     
     public function testIssetAndUnset()
     {
-        $obj = new TestDb_TestDoc;
+        $obj = new TestDoc;
         $obj->test = 'test';
         
         $unset = false;
@@ -50,7 +50,7 @@ class Test_Mongo_Document extends Europa_Unit_Test
     
     public function testIteration()
     {
-        $obj = new TestDb_TestDoc(array('test1' => 'value1', 'test2' => 'value2'));
+        $obj = new TestDoc(array('test1' => 'value1', 'test2' => 'value2'));
         $arr = array();
         foreach ($obj as $name => $value) {
             $arr[$name] = $value;
@@ -61,7 +61,7 @@ class Test_Mongo_Document extends Europa_Unit_Test
     
     public function testArrayAccessSetAndGet()
     {
-        $obj = new TestDb_TestDoc;
+        $obj = new TestDoc;
         $obj['test1'] = 'value1';
         $obj['test2'] = 'value2';
         return $obj['test1'] === 'value1'
@@ -70,7 +70,7 @@ class Test_Mongo_Document extends Europa_Unit_Test
     
     public function testArrayAccessIssetAndUnset()
     {
-        $obj = new TestDb_TestDoc;
+        $obj = new TestDoc;
         $obj['test'] = 'test';
         
         $isset = isset($obj['test']);
@@ -82,93 +82,93 @@ class Test_Mongo_Document extends Europa_Unit_Test
     
     public function testCount()
     {
-        $obj = new TestDb_TestDoc(array('test1' => 'value1', 'test2' => 'value2'));
+        $obj = new TestDoc(array('test1' => 'value1', 'test2' => 'value2'));
         return count($obj) === 2;
     }
     
     public function testEmbedDocumentSetting()
     {
-        $obj = new TestDb_TestDoc;
+        $obj = new TestDoc;
         $obj->embed = array('test' => 'test');
-        return $obj->embed instanceof TestDb_TestDoc_TestEmbed
+        return $obj->embed instanceof TestEmbed
             && $obj->embed->test === 'test';
     }
     
     public function testReferenceDocumentSetting()
     {
-        $obj = new TestDb_TestDoc;
+        $obj = new TestDoc;
         $obj->reference = array('test' => 'test');
-        return $obj->reference instanceof TestDb_TestReference
+        return $obj->reference instanceof TestReference
             && $obj->reference->test === 'test';
     }
     
     public function testEmbedCollectionSettingWithEmbeddedDocument()
     {
-        $obj = new TestDb_TestDoc;
+        $obj = new TestDoc;
         $obj->embeds = array(
             array('test' => 'test1'),
             array('test' => 'test2')
         );
         return $obj->embeds instanceof Europa_Mongo_EmbeddedCollection
-            && $obj->embeds[0] instanceof TestDb_TestDoc_TestEmbed
-            && $obj->embeds[1] instanceof TestDb_TestDoc_TestEmbed
+            && $obj->embeds[0] instanceof TestEmbed
+            && $obj->embeds[1] instanceof TestEmbed
             && $obj->embeds[0]->test === 'test1'
             && $obj->embeds[1]->test === 'test2';
     }
     
     public function testEmbedCollectionAppendingWithEmbeddedDocument()
     {
-        $obj = new TestDb_TestDoc;
+        $obj = new TestDoc;
         $obj->embeds[] = array('test' => 'test1');
         $obj->embeds[] = array('test' => 'test2');
         return $obj->embeds instanceof Europa_Mongo_EmbeddedCollection
-            && $obj->embeds[0] instanceof TestDb_TestDoc_TestEmbed
-            && $obj->embeds[1] instanceof TestDb_TestDoc_TestEmbed
+            && $obj->embeds[0] instanceof TestEmbed
+            && $obj->embeds[1] instanceof TestEmbed
             && $obj->embeds[0]->test === 'test1'
             && $obj->embeds[1]->test === 'test2';
     }
     
     public function testEmbedCollectionSettingWithEmbeddedReference()
     {
-        $obj = new TestDb_TestDoc;
+        $obj = new TestDoc;
         $obj->references = array(
             array('test' => 'test1'),
             array('test' => 'test2')
         );
         return $obj->references    instanceof Europa_Mongo_EmbeddedCollection
-            && $obj->references[0] instanceof TestDb_TestReference
-            && $obj->references[1] instanceof TestDb_TestReference
+            && $obj->references[0] instanceof TestReference
+            && $obj->references[1] instanceof TestReference
             && $obj->references[0]->test === 'test1'
             && $obj->references[1]->test === 'test2';
     }
     
     public function testEmbedCollectionAppendingWithEmbeddedReference()
     {
-        $obj = new TestDb_TestDoc;
+        $obj = new TestDoc;
         $obj->references[] = array('test' => 'test1');
         $obj->references[] = array('test' => 'test2');
         return $obj->references    instanceof Europa_Mongo_EmbeddedCollection
-            && $obj->references[0] instanceof TestDb_TestReference
-            && $obj->references[1] instanceof TestDb_TestReference
+            && $obj->references[0] instanceof TestReference
+            && $obj->references[1] instanceof TestReference
             && $obj->references[0]->test === 'test1'
             && $obj->references[1]->test === 'test2';
     }
     
     public function testNonExistentSingularRelationshipGetting()
     {
-        $obj = new TestDb_TestDoc;
-        return $obj->embed instanceof TestDb_TestDoc_TestEmbed;
+        $obj = new TestDoc;
+        return $obj->embed instanceof TestEmbed;
     }
     
     public function testNonExistentMultipleRelationshipGetting()
     {
-        $obj = new TestDb_TestDoc;
+        $obj = new TestDoc;
         return $obj->embeds instanceof Europa_Mongo_EmbeddedCollection;
     }
     
     public function testSingleLevelSave()
     {
-        $obj = new TestDb_TestDoc;
+        $obj = new TestDoc;
         $obj->test = 'test1';
         $obj->save();
         return $obj->getCollection()->where('test', 'test1')->count() === 1;
@@ -176,7 +176,7 @@ class Test_Mongo_Document extends Europa_Unit_Test
     
     public function testSingleLevelSaveWithOneEmbedded()
     {
-        $obj = new TestDb_TestDoc;
+        $obj = new TestDoc;
         $obj->embed = array('oneEmbed' => true);
         $obj->save();
         return $obj->getCollection()->where('embed.oneEmbed', true)->count() === 1;
@@ -184,7 +184,7 @@ class Test_Mongo_Document extends Europa_Unit_Test
     
     public function testMultiLevelSaveWithMultipleEmbedded()
     {
-        $obj = new TestDb_TestDoc;
+        $obj = new TestDoc;
         $obj->embeds = array(
             array('multiEmbed' => true),
             array('multiEmbed' => true)
@@ -197,7 +197,7 @@ class Test_Mongo_Document extends Europa_Unit_Test
     
     public function testMultiLevelSaveWithOneReference()
     {
-        $obj = new TestDb_TestDoc;
+        $obj = new TestDoc;
         $obj->load(array('test' => 'test1'));
         $obj->reference = array('test' => 'test2');
         $obj->save();
@@ -209,7 +209,7 @@ class Test_Mongo_Document extends Europa_Unit_Test
     
     public function testMultiLevelSaveWithMultipleReferences()
     {
-        $obj = new TestDb_TestDoc;
+        $obj = new TestDoc;
         $obj->test = 'test1';
         $obj->load();
         $obj->references = array(
@@ -222,26 +222,26 @@ class Test_Mongo_Document extends Europa_Unit_Test
     }
 }
 
-class TestDb_TestDoc extends Europa_Mongo_Document
+class TestDoc extends Europa_Mongo_Document
 {
     public function preConstruct()
     {
         $this->setDb('testDb');
         $this->setCollection('testDoc');
         
-        $this->hasOne('embed', 'TestDb_TestDoc_TestEmbed');
-        $this->hasOne('reference', 'TestDb_TestReference');
-        $this->hasMany('embeds', 'TestDb_TestDoc_TestEmbed');
-        $this->hasMany('references', 'TestDb_TestReference');
+        $this->hasOne('embed', 'TestEmbed');
+        $this->hasOne('reference', 'TestReference');
+        $this->hasMany('embeds', 'TestEmbed');
+        $this->hasMany('references', 'TestReference');
     }
 }
 
-class TestDb_TestDoc_TestEmbed extends Europa_Mongo_EmbeddedDocument
+class TestEmbed extends Europa_Mongo_EmbeddedDocument
 {
     
 }
 
-class TestDb_TestReference extends Europa_Mongo_Document
+class TestReference extends Europa_Mongo_Document
 {
     public function preConstruct()
     {

@@ -323,7 +323,7 @@ abstract class Europa_Mongo_Document extends Europa_Mongo_DocumentAbstract
             $this->_collection    = get_class($this);
             $this->_collection[0] = strtolower($this->_collection[0]);
         }
-        return $this->getDb()->selectCollection($this->_collection);
+        return $this->getDb()->selectCollection($this->_collection)->setClass(get_class($this));
     }
     
     /**

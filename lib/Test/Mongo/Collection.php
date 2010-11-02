@@ -35,7 +35,7 @@ class Test_Mongo_Collection extends Europa_Unit_Test
     {
         $items = 0;
         foreach ($this->_db->collectiontest as $item) {
-            if (!$item instanceof Collectiontest_Collectiontest) {
+            if (!$item instanceof Collectiontest) {
                 return false;
             }
             ++$items;
@@ -46,7 +46,7 @@ class Test_Mongo_Collection extends Europa_Unit_Test
     public function testArrayAccessSetWrongClass()
     {
         try {
-            $this->_db->collectiontest[] = new Collectiontest_WrongDocument;
+            $this->_db->collectiontest[] = new WrongDocument;
         } catch (Europa_Mongo_Exception $e) {
             return true;
         }
@@ -57,7 +57,7 @@ class Test_Mongo_Collection extends Europa_Unit_Test
     {
         $collection = $this->_db->collectiontest;
         try {
-            $collection[] = new Collectiontest_Collectiontest(array('field' => 'val11'));
+            $collection[] = new Collectiontest(array('field' => 'val11'));
         } catch (Europa_Mongo_Exception $e) {
             return false;
         }
@@ -225,18 +225,18 @@ class Test_Mongo_Collection extends Europa_Unit_Test
     }
 }
 
-class Collectiontest_Collectiontest extends Europa_Mongo_Document
+class Collectiontest extends Europa_Mongo_Document
 {
-    public function preConstruct()
+    protected function preConstruct()
     {
         $this->setDb('collectiontest');
         $this->setCollection('collectiontest');
     }
 }
 
-class Collectiontest_WrongDocument extends Europa_Mongo_Document
+class WrongDocument extends Europa_Mongo_Document
 {
-    public function preConstruct()
+    protected function preConstruct()
     {
         $this->setDb('collectiontest');
         $this->setCollection('wrongDocument');
