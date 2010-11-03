@@ -63,8 +63,8 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     /**
      * Constructs a new document and sets any passed params.
      * 
-     * @param object|array $params An iterable element containing params
-     * to set.
+     * @param object|array $params An iterable element containing to set.
+     * 
      * @return Europa_Mongo_Document
      */
     public function __construct($params = array())
@@ -77,8 +77,9 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     /**
      * Sets a document parameter.
      * 
-     * @param string $name The name of the parameter.
-     * @param mixed $value The value of the parameter.
+     * @param string $name  The name of the parameter.
+     * @param mixed  $value The value of the parameter.
+     * 
      * @return Europa_Mongo_Document
      */
     final public function __set($name, $value)
@@ -90,6 +91,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * Returns a document parameter.
      * 
      * @param string $name The name of the parameter to get.
+     * 
      * @return mixed
      */
     final public function __get($name)
@@ -101,6 +103,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * Returns whether or not a particular parameter is set.
      * 
      * @param string $name The name of the parameter to check.
+     * 
      * @return bool
      */
     final public function __isset($name)
@@ -112,6 +115,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * Removes the specified parameter.
      * 
      * @param string $name The parameter to remove.
+     * 
      * @return Europa_Mongo_Document
      */
     final public function __unset($name)
@@ -140,6 +144,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * Fills the current document with the specified data.
      * 
      * @param mixed $data The data to fill the document with.
+     * 
      * @return Europa_Mongo_Document
      */
     public function fill($data)
@@ -208,8 +213,9 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     /**
      * Allows array-like setting of parameters.
      * 
-     * @param string $name The name of the parmaeter to set.
-     * @param mixed $value The value of the parameter to set.
+     * @param string $name  The name of the parmaeter to set.
+     * @param mixed  $value The value of the parameter to set.
+     * 
      * @return Europa_Mongo_Document
      */
     public function offsetSet($name, $value)
@@ -221,6 +227,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * Allows array-like getting of parameters.
      * 
      * @param string $name The parameter to get.
+     * 
      * @return mixed
      */
     public function offsetGet($name)
@@ -232,6 +239,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * Array-like way for checking parameter existence.
      * 
      * @param string $name THe name of the parameter to check.
+     * 
      * @return mixed
      */
     public function offsetExists($name)
@@ -243,6 +251,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * Array-like way of removing the specified parameter.
      * 
      * @param string $name The parameter to remove.
+     * 
      * @return Europa_Mongo_Document
      */
     public function offsetUnset($name)
@@ -263,8 +272,8 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     /**
      * Sets the specified parameter's value.
      * 
-     * @param string $name The parameter to set.
-     * @param mixed $value The value to give the parameter.
+     * @param string $name  The parameter to set.
+     * @param mixed  $value The value to give the parameter.
      * 
      * @return Europa_Mongo_Document
      */
@@ -272,6 +281,11 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     {
         // get real name
         $name = $this->getPropertyFromAlais($name);
+        
+        // force MongoId
+        if ($name === '_id' && !$value instanceof MongoId) {
+            $value = new MongoId($value);
+        }
         
         // force has-one to be a Europa_Mongo_Document
         if (isset($this->_hasOne[$name])) {
@@ -291,6 +305,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * Gets the specified parameter's value.
      * 
      * @param string $name The name of the parameter to get.
+     * 
      * @return mixed
      */
     public function get($name)
@@ -324,6 +339,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * Returns whether or not the specified parameter exists.
      * 
      * @param string $name The parameter to check for.
+     * 
      * @return bool
      */
     public function has($name)
@@ -336,6 +352,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * Removes the specified parameter.
      * 
      * @param string $name The parameter to remove.
+     * 
      * @return bool
      */
     public function clear($name)
@@ -409,7 +426,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     {
         $array = array();
         foreach ($this->_data as $name => $item) {
-            if ($item instanceof MongoId || $item instanceof MongoDBRef) {
+            if ($item instanceof MongoId) {
                 $item = (string) $item;
             } elseif ($item instanceof Europa_Mongo_Accessible) {
                 $item = $item->toArray();
@@ -432,18 +449,12 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
         
         // sift through the data
         foreach ($this->_data as $name => $item) {
-            // force a mongo id to be an instance of MongoId
-            if ($name === '_id') {
-                $array[$name] = new MongoId((string) $item);
-                continue;
-            }
-            
             // handle has one
             if (isset($this->_hasOne[$name])) {
                 if ($item instanceof Europa_Mongo_EmbeddedDocument) {
                     $array[$name] = $item->toMongoArray();
-                } else {
-                    $array[$name] = new MongoId((string) $item->_id);
+                } elseif ($item instanceof Europa_Mongo_Document) {
+                    $array[$name] = $item->_id;
                 }
                 continue;
             }
@@ -454,8 +465,8 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
                 foreach ($item as $subItem) {
                     if ($subItem instanceof Europa_Mongo_EmbeddedDocument) {
                         $array[$name][] = $subItem->toMongoArray();
-                    } else {
-                        $array[$name][] = new MongoId((string) $subItem->_id);
+                    } elseif ($item instanceof Europa_Mongo_Document) {
+                        $array[$name][] = $item->_id;
                     }
                 }
                 continue;
@@ -472,8 +483,9 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     /**
      * Applies a has one relationship to the document.
      * 
-     * @param string $name The name of the property.
+     * @param string $name  The name of the property.
      * @param string $class The name of the class to use.
+     * 
      * @return Europa_Mongo_Document
      */
     public function hasOne($name, $class = null)
@@ -485,7 +497,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     /**
      * Applies a has many relationship to the document.
      * 
-     * @param string $name The name of the property.
+     * @param string $name  The name of the property.
      * @param string $class The name of the class to use.
      * 
      * @return Europa_Mongo_Document
