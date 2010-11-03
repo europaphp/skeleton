@@ -12,6 +12,20 @@
 class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Accessible
 {
     /**
+     * The ascending flag.
+     * 
+     * @var int
+     */
+    const ASC = 1;
+    
+    /**
+     * The descending flag.
+     * 
+     * @var int
+     */
+    const DESC = -1;
+    
+    /**
      * The database to use for the collection.
      * 
      * @var Europa_Mongo_Db
@@ -87,6 +101,13 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      * @var bool
      */
     private $_refresh = false;
+    
+    /**
+     * The sorting options.
+     * 
+     * @var array
+     */
+    private $_sort = array();
     
     /**
      * Constructs a new collection and sets defaults.
@@ -248,6 +269,33 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
     }
     
     /**
+     * Applies sorting to the collection.
+     * 
+     * @param mixed $fields    The field or fields to sort.
+     * @param int   $direction The direction to sort.
+     * 
+     * @return Europa_Mongo_Collection
+     */
+    public function sort($fields = null, $direction = self::ASC)
+    {
+        if (is_null($fields)) {
+            return $this->_sort;
+        }
+        
+        if (!$fields) {
+            $this->_sort = array();
+            return $this;
+        }
+        
+        if (!is_array($fields)) {
+            $fields = array($fields => $direction);
+        }
+        
+        $this->_sort = array_merge($this->_sort, $fields);
+        return $this;
+    }
+    
+    /**
      * Returns the total number of pages.
      * 
      * @return int
@@ -321,8 +369,23 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
         $query  = array_merge($this->_query, $query);
         $fields = array_merge($this->_fields, $fields);
         
-        // apply it to the cursor
-        $this->_cursor = $this->find($query, $fields)->limit($this->limit())->skip($this->skip());
+        // query
+        $this->_cursor = $this->find($query, $fields);
+        
+        // apply limiting
+        if ($limit = $this->limit()) {
+            $this->_cursor->limit($limit);
+        }
+        
+        // apply skipping
+        if ($skip = $this->skip()) {
+            $this->_cursor->skip($skip);
+        }
+        
+        // apply sorting
+        if ($sort = $this->sort()) {
+            $this->_cursor->sort($sort);
+        }
         
         // rewind to make sure the cursor is reset
         $this->_cursor->rewind();
