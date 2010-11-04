@@ -99,7 +99,8 @@ class Europa_Mongo_EmbeddedCollection implements Europa_Mongo_Accessible
      * Applies the document to the collection.
      * 
      * @param mixed $offset
-     * @param Europa_Mongo_DocumentAbstract $document
+     * @param mixed $document
+     * 
      * @return Europa_Mongo_EmbeddedCollection
      */
     public function offsetSet($offset, $document)
@@ -123,6 +124,7 @@ class Europa_Mongo_EmbeddedCollection implements Europa_Mongo_Accessible
      * Returns the document at the specified offset.
      * 
      * @param mixed $offset
+     * 
      * @return Europa_Mongo_DocumentAbstract
      */
     public function offsetGet($offset)
@@ -138,6 +140,7 @@ class Europa_Mongo_EmbeddedCollection implements Europa_Mongo_Accessible
      * offset exists.
      * 
      * @param mixed $offset
+     * 
      * @return bool
      */
     public function offsetExists($offset)

@@ -26,20 +26,6 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     private $_data = array();
     
     /**
-     * Whitelisted properties.
-     * 
-     * @var array
-     */
-    private $_whitelist = array();
-    
-    /**
-     * Blacklisted properties.
-     * 
-     * @var array
-     */
-    private $_blacklist = array();
-    
-    /**
      * Property aliases.
      * 
      * @var array
@@ -149,11 +135,26 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      */
     public function fill($data)
     {
+        if (!$data) {
+            return $this;
+        }
+        
+        if ($this->isId($data)) {
+            $this->setId($data);
+            return $this;
+        }
+        
+        if ($this->isRef($data)) {
+            $this->setRef($data);
+            return $this;
+        }
+        
         if (is_array($data) || is_object($data)) {
             foreach ($data as $name => $value) {
                 $this->set($name, $value);
             }
         }
+        
         return $this;
     }
     
@@ -168,8 +169,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     }
     
     /**
-     * Returns the parameter name of the current parameter in the
-     * iteration.
+     * Returns the parameter name of the current parameter in the iteration.
      * 
      * @return string
      */
@@ -270,6 +270,65 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     }
     
     /**
+     * Checks to make sure the passed $id is a valid MongoId.
+     * 
+     * @param mixed $id The id to check.
+     * 
+     * @return bool
+     */
+    public function isId($id)
+    {
+        if ($id instanceof MongoId) {
+            return true;
+        }
+        $new = new MongoId($id);
+        return $id === $new->__toString();
+    }
+    
+    /**
+     * Returns whether or not the specified $ref is a MongoDBRef.
+     * 
+     * @param mixed $ref The ref to check.
+     * 
+     * @return bool
+     */
+    public function isRef($ref)
+    {
+        return MongoDBRef::isRef($ref);
+    }
+    
+    /**
+     * Formats the passed id and configures the object appropriately.
+     * 
+     * @param mixed $id The id to set.
+     * 
+     * @return Europa_Mongo_DocumentAbstract
+     */
+    public function setId($id)
+    {
+        $this->_data['_id'] = new MongoId((string) $id);
+        return $this;
+    }
+    
+    /**
+     * Sets the specified database reference. It automatically selects the
+     * correct database (if specified) and collection while setting the $id.
+     * 
+     * @param array $ref The reference to set.
+     * 
+     * @return Europa_Mongo_DocumentAbstract
+     */
+    public function setRef(array $ref)
+    {
+        if (isset($ref['$db'])) {
+            $this->setDb($ref['$db']);
+        }
+        $this->setCollection($ref['$ref']);
+        $this->setId($ref['$id']);
+        return $this;
+    }
+    
+    /**
      * Sets the specified parameter's value.
      * 
      * @param string $name  The parameter to set.
@@ -282,13 +341,10 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
         // get real name
         $name = $this->getPropertyFromAlais($name);
         
-        // force MongoId
-        if ($name === '_id' && !$value instanceof MongoId) {
-            $value = new MongoId($value);
-        }
-        
-        // force has-one to be a Europa_Mongo_Document
-        if (isset($this->_hasOne[$name])) {
+        // id and dbref automation
+        if ($name === '_id') {
+            return $this->setId($value);
+        } elseif (isset($this->_hasOne[$name])) {
             $class = $this->_hasOne[$name];
             $value = new $class($value);
         } elseif (isset($this->_hasMany[$name])) {
@@ -298,6 +354,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
         // set the value
         $this->_data[$name] = $value;
         
+        // chain
         return $this;
     }
     

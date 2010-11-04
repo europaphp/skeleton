@@ -45,14 +45,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      * @var array
      */
     private $_query = array();
-    
-    /**
-     * The last query that was run.
-     * 
-     * @var array
-     */
-    private $_lastQuery = array();
-    
+        
     /**
      * The fields to return.
      * 
@@ -176,7 +169,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
         }
         
         $this->_fields = array_merge($this->_fields, $fields);
-        return $this;
+        return $this->refresh();
     }
     
     /**
@@ -188,8 +181,6 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      */
     public function where($field, $value)
     {
-        $this->refresh();
-        
         // if the value is an array then it's an operator
         if (is_array($value)) {
             // make sure the value is an array, or it's overwritten
@@ -209,7 +200,9 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
             }
             $this->_query[$field] = $value;
         }
-        return $this;
+        
+        // mark as changed and chain
+        return $this->refresh();
     }
     
     /**
@@ -265,6 +258,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
             $this->skip($limit * $page - $limit);
         }
         
+        // mark as changed and chain
         return $this->refresh();
     }
     
@@ -281,6 +275,9 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
         if (is_null($fields)) {
             return $this->_sort;
         }
+        
+        // mark as changed
+        $this->refresh();
         
         if (!$fields) {
             $this->_sort = array();
@@ -390,9 +387,6 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
         // rewind to make sure the cursor is reset
         $this->_cursor->rewind();
         
-        // set the last query as to re-use any settings
-        $this->_lastQuery = $query;
-        
         // mark as refreshed and return the collection
         return $this->stop();
     }
@@ -419,8 +413,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
     {
         $current = $this->getCursor()->current();
         $class   = $this->getClass();
-        $class   = new $class;
-        return $class->setCollection($this->getName())->fill($current);
+        return new $class($current);
     }
     
     /**
