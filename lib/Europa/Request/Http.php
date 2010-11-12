@@ -131,6 +131,8 @@ class Europa_Request_Http extends Europa_Request
             $requestUri = isset($_SERVER['HTTP_X_REWRITE_URL'])
                         ? $_SERVER['HTTP_X_REWRITE_URL']
                         : $_SERVER['REQUEST_URI'];
+            $requestUri = explode('?', $requestUri);
+            $requestUri = $requestUri[0];
             $requestUri = trim($requestUri, '/');
             $requestUri = substr($requestUri, strlen(self::getRootUri()));
             $requestUri = trim($requestUri, '/');

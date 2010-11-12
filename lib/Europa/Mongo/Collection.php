@@ -6,8 +6,7 @@
  * @category Mongo
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  (c) 2010 Trey Shugart http://europaphp.org/license
  */
 class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Accessible
 {
@@ -75,6 +74,13 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
     private $_class = null;
     
     /**
+     * The reference to the class to get information about it's fields.
+     * 
+     * @var Europa_Mongo_Document
+     */
+    private $_reference;
+    
+    /**
      * The result limit.
      * 
      * @var int|null
@@ -103,10 +109,20 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
     private $_sort = array();
     
     /**
+     * Magic method prefixed that have a special meaning.
+     * 
+     * @var array
+     */
+    private $_magicPrefixes = array(
+        'filterBy'
+    );
+    
+    /**
      * Constructs a new collection and sets defaults.
      * 
      * @param Europa_Mongo_Db $db
-     * @param string $name
+     * @param string          $name
+     * 
      * @return Europa_Mongo_Collection
      */
     public function __construct(Europa_Mongo_Db $db, $name)
@@ -117,7 +133,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
     }
     
     /**
-     * Calls a command using where.
+     * Calls any magic methods.
      * 
      * @param string $name The name of the command.
      * @param array  $args The arguments to pass to the command.
@@ -126,7 +142,13 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      */
     public function __call($name, array $args = array())
     {
-        return $this->where($args[0], array('$' . $name => $args[1]));
+        $fields = $args[0];
+        if (isset($args[1])) {
+            $value = array('$' . $name => $args[1]);
+            $this->where($fields, $value);
+        } else {
+            $this->where($fields);
+        }
     }
     
     /**
@@ -155,6 +177,7 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      * selected.
      * 
      * @param mixed $fields A string or array of fields to return.
+     * 
      * @return Europa_Mongo_Collection
      */
     public function select($fields = null)
@@ -168,41 +191,101 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
             $fields = array($fields);
         }
         
+        // make sure the fields are unaliased
+        foreach ($fields as $k => $v) {
+            $field[$k] = $this->getDocumentReference()->unAlias($v);
+        }
+        
         $this->_fields = array_merge($this->_fields, $fields);
         return $this->refresh();
     }
     
     /**
-     * Adds a claus for the specified field.
+     * Returns a distinct array of results containing values from the specified field.
      * 
-     * @param string $field
-      *@param mixed $value
+     * @param string $field The field to select the distinct values for.
+     *
+     * @return array
+     */
+    public function distinct($field)
+    {
+        return $this->getDb()->command(
+            array(
+                'distinct' => $this->getName(),
+                'key'      => $field,
+                'query'    => $this->getQuery()
+            )
+        );
+    }
+    
+    /**
+     * Adds a clause for the specified field.
+     * 
+     * @param string $fields
+     * @param mixed  $value
+     * 
      * @return Europa_Mongo_Collection
      */
-    public function where($field, $value)
+    public function where($fields, $value = null)
     {
-        // if the value is an array then it's an operator
-        if (is_array($value)) {
-            // make sure the value is an array, or it's overwritten
-            if (!isset($this->_query[$field]) || !is_array($this->_query[$field])) {
-                $this->_query[$field] = array();
-            }
+        // normalize to an arary
+        if (!is_array($fields)) {
+            $fields = array($fields => $value);
+        }
+        
+        // attach all field wheres
+        foreach ($fields as $field => $value) {
+            $field = $this->getDocumentReference()->unAlias($field);
             
-            // apply each operator
-            foreach ($value as $k => $v) {
-                $this->_query[$field][$k] = $v;
+            // if the value is an array then it's an operator
+            if (is_array($value)) {
+                // make sure the value is an array, or it's overwritten
+                if (!isset($this->_query[$field]) || !is_array($this->_query[$field])) {
+                    $this->_query[$field] = array();
+                }
+                
+                // apply each operator
+                foreach ($value as $k => $v) {
+                    $this->_query[$field][$k] = $v;
+                }
+            // handle straight values
+            } else {
+                // make sure the value is a mongo id if the field is _id
+                if ($field === '_id') {
+                    $value = new MongoID($value);
+                }
+                $this->_query[$field] = $value;
             }
-        // handle straight values
-        } else {
-            // make sure the value is a mongo id if the field is _id
-            if ($field === '_id' && !$value instanceof MongoId) {
-                $value = new MongoID($value);
-            }
-            $this->_query[$field] = $value;
         }
         
         // mark as changed and chain
         return $this->refresh();
+    }
+    
+    /**
+     * Ensures that a regex value is passed to where().
+     * 
+     * @param string $field
+     * @param string $value
+     * 
+     * @return Europa_Mongo_Colelction
+     */
+    public function like($field, $value = null)
+    {
+        return $this->where($field, $value);
+    }
+    
+    /**
+     * Performs a search using regex using an "or" query.
+     * 
+     * @param string $field
+     * @param string $value
+     * 
+     * @return Europa_Mongo_Colelction
+     */
+    public function orLike($field, $value = null)
+    {
+        return $this->or($field, $value);
     }
     
     /**
@@ -353,6 +436,26 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
     }
     
     /**
+     * Returns the current compiled query.
+     * 
+     * @return array
+     */
+    public function getQuery()
+    {
+        return $this->_query;
+    }
+    
+    /**
+     * Returns the fields being returned.
+     * 
+     * @return array
+     */
+    public function getFields()
+    {
+        return $this->_fields;
+    }
+    
+    /**
      * Executes the current query.
      * 
      * @param array $query  Any additional query params to use.
@@ -363,10 +466,13 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
     public function execute(array $query = array(), array $fields = array())
     {
         // build the query
-        $query  = array_merge($this->_query, $query);
-        $fields = array_merge($this->_fields, $fields);
+        $query  = array_merge($this->getQuery(), $query);
+        $fields = array_merge($this->getFields(), $fields);
         
-        // query
+        // start time for logging
+        $time = microtime(true);
+        
+        // execut query
         $this->_cursor = $this->find($query, $fields);
         
         // apply limiting
@@ -386,6 +492,18 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
         
         // rewind to make sure the cursor is reset
         $this->_cursor->rewind();
+        
+        // end time for logging
+        $time = round(microtime(true) - $time, 4);
+        
+        // log the query
+        $this->getDb()->getConnection()->addQueryLog(
+            $this->getDb()->getName(),
+            $this->getName(),
+            $query,
+            $fields,
+            $time
+        );
         
         // mark as refreshed and return the collection
         return $this->stop();
@@ -589,12 +707,17 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
      */
     public function setClass($class)
     {
-        if (!$class || !is_string($class)) {
+        // set the class and reference object
+        $this->_class     = $class;
+        $this->_reference = new $class;
+        
+        // make sure it's a valid childclass
+        if (!$this->_reference instanceof Europa_Mongo_Document) {
             throw new Europa_Mongo_Exception(
-                'Specified class name must be a string.'
+                'The specified class must be an instance or subclass of Europa_Mongo_Document.'
             );
         }
-        $this->_class = $class;
+        
         return $this;
     }
     
@@ -620,5 +743,74 @@ class Europa_Mongo_Collection extends MongoCollection implements Europa_Mongo_Ac
     public function getDefaultClass()
     {
         return Europa_String::create($this->getName())->toClass()->__toString();
+    }
+    
+    /**
+     * Aggregates the specified field value from each document into an array.
+     * 
+     * @param string $field The field to aggregate.
+     * 
+     * @return array
+     */
+    public function aggregate($field)
+    {
+        $field = $this->getDocumentReference()->unAlias($field);
+        $array = array();
+        foreach ($this->getCursor() as $document) {
+            if (isset($document[$field])) {
+                $array[] = $document[$field];
+            }
+        }
+        return $array;
+    }
+    
+    /**
+     * Aggregates the specified field and makes sure that the values are unique.
+     * 
+     * @param string $field The field to aggregate and make unique.
+     * 
+     * @return array
+     */
+    public function unique($field)
+    {
+        $array = $this->aggregate($field);
+        return array_unique($array);
+    }
+    
+    /**
+     * Filters by the specified column according to the specified exactness. If
+     * an array is passed, then exact isn't used and an "in" query is used.
+     * 
+     * @param string $field The filter to filter by.
+     * @param mixed  $value The value to use.
+     * @param bool   $exact Whether or not to match exactly.
+     * 
+     * @return BaseCollection
+     */
+    public function filterBy($field, $value, $exact = true)
+    {
+        if (is_array($value)) {
+            $this->in($field, $value);
+        } elseif ($exact) {
+            $this->where($field, $value);
+        } else {
+            $this->like($field, $value);
+        }
+        return $this;
+    }
+    
+    /**
+     * Returns a reference of the document class that is returned in this collection.
+     * This allows information to be collected about the document class that is
+     * returned for every item in the colleciton.
+     * 
+     * @return Europa_Mongo_Document
+     */
+    protected function getDocumentReference()
+    {
+        if (!$this->_reference) {
+            $this->setClass($this->getDefaultClass());
+        }
+        return $this->_reference;
     }
 }

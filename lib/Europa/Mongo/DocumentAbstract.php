@@ -339,7 +339,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     public function set($name, $value)
     {
         // get real name
-        $name = $this->getPropertyFromAlais($name);
+        $name = $this->unAlias($name);
         
         // id and dbref automation
         if ($name === '_id') {
@@ -368,7 +368,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     public function get($name)
     {
         // get real name
-        $name = $this->getPropertyFromAlais($name);
+        $name = $this->unAlias($name);
         
         // if the value exists, return it
         if (isset($this->_data[$name])) {
@@ -401,7 +401,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      */
     public function has($name)
     {
-        $name = $this->getPropertyFromAlais($name);
+        $name = $this->unAlias($name);
         return isset($this->_data[$name]);
     }
     
@@ -415,7 +415,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     public function clear($name)
     {
         // get real name
-        $name = $this->getPropertyFromAlais($name);
+        $name = $this->unAlias($name);
         
         // unset only if set
         if (isset($this->_data[$name])) {
@@ -573,7 +573,7 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * 
      * @return string
      */
-    protected function getPropertyFromAlais($alias)
+    public function unAlias($alias)
     {
         if (isset($this->_aliases[$alias])) {
             return $this->_aliases[$alias];

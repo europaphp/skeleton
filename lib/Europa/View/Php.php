@@ -20,27 +20,42 @@ class Europa_View_Php extends Europa_View
      * 
      * @var Europa_View
      */
-    protected $_child = null;
+    private $_child = null;
     
     /**
      * The script to be rendered.
      * 
      * @var string
      */
-    protected $_script = null;
+    private $_script = null;
     
     /**
      * The script suffix.
      * 
      * @var string
      */
-    protected $_suffix = 'php';
+    private $_suffix = 'php';
+    
+    /**
+     * The helper formatter for this instance.
+     * 
+     * @var string
+     */
+    private $_helperFormatter;
+    
+    /**
+     * The default helper formatter.
+     * 
+     * @var string
+     */
+    private static $_defaultHelperFormatter;
     
     /**
      * Construct the view and sets defaults.
      * 
      * @param string $script The script to render.
-     * @param array $params The arguments to pass to the script.
+     * @param array  $params The arguments to pass to the script.
+     * 
      * @return Europa_View
      */
     public function __construct($script = null, $params = null)
@@ -58,48 +73,47 @@ class Europa_View_Php extends Europa_View
      * unset.
      * 
      * @param string $name The name of the property to get or helper to load.
+     * 
      * @return mixed
      */
     public function __get($name)
     {
+        // if it's already set, return it
         if (parent::__isset($name)) {
             return parent::__get($name);
         }
+        
+        // call the helper
         $helper = $this->__call($name);
+        
+        // if it had a return value, set it and return it
         if ($helper) {
             parent::__set($name, $helper);
             return $helper;
         }
+        
+        // otherwise just return null
         return null;
     }
 
     /**
-     * Attempts to load a helper and executes it. Returns null of not found.
+     * Attempts to load and execute a helper. Returns null of not found.
      * 
      * @return mixed
      */
     public function __call($func, $args = array())
     {
         // format the helper class name for the given method
-        $class = (string) Europa_String::create($func)->toClass();
+        $class = $this->formatHelper($func);
 
         // if unable to load, return null
         if (!Europa_Loader::loadClass($class)) {
             return null;
         }
 
-        // instantiate the helper and pass in the current view
-        $class = new $class($this, $args);
-        
-        // helper must implement the helper interface
-        if (!$class instanceof Europa_View_Helper) {
-            throw new Europa_View_Exception_InvalidHelperInstance(
-                'Helper ' . get_class($class) . ' must implement Europa_View_Helper.'
-            );
-        }
-
-        // or just return the helper instance
-        return $class;
+        // reflect and create a new instance with the passed arguments
+        $class = new ReflectionClass($class);
+        return $class->newInstanceArgs($args);
     }
     
     /**
@@ -112,7 +126,8 @@ class Europa_View_Php extends Europa_View
         // allows us to return the included file as a string
         ob_start();
         
-        // include it
+        // include it and trigger an error for any exceptions since you can't throw
+        // exceptions inside __toString
         if ($view = Europa_Loader::search($this->getScript() . '.' . $this->getSuffix())) {
             try {
                 include $view;
@@ -130,6 +145,7 @@ class Europa_View_Php extends Europa_View
      * view.
      * 
      * @param Europa_View $view The view to extend.
+     * 
      * @return Europa_View
      */
     public function extend(Europa_View $view)
@@ -141,6 +157,7 @@ class Europa_View_Php extends Europa_View
      * Sets the child view for the current view and returns the current view.
      * 
      * @param Europa_View $view The view to extend.
+     * 
      * @return Europa_View
      */
     public function setChild(Europa_View $view)
@@ -153,6 +170,7 @@ class Europa_View_Php extends Europa_View
      * Returns the child of the current view if it exists.
      * 
      * @param Europa_View $view The view to extend.
+     * 
      * @return Europa_View
      */
     public function getChild()
@@ -165,6 +183,7 @@ class Europa_View_Php extends Europa_View
      * 
      * @param String $script The path to the script to be rendered relative 
      * to the view path, excluding the extension.
+     * 
      * @return Object Europa_View
      */
     public function setScript($script)
@@ -187,6 +206,7 @@ class Europa_View_Php extends Europa_View
      * Sets the view suffix.
      * 
      * @param string $suffix The suffix to use.
+     * 
      * @return Europa_View_Php
      */
     public function setSuffix($suffix)
@@ -203,5 +223,77 @@ class Europa_View_Php extends Europa_View
     public function getSuffix()
     {
         return $this->_suffix;
+    }
+    
+    /**
+     * Sets the helper formatter only for this instance.
+     * 
+     * @param mixed $formatter The helper formatter.
+     * 
+     * @return Europa_View_Php
+     */
+    public function setHelperFormatter($formatter)
+    {
+        if (!is_callable($formatter)) {
+            throw new Europa_View_Exception(
+                'The specified helper formatter is not callable.'
+            );
+        }
+        $this->_helperFormatter = $formatter;
+        return $this;
+    }
+    
+    /**
+     * Returns the helper formatter.
+     * 
+     * @return mixed
+     */
+    public function getHelperFormatter()
+    {
+        return $this->_helperFormatter();
+    }
+    
+    /**
+     * Sets the default helper formatter for all view instances.
+     * 
+     * @param mixed The helper formatter.
+     * 
+     * @return void
+     */
+    public static function setDefaultHelperFormatter($formatter)
+    {
+        self::$_defaultHelperFormatter = $formatter;
+    }
+    
+    /**
+     * Returns the default helper formatter.
+     * 
+     * @return mixed
+     */
+    public static function getDefaultHelperFormatter()
+    {
+        return self::$_defaultHelperFormatter;
+    }
+    
+    /**
+     * Returns the formatted helper class name from the helper string passed.
+     * 
+     * @param string $helper The helper to format.
+     * 
+     * @return string
+     */
+    protected function formatHelper($helper)
+    {
+        $formatter = $this->getHelperFormatter();
+        
+        if (!$formatter) {
+            $formatter = self::getDefaultHelperFormatter();
+        }
+        
+        if (!$formatter) {
+            return Europa_String::create($helper)->toClass()->__toString();
+        }
+        
+        return call_user_func_array($formatter, array($helper));
     }
 }

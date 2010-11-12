@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * The MongoDB connection class. Allows management and assigning
+ * of mutiple connections as well as default connections.
+ * 
+ * @category Mongo
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  (c) 2010 Trey Shugart http://europaphp.org/license
+ */
 class Europa_Mongo_Db extends MongoDB
 {
     /**
@@ -17,10 +26,18 @@ class Europa_Mongo_Db extends MongoDB
     private $_name;
     
     /**
+     * The subclass to use when returning a collection.
+     * 
+     * @var string
+     */
+    private $_class;
+    
+    /**
      * Constructs the database and sets defaults.
      * 
      * @param Europa_Mongo_Connection $connection The connection to use.
-     * @param string $name The name of the database.
+     * @param string                  $name       The name of the database.
+     * 
      * @return Europa_Mongo_Db
      */
     public function __construct(Europa_Mongo_Connection $connection, $name)
@@ -34,6 +51,7 @@ class Europa_Mongo_Db extends MongoDB
      * Returns the specified collection.
      * 
      * @param string $name The name of the collection to get.
+     * 
      * @return Europa_Mongo_Collection
      */
     public function __get($name)
@@ -45,11 +63,19 @@ class Europa_Mongo_Db extends MongoDB
      * Returns the specified collection.
      * 
      * @param string $name The name of the collection to get.
+     * 
      * @return Europa_Mongo_Collection
      */
     public function selectCollection($name)
     {
-        return new Europa_Mongo_Collection($this, $name);
+        $class = $this->getClass();
+        $class = new $class($this, $name);
+        if (!$class instanceof Europa_Mongo_Collection) {
+            throw new Europa_Mongo_Exception(
+                'Collection class must be an instance or subclass of Europa_Mongo_Collection.'
+            );
+        }
+        return $class;
     }
     
     /**
@@ -57,7 +83,7 @@ class Europa_Mongo_Db extends MongoDB
      * 
      * @return Europa_Mongo_Connection
      */
-    final public function getConnection()
+    public function getConnection()
     {
         return $this->_connection;
     }
@@ -67,8 +93,34 @@ class Europa_Mongo_Db extends MongoDB
      * 
      * @return string
      */
-    final public function getName()
+    public function getName()
     {
         return $this->_name;
+    }
+    
+    /**
+     * Sets the class to use for collection subclasses.
+     * 
+     * @param string $class The class to use for subclasses.
+     * 
+     * @return Europa_Mongo_Db
+     */
+    public function setClass($class)
+    {
+        $this->_class = $class;
+        return $this;
+    }
+    
+    /**
+     * Returns the classname being used for collections.
+     * 
+     * @return string
+     */
+    public function getClass()
+    {
+        if (!$this->_class) {
+            $this->setClass('Europa_Mongo_Collection');
+        }
+        return $this->_class;
     }
 }

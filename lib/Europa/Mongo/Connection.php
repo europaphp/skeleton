@@ -7,8 +7,7 @@
  * @category Mongo
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  (c) 2010 Trey Shugart http://europaphp.org/license
  */
 class Europa_Mongo_Connection extends Mongo
 {
@@ -41,6 +40,13 @@ class Europa_Mongo_Connection extends Mongo
     private static $_defaultOptions = array();
     
     /**
+     * The default class to use.
+     * 
+     * @var string
+     */
+    private static $_defaultClass = 'Europa_Mongo_Db';
+    
+    /**
      * The DSN associated to this connection.
      * 
      * @var string
@@ -53,6 +59,22 @@ class Europa_Mongo_Connection extends Mongo
      * @var array
      */
     private $_options;
+    
+    /**
+     * The class to use for the database object.
+     * 
+     * @var string
+     */
+    private $_class;
+    
+    /**
+     * The query log, if logging is turned on. Contains information about each query
+     * that was run such as the database, collection, query, fields returnd and time
+     * taken.
+     * 
+     * @var array
+     */
+    private $_log = array();
     
     /**
      * Constructs a new connection and sets defaults.
@@ -139,7 +161,14 @@ class Europa_Mongo_Connection extends Mongo
      */
     public function selectDb($name)
     {
-        return new Europa_Mongo_Db($this, $name);
+        $class = $this->getClass();
+        $class = new $class($this, $name);
+        if (!$class instanceof Europa_Mongo_Db) {
+            throw new Europa_Mongo_Exception(
+                'Database must be an instance or subclass of Europa_Mongo_Db.'
+            );
+        }
+        return $class;
     }
     
     /**
@@ -153,6 +182,83 @@ class Europa_Mongo_Connection extends Mongo
     public function selectCollection($dbName, $collectionName)
     {
         return new Europa_Mongo_Collection($this->$dbName, $collectionName);
+    }
+    
+    /**
+     * Sets the database class to use.
+     * 
+     * @param string $class The class to use.
+     * 
+     * @return Europa_Mongo_Connection
+     */
+    public function setClass($class)
+    {
+        $this->_class = $class;
+        return $this;
+    }
+    
+    /**
+     * Returns the database class to use.
+     * 
+     * @return string
+     */
+    public function getClass()
+    {
+        if (!$this->_class) {
+            $this->setClass(self::getDefaultClass());
+        }
+        return $this->_class;
+    }
+    
+    /**
+     * Logs a query.
+     * 
+     * @return Europa_Mongo_Connection
+     */
+    public function addQueryLog($database, $collection, $query, $fields, $time)
+    {
+        $this->_log[] = array(
+            'database'   => $database,
+            'collection' => $collection,
+            'query'      => $query,
+            'fields'     => $fields,
+            'time'       => $time
+        );
+        return $this;
+    }
+    
+    /**
+     * Returns the whole query log.
+     * 
+     * @return array
+     */
+    public function getQueryLog()
+    {
+        return $this->_log;
+    }
+    
+    /**
+     * Returns the number of queries run.
+     * 
+     * @return int
+     */
+    public function getQueryCount()
+    {
+        return count($this->getQueryLog());
+    }
+    
+    /**
+     * Returns the time - in seconds - it took for all queries to run.
+     * 
+     * @return float
+     */
+    public function getQueryTime()
+    {
+        $time = 0;
+        foreach ($this->getQueryLog() as $log) {
+            $time += $log['time'];
+        }
+        return $time;
     }
     
     /**
@@ -310,5 +416,27 @@ class Europa_Mongo_Connection extends Mongo
     public static function getDefaultOptions()
     {
         return self::$_defaultOptions;
+    }
+    
+    /**
+     * Sets the default database class.
+     * 
+     * @param string $class The default database class.
+     * 
+     * @return void
+     */
+    public static function setDefaultClass($class)
+    {
+        self::$_defaultClass = $class;
+    }
+    
+    /**
+     * Returns the default database class.
+     * 
+     * @return string
+     */
+    public static function getDefaultClass()
+    {
+        return self::$_defaultClass;
     }
 }
