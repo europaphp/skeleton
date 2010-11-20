@@ -1,13 +1,12 @@
 <?php
 
 /**
- * A router which can dispatch to a request or match a given subject.
+ * A basic router.
  * 
- * @category Request
+ * @category Router
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  (c) 2010 Trey Shugart http://europaphp.org/license
  */
 class Europa_Router implements Iterator, ArrayAccess, Countable
 {
@@ -29,6 +28,7 @@ class Europa_Router implements Iterator, ArrayAccess, Countable
      * Performs route matching. The parameters are returned if matched.
      * 
      * @param string $subject The subject to match.
+     * 
      * @return bool|false
      */
     public function query($subject)
@@ -46,8 +46,9 @@ class Europa_Router implements Iterator, ArrayAccess, Countable
     /**
      * Sets a route.
      * 
-     * @param string $name The name of the route.
+     * @param string       $name  The name of the route.
      * @param Europa_Route $route The route to use.
+     * 
      * @return Europa_Router
      */
     public function setRoute($name, Europa_Route $route)
@@ -60,6 +61,7 @@ class Europa_Router implements Iterator, ArrayAccess, Countable
      * Gets a specified route.
      * 
      * @param string $name The name of the route to get.
+     * 
      * @return Europa_Route|null
      */
     public function getRoute($name = null)
@@ -153,6 +155,7 @@ class Europa_Router implements Iterator, ArrayAccess, Countable
      * Returns the specified route.
      * 
      * @param mixed $offset The route to get.
+     * 
      * @return Europa_Route|null
      */
     public function offsetGet($offset)
@@ -163,8 +166,9 @@ class Europa_Router implements Iterator, ArrayAccess, Countable
     /**
      * Sets the specified route.
      * 
-     * @param mixed $offset The name of the route.
-     * @param Europa_Route $route The route to set.
+     * @param mixed        $offset The name of the route.
+     * @param Europa_Route $route  The route to set.
+     * 
      * @return void
      */
     public function offsetSet($offset, $route)
@@ -176,6 +180,7 @@ class Europa_Router implements Iterator, ArrayAccess, Countable
      * Checks to see if a route exists.
      * 
      * @param mixed $offset The route to check for.
+     * 
      * @return bool
      */
     public function offsetExists($offset)
@@ -187,6 +192,7 @@ class Europa_Router implements Iterator, ArrayAccess, Countable
      * Removes a route.
      * 
      * @param mixed $offset The route to remove.
+     * 
      * @return void
      */
     public function offsetUnset($offset)

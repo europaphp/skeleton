@@ -6,16 +6,23 @@
  * @category Forms
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  (c) 2010 Trey Shugart http://europaphp.org/license
  */
 interface Europa_Form_Renderable
 {
     /**
+     * Makes sure every renderable object can be rendered.
+     * 
+     * @return string
+     */
+    public function __toString();
+    
+    /**
      * Sets an attribute value.
      * 
-     * @param string $name The name of the attribute.
+     * @param string $name  The name of the attribute.
      * @param string $value The value of the attribute.
+     * 
      * @return mixed
      */
     public function __set($name, $value);
@@ -24,6 +31,7 @@ interface Europa_Form_Renderable
      * Returns an attribute value.
      * 
      * @param string $name The name of the attribute.
+     * 
      * @return mixed
      */
     public function __get($name);
@@ -32,6 +40,7 @@ interface Europa_Form_Renderable
      * Returns whether or not an attribute exists.
      * 
      * @param string $name The attribute name.
+     * 
      * @return bool
      */
     public function __isset($name);
@@ -40,6 +49,7 @@ interface Europa_Form_Renderable
      * Removes an attribute.
      * 
      * @param string $name The attribute name.
+     * 
      * @return bool
      */
     public function __unset($name);
@@ -47,8 +57,9 @@ interface Europa_Form_Renderable
     /**
      * Sets an attribute value.
      * 
-     * @param string $name The name of the attribute.
+     * @param string $name  The name of the attribute.
      * @param string $value The value of the attribute.
+     * 
      * @return mixed
      */
     public function setAttribute($name, $value);
@@ -57,6 +68,7 @@ interface Europa_Form_Renderable
      * Returns an attribute value.
      * 
      * @param string $name The name of the attribute.
+     * 
      * @return mixed
      */
     public function getAttribute($name);
@@ -65,6 +77,7 @@ interface Europa_Form_Renderable
      * Returns whether or not an attribute exists.
      * 
      * @param string $name The attribute name.
+     * 
      * @return bool
      */
     public function hasAttribute($name);
@@ -73,6 +86,7 @@ interface Europa_Form_Renderable
      * Removes an attribute.
      * 
      * @param string $name The attribute name.
+     * 
      * @return bool
      */
     public function removeAttribute($name);

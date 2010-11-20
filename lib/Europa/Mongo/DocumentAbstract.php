@@ -298,7 +298,8 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
     }
     
     /**
-     * Formats the passed id and configures the object appropriately.
+     * Formats the passed id and configures the object appropriately. If the
+     * id is a false value then it is ignored.
      * 
      * @param mixed $id The id to set.
      * 
@@ -306,7 +307,9 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      */
     public function setId($id)
     {
-        $this->_data['_id'] = new MongoId((string) $id);
+        if ($id) {
+            $this->_data['_id'] = new MongoId((string) $id);
+        }
         return $this;
     }
     
@@ -314,17 +317,21 @@ abstract class Europa_Mongo_DocumentAbstract implements Europa_Mongo_Accessible
      * Sets the specified database reference. It automatically selects the
      * correct database (if specified) and collection while setting the $id.
      * 
+     * if $ref['$id'] is a false value, then $ref is ignored.
+     * 
      * @param array $ref The reference to set.
      * 
      * @return Europa_Mongo_DocumentAbstract
      */
     public function setRef(array $ref)
     {
-        if (isset($ref['$db'])) {
-            $this->setDb($ref['$db']);
+        if ($ref['$id']) {
+            if (isset($ref['$db'])) {
+                $this->setDb($ref['$db']);
+            }
+            $this->setCollection($ref['$ref']);
+            $this->setId($ref['$id']);
         }
-        $this->setCollection($ref['$ref']);
-        $this->setId($ref['$id']);
         return $this;
     }
     

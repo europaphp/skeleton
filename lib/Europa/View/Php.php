@@ -84,7 +84,7 @@ class Europa_View_Php extends Europa_View
         }
         
         // call the helper
-        $helper = $this->__call($name);
+        $helper = $this->__call($name, array($this));
         
         // if it had a return value, set it and return it
         if ($helper) {
@@ -105,15 +105,18 @@ class Europa_View_Php extends Europa_View
     {
         // format the helper class name for the given method
         $class = $this->formatHelper($func);
-
+        
         // if unable to load, return null
         if (!Europa_Loader::loadClass($class)) {
             return null;
         }
-
+        
         // reflect and create a new instance with the passed arguments
         $class = new ReflectionClass($class);
-        return $class->newInstanceArgs($args);
+        if ($class->hasMethod('__construct')) {
+            return $class->newInstanceArgs($args);
+        }
+        return $class->newInstance();
     }
     
     /**
@@ -250,7 +253,7 @@ class Europa_View_Php extends Europa_View
      */
     public function getHelperFormatter()
     {
-        return $this->_helperFormatter();
+        return $this->_helperFormatter;
     }
     
     /**

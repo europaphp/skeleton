@@ -34,13 +34,6 @@ abstract class Europa_Request
     protected $_params = array('controller' => 'index');
     
     /**
-     * The router, if any to process the request.
-     * 
-     * @var Europa_Router|null
-     */
-    protected $_router = null;
-    
-    /**
      * Contains the instances of all requests that are currently 
      * dispatching in chronological order.
      * 
@@ -79,28 +72,6 @@ abstract class Europa_Request
     }
     
     /**
-     * Binds a router to the request.
-     * 
-     * @param Europa_Router $router The router to bind.
-     * @return Europa_Request
-     */
-    public function setRouter(Europa_Router $router = null)
-    {
-        $this->_router = $router;
-        return $this;
-    }
-    
-    /**
-     * Returns the router that was set on the request.
-     * 
-     * @return Europa_Router
-     */
-    public function getRouter()
-    {
-        return $this->_router;
-    }
-    
-    /**
      * Directly dispatches the request
      * 
      * @return Europa_Controller
@@ -109,18 +80,6 @@ abstract class Europa_Request
     {
         // register the instance in the stack so it can be easily found
         self::$_stack[] = $this;
-        
-        // route if a router was set
-        if ($this->_router) {
-            $params = $this->_router->query($this);
-            if ($params === false) {
-                throw new Europa_Request_Exception(
-                    'Unable to match a route.',
-                    Europa_Request_Exception::NO_ROUTE_MATCHED
-                );
-            }
-            $this->setParams($params);
-        }
         
         // routing information
         $controller = $this->formatController();
@@ -144,9 +103,6 @@ abstract class Europa_Request
                 Europa_Request_Exception::INVALID_CONTROLLER
             );
         }
-        
-        // action it
-        $controller->action();
         
         // execute the rendering process
         $rendered = $controller->__toString();

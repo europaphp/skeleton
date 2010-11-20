@@ -37,19 +37,14 @@ class Europa_Request_Http extends Europa_Request
      * formatted.
      * 
      * @param string $uri The URI to format.
+     * 
      * @return string
      */
-    public function formatUri($uri = null, array $params = array())
+    public static function uri($uri = null)
     {
         // if it has a protocol prepended just return it
         if (strpos($uri, '://') !== false) {
             return $uri;
-        }
-        
-        // check for a router/route and use it'a parameters if found
-        $router = $this->getRouter();
-        if ($router && $route = $router->getRoute($uri)) {
-            $uri = $route->reverse($params);
         }
         
         // make consistent
@@ -72,11 +67,12 @@ class Europa_Request_Http extends Europa_Request
      * Europa_Request_Http->formatUri().
      * 
      * @param string $uri The URI to redirect to.
+     * 
      * @return void
      */
-    public function redirect($uri = '/', array $params = array())
+    public static function redirect($uri = '/')
     {
-        header('Location: ' . $this->formatUri($uri, $params));
+        header('Location: ' . self::uri($uri));
         exit;
     }
     
@@ -119,10 +115,12 @@ class Europa_Request_Http extends Europa_Request
      * 
      * The request URI is always normalized, meaning that leading and trailing
      * slashes are trimmed.
-     *
+     * 
+     * @param bool $includeQueryString Whether or not to include the query string.
+     * 
      * @return string
      */
-    public static function getRequestUri()
+    public static function getRequestUri($includeQueryString = false)
     {
         static $requestUri;
         if (!isset($requestUri)) {
@@ -131,8 +129,14 @@ class Europa_Request_Http extends Europa_Request
             $requestUri = isset($_SERVER['HTTP_X_REWRITE_URL'])
                         ? $_SERVER['HTTP_X_REWRITE_URL']
                         : $_SERVER['REQUEST_URI'];
-            $requestUri = explode('?', $requestUri);
-            $requestUri = $requestUri[0];
+            
+            // remove the query string if not wanted
+            if (!$includeQueryString) {
+                $requestUri = explode('?', $requestUri);
+                $requestUri = $requestUri[0];
+            }
+            
+            // format the rest
             $requestUri = trim($requestUri, '/');
             $requestUri = substr($requestUri, strlen(self::getRootUri()));
             $requestUri = trim($requestUri, '/');
