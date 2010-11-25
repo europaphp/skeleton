@@ -36,7 +36,7 @@ class Europa_Router implements Iterator, ArrayAccess, Countable
         foreach ($this as $route) {
             $params = $route->query($subject);
             if ($params !== false) {
-                $this->_matched = $route;
+                $this->_route = $route;
                 return $params;
             }
         }
@@ -85,7 +85,7 @@ class Europa_Router implements Iterator, ArrayAccess, Countable
      * 
      * @return Europa_Router
      */
-    public function clearRoute()
+    public function clear()
     {
         $this->_route = null;
         return $this;
