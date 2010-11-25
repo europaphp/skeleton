@@ -24,7 +24,8 @@ interface Europa_Route
      * false on failure.
      * 
      * @param string $subject The string to query against the route.
-     * @return array|bool
+     * 
+     * @return array
      */
     public function query($subject);
 }
