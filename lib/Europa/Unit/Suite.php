@@ -7,8 +7,7 @@
  * @category UnitTesting
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  (c) 2010 Trey Shugart http://europaphp.org/license
  */
 abstract class Europa_Unit_Suite extends Europa_Unit_Testable
 {
@@ -51,6 +50,14 @@ abstract class Europa_Unit_Suite extends Europa_Unit_Testable
         $this->tearDown();
     }
     
+    /**
+     * Adds the test to the suite.
+     * 
+     * @param int                  $offset The offset to add the test to.
+     * @param Europa_Unit_Testable $test   The test to add.
+     * 
+     * @return Europa_Unit_Suite
+     */
     public function offsetSet($offset, $test)
     {
         if (is_string($test)) {
@@ -68,12 +75,17 @@ abstract class Europa_Unit_Suite extends Europa_Unit_Testable
         $this->_tests[] = $test;
     }
     
-    protected function _isTestClass($class)
+    /**
+     * Returns whether or not the specified class is a valid test class.
+     * 
+     * @param mixed $class An instance or string representing the class to check.
+     * 
+     * @return bool
+     */
+    protected function isTestClass($class)
     {
         $reflect = new ReflectionClass($class);
-        if ($reflect->isAbstract()) {
-            return false;
-        }
-        return substr($class, 0, 5) === 'Test_';
+        return !$reflect->isAbstract()
+            && $reflect->isSublcassOf('Europa_Unit_Testable');
     }
 }
