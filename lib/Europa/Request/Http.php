@@ -28,38 +28,7 @@ class Europa_Request_Http extends Europa_Request
      */
     public function __toString()
     {
-        return self::getRequestUri();
-    }
-    
-    /**
-     * Formats the passed in URI. The URI can be a relative path, absolute or
-     * a named route. Whatever is passed in, it will be normalized and 
-     * formatted.
-     * 
-     * @param string $uri The URI to format.
-     * 
-     * @return string
-     */
-    public static function uri($uri = null)
-    {
-        // if it has a protocol prepended just return it
-        if (strpos($uri, '://') !== false) {
-            return $uri;
-        }
-        
-        // make consistent
-        if ($uri) {
-            $uri = '/' . ltrim($uri, '/');
-        }
-        
-        // if there is a root uri, add a forward slash to it
-        $root = self::getRootUri();
-        if ($root) {
-            $root = '/' . $root;
-        }
-        
-        // automate
-        return $root . $uri;
+        return self::uri();
     }
 
     /**
@@ -91,7 +60,7 @@ class Europa_Request_Http extends Europa_Request
      *
      * @return string
      */
-    public static function getRootUri()
+    public static function root()
     {
         static $root;
         if (!isset($root)) {
@@ -116,11 +85,9 @@ class Europa_Request_Http extends Europa_Request
      * The request URI is always normalized, meaning that leading and trailing
      * slashes are trimmed.
      * 
-     * @param bool $includeQueryString Whether or not to include the query string.
-     * 
      * @return string
      */
-    public static function getRequestUri($includeQueryString = false)
+    public static function uri()
     {
         static $requestUri;
         if (!isset($requestUri)) {
@@ -130,18 +97,26 @@ class Europa_Request_Http extends Europa_Request
                         ? $_SERVER['HTTP_X_REWRITE_URL']
                         : $_SERVER['REQUEST_URI'];
             
-            // remove the query string if not wanted
-            if (!$includeQueryString) {
-                $requestUri = explode('?', $requestUri);
-                $requestUri = $requestUri[0];
-            }
+            // remove the query string
+            $requestUri = explode('?', $requestUri);
+            $requestUri = $requestUri[0];
             
             // format the rest
             $requestUri = trim($requestUri, '/');
-            $requestUri = substr($requestUri, strlen(self::getRootUri()));
+            $requestUri = substr($requestUri, strlen(self::root()));
             $requestUri = trim($requestUri, '/');
         }
         return $requestUri;
+    }
+    
+    /**
+     * Returns the query string in the current request.
+     * 
+     * @return string
+     */
+    public static function query()
+    {
+        return $_SERVER['QUERY_STRING'];
     }
     
     /**
@@ -159,22 +134,35 @@ class Europa_Request_Http extends Europa_Request
      * 
      * @return string
      */
-    public static function getFullUri()
+    public static function full()
     {
-        $protocol = 'http';
-        if (self::isSecure()) {
-            $protocol = 'https';
+        // base
+        $uri = 'http';
+        
+        // format secure
+        if ($this->isSecure()) {
+            $uri .= 's';
         }
-        $port = null;
+        
+        // format host
+        $uri .= '://' . $_SERVER['HTTP_HOST'];
+        
+        // format port of other than 80
         if ($_SERVER['SERVER_PORT'] != 80) {
-            $port = ':' . $_SERVER['SERVER_PORT'];
+            $uri .= ':' . $_SERVER['SERVER_PORT'];
         }
-        return $protocol
-             . '://'
-             . $_SERVER['HTTP_HOST']
-             . $port
-             . '/' . self::getRootUri()
-             . '/' . self::getRequestUri();
+        
+        // append root uri
+        if ($root = self::root()) {
+            $uri .= '/' . $root;
+        }
+        
+        // append request uri
+        if ($request = self::uri()) {
+            $uri .= '/' . $request;
+        }
+        
+        return $uri;
     }
     
     /**
@@ -185,7 +173,7 @@ class Europa_Request_Http extends Europa_Request
      * 
      * @return array
      */
-    public static function getHeaders()
+    public static function headers()
     {
         static $server;
         if (!isset($server)) {
@@ -207,11 +195,12 @@ class Europa_Request_Http extends Europa_Request
      * Returns the value of a single request header or null if not found.
      * 
      * @param string $name The name of the request header to retrieve.
+     * 
      * @return string
      */
-    public static function getHeader($name)
+    public static function header($name)
     {
-        $headers = self::getHeaders();
+        $headers = self::headers();
         if (isset($headers[$name])) {
             return $headers[$name];
         }
@@ -224,11 +213,29 @@ class Europa_Request_Http extends Europa_Request
      * 
      * @return array
      */
-    public static function getAcceptedContentTypes()
+    public static function accepts($type = null)
     {
-        $accept = self::getHeader('Accept');
+        // parse out accept headers
+        $accept = self::header('Accept');
         $accept = explode(',', $accept);
         array_walk($accept, 'trim');
+        
+        // if a type is specified, we check to see if it is accepted
+        if ($type) {
+            return in_array($type, $accept);
+        }
+        
+        // or return all types
         return $accept;
+    }
+    
+    /**
+     * Retuns the request method from the server vars and formats it.
+     *
+     * @return string
+     */
+    public static function method()
+    {
+        return strtolower($_SERVER['REQUEST_METHOD']);
     }
 }
