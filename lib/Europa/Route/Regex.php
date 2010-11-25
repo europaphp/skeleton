@@ -16,7 +16,7 @@ class Europa_Route_Regex implements Europa_Route
      * 
      * @var string
      */
-    protected $_expression;
+    private $_expression;
     
     /**
      * Since it is very difficult to reverse engineer a regular expression
@@ -25,21 +25,22 @@ class Europa_Route_Regex implements Europa_Route
      * 
      * @var string
      */
-    protected $_reverse;
+    private $_reverse;
     
     /**
      * The mapping used to map matched parameters or bind hard-coded parameters.
      * 
      * @var array
      */
-    protected $_map;
+    private $_map;
     
     /**
      * Constructs the route and sets required properties.
      * 
      * @param string $expression The expression for route matching/parsing.
-     * @param string $reverse The string used to reverse engineer the route.
-     * @param array $map The string to use when reverse engineering the expression.
+     * @param string $reverse    The string used to reverse engineer the route.
+     * @param array  $map        The string to use when reverse engineering the expression.
+     * 
      * @return Europa_Route
      */
     public function __construct($expression, $reverse = null, array $map = array())
@@ -53,6 +54,7 @@ class Europa_Route_Regex implements Europa_Route
      * Reverse engineers the current route to produce a formatted string.
      * 
      * @param array $params The parameters used to reverse engineer the route.
+     * 
      * @return string
      */
     public function reverse(array $params = array())
@@ -69,6 +71,7 @@ class Europa_Route_Regex implements Europa_Route
      * custom routing algorithm. Returns the matched parameters.
      * 
      * @param string $subject The URI to match against the current route definition.
+     * 
      * @return array|bool
      */
     public function query($subject)
@@ -77,6 +80,7 @@ class Europa_Route_Regex implements Europa_Route
         $subject = (string) $subject;
         $params  = array();
         
+        // get some matches or return false if not matched
         if (!preg_match('#' . $this->_expression . '#', $subject, $matches)) {
             return false;
         }
