@@ -103,6 +103,9 @@ class Europa_View_Php extends Europa_View
      */
     public function __call($func, $args = array())
     {
+        // make sure the view is always the first argument
+        array_unshift($args, $this);
+        
         // format the helper class name for the given method
         $class = $this->formatHelper($func);
         
@@ -116,6 +119,8 @@ class Europa_View_Php extends Europa_View
         if ($class->hasMethod('__construct')) {
             return $class->newInstanceArgs($args);
         }
+        
+        // return the new instance with no arguments
         return $class->newInstance();
     }
     
@@ -239,21 +244,11 @@ class Europa_View_Php extends Europa_View
     {
         if (!is_callable($formatter)) {
             throw new Europa_View_Exception(
-                'The specified helper formatter is not callable.'
+                'The helper formatter is not callable.'
             );
         }
         $this->_helperFormatter = $formatter;
         return $this;
-    }
-    
-    /**
-     * Returns the helper formatter.
-     * 
-     * @return mixed
-     */
-    public function getHelperFormatter()
-    {
-        return $this->_helperFormatter;
     }
     
     /**
@@ -265,17 +260,12 @@ class Europa_View_Php extends Europa_View
      */
     public static function setDefaultHelperFormatter($formatter)
     {
+        if (!is_callable($formatter)) {
+            throw new Europa_View_Exception(
+                'The default helper formatter is not callable.'
+            );
+        }
         self::$_defaultHelperFormatter = $formatter;
-    }
-    
-    /**
-     * Returns the default helper formatter.
-     * 
-     * @return mixed
-     */
-    public static function getDefaultHelperFormatter()
-    {
-        return self::$_defaultHelperFormatter;
     }
     
     /**
@@ -287,16 +277,20 @@ class Europa_View_Php extends Europa_View
      */
     protected function formatHelper($helper)
     {
-        $formatter = $this->getHelperFormatter();
+        // user-defined formatter
+        $formatter = $this->_helperFormatter;
         
+        // user-defined default formatter
         if (!$formatter) {
-            $formatter = self::getDefaultHelperFormatter();
+            $formatter = self::$_defaultHelperFormatter;
         }
         
+        // pre-defined default formatter
         if (!$formatter) {
-            return Europa_String::create($helper)->toClass()->__toString();
+            return Europa_String::create($helper)->toClass()->__toString() . 'Helper';
         }
         
+        // format
         return call_user_func_array($formatter, array($helper));
     }
 }
