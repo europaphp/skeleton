@@ -11,8 +11,5 @@
  */
 class ErrorController extends AbstractController
 {
-	public function action()
-	{
-		
-	}
+	
 }

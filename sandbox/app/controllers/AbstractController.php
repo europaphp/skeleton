@@ -1,16 +1,15 @@
 <?php
 
-abstract class AbstractController extends Europa_Controller_Standard
+abstract class AbstractController extends Europa_Controller
 {
-	public function __construct(Europa_Request $request)
+	public function init()
 	{
-		parent::__construct($request);
-		$viewScript = Europa_String::create($request->getController());
-		$viewScript->toClass()->replace('_', '/');
+		$view = str_replace('Controller', 'View', get_class($this));
+		$view = str_replace('_', '/', $view);
 		$this->setView(
 			new Europa_View_Layout(
 				new Europa_View_Php('DefaultLayout'),
-				new Europa_View_Php($viewScript . 'View')
+				new Europa_View_Php($view)
 			)
 		);
 	}

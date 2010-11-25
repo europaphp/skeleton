@@ -6,10 +6,9 @@
  * @category Helpers
  * @package  LangHelper
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class LangHelper implements Europa_View_Helper
+class LangHelper
 {
     /**
      * The language to use.
@@ -23,7 +22,7 @@ class LangHelper implements Europa_View_Helper
 	 * 
 	 * @var array
 	 */
-	protected $_ini = array();
+	private $_ini = array();
 	
 	/**
 	 * Constructs the language helper and parses the required ini file.
@@ -31,7 +30,7 @@ class LangHelper implements Europa_View_Helper
 	 * @param Europa_View $view The view that called the helper.
 	 * @return LangHelper
 	 */
-	public function __construct(Europa_View $view, array $args = array())
+	public function __construct(Europa_View $view)
 	{
 		$path = $this->_getIniFullPath($view);
 		if (is_file($path)) {
@@ -77,22 +76,6 @@ class LangHelper implements Europa_View_Helper
 	}
 	
 	/**
-	 * Returns the full path to the INI file to parse. The view is used to
-	 * determine which file should be parsed.
-	 * 
-	 * @param Europa_View $view The view to parse the ini file for.
-	 * @return string
-	 */
-	protected function _getIniFullPath(Europa_View $view)
-	{
-		return dirname(__FILE__) . '/../lang/'
-		     . self::$_lang
-		     . '/'
-		     . $view->getScript()
-		     . '.ini';
-	}
-	
-	/**
 	 * Sets the language to use.
 	 * 
 	 * @return void
@@ -100,5 +83,21 @@ class LangHelper implements Europa_View_Helper
 	static public function set($language)
 	{
 	    self::$_lang = $language;
+	}
+	
+	/**
+	 * Returns the full path to the INI file to parse. The view is used to
+	 * determine which file should be parsed.
+	 * 
+	 * @param Europa_View $view The view to parse the ini file for.
+	 * @return string
+	 */
+	private function _getIniFullPath(Europa_View $view)
+	{
+		return dirname(__FILE__) . '/../lang/'
+		     . self::$_lang
+		     . '/'
+		     . $view->getScript()
+		     . '.ini';
 	}
 }

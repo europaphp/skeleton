@@ -1,33 +1,37 @@
 <?php
 
-class CssHelper implements Europa_View_Helper
+class CssHelper
 {
-	protected $_layout;
+	private $_layout;
 	
-	protected $_view;
+	private $_view;
 	
-	public function __construct(Europa_View $view, array $args = array())
+	public function __construct(Europa_View $view)
 	{
 		$request = new Europa_Request_Http;
-		$this->_layout = './css/' . $view->getScript() . '.css';
-		$this->_view   = './css/' . Europa_String::create($request->getController())->toClass()->replace('_', DIRECTORY_SEPARATOR) . 'View.css';
+		$this->_layout = 'css/' . $view->getScript() . '.css';
+		$this->_view   = 'css/' . Europa_String::create($request->getController())->toClass()->replace('_', DIRECTORY_SEPARATOR) . 'View.css';
 	}
 	
 	public function __toString()
 	{
 		$css = '';
 		
-		if (file_exists($this->_layout)) {
-			$css .= '<link rel="stylesheet" type="text/css" href="' 
-			     . $this->_layout 
-			     . '" />'
+		if (file_exists('./' . $this->_layout)) {
+			$css .= '<link rel="stylesheet" type="text/css" href="/' 
+			     .  Europa_Request_Http::root()
+			     .  '/'
+			     .  $this->_layout 
+			     .  '" />'
 			     .  "\n";
 		}
 		
-		if (file_exists($this->_view)) {
-			$css .= '<link rel="stylesheet" type="text/css" href="' 
-			     . $this->_view 
-			     . '" />'
+		if (file_exists('./' . $this->_view)) {
+			$css .= '<link rel="stylesheet" type="text/css" href="/' 
+			     .  Europa_Request_Http::root()
+			     .  '/'
+			     .  $this->_view 
+			     .  '" />'
 			     .  "\n";
 		}
 		

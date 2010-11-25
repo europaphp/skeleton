@@ -1,36 +1,59 @@
 <?php
 
 /**
- * A helper for formatting a passed in URI.
+ * A helper for formatting a passed in url.
  * 
  * @category Helpers
- * @package  UriHelper
+ * @package  UrlHelper
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class UriHelper implements Europa_View_Helper
+class UrlHelper implements Europa_View_Helper
 {
-    private $_uri = null;
+    /**
+     * The url to format.
+     * 
+     * @var string
+     */
+    private $_url = null;
     
+    /**
+     * The parameters to use.
+     * 
+     * @var array
+     */
     private $_params = array();
     
-    public function __construct(Europa_View $view, array $args = array())
+    /**
+     * Instantiates the url formatter and sets properties.
+     * 
+     * @param Europa_View $view
+     * @param string      $url
+     * @param array       $params
+     * 
+     * @return urlHelper
+     */
+    public function __construct(Europa_View $view, $url = null, array $params = array())
     {
-        if (isset($args[0])) {
-            $this->_uri = $args[0];
-        }
-        
-        if (isset($args[1])) {
-            $this->_params = $args[1];
-        }
+        $this->_url    = $url;
+        $this->_params = $params;
     }
     
+    /**
+     * Formats the url and returns it.
+     */
     public function __toString()
     {
-        return Europa_Request::getActiveInstance()->formatUri(
-            $this->_uri,
-            $this->_params
-        );
+        $url = Europa_Request_Http::root();
+        
+        if ($this->_url) {
+            $url .= '/' . ltrim($this->_url, '/');
+        }
+        
+        if ($this->_params) {
+            $url .= '?' . http_build_query($params);
+        }
+        
+        return $url;
     }
 }

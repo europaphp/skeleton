@@ -17,18 +17,20 @@ Europa_Loader::addPath($base . 'app/helpers');
 
 // dispatch the request catching any exceptions
 try {
-    $request = new Europa_Request_Http;
-	$router  = new Europa_Router();
-	$router['default'] = new Europa_Route_Regex(
-		'\??/?(?<controller>[^&]+)?',
-		'/?/:controller',
-		array('controller' => 'index')
-	);
-	echo $request->setRouter($router)->dispatch();
+    // request routing
+    $router = new Europa_Router_Request(new Europa_Request_Http);
+    
+    // default route matches root/uri/index.php/request/uri to Request_UriController
+    $router['default'] = new Europa_Route_Regex(
+        'index\.php/(?<controller>.+)',
+        'index.php/:controller',
+        array('controller' => 'index')
+    );
+    
+    // dispatch and echo the result
+    echo $router->dispatch();
 } catch (Exception $e) {
-	// if any errors occur, force the request to the error controller
-	$europa = new Europa_Request_Http;
-	$europa->controller = 'error';
-	$europa->exception  = $e;
-	echo $europa->dispatch();
+	$error = new ErrorController(new Europa_Request_Http);
+	$error->exception = $e;
+	echo $error;
 }
