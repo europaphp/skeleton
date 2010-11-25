@@ -43,18 +43,8 @@ abstract class Europa_Controller
         // initlialize
         $this->init();
         
-        // if get parameters are present
-        if ($_GET) {
-            $this->get();
-        }
-        
-        // if post parameters are present
-        if ($_POST) {
-            $this->post();
-        }
-        
-        // always called
-        $this->action();
+        // call the appropriate request method event
+        $this->{$request->method()}();
     }
     
     /**
@@ -145,7 +135,17 @@ abstract class Europa_Controller
     }
     
     /**
-     * Get called if there is get parameters present.
+     * Called when the request method is OPTIONS.
+     * 
+     * @return void
+     */
+    protected function options()
+    {
+        
+    }
+    
+    /**
+     * Called when the request method is GET.
      * 
      * @return void
      */
@@ -155,7 +155,17 @@ abstract class Europa_Controller
     }
     
     /**
-     * Gets called of post parameters are present.
+     * Called when the request method is HEAD.
+     * 
+     * @return void
+     */
+    protected function head()
+    {
+        
+    }
+    
+    /**
+     * Called when the request method is POST.
      * 
      * @return void
      */
@@ -164,12 +174,43 @@ abstract class Europa_Controller
         
     }
     
+    
     /**
-     * Gets called after get/post events.
+     * Called when the request method is PUT.
      * 
      * @return void
      */
-    protected function action()
+    protected function put()
+    {
+        
+    }
+    
+    /**
+     * Called when the request method is DELETE.
+     * 
+     * @return void
+     */
+    protected function delete()
+    {
+        
+    }
+    
+    /**
+     * Called when the request method is TRACE.
+     * 
+     * 
+     */
+    protected function trace()
+    {
+        
+    }
+    
+    /**
+     * Called when the request method is CONNECT.
+     * 
+     * @return void
+     */
+    protected function connect()
     {
         
     }
