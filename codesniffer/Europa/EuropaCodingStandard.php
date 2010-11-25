@@ -51,7 +51,6 @@ class PHP_CodeSniffer_Standards_Europa_EuropaCodingStandard extends PHP_CodeSnif
             'Generic/Sniffs/Formatting/DisallowMultipleStatementsSniff.php',
             'Generic/Sniffs/Formatting/SpaceAfterCastSniff.php',
             'Generic/Sniffs/Functions/CallTimePassByReferenceSniff.php',
-            'Generic/Sniffs/Functions/OpeningFunctionBraceBsdAllmanSniff.php',
             'Generic/Sniffs/NamingConventions/ConstructorNameSniff.php',
             'Generic/Sniffs/NamingConventions/UpperCaseConstantNameSniff.php',
             'Generic/Sniffs/PHP/DisallowShortOpenTagSniff.php',
