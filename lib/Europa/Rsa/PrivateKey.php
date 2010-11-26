@@ -6,8 +6,7 @@
  * @category Rsa
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  (c) 2010 Trey Shugart http://europaphp.org/license
  */
 class Europa_Rsa_PrivateKey
 {
@@ -43,8 +42,9 @@ class Europa_Rsa_PrivateKey
      * Constructs a private key. If no key is provided, a new one is generated
      * using the specified size.
      * 
-     * @param string $key The public key.
-     * @param int $size The size of the private key to generate in bits.
+     * @param string $key  The public key.
+     * @param int    $size The size of the private key to generate in bits.
+     * 
      * @return Europa_Rsa_PublicKey
      */
     public function __construct($key = null, $size = 1024)
