@@ -6,8 +6,7 @@
  * @category Request
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  (c) 2010 Trey Shugart http://europaphp.org/license
  */
 class Europa_Request_Http extends Europa_Request
 {
@@ -18,7 +17,7 @@ class Europa_Request_Http extends Europa_Request
      */
     public function __construct()
     {
-        $this->setParams($_REQUEST);
+        $this->setAll($_REQUEST);
     }
     
     /**
@@ -29,6 +28,19 @@ class Europa_Request_Http extends Europa_Request
     public function __toString()
     {
         return self::uri();
+    }
+    
+    /**
+     * Retuns the request method from the server vars and formats it. Defaults to "get".
+     *
+     * @return string
+     */
+    public function method()
+    {
+        if (isset($_SERVER['REQUEST_METHOD'])) {
+            return strtolower($_SERVER['REQUEST_METHOD']);
+        }
+        return 'get';
     }
 
     /**
@@ -227,15 +239,5 @@ class Europa_Request_Http extends Europa_Request
         
         // or return all types
         return $accept;
-    }
-    
-    /**
-     * Retuns the request method from the server vars and formats it.
-     *
-     * @return string
-     */
-    public static function method()
-    {
-        return strtolower($_SERVER['REQUEST_METHOD']);
     }
 }

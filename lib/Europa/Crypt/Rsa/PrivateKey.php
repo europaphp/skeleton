@@ -8,7 +8,7 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class Europa_Rsa_PrivateKey
+class Europa_Crypt_Rsa_PrivateKey
 {
     /**
      * The starting delineator for a PEM formatted key.
@@ -45,10 +45,16 @@ class Europa_Rsa_PrivateKey
      * @param string $key  The public key.
      * @param int    $size The size of the private key to generate in bits.
      * 
-     * @return Europa_Rsa_PublicKey
+     * @return Europa_Crypt_Rsa_PrivateKey
      */
     public function __construct($key = null, $size = 1024)
     {
+        // make sure the openssl extension is enabled
+        if (!function_exists('openssl_pkey_new')) {
+            throw new Europa_Crypt_Rsa_Exception('The OpenSSL extension must be available.');
+        }
+        
+        // if a key is provided, use it, otherwise generate one
         if ($key) {
             // format the key to PEM format
             if (strpos($key, self::PEM_START) === false) {
@@ -59,6 +65,8 @@ class Europa_Rsa_PrivateKey
                 $key = PHP_EOL . $key . PHP_EOL;
                 $key = self::PEM_START . $key . self::PEM_END . PHP_EOL;
             }
+            
+            // get the private key
             $key = openssl_pkey_get_private($key);
         } else {
             $key = openssl_pkey_new(
@@ -68,13 +76,18 @@ class Europa_Rsa_PrivateKey
                 )
             );
         }
+        
+        // if the key is not valid, throw an exception
         if (!$key) {
-            throw new Europa_Rsa_Exception(
-                'The provided key is not a valid RSA private key.',
-                Europa_Rsa_Exception::INVALID_PRIVATE_KEY
+            throw new Europa_Crypt_Rsa_Exception(
+                'The provided key is not a valid RSA private key.'
             );
         }
+        
+        // export the private key
         openssl_pkey_export($key, $key);
+        
+        // and set it
         $this->_key = $key;
     }
     
@@ -89,7 +102,7 @@ class Europa_Rsa_PrivateKey
     }
     
     /**
-     * Returns an instance of Europa_Rsa_PublicKey representing the public key.
+     * Returns an instance of Europa_Crypt_Rsa_PublicKey representing the public key.
      * 
      * @return string
      */
@@ -97,7 +110,7 @@ class Europa_Rsa_PrivateKey
     {
         $key = openssl_pkey_get_private($this->_key);
         $key = openssl_pkey_get_details($key);
-        return new Europa_Rsa_PublicKey($key['key']);
+        return new Europa_Crypt_Rsa_PublicKey($key['key']);
     }
     
     /**

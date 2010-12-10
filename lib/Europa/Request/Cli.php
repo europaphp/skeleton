@@ -12,6 +12,13 @@
 class Europa_Request_Cli extends Europa_Request
 {
     /**
+     * The CLI request method.
+     * 
+     * @var string
+     */
+    const METHOD = 'cli';
+    
+    /**
      * Holds the commands that were executed, not arguments.
      * 
      * @var array
@@ -26,7 +33,7 @@ class Europa_Request_Cli extends Europa_Request
      */
     public function __construct()
     {
-        $this->_parseParams();
+        $this->parseParams();
     }
     
     /**
@@ -40,12 +47,22 @@ class Europa_Request_Cli extends Europa_Request
     }
     
     /**
+     * Returns the request method for the cli request.
+     * 
+     * @return string
+     */
+    public function method()
+    {
+        return self::METHOD;
+    }
+    
+    /**
      * Parses out the cli request parameters - in unix style - and sets them on
      * the request.
      * 
      * @return Europa_Request_Cli
      */
-    protected function _parseParams()
+    protected function parseParams()
     {
         $args = $_SERVER['argv'];
         $skip = false;
@@ -63,10 +80,10 @@ class Europa_Request_Cli extends Europa_Request
                 $next  = isset($args[$index + 1]) ? $args[$index + 1] : false;
             
                 if ($next && $next[0] !== '-') {
-                    $this->setParam($param, $next);
+                    $this->set($param, $next);
                     $skip = true;
                 } else {
-                    $this->setParam($param, true);
+                    $this->set($param, true);
                 }
             } else {
                 $this->_commands[] = $param;

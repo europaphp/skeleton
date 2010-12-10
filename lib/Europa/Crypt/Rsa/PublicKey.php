@@ -6,10 +6,9 @@
  * @category Rsa
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class Europa_Rsa_PublicKey
+class Europa_Crypt_Rsa_PublicKey
 {
     /**
      * The starting delineator for a PEM formatted key.
@@ -51,10 +50,12 @@ class Europa_Rsa_PublicKey
      * public key can only be generated with a private key.
      * 
      * @param string $key The public key.
-     * @return Europa_Rsa_PublicKey
+     * 
+     * @return Europa_Crypt_Rsa_PublicKey
      */
     public function __construct($key)
     {
+        // make sure the pem parts are removed
         if (strpos($key, self::PEM_START) === false) {
             $key = trim($key);
             $key = str_replace(PHP_EOL, '', $key);
@@ -63,13 +64,18 @@ class Europa_Rsa_PublicKey
             $key = PHP_EOL . $key . PHP_EOL;
             $key = self::PEM_START . $key . self::PEM_END;
         }
+        
+        // generate public key from the private key
         $key = openssl_pkey_get_public($key);
+        
+        // if the key is not valid, throw an exception
         if (!$key) {
-            throw new Europa_Rsa_Exception(
-                'The provided key is not a valid RSA public key.',
-                Europa_Rsa_Exception::INVALID_PUBLIC_KEY
+            throw new Europa_Crypt_Rsa_Exception(
+                'The provided key is not a valid RSA public key.'
             );
         }
+        
+        // get key details
         $key = openssl_pkey_get_details($key);
         $this->_key  = $key['key'];
         $this->_size = $key['bits'];
@@ -113,6 +119,7 @@ class Europa_Rsa_PublicKey
      * Encrypts a value using the public key and returns it.
      * 
      * @param string $value The value to encrypt.
+     * 
      * @return string
      */
     public function encrypt($value, $padding = OPENSSL_PKCS1_PADDING)
@@ -125,6 +132,7 @@ class Europa_Rsa_PublicKey
      * Decrypts a value using the public key and returns it.
      * 
      * @param string $value The value to decrypt.
+     * 
      * @return string
      */
     public function decrypt($value, $padding = OPENSSL_PKCS1_PADDING)

@@ -6,24 +6,23 @@
  * @category Request
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-abstract class Europa_Request
+abstract class Europa_Request implements Iterator, ArrayAccess, Countable
 {
     /**
      * The key used to get the controller from the request params.
      * 
      * @var string
      */
-    protected $_controllerKey = 'controller';
+    private $_controllerKey = 'controller';
     
     /**
      * The callback to use for formatting the controller parameter.
      * 
      * @var mixed
      */
-    protected $_controllerFormatter = null;
+    private $_controllerFormatter = null;
     
     /**
      * The params parsed out of the route and cascaded through the
@@ -31,7 +30,7 @@ abstract class Europa_Request
      * 
      * @var array
      */
-    protected $_params = array('controller' => 'index');
+    private $_params = array('controller' => 'index');
     
     /**
      * Contains the instances of all requests that are currently 
@@ -49,26 +48,59 @@ abstract class Europa_Request
     abstract public function __toString();
     
     /**
+     * Returns the request method.
+     * 
+     * @return string
+     */
+    abstract public function method();
+    
+    /**
      * Returns the specified request parameter.
      * 
      * @param string $name The name of the parameter.
+     * 
      * @return mixed
      */
     public function __get($name)
     {
-        return $this->getParam($name);
+        return $this->get($name);
     }
     
     /**
      * Sets the specified request parameter.
      * 
-     * @param string $name The name of the parameter.
-     * @param mixed $value The value of the parameter.
+     * @param string $name  The name of the parameter.
+     * @param mixed  $value The value of the parameter.
+     * 
      * @return mixed
      */
     public function __set($name, $value)
     {
-        $this->setParam($name, $value);
+        return $this->set($name, $value);
+    }
+    
+    /**
+     * Checks for the specified parameter.
+     * 
+     * @param string $name The parameter to check for.
+     * 
+     * @return Europa_Request
+     */
+    public function __isset($name)
+    {
+        return $this->has($name);
+    }
+    
+    /**
+     * Unsets the specified parameter.
+     * 
+     * @param string $name The parameter to unset.
+     * 
+     * @return Europa_Request
+     */
+    public function __unset($name)
+    {
+        return $this->clear($name);
     }
     
     /**
@@ -98,13 +130,15 @@ abstract class Europa_Request
         // make sure it's a valid instance
         if (!$controller instanceof Europa_Controller) {
             throw new Europa_Request_Exception(
-                'Class ' . get_class($controller) . ' is not a valid controller instance.'
-                . 'Controller classes must derive from Europa_Controller.',
-                Europa_Request_Exception::INVALID_CONTROLLER
+                'Class '
+                . get_class($controller) 
+                . ' is not a valid controller instance.'
+                . 'Controller classes must derive from Europa_Controller.'
             );
         }
         
         // execute the rendering process
+        $controller->action();
         $rendered = $controller->__toString();
         
         // remove the dispatch from the stack
@@ -117,12 +151,12 @@ abstract class Europa_Request
     /**
      * Returns a given parameter's value.
      * 
-     * @param string $names The name or names of the parameters to search for.
-     * @param mixed $default The default value to return if the parameters
-     * aren't set.
+     * @param string $names   The name or names of the parameters to search for.
+     * @param mixed  $default The default value to return if the parameters aren't set.
+     * 
      * @return mixed
      */
-    public function getParam($names, $default = null)
+    public function get($names, $default = null)
     {
         if (!is_array($names)) {
             $names = array($names);
@@ -142,10 +176,11 @@ abstract class Europa_Request
      * a param '--my-param' which is also aliased as 'm'.
      * 
      * @param string $names The parameter name or names.
-     * @param mixed $value The parameter value.
+     * @param mixed  $value The parameter value.
+     * 
      * @return Europa_Request
      */
-    public function setParam($names, $value)
+    public function set($names, $value)
     {
         if (!is_array($names)) {
             $names = array($names);
@@ -157,13 +192,43 @@ abstract class Europa_Request
     }
     
     /**
-     * Returns all parameters set on the request.
+     * Returns whether or not the specified parameter or parameters exist.
      * 
-     * @return array
+     * @param mixed $names The name or names of parameters to check for.
+     * 
+     * @return bool
      */
-    public function getParams()
+    public function has($names)
     {
-        return $this->_params;
+        if (!is_array($names)) {
+            $names = array($names);
+        }
+        foreach ($names as $name) {
+            if (isset($this->_params[$name])) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Clears the specified parameter or parameters.
+     * 
+     * @param mixed $names The name or names of parameters to clear.
+     * 
+     * @return bool
+     */
+    public function clear($names)
+    {
+        if (!is_array($names)) {
+            $names = array($names);
+        }
+        foreach ($nameas as $name) {
+            if (isset($this->_params[$name])) {
+                unset($this->_params[$name]);
+            }
+        }
+        return $this;
     }
     
     /**
@@ -171,16 +236,27 @@ abstract class Europa_Request
      * parameters with the same name.
      * 
      * @param mixed $params The params to set. Can be any iterable value.
+     * 
      * @return Europa_Request
      */
-    public function setParams($params)
+    public function setAll($params)
     {
         if (is_array($params) || is_object($params)) {
             foreach ($params as $k => $v) {
-                $this->setParam($k, $v);
+                $this->set($k, $v);
             }
         }
         return $this;
+    }
+    
+    /**
+     * Returns all parameters set on the request.
+     * 
+     * @return array
+     */
+    public function getAll()
+    {
+        return $this->_params;
     }
     
     /**
@@ -188,10 +264,62 @@ abstract class Europa_Request
      * 
      * @return Europa_Request
      */
-    public function clearParams()
+    public function clearAll()
     {
         $this->_params = array();
         return $this;
+    }
+    
+    /**
+     * Sets the controller parameter.
+     * 
+     * @param string $controller The controller to set.
+     * 
+     * @return Europa_Request
+     */
+    public function setController($controller)
+    {
+        return $this->set($this->getControllerKey(), $controller);
+    }
+    
+    /**
+     * Returns the controller parameter. This is the value that is passed to the formatter.
+     * 
+     * @return string
+     */
+    public function getController()
+    {
+        return $this->get($this->getControllerKey());
+    }
+    
+    /**
+     * Sets the controller key to use for retrieving it from the request.
+     * 
+     * @param string $key The key of the controller parameter.
+     * 
+     * @return Europa_Request
+     */
+    public function setControllerKey($newKey)
+    {
+        // retrieve the current key and controller
+        $oldKey = $this->_controllerKey;
+        $oldVal = $this->get($oldKey);
+        
+        // set the new key
+        $this->_controllerKey = $newKey;
+        
+        // auto-set the new controller parameter to the old value
+        return $this->set($newKey, $oldVal);
+    }
+    
+    /**
+     * Retrieves the controller key.
+     * 
+     * @return string
+     */
+    public function getControllerKey()
+    {
+        return $this->_controllerKey;
     }
     
     /**
@@ -211,6 +339,7 @@ abstract class Europa_Request
      * Sets the formatter that should be used to format the controller class.
      * 
      * @param mixed $callback The callback for formatting the controller.
+     * 
      * @return Europa_Request
      */
     public function setControllerFormatter($callback)
@@ -226,54 +355,122 @@ abstract class Europa_Request
     }
     
     /**
-     * Sets the controller parameter.
+     * Returns the parameter count.
      * 
-     * @param string $controller The controller to set.
-     * @return Europa_Request
+     * @return int
      */
-    public function setController($controller)
+    public function count()
     {
-        return $this->setParam($this->getControllerKey(), $controller);
+        return count($this->_params);
     }
     
     /**
-     * Returns the controller parameter. This is the value that is passed to the
-     * formatter.
+     * Returns the current parameter.
+     * 
+     * @return mixed
+     */
+    public function current()
+    {
+        return current($this->_params);
+    }
+    
+    /**
+     * Returns the parameter key.
      * 
      * @return string
      */
-    public function getController()
+    public function key()
     {
-        return $this->getParam($this->getControllerKey());
+        return key($this->_params);
     }
     
     /**
-     * Sets the controller key to use for retrieving it from the request.
+     * Moves to the next parameter.
      * 
-     * @param string $key The key of the controller parameter.
      * @return Europa_Request
      */
-    public function setControllerKey($newKey)
+    public function next()
     {
-        // retrieve the current key and controller
-        $oldKey = $this->_controllerKey;
-        $oldVal = $this->getParam($oldKey);
-        
-        // set the new key
-        $this->_controllerKey = $newKey;
-        
-        // auto-set the new controller parameter to the old value
-        return $this->setParam($newKey, $oldVal);
+        next($this->_params);
+        return $this;
     }
     
     /**
-     * Retrieves the controller key.
+     * Resets iteration.
      * 
-     * @return string
+     * @return Europa_Request
      */
-    public function getControllerKey()
+    public function rewind()
     {
-        return $this->_controllerKey;
+        reset($this->_params);
+        return $this;
+    }
+    
+    /**
+     * Returns whether or not the iteration can continue.
+     * 
+     * @return bool
+     */
+    public function valid()
+    {
+        return isset($this->_params[$this->key()]);
+    }
+    
+    /**
+     * Alias for Europa_Request->set().
+     * 
+     * @param string $offset The parameter.
+     * @param mixed  $value  The value.
+     * 
+     * @return mixed
+     * 
+     * @see Europa_Request->set();
+     */
+    public function offsetSet($offset, $value)
+    {
+        return $this->set($offset, $value);
+    }
+    
+    /**
+     * Alias for Europa_Request->get().
+     * 
+     * @param string $offset The parameter.
+     * 
+     * @return Europa_Request
+     * 
+     * @see Europa_Request->get();
+     */
+    public function offsetGet($offset)
+    {
+        return $this->get($offset);
+    }
+    
+    /**
+     * Alias for Europa_Request->has().
+     * 
+     * @param string $offset The parameter.
+     * 
+     * @return mixed
+     * 
+     * @see Europa_Request->has();
+     */
+    public function offsetExists($offset)
+    {
+        return $this->has($offset);
+    }
+    
+    /**
+     * Alias for Europa_Request->clear().
+     * 
+     * @param string $offset The parameter.
+     * 
+     * @return mixed
+     * 
+     * @see Europa_Request->clear();
+     */
+    public function offsetUnset($offset)
+    {
+        return $this->clear($offset);
     }
     
     /**
@@ -281,7 +478,7 @@ abstract class Europa_Request
      * 
      * @return mixed
      */
-    public static function getActiveInstance()
+    public static function getLastActive()
     {
         $len = count(self::$_stack);
         if ($len) {
@@ -291,8 +488,7 @@ abstract class Europa_Request
     }
     
     /**
-     * Returns all Europa_Request instances that are dispatching,
-     * in chronological order, as an array.
+     * Returns all Europa_Request instances that are dispatching, in chronological order, as an array.
      * 
      * @return array
      */

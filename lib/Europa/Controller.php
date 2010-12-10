@@ -3,11 +3,21 @@
 /**
  * The base controller for all controller classes.
  * 
+ * The following methods are supported with variable parameters:
+ *   - cli
+ *   - options
+ *   - get
+ *   - head
+ *   - post
+ *   - put
+ *   - delete
+ *   - trace
+ *   - connect
+ * 
  * @category  Controllers
  * @package   Europa
  * @author    Trey Shugart <treshugart@gmail.com>
- * @copyright (c) 2010 Trey Shugart
- * @link      http://europaphp.org/license
+ * @copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
 abstract class Europa_Controller
 {
@@ -34,17 +44,8 @@ abstract class Europa_Controller
      */
     public function __construct(Europa_Request $request)
     {
-        // set the request
         $this->_request = $request;
-        
-        // map properties
-        $this->_mapRequestToProperties($request);
-        
-        // initlialize
-        $this->init();
-        
-        // call the appropriate request method event
-        $this->{$request->method()}();
+        call_user_func_array(array($this, 'init'), $this->_mapParamsTo('init'));
     }
     
     /**
@@ -54,22 +55,29 @@ abstract class Europa_Controller
      */
     public function __toString()
     {
-        // null by default
-        $view = null;
-        
-        // pre-rendering event
+        // pre-rendering event is always called
         $this->preRender();
         
-        // render the view
-        if ($this->_view) {
-            $view = $this->_view->__toString();
+        // render the view and call the post-render event
+        // only if a view exists
+        $view = $this->getView();
+        if ($view) {
+            $view = $view->__toString();
+            $this->postRender();
         }
-        
-        // post rendering event
-        $this->postRender();
         
         // return output
         return $view;
+    }
+    
+    /**
+     * Returns the request being used.
+     * 
+     * @return Europa_Request
+     */
+    public function getRequest()
+    {
+        return $this->_request;
     }
         
     /**
@@ -78,13 +86,12 @@ abstract class Europa_Controller
      * 
      * @param Europa_View $view The view to use.
      * 
-     * @return Europa_Controller_Standard
+     * @return Europa_Controller
      */
     public function setView(Europa_View $view = null)
     {
         if ($this->_view) {
-            $view->setParams($this->_view->getParams());
-            unset($this->_view);
+            $view->setAll($this->_view->getAll());
         }
         $this->_view = $view;
         return $this;
@@ -101,27 +108,46 @@ abstract class Europa_Controller
     }
     
     /**
-     * Returns the request being used.
-     * 
-     * @return Europa_Request
-     */
-    public function getRequest()
-    {
-        return $this->_request;
-    }
-    
-    /**
      * Forwards the request to the specified controller.
      * 
      * @param string $to The controller to forward the request to.
+     * 
      * @return Europa_Controller
      */
     public function forward($to)
     {
         $to = (string) Europa_String::create($to)->toClass();
-        $to = new $to($this->_request);
+        $to = new $to($this->getRequest());
         $to->action();
         return $to;
+    }
+    
+    /**
+     * Makes sure the appropriate parameters are passed to init and the request
+     * method action.
+     * 
+     * @return void
+     * 
+     * @throws Europa_Controller_Exception
+     */
+    public function action()
+    {
+        // we call the approprate method for the request type
+        $method = $this->getRequest()->method();
+        
+        // check to make sure it exists and if not, throw an exception
+        if (!method_exists($this, $method)) {
+            throw new Europa_Controller_Exception('The method "' . get_class($this) . '->' . $method . '()" is not supported.');
+        }
+        
+        // pre-actioning
+        $this->preAction();
+        
+        // call appropriate method with it's defined parameters
+        call_user_func_array(array($this, $method), $this->_mapParamsTo($method));
+        
+        // post-actioning
+        $this->postAction();
     }
     
     /**
@@ -135,82 +161,21 @@ abstract class Europa_Controller
     }
     
     /**
-     * Called when the request method is OPTIONS.
+     * Pre-actioning event.
      * 
      * @return void
      */
-    protected function options()
+    protected function preAction()
     {
         
     }
     
     /**
-     * Called when the request method is GET.
+     * Post-actioning event.
      * 
      * @return void
      */
-    protected function get()
-    {
-        
-    }
-    
-    /**
-     * Called when the request method is HEAD.
-     * 
-     * @return void
-     */
-    protected function head()
-    {
-        
-    }
-    
-    /**
-     * Called when the request method is POST.
-     * 
-     * @return void
-     */
-    protected function post()
-    {
-        
-    }
-    
-    
-    /**
-     * Called when the request method is PUT.
-     * 
-     * @return void
-     */
-    protected function put()
-    {
-        
-    }
-    
-    /**
-     * Called when the request method is DELETE.
-     * 
-     * @return void
-     */
-    protected function delete()
-    {
-        
-    }
-    
-    /**
-     * Called when the request method is TRACE.
-     * 
-     * 
-     */
-    protected function trace()
-    {
-        
-    }
-    
-    /**
-     * Called when the request method is CONNECT.
-     * 
-     * @return void
-     */
-    protected function connect()
+    protected function postAction()
     {
         
     }
@@ -236,39 +201,47 @@ abstract class Europa_Controller
     }
     
     /**
-     * Sets properties from the request onto the class. If a property exists that
-     * doesn't have a default value and it doesn't exist in the request, then an
-     * exception is thrown.
+     * Maps the request parameters to the specified method.
      * 
-     * @return void
+     * @param string $method The method to get the request parameters for.
+     * 
+     * @return array
      */
-    private function _mapRequestToProperties(Europa_Request $request)
+    private function _mapParamsTo($method)
     {
-        $params = array();
-        foreach ($request->getParams() as $name => $param) {
-            $params[strtolower($name)] = $param;
+        $methodParams  = array();
+        $requestParams = array();
+        foreach ($this->getRequest()->getAll() as $name => $value) {
+            $requestParams[strtolower($name)] = $value;
         }
         
-        $class = new ReflectionClass($this);
-        foreach ($class->getProperties() as $property) {
-            if (!$property->isPublic()) {
-                continue;
-            }
+        // create a reflection method
+        $method = new ReflectionMethod($this, $method);
+
+        // automatically define the parameters that will be passed to the method
+        foreach ($method->getParameters() as $param) {
+            $pos  = $param->getPosition();
+            $name = strtolower($param->getName());
             
-            $normalcase = $property->getName();
-            $lowercase  = strtolower($normalcase);
-            if (isset($params[$lowercase])) {
-                $this->$normalcase = $params[$lowercase];
-            } elseif (!isset($this->$normalcase)) {
-                throw new Europa_Controller_Exception(
-                    "Required request parameter {$normalcase} was not defined."
+            // apply named parameters
+            if (array_key_exists($name, $requestParams)) {
+                $methodParams[$pos] = $requestParams[$name];
+            // set default values
+            } elseif ($param->isOptional()) {
+                $methodParams[$pos] = $param->getDefaultValue();
+            // throw exceptions when required params aren't defined
+            } else {
+                $class = get_class($this);
+                throw new Europa_Request_Exception(
+                    "Parameter {$param->getName()} for {$class}->{$method->getName()}() was not defined."
                 );
             }
-            
+
             // cast the parameter if it is scalar
-            if (is_scalar($this->$normalcase)) {
-                $this->$normalcase = Europa_String::create($this->$normalcase)->cast();
+            if (is_scalar($methodParams[$pos])) {
+                $methodParams[$pos] = Europa_String::create($methodParams[$pos])->cast();
             }
         }
+        return $methodParams;
     }
 }
