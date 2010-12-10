@@ -6,10 +6,9 @@
  * @category Directory
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class Europa_File extends SplFileObject
+class Europa_Fs_File extends SplFileObject
 {
     /**
      * Returns the file contents instead of the file path.
@@ -35,7 +34,7 @@ class Europa_File extends SplFileObject
      * Sets the contents of the file.
      * 
      * @param string $contents The contents to set to the file.
-     * @return Europa_File
+     * @return Europa_Fs_File
      */
     public function setContents($contents)
     {
@@ -64,7 +63,7 @@ class Europa_File extends SplFileObject
     public function delete()
     {
         if (!@unlink($this->getPathname())) {
-            throw new Europa_File_Exception(
+            throw new Europa_Fs_File_Exception(
                 'Could not delete file ' . $this->getPathname() . '.'
             );
         }
@@ -73,12 +72,12 @@ class Europa_File extends SplFileObject
     /**
      * Copies the file to the destination directory.
      * 
-     * @param Europa_Directory $destination The destination directory.
+     * @param Europa_Fs_Directory $destination The destination directory.
      * @param bool $fileOverwrite Whether or not to overwrite the destination file
      * if it exists.
-     * @return Europa_File
+     * @return Europa_Fs_File
      */
-    public function copy(Europa_Directory $destination, $fileOverwrite = true)
+    public function copy(Europa_Fs_Directory $destination, $fileOverwrite = true)
     {
         $source      = $this->getPathname();
         $destination = $destination->getPathname()
@@ -88,25 +87,25 @@ class Europa_File extends SplFileObject
         // copy the file to the destination
         if ($fileOverwrite || !is_file($destination)) {
             if (!@copy($source, $destination)) {
-                throw new Europa_File_Exception(
+                throw new Europa_Fs_File_Exception(
                     'Could not copy file ' . $source . ' to ' . $destination . '.'
                 );
             }
         }
         
         // return the new file
-        return new Europa_File($destination);
+        return new Europa_Fs_File($destination);
     }
     
     /**
      * Moves the current file to the specified directory.
      * 
-     * @param Europa_Directory $destination The destination directory.
+     * @param Europa_Fs_Directory $destination The destination directory.
      * @param bool $fileOverwrite Whether or not to overwrite the destination file
      * if it exists.
-     * @return Europa_File
+     * @return Europa_Fs_File
      */
-    public function move(Europa_Directory $destination, $fileOverwrite = true)
+    public function move(Europa_Fs_Directory $destination, $fileOverwrite = true)
     {
         $destination = $this->copy($destination, $fileOverwrite);
         $this->delete();
@@ -117,27 +116,27 @@ class Europa_File extends SplFileObject
      * Renames the current file to the new file and returns the new file.
      * 
      * @param string $newName The name to rename the current file to.
-     * @return Europa_File
+     * @return Europa_Fs_File
      */
     public function rename($newName)
     {
         $oldPath = $this->getPathname();
         $newPath = $this->getPath() . DIRECTORY_SEPARATOR . basename($newName);
         if (!@rename($oldPath, $newPath)) {
-            throw new Europa_File_Exception(
+            throw new Europa_Fs_File_Exception(
                 'Could not rename file from ' . $oldPath . ' to ' . $newPath . '.'
             );
         }
-        return new Europa_File($newPath);
+        return new Europa_Fs_File($newPath);
     }
     
     /**
      * Returns whether or not the current file exists in the specified direcory.
      * 
-     * param Europa_Directory $dir The directory to check in.
+     * param Europa_Fs_Directory $dir The directory to check in.
      * @return bool
      */
-    public function existsIn(Europa_Directory $dir)
+    public function existsIn(Europa_Fs_Directory $dir)
     {
         return $dir->hasFile($this);
     }
@@ -180,12 +179,12 @@ class Europa_File extends SplFileObject
      * Opens the specified file. If the file doesn't exist an exception is thrown.
      * 
      * @param string $file The file to open.
-     * @return Europa_Directory
+     * @return Europa_Fs_Directory
      */
     public static function open($file)
     {
         if (!is_file($file)) {
-            throw new Europa_File_Exception(
+            throw new Europa_Fs_File_Exception(
                 'Could not open file ' . $file . '.'
             );
         }
@@ -198,12 +197,12 @@ class Europa_File extends SplFileObject
      * 
      * @param string $file The file to create.
      * @param int $mask The octal mask of the file.
-     * @return Europa_File
+     * @return Europa_Fs_File
      */
     public static function create($file, $mask = 0777)
     {
         if (is_file($file)) {
-            throw new Europa_File_Exception(
+            throw new Europa_Fs_File_Exception(
                 'File ' . $file . ' already exists.'
             );
         }
@@ -217,12 +216,12 @@ class Europa_File extends SplFileObject
      * 
      * @param string $file The file to overwrite.
      * @param int $mask The octal mask of the file.
-     * @return Europa_File
+     * @return Europa_Fs_File
      */
     public static function overwrite($file, $mask = 0777)
     {
         if (is_file($file)) {
-            Europa_File::open($file)->delete();
+            Europa_Fs_File::open($file)->delete();
         }
         return self::create($file, $mask);
     }

@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-class Europa_Directory extends SplFileInfo implements Countable, Iterator
+class Europa_Fs_Directory extends SplFileInfo implements Countable, Iterator
 {
     /**
      * Holds all the items. If the items were filtered, then this array will
@@ -37,13 +37,13 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
      * Opens the directory an constructs the parent info object.
      * 
      * @param string $path The path to open.
-     * @return Europa_Directory
+     * @return Europa_Fs_Directory
      */
     public function __construct($path)
     {
         $this->_path = realpath($path);
         if (!$path || !$this->_path) {
-            throw new Europa_Directory_Exception(
+            throw new Europa_Fs_Directory_Exception(
                 'The path ' . $path . ' must be a valid.'
             );
         }
@@ -74,10 +74,10 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
     /**
      * Returns whether or not the current directory contains the specified file.
      * 
-     * @param Europa_File $file The file to check for.
+     * @param Europa_Fs_File $file The file to check for.
      * @return bool
      */
-    public function hasFile(Europa_File $file)
+    public function hasFile(Europa_Fs_File $file)
     {
         $file = $file->getBasename();
         foreach ($this as $item) {
@@ -92,11 +92,11 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
      * Merges the current directory to the destination directory and leaves the
      * current directory alone.
      * 
-     * @param Europa_Directory $destination The destination directory.
+     * @param Europa_Fs_Directory $destination The destination directory.
      * @param bool $fileOverwrite Whether or not to overwrite destination files.
-     * @return Europa_Directory
+     * @return Europa_Fs_Directory
      */
-    public function copy(Europa_Directory $destination, $fileOverwrite = true)
+    public function copy(Europa_Fs_Directory $destination, $fileOverwrite = true)
     {
         $self = $this->getPathname();
         $dest = $destination->getPathname() . DIRECTORY_SEPARATOR . $this->getBasename();
@@ -106,16 +106,16 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
             $new  = $dest . $new;
             $base = dirname($new);
             if (!is_dir($base)) {
-                Europa_Directory::create($base);
+                Europa_Fs_Directory::create($base);
             }
             if (!is_file($new) || $fileOverwrite) {
                 if (!@copy($old, $new)) {
-                    throw new Europa_Directory_Exception(
+                    throw new Europa_Fs_Directory_Exception(
                         'File ' . $old . ' could not be copied to ' . $new . '.'
                     );
                 }
             } elseif (is_file($new) && !$fileOverwrite) {
-                throw new Europa_Directory_Exception(
+                throw new Europa_Fs_Directory_Exception(
                     'File ' . $new . ' already exists.'
                 );
             }
@@ -127,11 +127,11 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
      * Moves the current directory to the destination directory, deletes the
      * current directory and returns the destination.
      * 
-     * @param Europa_Directory $destination The destination directory.
+     * @param Europa_Fs_Directory $destination The destination directory.
      * @param bool $fileOverwrite Whether or not to overwrite destination files.
-     * @return Europa_Directory
+     * @return Europa_Fs_Directory
      */
-    public function move(Europa_Directory $destination, $fileOverwrite = true)
+    public function move(Europa_Fs_Directory $destination, $fileOverwrite = true)
     {
         $this->copy($destination, $fileOverwrite);
         $this->delete();
@@ -142,18 +142,18 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
      * Renames the current directory and returns it.
      * 
      * @param string $newName The new name of the directory.
-     * @return Europa_Directory
+     * @return Europa_Fs_Directory
      */
     public function rename($newName)
     {
         $oldPath = $this->getPathname();
         $newPath = dirname($oldPath) . DIRECTORY_SEPARATOR . basename($newName);
         if (!@rename($oldPath, $newPath)) {
-            throw new Europa_Directory_Exception(
+            throw new Europa_Fs_Directory_Exception(
                 'Path ' . $oldPath . ' could not be renamed to ' . $newPath . '.'
             );
         }
-        return Europa_Directory::open($newPath);
+        return Europa_Fs_Directory::open($newPath);
     }
     
     /**
@@ -169,7 +169,7 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
         
         // then delete it
         if (!@rmdir($this->getPathname())) {
-            throw new Europa_Directory_Exception(
+            throw new Europa_Fs_Directory_Exception(
                 'Could not remove directory ' . $this->getPathname() . '.'
             );
         }
@@ -178,7 +178,7 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
     /**
      * Empties the current directory.
      * 
-     * @return Europa_Directory
+     * @return Europa_Fs_Directory
      */
     public function clear()
     {
@@ -233,7 +233,7 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
      * Applies the filter to the current listing.
      * 
      * @param mixed $filter The callback filter to run against each item.
-     * @return Europa_Directory
+     * @return Europa_Fs_Directory
      */
     public function filter($filter)
     {
@@ -248,7 +248,7 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
      * filters are removed.
      * 
      * @param bool $all Whether or not to move all filters.
-     * @return Europa_Directory
+     * @return Europa_Fs_Directory
      */
     public function unfilter($all = false)
     {
@@ -319,7 +319,7 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
     /**
      * Resets the directory listing back to the default.
      * 
-     * @return Europa_Directory
+     * @return Europa_Fs_Directory
      */
     public function unflatten()
     {
@@ -343,7 +343,7 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
     /**
      * Sorts the items.
      * 
-     * @return Europa_Directory
+     * @return Europa_Fs_Directory
      */
     public function sort()
     {
@@ -364,7 +364,7 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
     /**
      * Refreshes the current listing.
      * 
-     * @return Europa_Directory
+     * @return Europa_Fs_Directory
      */
     public function refresh()
     {
@@ -408,7 +408,7 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
     {
         $items = array();
         foreach ($this->_items as $item) {
-            if (is_file($item) && Europa_File::open($item)->searchIn($regex)) {
+            if (is_file($item) && Europa_Fs_File::open($item)->searchIn($regex)) {
                 $items[] = $item;
             }
         }
@@ -429,7 +429,7 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
     {
         $items = array();
         foreach ($this->searchIn($regex) as $file) {
-            $count = Europa_File::open($file)->searchAndReplace($regex, $replacement);
+            $count = Europa_Fs_File::open($file)->searchAndReplace($regex, $replacement);
             if ($count) {
                 $items[] = $file;
             }
@@ -460,7 +460,7 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
     /**
      * Returns the current item in the iteration.
      * 
-     * @return Europa_Directory|Europa_File
+     * @return Europa_Fs_Directory|Europa_Fs_File
      */
     public function current()
     {
@@ -471,7 +471,7 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
         if (is_dir($item)) {
             return self::open($item);
         }
-        return new Europa_File($item);
+        return new Europa_Fs_File($item);
     }
     
     /**
@@ -519,12 +519,12 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
      * doesn't exist.
      * 
      * @param string $path The path to the directory.
-     * @return Europa_Directory
+     * @return Europa_Fs_Directory
      */
     public static function open($path)
     {
         if (!is_dir($path)) {
-            throw new Europa_Directory_Exception(
+            throw new Europa_Fs_Directory_Exception(
                 'Could not open directory ' . $path . '.'
             );
         }
@@ -537,12 +537,12 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
      * 
      * @param string $path The path to the directory.
      * @param int $mask The octal mask of the directory.
-     * @return Europa_Directory
+     * @return Europa_Fs_Directory
      */
     public static function create($path, $mask = 0777)
     {
         if (is_dir($path)) {
-            throw new Europa_Directory_Exception(
+            throw new Europa_Fs_Directory_Exception(
                 'Directory ' . $path . ' already exists.'
             );
         }
@@ -559,12 +559,12 @@ class Europa_Directory extends SplFileInfo implements Countable, Iterator
      * 
      * @param string $path The path to the directory.
      * @param int $mask The octal mask of the directory.
-     * @return Europa_Directory
+     * @return Europa_Fs_Directory
      */
     public static function overwrite($path, $mask = 0777)
     {
         if (is_dir($path)) {
-            $dir = new Europa_Directory($path);
+            $dir = new Europa_Fs_Directory($path);
             $dir->delete();
         }
         return self::create($path, $mask);
