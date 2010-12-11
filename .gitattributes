@@ -1,0 +1,6 @@
+codesniffer/ export-ignore
+tests/ export-ignore
+lib/Testes export-ignore
+.git export-ignore
+.gitignore export-ignore
+.gitattributes export-ignore
