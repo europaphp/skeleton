@@ -84,7 +84,7 @@ class Europa_View_Php extends Europa_View
         }
         
         // call the helper
-        $helper = $this->__call($name, array($this));
+        $helper = $this->__call($name);
         
         // if it had a return value, set it and return it
         if ($helper) {
@@ -101,7 +101,7 @@ class Europa_View_Php extends Europa_View
      * 
      * @return mixed
      */
-    public function __call($func, $args = array())
+    public function __call($func, array $args = array())
     {
         // make sure the view is always the first argument
         array_unshift($args, $this);
