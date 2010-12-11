@@ -6,7 +6,7 @@
  * @category Helpers
  * @package  UrlHelper
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
 class UrlHelper implements Europa_View_Helper
 {
@@ -15,14 +15,14 @@ class UrlHelper implements Europa_View_Helper
      * 
      * @var string
      */
-    private $_url = null;
+    protected $url = null;
     
     /**
      * The parameters to use.
      * 
      * @var array
      */
-    private $_params = array();
+    protected $params = array();
     
     /**
      * Instantiates the url formatter and sets properties.
@@ -31,29 +31,28 @@ class UrlHelper implements Europa_View_Helper
      * @param string      $url
      * @param array       $params
      * 
-     * @return urlHelper
+     * @return UrlHelper
      */
     public function __construct(Europa_View $view, $url = null, array $params = array())
     {
-        $this->_url    = $url;
-        $this->_params = $params;
+        $this->url    = $url;
+        $this->params = $params;
     }
     
     /**
      * Formats the url and returns it.
+     * 
+     * @return string
      */
     public function __toString()
     {
         $url = Europa_Request_Http::root();
-        
-        if ($this->_url) {
-            $url .= '/' . ltrim($this->_url, '/');
+        if ($this->url) {
+            $url .= '/' . ltrim($this->url, '/');
         }
-        
-        if ($this->_params) {
+        if ($this->params) {
             $url .= '?' . http_build_query($params);
         }
-        
         return $url;
     }
 }

@@ -1,40 +1,62 @@
 <?php
 
+/**
+ * A helper that autoloads css files.
+ * 
+ * @category Helpers
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
+ */
 class CssHelper
 {
-	private $_layout;
-	
-	private $_view;
-	
-	public function __construct(Europa_View $view)
+    /**
+     * The css file associated to this instance.
+     * 
+     * @var string
+     */
+    protected $file;
+    
+    /**
+     * The path to all css files.
+     * 
+     * @var string
+     */
+    protected static $path = 'css';
+    
+	/**
+	 * Constructs the helper.
+	 * 
+	 * @return CssHelper
+	 */
+	public function __construct(Europa_View $view, $file = null)
 	{
-		$request = new Europa_Request_Http;
-		$this->_layout = 'css/' . $view->getScript() . '.css';
-		$this->_view   = 'css/' . Europa_String::create($request->getController())->toClass()->replace('_', DIRECTORY_SEPARATOR) . 'View.css';
+	    if (!$file) {
+	        $file = $view->getScript();
+	    }
+	    $this->file = $file;
 	}
 	
+	/**
+	 * Returns the link to the stylesheet.
+	 * 
+	 * @return string
+	 */
 	public function __toString()
 	{
-		$css = '';
-		
-		if (file_exists('./' . $this->_layout)) {
-			$css .= '<link rel="stylesheet" type="text/css" href="/' 
-			     .  Europa_Request_Http::root()
-			     .  '/'
-			     .  $this->_layout 
-			     .  '" />'
-			     .  "\n";
-		}
-		
-		if (file_exists('./' . $this->_view)) {
-			$css .= '<link rel="stylesheet" type="text/css" href="/' 
-			     .  Europa_Request_Http::root()
-			     .  '/'
-			     .  $this->_view 
-			     .  '" />'
-			     .  "\n";
-		}
-		
-		return $css;
+	    $file = '/' . Europa_Request_Http::root() . '/' . self::$path . '/' . $this->file . '.css';
+	    return '<link rel="stylesheet" type="text/css" href="' . $file . '" />';
+	}
+	
+	/**
+	 * Sets the global css path.
+	 * 
+	 * @param string $path The path to the css files.
+	 * 
+	 * @return void
+	 */
+	public static function path($path = null)
+	{
+	    self::$path = trim($path, '/');
 	}
 }

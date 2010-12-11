@@ -6,36 +6,65 @@
  * @category Helpers
  * @package  LangHelper
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
 class LangHelper
 {
-    /**
-     * The language to use.
-     * 
-     * @var string
-     */
-    private static $_lang = 'en_US';
-    
 	/**
 	 * Contains the ini values parsed out of the ini file.
 	 * 
 	 * @var array
 	 */
-	private $_ini = array();
+	protected $ini = array();
+	
+    /**
+     * The language to use.
+     * 
+     * @var string
+     */
+    protected static $lang = 'en_US';
+    
+    /**
+     * The base path to the language files.
+     * 
+     * @var string
+     */
+    protected static $path;
 	
 	/**
 	 * Constructs the language helper and parses the required ini file.
 	 * 
 	 * @param Europa_View $view The view that called the helper.
+	 * 
 	 * @return LangHelper
 	 */
-	public function __construct(Europa_View $view)
+	public function __construct(Europa_View $view, $path = null)
 	{
-		$path = $this->_getIniFullPath($view);
-		if (is_file($path)) {
-			$this->_ini = parse_ini_file($path);
+	    // allow a path to be specified when constructing
+	    if ($path) {
+	        self::path($path);
+	    }
+	    
+	    // set a default path if one doesn't exist
+	    if (!self::$path) {
+	        self::path(dirname(__FILE__) . '/../lang');
+	    }
+	    
+	    // format the path to the ini file
+	    $path = self::$path
+	          . DIRECTORY_SEPARATOR
+	          . self::$lang
+	          . DIRECTORY_SEPARATOR
+	          . $view->getScript()
+	          . '.ini';
+        
+        // make sure the language fle exists
+		if (!file_exists($path)) {
+			throw new Europa_Exception('The specified language file does not exist.');
 		}
+		
+		// set the language variables
+		$this->ini = parse_ini_file($path);
 	}
 	
 	/**
@@ -46,7 +75,8 @@ class LangHelper
 	 * Named parameters are prefixed using a colon (:) in the ini value.
 	 * 
 	 * @param string $name The language variable to retrieve.
-	 * @param array $args The arguments passed to the language variable.
+	 * @param array  $args The arguments passed to the language variable.
+	 * 
 	 * @return string
 	 */
 	public function __call($name, $args)
@@ -69,8 +99,8 @@ class LangHelper
 	 */
 	public function __get($name)
 	{
-		if (isset($this->_ini[$name])) {
-			return $this->_ini[$name];
+		if (isset($this->ini[$name])) {
+			return $this->ini[$name];
 		}
 		return null;
 	}
@@ -82,22 +112,22 @@ class LangHelper
 	 */
 	static public function set($language)
 	{
-	    self::$_lang = $language;
+	    self::$lang = $language;
 	}
 	
 	/**
-	 * Returns the full path to the INI file to parse. The view is used to
-	 * determine which file should be parsed.
+	 * Sets the base path to the language files.
 	 * 
-	 * @param Europa_View $view The view to parse the ini file for.
-	 * @return string
+	 * @param string $path The path to the language files.
+	 * 
+	 * @return mixed
 	 */
-	private function _getIniFullPath(Europa_View $view)
+	static public function path($path = null)
 	{
-		return dirname(__FILE__) . '/../lang/'
-		     . self::$_lang
-		     . '/'
-		     . $view->getScript()
-		     . '.ini';
+	    $realpath = realpath($path);
+	    if (!$realpath) {
+	        throw new Europa_Exception('The path to the language files is not valid.');
+	    }
+	    self::$path = $realpath;
 	}
 }
