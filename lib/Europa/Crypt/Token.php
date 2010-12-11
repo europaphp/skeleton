@@ -1,7 +1,7 @@
 <?php
 
 /**
- * A class for generating and sharing an non-reversible token.
+ * A class for generating and sharing an non-reversible cross-platform token.
  * 
  * @category Encryption
  * @package  Crypt
@@ -109,6 +109,6 @@ class Europa_Crypt_Token
      */
     public function __toString()
     {
-        return md5($this->sharedKey . serialize($this->data));
+        return md5($this->sharedKey . json_encode($this->data));
     }
 }
