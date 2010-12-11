@@ -4,11 +4,10 @@
  * A class used for application setup. Defined methods are called in
  * the order in which they are defined.
  * 
- * @category  Bootstrapper
- * @package   Europa
- * @author    Trey Shugart <treshugart@gmail.com>
- * @copyright (c) 2010 Trey Shugart
- * @link      http://europaphp.org/license
+ * @category Bootstrapper
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
 abstract class Europa_Bootstrapper
 {
@@ -18,7 +17,7 @@ abstract class Europa_Bootstrapper
      * 
      * @return void
      */
-    public function init()
+    final public function boot()
     {
         $class = new ReflectionClass($this);
         foreach ($class->getMethods() as $method) {
