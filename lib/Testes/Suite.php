@@ -44,7 +44,7 @@ abstract class Testes_Suite implements Testes_Testable, Iterator, Countable
         
         // load each file in the suite by convention
         foreach (new DirectoryIterator($path) as $file) {
-            if ($file->isDir()) {
+            if (!$this->isValid($file)) {
                 continue;
             }
             
@@ -196,5 +196,25 @@ abstract class Testes_Suite implements Testes_Testable, Iterator, Countable
     {
         $this->tests[] = $test;
         return $this;
+    }
+    
+    /**
+     * Tests whether or not the specified file is valid.
+     * 
+     * @param SplFileObject $file The file to check.
+     * 
+     * @return bool
+     */
+    protected function isValid(DirectoryIterator $file)
+    {
+        if ($file->isDot()) {
+            return false;
+        }
+        
+        if (strpos($file->getBasename(), '.') === 0) {
+            return false;
+        }
+        
+        return true;
     }
 }

@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-class Test_Validator_Map extends Europa_Unit_Test
+class Test_Validator_Map extends Testes_Test
 {
 	/**
 	 * The name error message.
@@ -79,6 +79,9 @@ class Test_Validator_Map extends Europa_Unit_Test
 	 */
 	public function testValidation()
 	{
-		return $this->_validator->validate($this->_data)->isValid();
+		$this->assert(
+		    $this->_validator->validate($this->_data)->isValid(),
+		    'Validation failing.'
+		);
 	}
 }

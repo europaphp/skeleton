@@ -1,6 +1,6 @@
 <?php
 
-class Test extends Europa_Unit_Suite
+class Test extends Testes_Suite
 {
 	
 }

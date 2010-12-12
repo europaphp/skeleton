@@ -1,6 +1,6 @@
 <?php
 
-class Test_ServiceContainer extends Europa_Unit_Test
+class Test_ServiceContainer extends Testes_Test
 {
     private $_container;
     
@@ -23,23 +23,33 @@ class Test_ServiceContainer extends Europa_Unit_Test
     
     public function testSetupConfig()
     {
-        return $this->_container['request']['class'] === 'Europa_Request_Http';
+        $this->assert(
+            $this->_container['request']['class'] === 'Europa_Request_Http',
+            'The service container class does not match.'
+        );
     }
     
     public function testSetupMap()
     {
-        return $this->_container->router instanceof Europa_Router;
+        $this->assert(
+            $this->_container->router instanceof Europa_Router,
+            'The required dependency was not returned.'
+        );
     }
     
     public function testOverride()
     {
-        return $this->_container->request instanceof Europa_Request_Http;
+        $this->assert(
+            $this->_container->request instanceof Europa_Request_Http,
+            'The required dependency was not returned.'
+        );
     }
     
     public function testCustomOverride()
     {
-        return $this->_container->request->test1 === true
-            && $this->_container->request->test2 === true;
+        $valid = $this->_container->request->test1 === true
+              && $this->_container->request->test2 === true;
+        $this->assert($valid, 'The request variables were not properly set.');
     }
     
     public function testFreshOverrideWithMergedConfig()
@@ -51,19 +61,26 @@ class Test_ServiceContainer extends Europa_Unit_Test
         );
         
         $request = $this->_container->request($configOverride);
-        return $request->test1 === true
-            && $request->test2 === false;
+        $valid   = $request->test1 === true
+                && $request->test2 === false;
+        $this->assert($valid, 'Configuration overriding is not working.');
     }
     
     public function testCache()
     {
-        return isset($this->_container->request);
+        $this->assert(
+            isset($this->_container->request),
+            'Dependency caching is not working.'
+        );
     }
     
     public function testUnset()
     {
         unset($this->_container->request);
-        return !isset($this->_container->request);
+        $this->assert(
+            !isset($this->_container->request),
+            'Unsetting is not working.'
+        );
     }
 }
 
@@ -72,9 +89,8 @@ class Container extends Europa_ServiceContainer
     protected function request(array $config = array())
     {
         $request = new $config['class'];
-        $request->setRouter($this->router);
         foreach ($config['params'] as $name => $value) {
-            $request->setParam($name, $value);
+            $request->__set    ($name, $value);
         }
         return $request;
     }

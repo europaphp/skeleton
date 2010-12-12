@@ -10,8 +10,7 @@
  * @category Views
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
 class Europa_View_Php extends Europa_View
 {
@@ -54,7 +53,7 @@ class Europa_View_Php extends Europa_View
      * Construct the view and sets defaults.
      * 
      * @param string $script The script to render.
-     * @param array  $params The arguments to pass to the script.
+     * @param mixed  $params The arguments to pass to the script.
      * 
      * @return Europa_View
      */
@@ -190,7 +189,7 @@ class Europa_View_Php extends Europa_View
      * Sets the script to be rendered.
      * 
      * @param String $script The path to the script to be rendered relative 
-     * to the view path, excluding the extension.
+     *                       to the view path, excluding the extension.
      * 
      * @return Object Europa_View
      */

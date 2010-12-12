@@ -63,7 +63,10 @@ abstract class Europa_Request implements Iterator, ArrayAccess, Countable
      */
     public function __get($name)
     {
-        return $this->get($name);
+        if ($this->__isset($name)) {
+            return $this->_params[$name];
+        }
+        return null;
     }
     
     /**
@@ -76,7 +79,8 @@ abstract class Europa_Request implements Iterator, ArrayAccess, Countable
      */
     public function __set($name, $value)
     {
-        return $this->set($name, $value);
+        $this->_params[$name] = $value;
+        return $this;
     }
     
     /**
@@ -88,7 +92,7 @@ abstract class Europa_Request implements Iterator, ArrayAccess, Countable
      */
     public function __isset($name)
     {
-        return $this->has($name);
+        return isset($this->_params[$name]);
     }
     
     /**
@@ -100,9 +104,89 @@ abstract class Europa_Request implements Iterator, ArrayAccess, Countable
      */
     public function __unset($name)
     {
-        return $this->clear($name);
+        if ($this->__isset($name)) {
+            unset($this->_params[$name]);
+        }
+        return $this;
     }
     
+    /**
+     * Sets parameters.
+     * 
+     * @param mixed $params The params to set.
+     * 
+     * @return Europa_Request
+     */
+    public function setParams($params)
+    {
+        // check for appropriate parameters
+        if (is_array($params) || is_object($params)) {
+            foreach ($params as $name => $value) {
+                $this->__set($name, $value);
+            }
+        }
+        return $this;
+    }
+    
+    /**
+     * Returns the parameters.
+     * 
+     * @return array
+     */
+    public function getParams()
+    {
+        return $this->_params;
+    }
+    
+    /**
+     * Checks to see if all of the passed params are in the request.
+     * 
+     * @return bool
+     */
+    public function hasParams(array $params)
+    {
+        foreach ($params as $name) {
+            if (!$this->__isset($name)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * Removes the parameters.
+     * 
+     * @return Europa_Request
+     */
+    public function removeParams()
+    {
+        $this->_params = array();
+        return $this;
+    }
+    
+    /**
+     * Merges in the passed parameters.
+     * 
+     * @param array $params The parameters to merge.
+     * 
+     * @return Europa_Request
+     */
+    public function mergeParams($params)
+    {
+        // get the old
+        $oldParams = $this->_params;
+        
+        // set the new to handle objects as well
+        $this->setParams($params);
+        
+        // get the new
+        $newParams = $this->_params;
+        
+        // merge and set
+        $this->_params = array_merge($this->_params, $params);
+        return $this;
+    }
+        
     /**
      * Directly dispatches the request
      * 
@@ -149,128 +233,6 @@ abstract class Europa_Request implements Iterator, ArrayAccess, Countable
     }
     
     /**
-     * Returns a given parameter's value.
-     * 
-     * @param string $names   The name or names of the parameters to search for.
-     * @param mixed  $default The default value to return if the parameters aren't set.
-     * 
-     * @return mixed
-     */
-    public function get($names, $default = null)
-    {
-        if (!is_array($names)) {
-            $names = array($names);
-        }
-        foreach ($names as $name) {
-            if (isset($this->_params[$name])) {
-                return $this->_params[$name];
-            }
-        }
-        return $default;
-    }
-    
-    /**
-     * Sets a given parameter's value. If multiple names are supplied, their
-     * values are set to the single passed value. This is useful for example
-     * for batch setting of default param values, or in CLI mode when you have
-     * a param '--my-param' which is also aliased as 'm'.
-     * 
-     * @param string $names The parameter name or names.
-     * @param mixed  $value The parameter value.
-     * 
-     * @return Europa_Request
-     */
-    public function set($names, $value)
-    {
-        if (!is_array($names)) {
-            $names = array($names);
-        }
-        foreach ($names as $name) {
-            $this->_params[$name] = $value;
-        }
-        return $this;
-    }
-    
-    /**
-     * Returns whether or not the specified parameter or parameters exist.
-     * 
-     * @param mixed $names The name or names of parameters to check for.
-     * 
-     * @return bool
-     */
-    public function has($names)
-    {
-        if (!is_array($names)) {
-            $names = array($names);
-        }
-        foreach ($names as $name) {
-            if (isset($this->_params[$name])) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    /**
-     * Clears the specified parameter or parameters.
-     * 
-     * @param mixed $names The name or names of parameters to clear.
-     * 
-     * @return bool
-     */
-    public function clear($names)
-    {
-        if (!is_array($names)) {
-            $names = array($names);
-        }
-        foreach ($nameas as $name) {
-            if (isset($this->_params[$name])) {
-                unset($this->_params[$name]);
-            }
-        }
-        return $this;
-    }
-    
-    /**
-     * Binds multiple parameters to the request. Overrides any existing
-     * parameters with the same name.
-     * 
-     * @param mixed $params The params to set. Can be any iterable value.
-     * 
-     * @return Europa_Request
-     */
-    public function setAll($params)
-    {
-        if (is_array($params) || is_object($params)) {
-            foreach ($params as $k => $v) {
-                $this->set($k, $v);
-            }
-        }
-        return $this;
-    }
-    
-    /**
-     * Returns all parameters set on the request.
-     * 
-     * @return array
-     */
-    public function getAll()
-    {
-        return $this->_params;
-    }
-    
-    /**
-     * Clears all parameters from the request. Includes clearing of default values.
-     * 
-     * @return Europa_Request
-     */
-    public function clearAll()
-    {
-        $this->_params = array();
-        return $this;
-    }
-    
-    /**
      * Sets the controller parameter.
      * 
      * @param string $controller The controller to set.
@@ -279,7 +241,7 @@ abstract class Europa_Request implements Iterator, ArrayAccess, Countable
      */
     public function setController($controller)
     {
-        return $this->set($this->getControllerKey(), $controller);
+        return $this->__set($this->getControllerKey(), $controller);
     }
     
     /**
@@ -289,7 +251,7 @@ abstract class Europa_Request implements Iterator, ArrayAccess, Countable
      */
     public function getController()
     {
-        return $this->get($this->getControllerKey());
+        return $this->__get($this->getControllerKey());
     }
     
     /**
@@ -303,13 +265,13 @@ abstract class Europa_Request implements Iterator, ArrayAccess, Countable
     {
         // retrieve the current key and controller
         $oldKey = $this->_controllerKey;
-        $oldVal = $this->get($oldKey);
+        $oldVal = $this->__get($oldKey);
         
         // set the new key
         $this->_controllerKey = $newKey;
         
         // auto-set the new controller parameter to the old value
-        return $this->set($newKey, $oldVal);
+        return $this->__set($newKey, $oldVal);
     }
     
     /**
@@ -428,7 +390,7 @@ abstract class Europa_Request implements Iterator, ArrayAccess, Countable
      */
     public function offsetSet($offset, $value)
     {
-        return $this->set($offset, $value);
+        return $this->__set($offset, $value);
     }
     
     /**
@@ -442,7 +404,7 @@ abstract class Europa_Request implements Iterator, ArrayAccess, Countable
      */
     public function offsetGet($offset)
     {
-        return $this->get($offset);
+        return $this->__get($offset);
     }
     
     /**
@@ -456,7 +418,7 @@ abstract class Europa_Request implements Iterator, ArrayAccess, Countable
      */
     public function offsetExists($offset)
     {
-        return $this->has($offset);
+        return $this->__isset($offset);
     }
     
     /**
@@ -470,7 +432,7 @@ abstract class Europa_Request implements Iterator, ArrayAccess, Countable
      */
     public function offsetUnset($offset)
     {
-        return $this->clear($offset);
+        return $this->__unset($offset);
     }
     
     /**
@@ -478,7 +440,7 @@ abstract class Europa_Request implements Iterator, ArrayAccess, Countable
      * 
      * @return mixed
      */
-    public static function getLastActive()
+    public static function getCurrent()
     {
         $len = count(self::$_stack);
         if ($len) {

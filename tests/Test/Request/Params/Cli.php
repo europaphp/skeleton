@@ -1,6 +1,6 @@
 <?php
 
-class Test_Request_Params_Cli extends Europa_Unit_Test
+class Test_Request_Params_Cli extends Testes_Test
 {
 	public function setUp()
 	{
@@ -21,42 +21,66 @@ class Test_Request_Params_Cli extends Europa_Unit_Test
 	
 	public function testCliFlag1()
 	{
-		return $this->_request->f === true;
+		$this->assert(
+		    $this->_request->f === true,
+		    'Flags not working.'
+		);
 	}
 	
 	public function testCliFlag2()
 	{
-		return $this->_request->flag2 === true;
+		$this->assert(
+		    $this->_request->flag2 === true,
+		    'Flags not working.'
+		);
 	}
 	
 	public function testCliFlag3()
 	{
-		return $this->_request->flag3 === true;
+	    $this->assert(
+    		$this->_request->flag3 === true,
+    		'Flags not working.'
+    	);
 	}
 	
 	public function testCliParam1()
 	{
-		return $this->_request->p === 'param1';
+	    $this->assert(
+    		$this->_request->p === 'param1',
+    		'Named paramters not working.'
+    	);
 	}
 	
 	public function testCliParam2()
 	{
-		return $this->_request->param2 === 'param2';
+		$this->assert(
+		    $this->_request->param2 === 'param2',
+		    'Named paramters not working.'
+		);
 	}
 	
 	public function testCliParam3()
 	{
-		return $this->_request->param3 === 'overridden';
+	    $this->assert(
+    	    $this->_request->param3 === 'overridden',
+    	    'Named paramters not working.'
+    	);
 	}
 	
 	public function testCliControllerSetting()
 	{
-		return $this->_request->getController() === 'customcontroller';
+		$this->assert(
+		    $this->_request->getController() === 'customcontroller',
+		    'Controller setting not working.'
+		);
 	}
 	
-	public function testCliParamClearing()
+	public function testCliParamRemoving()
 	{
-		$this->_request->clearParams();
-		return $this->_request->param3 === null;
+		$this->_request->removeParams();
+		$this->assert(
+		    $this->_request->param3 === null,
+		    'Parameter removing not working'
+		);
 	}
 }

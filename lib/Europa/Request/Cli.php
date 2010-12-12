@@ -80,10 +80,10 @@ class Europa_Request_Cli extends Europa_Request
                 $next  = isset($args[$index + 1]) ? $args[$index + 1] : false;
             
                 if ($next && $next[0] !== '-') {
-                    $this->set($param, $next);
+                    $this->__set($param, $next);
                     $skip = true;
                 } else {
-                    $this->set($param, true);
+                    $this->__set($param, true);
                 }
             } else {
                 $this->_commands[] = $param;

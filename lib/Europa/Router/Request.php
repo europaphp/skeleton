@@ -67,6 +67,6 @@ class Europa_Router_Request extends Europa_Router
     {
         $request = $this->getRequest();
         $subject = $subject ? $subject : $request->__toString();
-        return $request->setAll($this->query($subject))->dispatch();
+        return $request->setParams($this->query($subject))->dispatch();
     }
 }

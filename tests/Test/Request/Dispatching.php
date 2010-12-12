@@ -1,6 +1,6 @@
 <?php
 
-class Test_Request_Dispatching extends Europa_Unit_Test
+class Test_Request_Dispatching extends Testes_Test
 {
 	static public $request = false;
 	
@@ -9,15 +9,19 @@ class Test_Request_Dispatching extends Europa_Unit_Test
 		$request = new Europa_Request_Http;
 		$request->setController('test');
 		$request->dispatch();
-		return self::$request === $request;
+		
+		$this->assert(
+		    self::$request === $request,
+		    'Unable to retrieve active instance.'
+		);
 	}
 }
 
 class TestController extends Europa_Controller
 {
-	public function action()
+	public function get()
 	{
-		Test_Request_Dispatching::$request = Europa_Request::getActiveInstance();
+		Test_Request_Dispatching::$request = Europa_Request::getCurrent();
 	}
 	
 	public function __toString()

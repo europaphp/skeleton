@@ -1,6 +1,6 @@
 <?php
 
-class Test_Loader extends Europa_Unit_Test
+class Test_Loader extends Testes_Test
 {
 	private $_fileHandle;
 	
@@ -14,12 +14,15 @@ class Test_Loader extends Europa_Unit_Test
 		$this->_dummyClass = 'Test_LoaderDummyTestClass';
 		$this->_fileHandle = fopen($this->_dummyFile, 'w+');
 		fwrite($this->_fileHandle, '<?php class ' . $this->_dummyClass . ' {}');
+		chmod($this->_dummyFile, 0777);
 	}
 
 	public function tearDown()
 	{
-		fclose($this->_fileHandle);
-		unlink($this->_dummyFile);
+	    if (file_exists($this->_dummyFile)) {
+    		fclose($this->_fileHandle);
+    		unlink($this->_dummyFile);
+    	}
 	}
 	
 	public function testRegisterAutoload()
@@ -32,20 +35,26 @@ class Test_Loader extends Europa_Unit_Test
 				&& $func[0] === 'Europa_Loader'
 				&& $func[1] === 'loadClass'
 			) {
-				return true;
+			    return;
 			}
 		}
-		return false;
+		$this->assert(false, 'Unable to regiseter autoloading.');
 	}
 
 	public function testLoadClass()
 	{
-		return (bool) Europa_Loader::loadClass($this->_dummyClass);
+		$this->assert(
+		    Europa_Loader::loadClass($this->_dummyClass),
+		    'Unalbe to load class.'
+		);
 	}
 	
 	public function testAddPath()
 	{
-		Europa_Loader::addPath('.');
-		return true;
+	    try {
+    		Europa_Loader::addPath('.');
+    	} catch (Exception $e) {
+    	    $this->assert(false, 'Could not add load path.');
+    	}
 	}
 }

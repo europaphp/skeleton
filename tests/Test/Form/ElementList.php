@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-class Test_Form_ElementList extends Europa_Unit_Test
+class Test_Form_ElementList extends Testes_Test
 {
 	/**
 	 * The list that is being used for the test.
@@ -43,10 +43,10 @@ class Test_Form_ElementList extends Europa_Unit_Test
 	 */
 	public function testElementExistence()
 	{
-		if (!$this->_list['user[0][name]'] instanceof Europa_Form_Element_Input) {
-			return false;
-		}
-		return true;
+	    $this->assert(
+	        $this->_list['user[0][name]'] instanceof Europa_Form_Element_Input,
+	        'Element does not exist.'
+	    );
 	}
 	
 	/**
@@ -58,7 +58,11 @@ class Test_Form_ElementList extends Europa_Unit_Test
 	{
 		$required = new Europa_Validator_Required;
 		$required->addMessage('Name is required.');
-		return $this->_list->validate()->isValid();
+		
+		$this->assert(
+		    $this->_list->validate()->isValid(),
+		    'Element is not valid.'
+		);
 	}
 	
 	/**
@@ -69,10 +73,13 @@ class Test_Form_ElementList extends Europa_Unit_Test
 	public function testNumericToArray()
 	{
 		$toArray = $this->_list->toArray();
-		return isset($toArray['user'][0]['name'])
+		
+		$valid = isset($toArray['user'][0]['name'])
 		    && isset($toArray['user'][1]['bio'])
 		    && $toArray['user'][0]['name'] === 'tres'
 		    && $toArray['user'][1]['bio']  === 'php dev';
+		
+		$this->assert($valid, 'Numeric indicies in toArray failed.');
 	}
 	
 	/**
@@ -83,10 +90,13 @@ class Test_Form_ElementList extends Europa_Unit_Test
 	public function testStringToArray()
 	{
 		$toArray = $this->_list->toArray();
-		return isset($toArray['user']['zero']['name'])
-		    && isset($toArray['user']['zero']['bio'])
-		    && $toArray['user']['zero']['name'] === 'tres'
-		    && $toArray['user']['zero']['bio']  === 'php dev';
+		
+		$valid = isset($toArray['user']['zero']['name'])
+		      && isset($toArray['user']['zero']['bio'])
+		      && $toArray['user']['zero']['name'] === 'tres'
+		      && $toArray['user']['zero']['bio']  === 'php dev';
+		
+		$this->assert($valid, 'String indicies in toArray failed.');
 	}
 }
 

@@ -1,6 +1,6 @@
 <?php
 
-class Test_Request_Http extends Europa_Unit_Test
+class Test_Request_Http extends Testes_Test
 {
 	public function setUp()
 	{
@@ -12,19 +12,17 @@ class Test_Request_Http extends Europa_Unit_Test
 	
 	public function testRequestHttpRootUri()
 	{
-		return Europa_Request_Http::getRootUri() === 'EuropaPHP/master/sandbox';
+		$this->assert(
+		    Europa_Request_Http::root() === 'EuropaPHP/master/sandbox',
+		    'Root uri is not working.'
+		);
 	}
 	
 	public function testRequestHttpRequestUri()
 	{
-		return Europa_Request_Http::getRequestUri() === 'some/request/uri';
-	}
-	
-	public function testUriFormatting()
-	{
-		$uri1 = $this->_request->formatUri('/my/new/uri/');
-		$uri2 = $this->_request->formatUri('my/new/uri');
-		return $uri1 === '/EuropaPHP/master/sandbox/my/new/uri/'
-		    && $uri2 === '/EuropaPHP/master/sandbox/my/new/uri';
+	    $this->assert(
+		    Europa_Request_Http::uri() === 'some/request/uri',
+		    'Request uri is not working.'
+		);
 	}
 }

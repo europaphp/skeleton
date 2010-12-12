@@ -1,6 +1,6 @@
 <?php
 
-class Test_Form_Element extends Europa_Unit_Test
+class Test_Form_Element extends Testes_Test
 {
 	public function testFill()
 	{
@@ -15,17 +15,24 @@ class Test_Form_Element extends Europa_Unit_Test
 				)
 			)
 		);
-		return $element->value === 'value';
+		$this->assert(
+		    $element->value === 'value',
+		    'Filling does not work.'
+		);
 	}
 	
 	public function testToArraySimple()
 	{
-		$element = new Europa_Form_Element_Input;
+		$element        = new Europa_Form_Element_Input;
 		$element->name  = 'my';
 		$element->value = 'value';
+		
 		$toArray = $element->toArray();
-		return isset($toArray['my'])
-		    && $toArray['my'] === 'value';
+		
+		$valid = isset($toArray['my'])
+		      && $toArray['my'] === 'value';
+		
+		$this->assert($valid, 'Simple to array failed.');
 	}
 	
 	public function testToArrayStringNumericKey()
@@ -33,10 +40,14 @@ class Test_Form_Element extends Europa_Unit_Test
 		$element = new Europa_Form_Element_Input;
 		$element->name  = 'my[1]';
 		$element->value = 'value';
+		
 		$toArray = $element->toArray();
-		return isset($toArray['my'])
-		    && isset($toArray['my']['1'])
-		    && $toArray['my']['1']=== 'value';
+		
+		$valid = isset($toArray['my'])
+		      && isset($toArray['my']['1'])
+		      && $toArray['my']['1']=== 'value';
+		
+		$this->assert($valid, 'To array with a string key failed.');
 	}
 	
 	public function testToArrayIntNumericKey()
@@ -44,10 +55,14 @@ class Test_Form_Element extends Europa_Unit_Test
 		$element = new Europa_Form_Element_Input;
 		$element->name  = 'my[1]';
 		$element->value = 'value';
+		
 		$toArray = $element->toArray();
-		return isset($toArray['my'])
-		    && isset($toArray['my'][1])
-		    && $toArray['my'][1]=== 'value';
+		
+		$valid = isset($toArray['my'])
+		      && isset($toArray['my'][1])
+		      && $toArray['my'][1]=== 'value';
+		
+		$this->assert($valid, 'To array with a numeric key failed.');
 	}
 	
 	public function testToArrayComplex()
@@ -55,12 +70,16 @@ class Test_Form_Element extends Europa_Unit_Test
 		$element = new Europa_Form_Element_Input;
 		$element->name  = 'my[1][test][0][element]';
 		$element->value = 'value';
+		
 		$toArray = $element->toArray();
-		return isset($toArray['my'])
-		    && isset($toArray['my']['1'])
-		    && isset($toArray['my']['1']['test'])
-		    && isset($toArray['my']['1']['test'][0])
-		    && isset($toArray['my']['1']['test'][0]['element'])
-		    && $toArray['my']['1']['test'][0]['element'] === 'value';
+		
+		$valid = isset($toArray['my'])
+		      && isset($toArray['my']['1'])
+		      && isset($toArray['my']['1']['test'])
+		      && isset($toArray['my']['1']['test'][0])
+		      && isset($toArray['my']['1']['test'][0]['element'])
+		      && $toArray['my']['1']['test'][0]['element'] === 'value';
+	    
+	    $this->assert($valid, 'Complex to array failed.');
 	}
 }

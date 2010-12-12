@@ -1,6 +1,6 @@
 <?php
 
-class Test_Request_Params_Http extends Europa_Unit_Test
+class Test_Request_Params_Http extends Testes_Test
 {	
 	protected $_request;
 	
@@ -13,38 +13,47 @@ class Test_Request_Params_Http extends Europa_Unit_Test
 	
 	public function testHttpParamCascading()
 	{
-		return $this->_request->cascade1 === true
-		    && $this->_request->cascade2 === true;
+		$valid = $this->_request->cascade1 === true
+		      && $this->_request->cascade2 === true;
+		
+		$this->assert($valid, 'Parameter cascading not working.');
 	}
 	
 	public function testHttpParamSetting()
 	{
 		$this->_request->testSet1 = true;
-		return $this->_request->testSet1 == true;
+		
+		$this->assert(
+		    $this->_request->testSet1 == true,
+		    'Parameter setting not working.'
+		);
 	}
 	
-	public function testHttpParamBulkSettingFromArray()
+	public function testHttpParamBulk()
 	{
 		$this->_request->setParams(array('bulk1' => true));
-		return $this->_request->bulk1 === true;
-	}
-
-	public function testHttpParamBulkSettingFromClass()
-	{
-		$class = new stdClass;
-		$class->bulk2 = true;
-		$this->_request->setParams($class);
-		return $this->_request->bulk2 === true;
+		
+		$this->assert(
+		    $this->_request->bulk1 === true,
+		    'Bulk setting not working.'
+		);
 	}
 	
 	public function testHttpControllerSetting()
 	{
-		return $this->_request->getController() === 'customcontroller';
+		$this->assert(
+		    $this->_request->getController() === 'customcontroller',
+		    'Controller setting not working.'
+		);
 	}
 	
 	public function testHttpParamClearing()
 	{
-		$this->_request->clearParams();
-		return $this->_request->bulk2 === null;
+		$this->_request->removeParams();
+		
+		$this->assert(
+		    $this->_request->bulk2 === null,
+		    'Parameter removing not working.'
+		);
 	}
 }

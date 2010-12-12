@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-class Test_Validator_Suite extends Europa_Unit_Test
+class Test_Validator_Suite extends Testes_Test
 {
 	/**
 	 * Tests to make sure it fails if all sub-tests fail.
@@ -21,7 +21,10 @@ class Test_Validator_Suite extends Europa_Unit_Test
 		$suite   = new Europa_Validator_Suite;
 		$suite[] = new Europa_Validator_Required;
 		$suite[] = new Europa_Validator_Number;
-		return $suite->validate(null)->isValid() === false;
+		$this->assert(
+		    $suite->validate(null)->isValid() === false,
+		    'Could not fail all validators.'
+		);
 	}
 	
 	/**
@@ -34,7 +37,10 @@ class Test_Validator_Suite extends Europa_Unit_Test
 		$suite   = new Europa_Validator_Suite;
 		$suite[] = new Europa_Validator_Required;
 		$suite[] = new Europa_Validator_Number;
-		return $suite->validate('1')->isValid() === true;
+		$this->assert(
+		    $suite->validate('1')->isValid() === true,
+		    'Could not pass all validators.'
+		);
 	}
 	
 	/**
@@ -47,6 +53,9 @@ class Test_Validator_Suite extends Europa_Unit_Test
 		$suite   = new Europa_Validator_Suite;
 		$suite[] = new Europa_Validator_Required;
 		$suite[] = new Europa_Validator_Number;
-		return $suite->validate('something')->isValid() === false;
+		$this->assert(
+		    $suite->validate('something')->isValid() === false,
+		    'Could not pass one validator.'
+		);
 	}
 }

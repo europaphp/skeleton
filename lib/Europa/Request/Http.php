@@ -17,7 +17,7 @@ class Europa_Request_Http extends Europa_Request
      */
     public function __construct()
     {
-        $this->setAll($_REQUEST);
+        $this->setParams($_REQUEST);
     }
     
     /**
@@ -41,20 +41,6 @@ class Europa_Request_Http extends Europa_Request
             return strtolower($_SERVER['REQUEST_METHOD']);
         }
         return 'get';
-    }
-
-    /**
-     * Redirects the client to the specified URI. The URI is formatted using
-     * Europa_Request_Http->formatUri().
-     * 
-     * @param string $uri The URI to redirect to.
-     * 
-     * @return void
-     */
-    public static function redirect($uri = '/')
-    {
-        header('Location: ' . self::uri($uri));
-        exit;
     }
     
     /**

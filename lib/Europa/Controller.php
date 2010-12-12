@@ -211,7 +211,7 @@ abstract class Europa_Controller
     {
         $methodParams  = array();
         $requestParams = array();
-        foreach ($this->getRequest()->getAll() as $name => $value) {
+        foreach ($this->getRequest()->getParams() as $name => $value) {
             $requestParams[strtolower($name)] = $value;
         }
         

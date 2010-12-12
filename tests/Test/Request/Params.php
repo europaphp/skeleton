@@ -1,6 +1,6 @@
 <?php
 
-class Test_Request_Params extends Europa_Unit_Suite
+class Test_Request_Params extends Testes_Suite
 {
 	
 }

@@ -6,10 +6,9 @@
  * @category Views
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-abstract class Europa_View implements ArrayAccess, Iterator
+abstract class Europa_View implements ArrayAccess, Iterator, Countable
 {
     /**
      * The parameters and helpers bound to the view.
@@ -32,6 +31,7 @@ abstract class Europa_View implements ArrayAccess, Iterator
      * unset.
      * 
      * @param string $name The name of the property to get or helper to load.
+     * 
      * @return mixed
      */
     public function __get($name)
@@ -46,7 +46,8 @@ abstract class Europa_View implements ArrayAccess, Iterator
      * Sets a parameter.
      * 
      * @param string $name  The parameter to set.
-     * @param mixed $value The value to set.
+     * @param mixed  $value The value to set.
+     * 
      * @return bool
      */
     public function __set($name, $value)
@@ -58,6 +59,7 @@ abstract class Europa_View implements ArrayAccess, Iterator
      * Returns whether a parameter is set or not.
      * 
      * @param string $name The parameter to check.
+     * 
      * @return bool
      */
     public function __isset($name)
@@ -69,6 +71,7 @@ abstract class Europa_View implements ArrayAccess, Iterator
      * Unsets a parameter
      * 
      * @param string $name The parameter to unset.
+     * 
      * @return void
      */
     public function __unset($name)
@@ -80,6 +83,7 @@ abstract class Europa_View implements ArrayAccess, Iterator
      * Applies a group of parameters to the view.
      * 
      * @param mixed $params The params to set. Can be any iterable value.
+     * 
      * @return Europa_View
      */
     public function setParams($params)
@@ -106,50 +110,144 @@ abstract class Europa_View implements ArrayAccess, Iterator
         return $this->_params;
     }
     
-    public function offsetSet($index, $value)
+    /**
+     * Returns whether or not the passed parameters exist.
+     * 
+     * @param array $params The parameters to check for.
+     * 
+     * @return bool
+     */
+    public function hasParams(array $params)
     {
-        $this->$index = $value;
+        foreach ($params as $name) {
+            if (!$this->__isset($name)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * Removes all parameters.
+     * 
+     * @return Europa_View
+     */
+    public function removeParams()
+    {
+        $this->_params = array();
         return $this;
     }
     
-    public function offsetGet($index)
+    /**
+     * Sets the specified parameter.
+     * 
+     * @param string $name  The parameter name.
+     * @param mixed  $value The parameter value.
+     * 
+     * @return Europa_View
+     */
+    public function offsetSet($name, $value)
     {
-        return $this->$index;
-    }
-    
-    public function offsetExists($index)
-    {
-        return isset($this->$index);
-    }
-    
-    public function offsetUnset($index)
-    {
-        unset($this->$index);
+        $this->__set($name, $value);
         return $this;
     }
     
+    /**
+     * Returns the specified parameter.
+     * 
+     * @param string $name The parameter name.
+     * 
+     * @return mixed
+     */
+    public function offsetGet($name)
+    {
+        return $this->__get($name);
+    }
+    
+    /**
+     * Returns whether or not the specified parameter exists.
+     * 
+     * @param string $name The parameter name.
+     * 
+     * @return bool
+     */
+    public function offsetExists($name)
+    {
+        return $this->__isset($name);
+    }
+    
+    /**
+     * Unsets the specified parameter.
+     * 
+     * @param string $name The parameter name.
+     * 
+     * @return Europa_View
+     */
+    public function offsetUnset($name)
+    {
+        $this->__unset($name);
+        return $this;
+    }
+    
+    /**
+     * Returns the current parameter.
+     * 
+     * @return mixed
+     */
     public function current()
     {
         return current($this->_params);
     }
     
+    /**
+     * Returns the current parameter name.
+     * 
+     * @return string
+     */
     public function key()
     {
         return key($this->_params);
     }
     
+    /**
+     * Moves to the next parameter.
+     * 
+     * @return Europa_View
+     */
     public function next()
     {
-        return next($this->_params);
+        next($this->_params);
+        return $this;
     }
     
+    /**
+     * Resets iteration.
+     * 
+     * @return Europa_View
+     */
     public function rewind()
     {
-        return reset($this->_params);
+        reset($this->_params);
+        return $this;
     }
     
+    /**
+     * Returns whether or not iteration is still valid.
+     * 
+     * @return bool
+     */
     public function valid()
     {
         return isset($this->{$this->key()});
+    }
+    
+    /**
+     * Returns the number of parameters.
+     * 
+     * @return int
+     */
+    public function count()
+    {
+        return count($this->_params);
     }
 }

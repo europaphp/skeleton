@@ -1,6 +1,6 @@
 <?php
 
-class Test_Route extends Europa_Unit_Suite
+class Test_Route extends Testes_Suite
 {
 	
 }

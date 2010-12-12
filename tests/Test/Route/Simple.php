@@ -1,37 +1,50 @@
 <?php
 
-class Test_Route_Simple extends Europa_Unit_Test
+class Test_Route_Simple extends Testes_Test
 {
 	public function testMatch()
 	{
 		$route = new Europa_Route_Simple(':controller/:action');
-		return $route->query('some-controller/some-action') !== false;
+		$this->assert(
+		    $route->query('some-controller/some-action') !== false,
+		    'Matching not working.'
+		);
 	}
 	
 	public function testNonMatch()
 	{
 		$route = new Europa_Route_Simple(':controller/:action');
-		return $route->query('some-controller/some-action/some-parameter') === false;
+		$this->assert(
+		    $route->query('some-controller/some-action/some-parameter') === false,
+		    'Not-matching not working.'
+		);
 	}
 	
 	public function testWildcardWithSlash()
 	{
 		$route = new Europa_Route_Simple(':controller/:action/*');
-		return $route->query('some-controller/some-action/') !== false
-		    && $route->query('some-controller/some-action/some/other/stuff') !== false;
+		$valid = $route->query('some-controller/some-action/') !== false
+		      && $route->query('some-controller/some-action/some/other/stuff') !== false;
+		
+		$this->assert($valid, 'Wildcard with slash not working.');
 	}
 	
 	public function testWildcardWithoutSlash()
 	{
 		$route = new Europa_Route_Simple(':controller/:action*');
-		return $route->query('some-controller/some-action') !== false
-		    && $route->query('some-controller/some-action/some/other/stuff') !== false;;
+		$valid = $route->query('some-controller/some-action') !== false
+		      && $route->query('some-controller/some-action/some/other/stuff') !== false;
+		
+		$this->assert($valid, 'Wildcard without slash not working.');
 	}
 	
 	public function testRequireEndingSlash()
 	{
 		$route = new Europa_Route_Simple(':controller/:action/');
-		return $route->query('some-controller/some-action') === false;
+		$this->assert(
+		    $route->query('some-controller/some-action') === false,
+		    'Required ending slash not working.'
+		);
 	}
 	
 	public function testParameterBinding()
@@ -43,8 +56,10 @@ class Test_Route_Simple extends Europa_Unit_Test
 			return false;
 		}
 		
-		return $params['controller'] === 'test-controller'
-		    && $params['action']     === 'test-action';
+		$valid = $params['controller'] === 'test-controller'
+		      && $params['action']     === 'test-action';
+		
+		$this->assert($valid, 'Parameter binding not working.');
 	}
 	
 	public function testDefaultParameterBinding()
@@ -62,9 +77,11 @@ class Test_Route_Simple extends Europa_Unit_Test
 			return false;
 		}
 		
-		return $params['controller'] === 'test-controller'
-		    && $params['action']     === 'test-action'
-		    && $params['user']       === 'testuser';
+		$valid = $params['controller'] === 'test-controller'
+		      && $params['action']     === 'test-action'
+		      && $params['user']       === 'testuser';
+		
+		$this->assert($valid, 'Default parameter binding not working.');
 	}
 	
 	public function testDynamicParameterBinding()
@@ -76,13 +93,18 @@ class Test_Route_Simple extends Europa_Unit_Test
 			return false;
 		}
 		
-		return $params['param1'] === 'value1'
-		    && $params['param2'] === 'value2';
+		$valid = $params['param1'] === 'value1'
+		      && $params['param2'] === 'value2';
+		
+		$this->assert($valid, 'Dynamic parameter binding not working.');
 	}
 	
 	public function testReverseEngineering()
 	{
 		$route = new Europa_Route_Simple('user/:username');
-		return $route->reverse(array('username' => 'testuser')) === 'user/testuser';
+		$this->assert(
+		    $route->reverse(array('username' => 'testuser')) === 'user/testuser',
+		    'Reverse engineering not working.'
+		);
 	}
 }
