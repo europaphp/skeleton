@@ -44,7 +44,7 @@ class JsHelper
 	 */
 	public function __toString()
 	{
-	    $file = '/' . Europa_Request_Http::root() . '/' . self::$path . '/' . $this->file . '.css';
+	    $file = '/' . Europa_Request_Http::root() . '/' . self::$path . '/' . $this->file . '.js';
 	    return '<script type="text/javascript" src="' . $file . '"></script>';
 	}
 	
