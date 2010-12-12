@@ -6,7 +6,7 @@
  * @category Router
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
 class Europa_Router_Request extends Europa_Router
 {
@@ -26,20 +26,7 @@ class Europa_Router_Request extends Europa_Router
      */
     public function __construct(Europa_Request $request)
     {
-        $this->setRequest($request);
-    }
-    
-    /**
-     * Sets the request to route.
-     * 
-     * @param Europa_Request $request The request to route.
-     * 
-     * @return Europa_Router_Request
-     */
-    public function setRequest(Europa_Request $request)
-    {
         $this->_request = $request;
-        return $this;
     }
     
     /**

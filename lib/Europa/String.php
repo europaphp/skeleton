@@ -294,6 +294,16 @@ class Europa_String implements Countable
         }
         return $val;
     }
+    
+    /**
+     * Multi-byte safe. Calculates and returns number of characters in a string.
+     * 
+     * @return int
+     */
+    public function count()
+    {
+        return mb_strlen($this->_string);
+    }
 
     /**
      * Creates a new string. Same as calling new Europa_String($string).
@@ -304,15 +314,5 @@ class Europa_String implements Countable
     public static function create($string = '')
     {
         return new self($string);
-    }
-    
-    /**
-     * Multi-byte safe. Calculates and returns number of characters in a string.
-     * 
-     * @return int
-     */
-    public function count()
-    {
-        return mb_strlen($this->_string);
     }
 }

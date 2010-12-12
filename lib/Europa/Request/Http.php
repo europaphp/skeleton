@@ -164,6 +164,19 @@ class Europa_Request_Http extends Europa_Request
     }
     
     /**
+     * Redirects the request to the specified uri.
+     * 
+     * @param string $uri The uri to redirect to.
+     * 
+     * @return void
+     */
+    public static function redirect($uri)
+    {
+        header('Location: /' . self::root() . '/' . ltrim($uri, '/'));
+        exit;
+    }
+    
+    /**
      * Returns all of the request headers as an array.
      * 
      * The header names are formatted to appear as normal, not all uppercase

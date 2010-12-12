@@ -3,11 +3,10 @@
 /**
  * A view renderer that connects two views. One as a layout and one as the child view.
  * 
- * @category  Views
- * @package   Europa
- * @author    Trey Shugart <treshugart@gmail.com>
- * @copyright (c) 2010 Trey Shugart
- * @link      http://europaphp.org/license
+ * @category Views
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
 class Europa_View_Layout extends Europa_View
 {
@@ -16,28 +15,28 @@ class Europa_View_Layout extends Europa_View
      * 
      * @var Europa_View
      */
-    protected $_layout = null;
+    protected $layout = null;
     
     /**
      * The view to use.
      * 
      * @var Europa_View
      */
-    protected $_view = null;
+    protected $view = null;
     
     /**
      * The property that the view is bound on the layout to.
      * 
      * @var string
      */
-    protected $_layoutViewProperty = 'view';
+    protected $layoutViewProperty = 'view';
     
     /**
      * Constructs the view layout and sets layout and views.
      * 
      * @param Europa_View $layout The layout to use.
      * @param Europa_View $view The view to use.
-     * @return Europa_View_Layout
+     * @return Europa_Viewlayout
      */
     public function __construct(Europa_View $layout = null, Europa_View $view = null)
     {
@@ -51,15 +50,13 @@ class Europa_View_Layout extends Europa_View
      */
     public function __toString()
     {
-        if ($this->_layout) {
-            $this->_layout{$this->_layoutViewProperty} = $this->_view;
-            return $this->_layout->__toString();
+        if ($this->layout) {
+            $this->layout{$this->layoutViewProperty} = $this->view;
+            return $this->layout->__toString();
         }
-        
-        if ($this->_view) {
-            return $this->_view->__toString();
+        if ($this->view) {
+            return $this->view->__toString();
         }
-        
         return '';
     }
     
@@ -73,8 +70,8 @@ class Europa_View_Layout extends Europa_View
     public function __set($name, $value)
     {
         parent::__set($name, $value);
-        $this->_layout->$name = $value;
-        $this->_view->$name   = $value;
+        $this->layout->$name = $value;
+        $this->view->$name   = $value;
     }
     
     /**
@@ -86,19 +83,19 @@ class Europa_View_Layout extends Europa_View
     public function __unset($name)
     {
         parent::__unset($name);
-        unset($this->_layout->$name);
-        unset($this->_view->$name);
+        unset($this->layout->$name);
+        unset($this->view->$name);
     }
     
     /**
      * Sets the layout to use.
      * 
      * @param Europa_View $layout The layout to use.
-     * @return Europa_View_Layout
+     * @return Europa_Viewlayout
      */
     public function setLayout(Europa_View $layout = null)
     {
-        $this->_layout = $layout;
+        $this->layout = $layout;
         return $this;
     }
     
@@ -109,18 +106,18 @@ class Europa_View_Layout extends Europa_View
      */
     public function getLayout()
     {
-        return $this->_layout;
+        return $this->layout;
     }
     
     /**
      * Sets the view to use.
      * 
      * @param Europa_View $view The view to use.
-     * @return Europa_View_Layout
+     * @return Europa_Viewlayout
      */
     public function setView(Europa_View $view = null)
     {
-        $this->_view = $view;
+        $this->view = $view;
         return $this;
     }
     
@@ -131,7 +128,7 @@ class Europa_View_Layout extends Europa_View
      */
     public function getView()
     {
-        return $this->_view;
+        return $this->view;
     }
     
     /**
@@ -139,11 +136,11 @@ class Europa_View_Layout extends Europa_View
      * time of rendering.
      * 
      * @param string $name The name of the property.
-     * @return Europa_View_Layout
+     * @return Europa_Viewlayout
      */
     public function setLayoutViewProperty($name)
     {
-        $this->_layoutViewProperty = $name;
+        $this->layoutViewProperty = $name;
         return $this;
     }
     
@@ -154,6 +151,6 @@ class Europa_View_Layout extends Europa_View
      */
     public function getLayoutViewProperty()
     {
-        return $this->_layoutViewProperty;
+        return $this->layoutViewProperty;
     }
 }

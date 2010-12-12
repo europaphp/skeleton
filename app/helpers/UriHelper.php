@@ -8,7 +8,7 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class UrlHelper implements Europa_View_Helper
+class UriHelper
 {
     /**
      * The url to format.
@@ -46,12 +46,12 @@ class UrlHelper implements Europa_View_Helper
      */
     public function __toString()
     {
-        $url = Europa_Request_Http::root();
+        $url = '/' . Europa_Request_Http::root();
         if ($this->url) {
             $url .= '/' . ltrim($this->url, '/');
         }
         if ($this->params) {
-            $url .= '?' . http_build_query($params);
+            $url .= '?' . http_build_query($this->params);
         }
         return $url;
     }

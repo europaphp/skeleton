@@ -133,56 +133,28 @@ class Europa_View_Php extends Europa_View
         // allows us to return the included file as a string
         ob_start();
         
+        // format the script
+        $script = $this->getScript() . '.' . $this->getSuffix();
+        
         // include it and trigger an error for any exceptions since you can't throw
         // exceptions inside __toString
-        if ($view = Europa_Loader::search($this->getScript() . '.' . $this->getSuffix())) {
+        if ($view = Europa_Loader::search($script)) {
             try {
                 include $view;
             } catch (Exception $e) {
                 trigger_error((string) $e, E_USER_ERROR);
             }
+        } else {
+            trigger_error(
+                'Unable to find view "'
+                . $script
+                . '" in the defined loads paths.',
+                E_USER_ERROR
+            );
         }
         
         // return the parsed view
         return ob_get_clean() . "\n";
-    }
-    
-    /**
-     * Extends the specified view with the current view. And returns the new
-     * view.
-     * 
-     * @param Europa_View $view The view to extend.
-     * 
-     * @return Europa_View
-     */
-    public function extend(Europa_View $view)
-    {
-        return $view->setChild($this);
-    }
-    
-    /**
-     * Sets the child view for the current view and returns the current view.
-     * 
-     * @param Europa_View $view The view to extend.
-     * 
-     * @return Europa_View
-     */
-    public function setChild(Europa_View $view)
-    {
-        $this->_child = $view;
-        return $this;
-    }
-    
-    /**
-     * Returns the child of the current view if it exists.
-     * 
-     * @param Europa_View $view The view to extend.
-     * 
-     * @return Europa_View
-     */
-    public function getChild()
-    {
-        return $this->_child;
     }
     
     /**
