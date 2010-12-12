@@ -44,6 +44,40 @@ class Europa_Request_Http extends Europa_Request
     }
     
     /**
+     * Returns the protocol part of the request.
+     * 
+     * @return string
+     */
+    public static function protocol()
+    {
+        static $protocol;
+        if (!$protocol) {
+            $protocol = 'http';
+            if ($this->isSecure()) {
+                $protocol .= 's';
+            }
+        }
+        return $protocol;
+    }
+    
+    /**
+     * Returns the host part of the request.
+     * 
+     * @return string
+     */
+    public static function host()
+    {
+        static $host;
+        if (!$host) {
+            $host = $_SERVER['HTTP_HOST'];
+            if ($_SERVER['SERVER_PORT'] != 80) {
+                $host .= ':' . $_SERVER['SERVER_PORT'];
+            }
+        }
+        return $host;
+    }
+    
+    /**
      * Returns the Europa root URI in relation to the file that dispatched
      * the controller.
      * 
@@ -134,32 +168,19 @@ class Europa_Request_Http extends Europa_Request
      */
     public static function full()
     {
-        // base
-        $uri = 'http';
-        
-        // format secure
-        if ($this->isSecure()) {
-            $uri .= 's';
+        $uri = '';
+        if ($protocol = self::protocol()) {
+            $uri .= $protocol . '://';
         }
-        
-        // format host
-        $uri .= '://' . $_SERVER['HTTP_HOST'];
-        
-        // format port of other than 80
-        if ($_SERVER['SERVER_PORT'] != 80) {
-            $uri .= ':' . $_SERVER['SERVER_PORT'];
+        if ($host = self::host()) {
+            $uri .= $host;
         }
-        
-        // append root uri
         if ($root = self::root()) {
             $uri .= '/' . $root;
         }
-        
-        // append request uri
         if ($request = self::uri()) {
             $uri .= '/' . $request;
         }
-        
         return $uri;
     }
     
@@ -172,7 +193,7 @@ class Europa_Request_Http extends Europa_Request
      */
     public static function redirect($uri)
     {
-        header('Location: /' . self::root() . '/' . ltrim($uri, '/'));
+        header('Location: ' . $uri);
         exit;
     }
     

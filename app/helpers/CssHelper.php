@@ -44,8 +44,12 @@ class CssHelper
 	 */
 	public function __toString()
 	{
-	    $file = '/' . Europa_Request_Http::root() . '/' . self::$path . '/' . $this->file . '.css';
-	    $path = $_SERVER['DOCUMENT_ROOT'] . $file;
+	    $file = '/';
+	    if ($root = Europa_Request_Http::root()) {
+	        $file .= $root . '/';
+	    }
+	    $file .= self::$path . '/' . $this->file . '.css';
+	    $path  = $_SERVER['DOCUMENT_ROOT'] . $file;
 	    if (file_exists($path)) {
 		    return '<link rel="stylesheet" type="text/css" href="' . $file . '" />';
 		}

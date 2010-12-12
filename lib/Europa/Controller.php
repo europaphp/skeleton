@@ -114,12 +114,13 @@ abstract class Europa_Controller
      * 
      * @return Europa_Controller
      */
-    public function forward($to)
+    public function forward($to, array $params = array())
     {
-        $to = (string) Europa_String::create($to)->toClass();
-        $to = new $to($this->getRequest());
-        $to->action();
-        return $to;
+        // modify the request
+        $request = $this->getRequest();
+        $request->setParams($params);
+        $request->setController($to);
+        die($request->dispatch());
     }
     
     /**

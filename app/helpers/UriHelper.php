@@ -46,9 +46,12 @@ class UriHelper
      */
     public function __toString()
     {
-        $url = '/' . Europa_Request_Http::root();
+        $url = '/';
+        if ($root = Europa_Request_Http::root()) {
+            $url .= $root . '/';
+        }
         if ($this->url) {
-            $url .= '/' . ltrim($this->url, '/');
+            $url .= ltrim($this->url, '/');
         }
         if ($this->params) {
             $url .= '?' . http_build_query($this->params);

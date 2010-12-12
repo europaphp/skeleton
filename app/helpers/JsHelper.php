@@ -44,8 +44,12 @@ class JsHelper
 	 */
 	public function __toString()
 	{
-	    $file = '/' . Europa_Request_Http::root() . '/' . self::$path . '/' . $this->file . '.js';
-	    $path = $_SERVER['DOCUMENT_ROOT'] . $file;
+	    $file = '/';
+	    if ($root = Europa_Request_Http::root()) {
+	        $file .= $root . '/';
+	    }
+	    $file .= self::$path . '/' . $this->file . '.js';
+	    $path  = $_SERVER['DOCUMENT_ROOT'] . $file;
 	    if (file_exists($path)) {
     	    return '<script type="text/javascript" src="' . $file . '"></script>';
     	}
