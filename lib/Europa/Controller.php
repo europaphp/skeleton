@@ -91,7 +91,7 @@ abstract class Europa_Controller
     public function setView(Europa_View $view = null)
     {
         if ($this->_view) {
-            $view->setAll($this->_view->getAll());
+            $view->setParams($this->_view->getParams());
         }
         $this->_view = $view;
         return $this;
