@@ -124,6 +124,19 @@ abstract class Europa_Controller
     }
     
     /**
+     * Redirects the current request to the specified url.
+     * 
+     * @param string $to The url to redirect to.
+     * 
+     * @return void
+     */
+    public function redirect($to)
+    {
+        header('Location: ' . Europa_Request_Http::format($to));
+        exit;
+    }
+    
+    /**
      * Makes sure the appropriate parameters are passed to init and the request
      * method action.
      * 

@@ -6,7 +6,7 @@
  * @category Request
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
 class Europa_Request_Http extends Europa_Request
 {
@@ -44,39 +44,119 @@ class Europa_Request_Http extends Europa_Request
     }
     
     /**
-     * Returns the protocol part of the request.
+     * Redirects the request to the specified uri.
      * 
-     * @return string
+     * @param string $uri The uri to redirect to.
+     * 
+     * @return void
      */
-    public static function protocol()
+    public static function redirect($uri)
     {
-        static $protocol;
-        if (!$protocol) {
-            $protocol = 'http';
-            if ($this->isSecure()) {
-                $protocol .= 's';
-            }
-        }
-        return $protocol;
+        header('Location: ' . new Europa_Uri($uri));
+        exit;
     }
     
     /**
-     * Returns the host part of the request.
+     * Returns all of the request headers as an array.
+     * 
+     * The header names are formatted to appear as normal, not all uppercase
+     * as in the $_SERVER super-global.
+     * 
+     * @return array
+     */
+    public static function headers()
+    {
+        static $server;
+        if (!isset($server)) {
+            foreach ($_SERVER as $name => $value) {
+                if (substr($name, 0, 5) === 'HTTP_') {
+                    $name = substr($name, 5);
+                    $name = strtolower($name);
+                    $name = str_replace('_', ' ', $name);
+                    $name = ucwords($name);
+                    $name = str_replace(' ', '-', $name);
+                    $server[$name] = $value;
+                }
+            }
+        }
+        return $server;
+    }
+    
+    /**
+     * Returns the value of a single request header or null if not found.
+     * 
+     * @param string $name The name of the request header to retrieve.
+     * 
+     * @return string
+     */
+    public static function header($name)
+    {
+        $headers = self::headers();
+        if (isset($headers[$name])) {
+            return $headers[$name];
+        }
+        return null;
+    }
+    
+    /**
+     * Returns the content types specified in the Accept request header. Each
+     * value is trimmed for consistency, but no further formatting occurs.
+     * 
+     * @return array
+     */
+    public static function accepts($type = null)
+    {
+        // parse out accept headers
+        $accept = self::header('Accept');
+        $accept = explode(',', $accept);
+        array_walk($accept, 'trim');
+        
+        // if a type is specified, we check to see if it is accepted
+        if ($type) {
+            return in_array($type, $accept);
+        }
+        
+        // or return all types
+        return $accept;
+    }
+    
+    /**
+     * Returns the scheme of the current request. This is either "http" or "https".
+     * 
+     * @return string
+     */
+    public static function scheme()
+    {
+        $scheme = 'http';
+        if (self::isSecure()) {
+            $scheme .= 's';
+        }
+        return $scheme;
+    }
+    
+    /**
+     * Returns the hostname of the request.
      * 
      * @return string
      */
     public static function host()
     {
-        static $host;
-        if (!$host) {
-            $host = $_SERVER['HTTP_HOST'];
-            if ($_SERVER['SERVER_PORT'] != 80) {
-                $host .= ':' . $_SERVER['SERVER_PORT'];
-            }
+        if (isset($_SERVER['HTTP_HOST'])) {
+            return $_SERVER['HTTP_HOST'];
         }
-        return $host;
+        return null;
     }
     
+    /**
+     * Returns the port the current request came through.
+     * 
+     * @return int
+     */
+    public static function port()
+    {
+        return (int) $_SERVER['SERVER_PORT'];
+    }
+        
     /**
      * Returns the Europa root URI in relation to the file that dispatched
      * the controller.
@@ -152,7 +232,48 @@ class Europa_Request_Http extends Europa_Request
     }
     
     /**
-     * Returns whether or not the request is being made through SSL.
+     * Returns the full URI that was used in the request.
+     * 
+     * @return string
+     */
+    public static function full()
+    {
+        $uri = 'http';
+        
+        // ssl
+        if (self::isSecure()) {
+            $uri .= 's';
+        }
+        
+        // host
+        $uri .= '://' .  self::host();
+        
+        // port
+        $port = self::port();
+        if (!$port != 80) {
+            $uri .= ':' . $port;
+        }
+        
+        // Europa root uri
+        if ($rootUri = self::root()) {
+            $uri .= '/' . $rootUri;
+        }
+        
+        // Europa request uri
+        if ($requestUri = self::request()) {
+            $uri .= '/' . $requestUri;
+        }
+        
+        // query string
+        if ($queryString = self::query()) {
+            $uri .= '?' . $queryString;
+        }
+        
+        return $uri;
+    }
+    
+    /**
+     * Returns whether or not the current request is using SSL.
      * 
      * @return bool
      */
@@ -162,102 +283,15 @@ class Europa_Request_Http extends Europa_Request
     }
     
     /**
-     * Returns the full URI that was used in the request.
+     * Formats the passed in URI using the Europa root URI.
      * 
      * @return string
      */
-    public static function full()
+    public static function format($uri)
     {
-        $uri = '';
-        if ($protocol = self::protocol()) {
-            $uri .= $protocol . '://';
+        if (strpos($uri, 'http://') === 0) {
+            return $uri;
         }
-        if ($host = self::host()) {
-            $uri .= $host;
-        }
-        if ($root = self::root()) {
-            $uri .= '/' . $root;
-        }
-        if ($request = self::uri()) {
-            $uri .= '/' . $request;
-        }
-        return $uri;
-    }
-    
-    /**
-     * Redirects the request to the specified uri.
-     * 
-     * @param string $uri The uri to redirect to.
-     * 
-     * @return void
-     */
-    public static function redirect($uri)
-    {
-        header('Location: ' . $uri);
-        exit;
-    }
-    
-    /**
-     * Returns all of the request headers as an array.
-     * 
-     * The header names are formatted to appear as normal, not all uppercase
-     * as in the $_SERVER super-global.
-     * 
-     * @return array
-     */
-    public static function headers()
-    {
-        static $server;
-        if (!isset($server)) {
-            foreach ($_SERVER as $name => $value) {
-                if (substr($name, 0, 5) === 'HTTP_') {
-                    $name = substr($name, 5);
-                    $name = strtolower($name);
-                    $name = str_replace('_', ' ', $name);
-                    $name = ucwords($name);
-                    $name = str_replace(' ', '-', $name);
-                    $server[$name] = $value;
-                }
-            }
-        }
-        return $server;
-    }
-    
-    /**
-     * Returns the value of a single request header or null if not found.
-     * 
-     * @param string $name The name of the request header to retrieve.
-     * 
-     * @return string
-     */
-    public static function header($name)
-    {
-        $headers = self::headers();
-        if (isset($headers[$name])) {
-            return $headers[$name];
-        }
-        return null;
-    }
-    
-    /**
-     * Returns the content types specified in the Accept request header. Each
-     * value is trimmed for consistency, but no further formatting occurs.
-     * 
-     * @return array
-     */
-    public static function accepts($type = null)
-    {
-        // parse out accept headers
-        $accept = self::header('Accept');
-        $accept = explode(',', $accept);
-        array_walk($accept, 'trim');
-        
-        // if a type is specified, we check to see if it is accepted
-        if ($type) {
-            return in_array($type, $accept);
-        }
-        
-        // or return all types
-        return $accept;
+        return '/' . self::root() . '/' . ltrim($uri, '/');
     }
 }
