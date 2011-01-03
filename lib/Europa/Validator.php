@@ -6,8 +6,7 @@
  * @category Validation
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
 abstract class Europa_Validator implements Europa_Validator_Validatable
 {
@@ -30,6 +29,7 @@ abstract class Europa_Validator implements Europa_Validator_Validatable
      * Adds a message to the validator.
      * 
      * @param string $message The message to add.
+     * 
      * @return Europa_Validator
      */
     public function addMessage($message)

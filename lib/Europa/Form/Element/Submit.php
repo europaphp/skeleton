@@ -18,8 +18,13 @@ class Europa_Form_Element_Submit extends Europa_Form_Element_Button
      */
     public function __construct(array $attributes = array())
     {
+        // pre-set value that can be overridden
+        $this->value = 'Submit';
+        
+        // construct with attributes
         parent::__construct($attributes);
-            $this->type  = 'submit';
-            $this->value = 'Submit';
-        }
+        
+        // force submit type
+        $this->type = 'submit';
     }
+}

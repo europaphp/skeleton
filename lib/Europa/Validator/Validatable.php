@@ -15,14 +15,14 @@ interface Europa_Validator_Validatable
      * Performs validation on the specified value.
      * 
      * @param mixed $value The value to validate.
+     * 
      * @return Europa_Validator_Validatable
      */
     public function validate($value);
     
-    /** 
+    /**
      * Tells whether the last validation was successful or not.
      * 
-     * @param mixed $value The value to validate.
      * @return bool
      */
     public function isValid();

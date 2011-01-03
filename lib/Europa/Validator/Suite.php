@@ -22,12 +22,33 @@ class Europa_Validator_Suite implements Europa_Validator_Validatable, ArrayAcces
      * Validates the value against all validators in the suite.
      * 
      * @param mixed $value The value to validate.
+     * 
      * @return Europa_Validator_Suite
      */
     public function validate($value)
     {
         foreach ($this as $validator) {
             $validator->validate($value);
+        }
+        return $this;
+    }
+    
+    /**
+     * Throws a validation exception.
+     * 
+     * @param mixed  $value   The value to validate.
+     * @param string $message The main validation message.
+     * @param string $class   The exception class to throw.
+     * 
+     * @throws Europa_Validator_Exception
+     */
+    public function validateAndThrow($value, $class = 'Europa_Validator_Exception')
+    {
+        $this->validate($value);
+        $class = new $class;
+        if (!$this->isValid()) {
+            $class->fromTraversible($this->getMessages());
+            throw $class;
         }
         return $this;
     }

@@ -30,6 +30,7 @@ class Europa_Validator_NumberRange extends Europa_Validator
      * 
      * @param mixed $min The mininum value.
      * @param mixed $max The maximum value.
+     * 
      * @return Viomedia_Validator_NumberRange
      */
     public function __construct($min, $max)
@@ -42,13 +43,18 @@ class Europa_Validator_NumberRange extends Europa_Validator
      * Checks to make sure the specified value is set.
      * 
      * @param mixed $value The value to validate.
+     * 
      * @return Europa_Validator_NumberRange
      */
     public function validate($value)
     {
         if (!is_numeric($value)) {
-            $this->fail();
-            return $this;
+            if (is_string($value)) {
+                $value = strlen($value);
+            } else {
+                $this->fail();
+                return $this;
+            }
         }
         
         $value = (float) $value;

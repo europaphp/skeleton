@@ -18,8 +18,13 @@ class Europa_Form_Element_Button extends Europa_Form_Element_Input
      */
     public function __construct(array $attributes = array())
     {
-        parent::__construct($attributes);
-        $this->type  = 'button';
+        // pre-set value that can be overridden
         $this->value = 'Button';
+        
+        // construct with attributes
+        parent::__construct($attributes);
+        
+        // force submit type
+        $this->type = 'button';
     }
 }
