@@ -37,10 +37,14 @@ class Europa_Request_Http extends Europa_Request
      */
     public function method()
     {
-        if (isset($_SERVER['REQUEST_METHOD'])) {
-            return strtolower($_SERVER['REQUEST_METHOD']);
+        if (isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
+            $method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
+        } elseif (isset($_SERVER['REQUEST_METHOD'])) {
+            $method = $_SERVER['REQUEST_METHOD'];
+        } else {
+            $method = 'get';
         }
-        return 'get';
+        return strtolower($method);
     }
     
     /**
