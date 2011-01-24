@@ -38,29 +38,30 @@ class LangHelper
 	 * 
 	 * @return LangHelper
 	 */
-	public function __construct(Europa_View $view, $path = null)
+	public function __construct(Europa_View $view, $fileOverride = null, $langOverride = null, $pathOverride = null)
 	{
-	    // allow a path to be specified when constructing
-	    if ($path) {
-	        self::path($path);
-	    }
-	    
-	    // set a default path if one doesn't exist
-	    if (!self::$path) {
-	        self::path(dirname(__FILE__) . '/../lang');
-	    }
+    	// set a default path if one doesn't exist
+    	if (!self::$path) {
+    	    self::path(dirname(__FILE__) . '/../lang');
+    	}
+    	
+	    // allow view script language override
+	    $file = $fileOverride ? $fileOverride : $view->getScript();
+	    $lang = $langOverride ? $langOverride : self::$lang;
+	    $path = $pathOverride ? $pathOverride : self::$path;
 	    
 	    // format the path to the ini file
-	    $path = self::$path
+	    $path = $path
 	          . DIRECTORY_SEPARATOR
-	          . self::$lang
+	          . $lang
 	          . DIRECTORY_SEPARATOR
-	          . $view->getScript()
+	          . $file
 	          . '.ini';
         
         // make sure the language fle exists
 		if (!file_exists($path)) {
-			throw new Europa_Exception('The specified language file does not exist.');
+			$e = new Europa_Exception('The language file "' . $path . '" does not exist.');
+			$e->trigger();
 		}
 		
 		// set the language variables
@@ -103,6 +104,26 @@ class LangHelper
 			return $this->ini[$name];
 		}
 		return null;
+	}
+	
+	/**
+	 * Returns the language variables as an array.
+	 * 
+	 * @return array
+	 */
+	public function toArray()
+	{
+	    return $this->_ini;
+	}
+	
+	/**
+	 * Returns the language variables as a JSON string.
+	 * 
+	 * @return array
+	 */
+	public function toJson()
+	{
+	    return json_encode($this->toArray());
 	}
 	
 	/**
