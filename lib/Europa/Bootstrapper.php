@@ -22,7 +22,7 @@ abstract class Europa_Bootstrapper
         $class = new ReflectionClass($this);
         foreach ($class->getMethods() as $method) {
             $name = $method->getName();
-            if ($name === __FUNCTION__ || strpos($name, '__') === 0) {
+            if ($name === __FUNCTION__ || strpos($name, '__') === 0 || (isset($this->$name) && !$this->$name)) {
                 continue;
             }
             $this->$name();
