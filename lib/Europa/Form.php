@@ -6,10 +6,12 @@
  * @category Forms
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-abstract class Europa_Form extends Europa_Form_ElementList
+namespace Europa
 {
-    
+	abstract class Form extends Form\ElementList
+	{
+	    
+	}
 }

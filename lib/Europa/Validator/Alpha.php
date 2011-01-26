@@ -8,22 +8,24 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class Europa_Validator_Alpha extends Europa_Validator
+namespace Europa\Validator
 {
-    /**
-     * Checks to make sure the specified value is set.
-     * 
-     * @param mixed $value The value to validate.
-     * 
-     * @return Europa_Validator_Alpha
-     */
-    public function validate($value)
+    class Alpha extends \Europa\Validator
     {
-        if (preg_match('/^[a-zA-Z]*$/', $value)) {
-            $this->pass();
-        } else {
-            $this->fail();
+        /**
+         * Checks to make sure the specified value is set.
+         * 
+         * @param mixed $value The value to validate.
+         * 
+         * @return void
+         */
+        public function validate($value)
+        {
+            if (preg_match('/^[a-zA-Z]*$/', $value)) {
+                $this->pass();
+            } else {
+                $this->fail();
+            }
         }
-        return $this;
     }
 }

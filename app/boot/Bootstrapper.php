@@ -3,6 +3,8 @@
 // autoloading isn't enabled yet, so required the bootstrapper
 require_once dirname(__FILE__) . '/../../lib/Europa/Bootstrapper.php';
 
+use Europa\Loader;
+
 /**
  * Bootstraps the sample application.
  * 
@@ -11,7 +13,7 @@ require_once dirname(__FILE__) . '/../../lib/Europa/Bootstrapper.php';
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class Bootstrapper extends Europa_Bootstrapper
+class Bootstrapper extends Europa\Bootstrapper
 {
     /**
      * The application base path.
@@ -58,9 +60,9 @@ class Bootstrapper extends Europa_Bootstrapper
      */
     public function addLoadPaths()
     {
-        Europa_Loader::addPath($this->_base . '/app/controllers');
-        Europa_Loader::addPath($this->_base . '/app/views');
-        Europa_Loader::addPath($this->_base . '/app/helpers');
+        \Europa\Loader::addPath($this->_base . '/app/controllers');
+        \Europa\Loader::addPath($this->_base . '/app/helpers');
+        \Europa\Loader::addPath($this->_base . '/app/views');
     }
     
     /**
@@ -70,6 +72,6 @@ class Bootstrapper extends Europa_Bootstrapper
      */
     public function registerAutoloading()
     {
-        Europa_Loader::registerAutoload();
+        \Europa\Loader::registerAutoload();
     }
 }

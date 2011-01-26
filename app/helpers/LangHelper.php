@@ -38,7 +38,7 @@ class LangHelper
 	 * 
 	 * @return LangHelper
 	 */
-	public function __construct(Europa_View $view, $fileOverride = null, $langOverride = null, $pathOverride = null)
+	public function __construct(\Europa\View $view, $fileOverride = null, $langOverride = null, $pathOverride = null)
 	{
     	// set a default path if one doesn't exist
     	if (!self::$path) {
@@ -60,7 +60,7 @@ class LangHelper
         
         // make sure the language fle exists
 		if (!file_exists($path)) {
-			$e = new Europa_Exception('The language file "' . $path . '" does not exist.');
+			$e = new \Europa\Exception('The language file "' . $path . '" does not exist.');
 			$e->trigger();
 		}
 		
@@ -147,7 +147,7 @@ class LangHelper
 	{
 	    $realpath = realpath($path);
 	    if (!$realpath) {
-	        throw new Europa_Exception('The path to the language files is not valid.');
+	        throw new \Europa\Exception('The language file base path "' . $path . '" does not exist.');
 	    }
 	    self::$path = $realpath;
 	}

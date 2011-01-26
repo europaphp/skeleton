@@ -7,9 +7,12 @@
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class Europa_Exception extends Exception
+namespace Europa
 {
-    
+	class Exception extends \Exception
+	{
+	    
+	}
 }

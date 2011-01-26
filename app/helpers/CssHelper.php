@@ -29,7 +29,7 @@ class CssHelper
 	 * 
 	 * @return CssHelper
 	 */
-	public function __construct(Europa_View $view, $file = null)
+	public function __construct(\Europa\View $view, $file = null)
 	{
 	    if (!$file) {
 	        $file = $view->getScript();
@@ -45,7 +45,7 @@ class CssHelper
 	public function __toString()
 	{
 	    $file = '/';
-	    if ($root = Europa_Request_Http::root()) {
+	    if ($root = Europa\Request\Http::root()) {
 	        $file .= $root . '/';
 	    }
 	    $file .= self::$path . '/' . $this->file . '.css';
