@@ -3,8 +3,6 @@
 // autoloading isn't enabled yet, so required the bootstrapper
 require_once dirname(__FILE__) . '/../../lib/Europa/Bootstrapper.php';
 
-use Europa\Loader;
-
 /**
  * Bootstraps the sample application.
  * 
