@@ -34,6 +34,8 @@ namespace Europa\Validator
                 $value = isset($data[$id]) ? $data[$id] : null;
                 $validator->validate($value);
             }
+            
+            return $this;
         }
     }
 }

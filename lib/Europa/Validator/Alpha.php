@@ -26,6 +26,7 @@ namespace Europa\Validator
             } else {
                 $this->fail();
             }
+            return $this;
         }
     }
 }

@@ -237,7 +237,7 @@ namespace Europa\Validator
          * 
          * @return \Europa\Validator\Validatable
          */
-        protected function add(Europa_Validator_Validatable $validator, $index = null)
+        protected function add(Validatable $validator, $index = null)
         {
             if (is_null($index)) {
                 $index = $this->count();

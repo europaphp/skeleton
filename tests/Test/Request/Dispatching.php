@@ -6,7 +6,7 @@ class Test_Request_Dispatching extends Testes_Test
 	
 	public function testGettingActiveInstance()
 	{
-		$request = new Europa_Request_Http;
+		$request = new \Europa\Request\Http;
 		$request->setController('test');
 		$request->dispatch();
 		
@@ -17,11 +17,11 @@ class Test_Request_Dispatching extends Testes_Test
 	}
 }
 
-class TestController extends Europa_Controller
+class TestController extends \Europa\Controller
 {
 	public function get()
 	{
-		Test_Request_Dispatching::$request = Europa_Request::getCurrent();
+		Test_Request_Dispatching::$request = \Europa\Request::getCurrent();
 	}
 	
 	public function __toString()

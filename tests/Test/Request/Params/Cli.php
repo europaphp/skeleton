@@ -16,7 +16,7 @@ class Test_Request_Params_Cli extends Testes_Test
 			'-param3', 'overridden',
 			'--controller', 'customcontroller'
 		);
-		$this->_request = new Europa_Request_Cli;
+		$this->_request = new \Europa\Request\Cli;
 	}
 	
 	public function testCliFlag1()

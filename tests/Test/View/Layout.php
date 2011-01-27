@@ -4,9 +4,9 @@ class Test_View_Layout extends Testes_Test
 {
 	public function setUp()
 	{
-		$this->_view = new Europa_View_Layout;
-		$this->_view->setLayout(new Europa_View_Json(array('test1' => true)));
-		$this->_view->setView(new Europa_View_Json(array('test2' => true)));
+		$this->_view = new \Europa\View\Layout;
+		$this->_view->setLayout(new \Europa\View\Json(array('test1' => true)));
+		$this->_view->setView(new \Europa\View\Json(array('test2' => true)));
 	}
 	
 	public function testParamSetting()

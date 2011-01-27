@@ -50,19 +50,6 @@ namespace Europa\Request
         }
         
         /**
-         * Redirects the request to the specified uri.
-         * 
-         * @param string $uri The uri to redirect to.
-         * 
-         * @return void
-         */
-        public static function redirect($uri)
-        {
-            header('Location: ' . $uri);
-            exit;
-        }
-        
-        /**
          * Returns all of the request headers as an array.
          * 
          * The header names are formatted to appear as normal, not all uppercase
@@ -289,15 +276,31 @@ namespace Europa\Request
         }
         
         /**
+         * Redirects the request to the specified uri.
+         * 
+         * @param string $uri The uri to redirect to.
+         * 
+         * @return void
+         */
+        public static function redirect($uri)
+        {
+            header('Location: ' . self::format($uri));
+            exit;
+        }
+        
+        /**
          * Formats the passed in URI using the Europa root URI.
          * 
          * @return string
          */
         public static function format($uri)
         {
-            if (strpos($uri, 'http://') === 0) {
+            // check for full or absolute paths
+            if (strpos($uri, 'http://') === 0 || strpos($uri, '/') === 0) {
                 return $uri;
             }
+            
+            // if not, then prepend the root
             return '/' . self::root() . '/' . ltrim($uri, '/');
         }
     }

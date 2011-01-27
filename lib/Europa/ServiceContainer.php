@@ -10,7 +10,7 @@
  */
 namespace Europa
 {
-    class ServiceContainer implements Iterator, ArrayAccess, Countable
+    class ServiceContainer implements \Iterator, \ArrayAccess, \Countable
     {
         /**
          * Contains a service name to class name map.

@@ -25,7 +25,7 @@ namespace Europa\Validator
         {
             if (!$email) {
                 $this->pass();
-                return;
+                return $this;
             }
             
             $isValid = true;
@@ -73,6 +73,7 @@ namespace Europa\Validator
             } else {
                 $this->fail();
             }
+            return $this;
         }
     }
 }
