@@ -6,25 +6,27 @@
  * @category Forms
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class Europa_Form_Element_Submit extends Europa_Form_Element_Button
+namespace Europa\Form\Element
 {
-    /**
-     * Constructs and sets defaults.
-     * 
-     * @return Europa_Form_Element_Submit
-     */
-    public function __construct(array $attributes = array())
+    class Submit extends Button
     {
-        // pre-set value that can be overridden
-        $this->value = 'Submit';
-        
-        // construct with attributes
-        parent::__construct($attributes);
-        
-        // force submit type
-        $this->type = 'submit';
+        /**
+         * Constructs and sets defaults.
+         * 
+         * @return \Europa\Form\Element\Submit
+         */
+        public function __construct(array $attributes = array())
+        {
+            // pre-set value that can be overridden
+            $this->value = 'Submit';
+            
+            // construct with attributes
+            parent::__construct($attributes);
+            
+            // force submit type
+            $this->type = 'submit';
+        }
     }
 }

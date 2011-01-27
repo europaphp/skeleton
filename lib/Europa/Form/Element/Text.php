@@ -6,10 +6,12 @@
  * @category Forms
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class Europa_Form_Element_Text extends Europa_Form_Element_Input
+namespace Europa\Form\Element
 {
-    
+	class Text extends Input
+	{
+	    
+	}
 }

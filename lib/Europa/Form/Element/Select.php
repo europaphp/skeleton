@@ -6,64 +6,66 @@
  * @category Forms
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class Europa_Form_Element_Select extends Europa_Form_Element
+namespace Europa\Form\Element
 {
-    /**
-     * The value of the selected option.
-     * 
-     * @var mixed
-     */
-    private $_value = '';
-    
-    /**
-     * The options to apply to the select.
-     * 
-     * @var array
-     */
-    private $_options = array();
-    
-    /**
-     * Constructs and sets defaults.
-     * 
-     * @return Europa_Form_Element_Select
-     */
-    public function __construct(array $attributes = array())
+    class Select extends \Europa\Form\Element
     {
-        if (isset($attributes['value'])) {
-            $this->_value = $attributes['value'];
-            unset($attributes['value']);
-        }
+        /**
+         * The value of the selected option.
+         * 
+         * @var mixed
+         */
+        private $_value = '';
         
-        if (isset($attributes['options'])) {
-            $this->_options = $attributes['options'];
-            unset($attributes['options']);
-        }
+        /**
+         * The options to apply to the select.
+         * 
+         * @var array
+         */
+        private $_options = array();
         
-        parent::__construct($attributes);
-    }
-    
-    /**
-     * Renders the reset element.
-     * 
-     * @return string
-     */
-    public function __toString()
-    {
-        $attr = $this->getAttributeString();
-        $html = '<select'
-              . ($attr ? ' ' . $attr : '')
-              . '>';
-        foreach ($this->_options as $label => $value) {
-            $selected = '';
-            if ($this->_value == $value) {
-                $selected = ' selected="selected"';
+        /**
+         * Constructs and sets defaults.
+         * 
+         * @return \Europa\Form\Element\Select
+         */
+        public function __construct(array $attributes = array())
+        {
+            if (isset($attributes['value'])) {
+                $this->_value = $attributes['value'];
+                unset($attributes['value']);
             }
-            $html .= '<option value="' . $value . '"' . $selected . '>' . $label . '</option>';
+            
+            if (isset($attributes['options'])) {
+                $this->_options = $attributes['options'];
+                unset($attributes['options']);
+            }
+            
+            parent::__construct($attributes);
         }
-        $html .= '</select>';
-        return $html;
+        
+        /**
+         * Renders the reset element.
+         * 
+         * @return string
+         */
+        public function __toString()
+        {
+            $attr = $this->getAttributeString();
+            $html = '<select'
+                  . ($attr ? ' ' . $attr : '')
+                  . '>';
+            foreach ($this->_options as $label => $value) {
+                $selected = '';
+                if ($this->_value == $value) {
+                    $selected = ' selected="selected"';
+                }
+                $html .= '<option value="' . $value . '"' . $selected . '>' . $label . '</option>';
+            }
+            $html .= '</select>';
+            return $html;
+        }
     }
 }

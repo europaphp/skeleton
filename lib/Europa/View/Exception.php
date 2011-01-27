@@ -1,6 +1,17 @@
 <?php
 
-class Europa_View_Exception extends Europa_Exception
+/**
+ * The main view exception class.
+ * 
+ * @category Exceptions
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
+ */
+namespace Europa\View
 {
-    
+	class Exception extends \Europa\Exception
+	{
+	    
+	}
 }

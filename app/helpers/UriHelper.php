@@ -33,7 +33,7 @@ class UriHelper
      * 
      * @return UrlHelper
      */
-    public function __construct(Europa_View $view, $url = null, array $params = array())
+    public function __construct(\Europa\View $view, $url = null, array $params = array())
     {
         $this->url    = $url;
         $this->params = $params;
@@ -47,7 +47,7 @@ class UriHelper
     public function __toString()
     {
         $url = '/';
-        if ($root = Europa_Request_Http::root()) {
+        if ($root = Europa\Request\Http::root()) {
             $url .= $root . '/';
         }
         if ($this->url) {

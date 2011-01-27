@@ -8,7 +8,7 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-abstract class AbstractController extends Europa_Controller
+abstract class AbstractController extends \Europa\Controller
 {
     /**
      * Sets up the views.
@@ -17,12 +17,10 @@ abstract class AbstractController extends Europa_Controller
      */
 	public function init()
 	{
-		$view = str_replace('Controller', 'View', get_class($this));
-		$view = str_replace('_', '/', $view);
 		$this->setView(
-			new Europa_View_Layout(
-				new Europa_View_Php('DefaultLayout'),
-				new Europa_View_Php($view)
+			new \Europa\View\Layout(
+				new \Europa\View\Php('DefaultLayout'),
+				new \Europa\View\Php(str_replace('Controller', 'View', get_class($this)))
 			)
 		);
 	}
