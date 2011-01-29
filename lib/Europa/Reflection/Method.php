@@ -14,11 +14,28 @@ namespace Europa\Reflection;
 class Method extends \ReflectionMethod
 {
     /**
+     * The cached doc string.
+     * 
+     * @var string
+     */
+    private $docString;
+
+    /**
      * The cached return types.
      * 
      * @var array
      */
     private $returnTypes;
+
+    /**
+     * Returns the doc block instance for this method.
+     * 
+     * @return \Europa\Reflection\Method\DocBlock
+     */
+    public function getDocBlock()
+    {
+        return new DocBlock\Method($this->getDocString());
+    }
     
     /**
      * Takes the passed named parameters and returns a merged array of the passed parameters
@@ -139,7 +156,7 @@ class Method extends \ReflectionMethod
         
         return false;
     }
-    
+
     /**
      * Returns the docblock for the specified method. If it's not defined, then it
      * goes up the inheritance tree and through its interfaces.
@@ -148,34 +165,33 @@ class Method extends \ReflectionMethod
      * 
      * @return string|null
      */
-    public function getDocCommentRecursive()
+    public function getDocString()
     {
         // if it's already been retrieved, just return it
-        if ($this->docblock) {
-            return $this->docblock;
+        if ($this->docString) {
+            return $this->docString;
         }
         
         // attempt to get it from the current method
-        $docblock = $this->method->getDocComment();
-        if ($docblock) {
-            $this->docblock = $docblock;
-            return $this->docblock;
+        if ($docblock = $this->getDocComment()) {
+            $this->docString = $docblock;
+            return $this->docString;
         }
         
         // if not, check it's interfaces
-        $methodName = $this->method->getName();
-        foreach ($this->method->getDeclaringClass()->getInterfaces() as $iFace) {
+        $methodName = $this->getName();
+        foreach ($this->getDeclaringClass()->getInterfaces() as $iFace) {
             // coninue of the method doesn't exist in the interface
             if (!$iFace->hasMethod($methodName)) {
                 continue;
             }
             
             // attempt to find it in the current interface
-            if ($this->docblock = $iFace->getMethod($methodName)->getDocComment()) {
+            if ($this->docString = $iFace->getMethod($methodName)->getDocComment()) {
                  break;
             }
         }
         
-        return $this->docblock;
+        return $this->docString;
     }
 }

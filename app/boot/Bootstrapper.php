@@ -59,8 +59,9 @@ class Bootstrapper extends Europa\Bootstrapper
     public function addLoadPaths()
     {
         \Europa\Loader::addPath($this->_base . '/app/controllers');
-        \Europa\Loader::addPath($this->_base . '/app/helpers');
         \Europa\Loader::addPath($this->_base . '/app/views');
+        \Europa\Loader::addPath($this->_base . '/app/helpers');
+        \Europa\Loader::addPath($this->_base . '/app/behaviors');
     }
     
     /**

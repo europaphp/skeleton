@@ -1,7 +1,7 @@
 <?php
 
 /**
- * An example controller sketching some of the features that can be implemented.
+ * A default controller for a base implementation.
  * 
  * @category Controllers
  * @package  Europa
@@ -17,6 +17,6 @@ class IndexController extends AbstractController
      */
 	public function get()
 	{
-	    
+		
 	}
 }
