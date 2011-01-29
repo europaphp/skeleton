@@ -20,6 +20,6 @@ class AuthBehavior
 
 	public function redirect()
 	{
-		$this->controller->redirect('index');
+		$this->controller->redirect('index.php/index');
 	}
 }
