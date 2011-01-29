@@ -9,7 +9,7 @@ class Test_ServiceContainer extends Testes_Test
         $this->_container = new Container(
             array(
                 'request' => array(
-                    'class'  => 'Europa_Request_Http',
+                    'class'  => '\Europa\Request\Http',
                     'params' => array(
                         'test1' => true,
                         'test2' => true
@@ -18,13 +18,13 @@ class Test_ServiceContainer extends Testes_Test
                 'router' => array()
             )
         );
-        $this->_container->router = 'Europa_Router';
+        $this->_container->router = '\Europa\Router';
     }
     
     public function testSetupConfig()
     {
         $this->assert(
-            $this->_container['request']['class'] === 'Europa_Request_Http',
+            $this->_container['request']['class'] === '\Europa\Request\Http',
             'The service container class does not match.'
         );
     }
@@ -32,7 +32,7 @@ class Test_ServiceContainer extends Testes_Test
     public function testSetupMap()
     {
         $this->assert(
-            $this->_container->router instanceof Europa_Router,
+            $this->_container->router instanceof \Europa\Router,
             'The required dependency was not returned.'
         );
     }
@@ -40,7 +40,7 @@ class Test_ServiceContainer extends Testes_Test
     public function testOverride()
     {
         $this->assert(
-            $this->_container->request instanceof Europa_Request_Http,
+            $this->_container->request instanceof \Europa\Request\Http,
             'The required dependency was not returned.'
         );
     }
@@ -84,13 +84,13 @@ class Test_ServiceContainer extends Testes_Test
     }
 }
 
-class Container extends Europa_ServiceContainer
+class Container extends \Europa\ServiceContainer
 {
     protected function request(array $config = array())
     {
         $request = new $config['class'];
         foreach ($config['params'] as $name => $value) {
-            $request->__set    ($name, $value);
+            $request->__set($name, $value);
         }
         return $request;
     }

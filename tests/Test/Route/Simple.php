@@ -4,7 +4,7 @@ class Test_Route_Simple extends Testes_Test
 {
 	public function testMatch()
 	{
-		$route = new Europa_Route_Simple(':controller/:action');
+		$route = new \Europa\Route\Simple(':controller/:action');
 		$this->assert(
 		    $route->query('some-controller/some-action') !== false,
 		    'Matching not working.'
@@ -13,7 +13,7 @@ class Test_Route_Simple extends Testes_Test
 	
 	public function testNonMatch()
 	{
-		$route = new Europa_Route_Simple(':controller/:action');
+		$route = new \Europa\Route\Simple(':controller/:action');
 		$this->assert(
 		    $route->query('some-controller/some-action/some-parameter') === false,
 		    'Not-matching not working.'
@@ -22,7 +22,7 @@ class Test_Route_Simple extends Testes_Test
 	
 	public function testWildcardWithSlash()
 	{
-		$route = new Europa_Route_Simple(':controller/:action/*');
+		$route = new \Europa\Route\Simple(':controller/:action/*');
 		$valid = $route->query('some-controller/some-action/') !== false
 		      && $route->query('some-controller/some-action/some/other/stuff') !== false;
 		
@@ -31,7 +31,7 @@ class Test_Route_Simple extends Testes_Test
 	
 	public function testWildcardWithoutSlash()
 	{
-		$route = new Europa_Route_Simple(':controller/:action*');
+		$route = new \Europa\Route\Simple(':controller/:action*');
 		$valid = $route->query('some-controller/some-action') !== false
 		      && $route->query('some-controller/some-action/some/other/stuff') !== false;
 		
@@ -40,7 +40,7 @@ class Test_Route_Simple extends Testes_Test
 	
 	public function testRequireEndingSlash()
 	{
-		$route = new Europa_Route_Simple(':controller/:action/');
+		$route = new \Europa\Route\Simple(':controller/:action/');
 		$this->assert(
 		    $route->query('some-controller/some-action') === false,
 		    'Required ending slash not working.'
@@ -49,7 +49,7 @@ class Test_Route_Simple extends Testes_Test
 	
 	public function testParameterBinding()
 	{
-		$route  = new Europa_Route_Simple(':controller/:action');
+		$route  = new \Europa\Route\Simple(':controller/:action');
 		$params = $route->query('test-controller/test-action');
 		
 		if (!$params) {
@@ -64,7 +64,7 @@ class Test_Route_Simple extends Testes_Test
 	
 	public function testDefaultParameterBinding()
 	{
-		$route = new Europa_Route_Simple(
+		$route = new \Europa\Route\Simple(
 			'user/:user',
 			array(
 				'controller' => 'test-controller',
@@ -86,7 +86,7 @@ class Test_Route_Simple extends Testes_Test
 	
 	public function testDynamicParameterBinding()
 	{
-		$route  = new Europa_Route_Simple(':controller/:action*');
+		$route  = new \Europa\Route\Simple(':controller/:action*');
 		$params = $route->query('controller/action/param1:value1/param2:value2');
 		
 		if (!$params) {
@@ -101,7 +101,7 @@ class Test_Route_Simple extends Testes_Test
 	
 	public function testReverseEngineering()
 	{
-		$route = new Europa_Route_Simple('user/:username');
+		$route = new \Europa\Route\Simple('user/:username');
 		$this->assert(
 		    $route->reverse(array('username' => 'testuser')) === 'user/testuser',
 		    'Reverse engineering not working.'

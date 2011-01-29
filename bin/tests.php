@@ -2,9 +2,9 @@
 
 // all we need to do is include the bootstrap
 require dirname(__FILE__) . '/../app/boot/bootstrap.php';
-Europa_Loader::addPath(dirname(__FILE__));
+\Europa\Loader::addPath(dirname(__FILE__) . '/../tests');
 
-$tests = new Test;
+$tests = new \Test;
 $tests->run();
 
 if ($assertions = $tests->assertions()) {

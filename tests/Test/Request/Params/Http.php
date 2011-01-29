@@ -6,7 +6,7 @@ class Test_Request_Params_Http extends Testes_Test
 	
 	public function setUp()
 	{
-		$this->_request = new Europa_Request_Http;
+		$this->_request = new \Europa\Request\Http;
 		$this->_request->setParams(array('cascade1' => false, 'cascade2' => true))
 		               ->setParams(array('cascade1' => true, 'controller' => 'customcontroller'));
 	}

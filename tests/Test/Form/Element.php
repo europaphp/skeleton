@@ -1,10 +1,10 @@
 <?php
 
-class Test_Form_Element extends Testes_Test
+class Test_Form_Element extends \Testes_Test
 {
 	public function testFill()
 	{
-		$element = new Europa_Form_Element_Input;
+		$element       = new \Europa\Form\Element\Input;
 		$element->name = 'my[test][element]';
 		$element->fill(
 			array(
@@ -23,7 +23,7 @@ class Test_Form_Element extends Testes_Test
 	
 	public function testToArraySimple()
 	{
-		$element        = new Europa_Form_Element_Input;
+		$element        = new \Europa\Form\Element\Input;
 		$element->name  = 'my';
 		$element->value = 'value';
 		
@@ -37,7 +37,7 @@ class Test_Form_Element extends Testes_Test
 	
 	public function testToArrayStringNumericKey()
 	{
-		$element = new Europa_Form_Element_Input;
+		$element        = new \Europa\Form\Element\Input;
 		$element->name  = 'my[1]';
 		$element->value = 'value';
 		
@@ -52,7 +52,7 @@ class Test_Form_Element extends Testes_Test
 	
 	public function testToArrayIntNumericKey()
 	{
-		$element = new Europa_Form_Element_Input;
+		$element        = new \Europa\Form\Element\Input;
 		$element->name  = 'my[1]';
 		$element->value = 'value';
 		
@@ -67,7 +67,7 @@ class Test_Form_Element extends Testes_Test
 	
 	public function testToArrayComplex()
 	{
-		$element = new Europa_Form_Element_Input;
+		$element        = new \Europa\Form\Element\Input;
 		$element->name  = 'my[1][test][0][element]';
 		$element->value = 'value';
 		

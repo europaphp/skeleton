@@ -44,10 +44,15 @@ namespace Europa
          * 
          * @return \Europa\Controller
          */
-        public function __construct(\Europa\Request $request)
+        public function __construct(Request $request)
         {
             $this->_request = $request;
-            call_user_func_array(array($this, 'init'), $this->_mapParamsTo('init'));
+            
+            $method = new Reflection\Method($this, 'init');
+            call_user_func_array(
+                array($this, 'init'),
+                $method->mergeNamedArgs($request->getParams())
+            );
         }
         
         /**
@@ -90,7 +95,7 @@ namespace Europa
          * 
          * @return \Europa\Controller
          */
-        public function setView(\Europa\View $view = null)
+        public function setView(View $view = null)
         {
             if ($this->_view) {
                 $view->setParams($this->_view->getParams());
@@ -134,7 +139,7 @@ namespace Europa
          */
         public function redirect($to)
         {
-            header('Location: ' . \Europa\Request\Http::format($to));
+            header('Location: ' . Request\Http::format($to));
             exit;
         }
         
@@ -153,14 +158,18 @@ namespace Europa
             
             // check to make sure it exists and if not, throw an exception
             if (!method_exists($this, $method)) {
-                throw new \Europa\Controller\Exception('The method "' . get_class($this) . '->' . $method . '()" is not supported.');
+                throw new Controller\Exception('The method "' . get_class($this) . '->' . $method . '()" is not supported.');
             }
             
             // pre-actioning
             $this->preAction();
             
             // call appropriate method with it's defined parameters
-            call_user_func_array(array($this, $method), $this->_mapParamsTo($method));
+            $method = new Reflection\Method($this, $method);
+            call_user_func_array(
+                array($this, $method->getName()),
+                $method->mergeNamedArgs($this->getRequest()->getParams())
+            );
             
             // post-actioning
             $this->postAction();
@@ -214,51 +223,6 @@ namespace Europa
         protected function postRender()
         {
             
-        }
-        
-        /**
-         * Maps the request parameters to the specified method.
-         * 
-         * @param string $method The method to get the request parameters for.
-         * 
-         * @return array
-         */
-        private function _mapParamsTo($method)
-        {
-            $methodParams  = array();
-            $requestParams = array();
-            foreach ($this->getRequest()->getParams() as $name => $value) {
-                $requestParams[strtolower($name)] = $value;
-            }
-            
-            // create a reflection method
-            $method = new \ReflectionMethod($this, $method);
-
-            // automatically define the parameters that will be passed to the method
-            foreach ($method->getParameters() as $param) {
-                $pos  = $param->getPosition();
-                $name = strtolower($param->getName());
-                
-                // apply named parameters
-                if (array_key_exists($name, $requestParams)) {
-                    $methodParams[$pos] = $requestParams[$name];
-                // set default values
-                } elseif ($param->isOptional()) {
-                    $methodParams[$pos] = $param->getDefaultValue();
-                // throw exceptions when required params aren't defined
-                } else {
-                    $class = get_class($this);
-                    throw new \Europa\Request\Exception(
-                        "Parameter {$param->getName()} for {$class}->{$method->getName()}() was not defined."
-                    );
-                }
-
-                // cast the parameter if it is scalar
-                if (is_scalar($methodParams[$pos])) {
-                    $methodParams[$pos] = \Europa\String::create($methodParams[$pos])->cast();
-                }
-            }
-            return $methodParams;
         }
     }
 }

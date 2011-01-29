@@ -2,19 +2,26 @@
 
 class Test_Loader extends Testes_Test
 {
+    private $_dummyDir;
+    
+    private $_dummyFile;
+    
 	private $_fileHandle;
-	
-	private $_dummyFile;
-	
-	private $_dummyCLass;
 	
 	public function setUp()
 	{
-		$this->_dummyFile  = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'LoaderDummyTestClass.php';
-		$this->_dummyClass = 'Test_LoaderDummyTestClass';
+	    $this->_dummyDir  = dirname(__FILE__) . '/../DummyNamespace';
+		$this->_dummyFile = $this->_dummyDir . DIRECTORY_SEPARATOR . 'LoaderDummyTestClass.php';
+		
+		mkdir($this->_dummyDir);
+		chmod($this->_dummyDir, 0777);
+		
 		$this->_fileHandle = fopen($this->_dummyFile, 'w+');
-		fwrite($this->_fileHandle, '<?php class ' . $this->_dummyClass . ' {}');
 		chmod($this->_dummyFile, 0777);
+		
+		fwrite($this->_fileHandle, '<?php namespace DummyNamespace; class LoaderDummyTestClass {}');
+		
+		\Europa\Loader::addPath($this->_dummyDir);
 	}
 
 	public function tearDown()
@@ -22,29 +29,30 @@ class Test_Loader extends Testes_Test
 	    if (file_exists($this->_dummyFile)) {
     		fclose($this->_fileHandle);
     		unlink($this->_dummyFile);
+    		unlink($this->_dummyDir);
     	}
 	}
 	
 	public function testRegisterAutoload()
 	{
-		Europa_Loader::registerAutoload();
+		\Europa\Loader::registerAutoload();
 		$funcs = spl_autoload_functions();
 		foreach ($funcs as $func) {
 			if (
 				is_array($func)
-				&& $func[0] === 'Europa_Loader'
+				&& $func[0] === 'Europa\Loader'
 				&& $func[1] === 'loadClass'
 			) {
 			    return;
 			}
 		}
-		$this->assert(false, 'Unable to regiseter autoloading.');
+		$this->assert(false, 'Unable to register autoloading.');
 	}
 
 	public function testLoadClass()
 	{
 		$this->assert(
-		    Europa_Loader::loadClass($this->_dummyClass),
+		    \Europa\Loader::loadClass('DummyNamespace\LoaderDummyTestClass'),
 		    'Unalbe to load class.'
 		);
 	}
@@ -52,7 +60,7 @@ class Test_Loader extends Testes_Test
 	public function testAddPath()
 	{
 	    try {
-    		Europa_Loader::addPath('.');
+    		\Europa\Loader::addPath('.');
     	} catch (Exception $e) {
     	    $this->assert(false, 'Could not add load path.');
     	}

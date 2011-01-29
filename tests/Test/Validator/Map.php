@@ -61,10 +61,10 @@ class Test_Validator_Map extends Testes_Test
 		);
 		
 		// create a validation map
-		$this->_validator = new Europa_Validator_Map;
-		$this->_validator['name'] = new Europa_Validator_Required;
-		$this->_validator['age']  = new Europa_Validator_NumberRange(18, 25);
-		$this->_validator['dob']  = new Europa_Validator_Required;
+		$this->_validator         = new \Europa\Validator\Map;
+		$this->_validator['name'] = new \Europa\Validator\Required;
+		$this->_validator['age']  = new \Europa\Validator\NumberRange(18, 25);
+		$this->_validator['dob']  = new \Europa\Validator\Required;
 		
 		// and add error messages
 		$this->_validator['name']->addMessage(self::NAME_ERROR);

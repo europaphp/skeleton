@@ -9,7 +9,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-class Test_Form_ElementList extends Testes_Test
+class Test_Form_ElementList extends \Testes_Test
 {
 	/**
 	 * The list that is being used for the test.
@@ -26,12 +26,13 @@ class Test_Form_ElementList extends Testes_Test
 	public function setUp()
 	{
 		$this->_list = new Test_Form_TestElementList;
-		$this->_list['user[0][name]'] = new Europa_Form_Element_Input;
-		$this->_list['user[0][bio]']  = new Europa_Form_Element_Textarea;
-		$this->_list['user[0][name]']->value = 'tres';
-		$this->_list['user[0][bio]']->value  = 'php dev';
-		$this->_list['user[zero][name]'] = new Europa_Form_Element_Input;
-		$this->_list['user[zero][bio]']  = new Europa_Form_Element_Textarea;
+		
+		$this->_list['user[0][name]']           = new \Europa\Form\Element\Input;
+		$this->_list['user[0][bio]']            = new \Europa\Form\Element\Textarea;
+		$this->_list['user[0][name]']->value    = 'tres';
+		$this->_list['user[0][bio]']->value     = 'php dev';
+		$this->_list['user[zero][name]']        = new \Europa\Form\Element\Input;
+		$this->_list['user[zero][bio]']         = new \Europa\Form\Element\Textarea;
 		$this->_list['user[zero][name]']->value = 'tres';
 		$this->_list['user[zero][bio]']->value  = 'php dev';
 	}
@@ -44,7 +45,7 @@ class Test_Form_ElementList extends Testes_Test
 	public function testElementExistence()
 	{
 	    $this->assert(
-	        $this->_list['user[0][name]'] instanceof Europa_Form_Element_Input,
+	        $this->_list['user[0][name]'] instanceof \Europa\Form\Element\Input,
 	        'Element does not exist.'
 	    );
 	}
@@ -56,7 +57,7 @@ class Test_Form_ElementList extends Testes_Test
 	 */
 	public function testValidation()
 	{
-		$required = new Europa_Validator_Required;
+		$required = new \Europa\Validator\Required;
 		$required->addMessage('Name is required.');
 		
 		$this->assert(
@@ -79,7 +80,7 @@ class Test_Form_ElementList extends Testes_Test
 		    && $toArray['user'][0]['name'] === 'tres'
 		    && $toArray['user'][1]['bio']  === 'php dev';
 		
-		$this->assert($valid, 'Numeric indicies in toArray failed.');
+		$this->assert($valid, 'Numeric indices in toArray failed.');
 	}
 	
 	/**
@@ -106,10 +107,9 @@ class Test_Form_ElementList extends Testes_Test
  * @category Tests
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class Test_Form_TestElementList extends Europa_Form_ElementList
+class Test_Form_TestElementList extends \Europa\Form\ElementList
 {
 	public function __toString()
 	{
