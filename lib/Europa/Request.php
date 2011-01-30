@@ -35,14 +35,6 @@ namespace Europa
         private $_params = array('controller' => 'index');
         
         /**
-         * Contains the instances of all requests that are currently 
-         * dispatching in chronological order.
-         * 
-         * @var array
-         */
-        private static $_stack = array();
-        
-        /**
          * Converts the request back into the original string representation.
          * 
          * @return string
@@ -196,9 +188,6 @@ namespace Europa
          */
         public function dispatch()
         {
-            // register the instance in the stack so it can be easily found
-            self::$_stack[] = $this;
-            
             // routing information
             $controller = $this->formatController();
             
@@ -225,13 +214,9 @@ namespace Europa
             
             // execute the rendering process
             $controller->action();
-            $rendered = $controller->__toString();
-            
-            // remove the dispatch from the stack
-            array_pop(self::$_stack);
             
             // return the rendered result
-            return $rendered;
+            return $controller;
         }
         
         /**
@@ -435,30 +420,6 @@ namespace Europa
         public function offsetUnset($offset)
         {
             return $this->__unset($offset);
-        }
-        
-        /**
-         * Returns the \Europa\Request instance that is currently dispatching.
-         * 
-         * @return mixed
-         */
-        public static function getCurrent()
-        {
-            $len = count(self::$_stack);
-            if ($len) {
-                return self::$_stack[$len - 1];
-            }
-            return null;
-        }
-        
-        /**
-         * Returns all \Europa\Request instances that are dispatching, in chronological order, as an array.
-         * 
-         * @return array
-         */
-        public static function getStack()
-        {
-            return self::$_stack;
         }
         
         /**

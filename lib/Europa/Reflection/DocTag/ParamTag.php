@@ -2,7 +2,7 @@
 
 namespace Europa\Reflection\DocTag;
 
-class ParamTag extends \Europa\Reflection\DocTagAbstract
+class ParamTag extends \Europa\Reflection\DocTag
 {
 	protected $type;
 

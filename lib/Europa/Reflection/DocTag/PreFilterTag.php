@@ -2,13 +2,13 @@
 
 namespace Europa\Reflection\DocTag;
 
-class BehaviorTag extends \Europa\Reflection\DocTagAbstract
+class PreFilterTag extends \Europa\Reflection\DocTag
 {
 	protected $class;
 
 	public function tag()
 	{
-		return 'behavior';
+		return 'preFilter';
 	}
 
 	public function setClass($class)

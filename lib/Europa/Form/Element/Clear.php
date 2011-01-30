@@ -10,7 +10,7 @@
  */
 namespace Europa\Form\Element
 {
-    class Reset extends Button
+    class Clear extends Button
     {
         /**
          * Constructs and sets defaults.
@@ -21,7 +21,7 @@ namespace Europa\Form\Element
         {
             parent::__construct($attributes);
                 $this->type  = 'reset';
-                $this->value = 'Reset';
+                $this->value = 'Clear';
             }
         }
     }

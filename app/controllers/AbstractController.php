@@ -17,6 +17,7 @@ abstract class AbstractController extends \Europa\Controller
      */
 	public function init()
 	{
+		session_start();
 		$this->setView(
 			new \Europa\View\Layout(
 				new \Europa\View\Php('DefaultLayout'),

@@ -2,7 +2,7 @@
 
 namespace Europa\Reflection;
 
-abstract class DocTagAbstract implements DocTagInterface
+abstract class DocTag
 {
 	/**
 	 * A generic tag string for abstract tag elements that don't
@@ -11,6 +11,13 @@ abstract class DocTagAbstract implements DocTagInterface
 	 * @var string
 	 */
 	protected $tagString;
+
+	/**
+	 * Returns the name of the tag.
+	 * 
+	 * @return string
+	 */
+	abstract public function tag();
 
 	/**
 	 * Constructs a new doc tag. If a tag string is specified then it's parsed.

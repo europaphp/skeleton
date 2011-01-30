@@ -62,10 +62,11 @@ abstract class Controller
         
         // render the view and call the post-render event
         // only if a view exists
-        $view = $this->getView();
-        if ($view) {
-            $view = $view->__toString();
+        if ($this->view) {
+            $view = $this->view->__toString();
             $this->postRender();
+        } else {
+            $view = '';
         }
         
         // return output
@@ -118,11 +119,11 @@ abstract class Controller
      */
     public function forward($to, array $params = array())
     {
-        // modify the request
+        // modify the request and dispach it's return value
         $request = $this->getRequest();
         $request->setParams($params);
         $request->setController($to);
-        die($request->dispatch());
+        return $request->dispatch();
     }
     
     /**
@@ -148,37 +149,60 @@ abstract class Controller
      */
     public function action()
     {
-        // we call the approprate method for the request type
+        // we call the approprate method for the specified request method
         $request = $this->getRequest();
         $method  = $request->method();
         
         // check to make sure it exists and if not, throw an exception
         if (!method_exists($this, $method)) {
-            throw new Controller\Exception('The method "' . get_class($this) . '->' . $method . '()" is not supported.');
+            throw new Controller\Exception('The method "{get_class($this)}::{$method}()" is not supported.');
         }
 
         // for manipulating the specified controller method
-        $reflect = new Reflection\Method($this, $method);
-        $params  = $reflect->mergeNamedArgs($request->getParams());
-        
-        // apply appropriate behaviors before actioning
-        $this->applyBehaviors(
-            $reflect->getDocBlock()->getTag('behavior', true),
+        $methodReflector = new Reflection\MethodReflector($this, $method);
+        $classReflector  = new Reflection\ClassReflector($this);
+
+        // use named parameters from the request for the controller method
+        $params = $methodReflector->mergeNamedArgs($request->getParams());
+
+        // apply pre-action filters
+        $this->applyFilters(
+            array_merge(
+                array(),
+                $classReflector->getDocBlock()->getTag('preFilter', true),
+                $methodReflector->getDocBlock()->getTag('preFilter', true)
+            ),
             $method,
             $params
         );
         
-        // pre-action before after applying behavhiors
+        // pre-action after applying filters
         $this->preAction();
 
         // call the appropriate method
-        call_user_func_array(
+        $viewParams = call_user_func_array(
             array($this, $method),
             $params
         );
+
+        // set view params if they were specified
+        if ($viewParams && $this->view) {
+            $this->view->setParams($viewParams);
+        }
         
-        // call the post action hook
+        // post-action before applying filters
         $this->postAction();
+
+        // apply post-action filters
+        $this->applyFilters(
+            array_merge(
+                array(),
+                $classReflector->getDocBlock()->getTag('postFilter', true),
+                $methodReflector->getDocBlock()->getTag('postFilter', true)
+            ),
+            $method,
+            $params
+        );
     }
     
     /**
@@ -231,12 +255,26 @@ abstract class Controller
         
     }
 
-    private function applyBehaviors(array $behaviors, $method, array $params = array())
+    private function applyFilters(array $filters, &$method, array &$params = array())
     {
          // execute each behavior in the order it was defined
-        foreach ($behaviors as $behavior) {
-            $class = $behavior->getClass();
+        foreach ($filters as $filter) {
+            $class = $filter->getClass();
             $class = new $class($this, $method, $params);
+
+            // make sure we can call the appropriate methods
+            if (!$class instanceof \Europa\Controller\FilterInterface) {
+                throw new Exception('The filter "{get_class($class)}" must derive from "\\Europa\\Controller\\FilterInterface".');
+            }
+
+            // general filter method
+            $class->filter();
+
+            // method for changing the method to call
+            $method = $class->method();
+
+            // method to filter any parameters
+            $params = $class->params();
         }
     }
 }

@@ -1,6 +1,8 @@
 <?php
 
-class CastParamBehavior
+namespace Europa\Controller;
+
+class FilterAbstract implements FilterInterface
 {
 	protected $controller;
 
@@ -13,13 +15,20 @@ class CastParamBehavior
 		$this->controller = $controller;
 		$this->method     = $method;
 		$this->params     = $params;
-		$this->cast();
 	}
 
-	public function cast()
+	public function filter()
 	{
-		foreach ($this->params as $name => $value) {
-			
-		}
+		
+	}
+
+	public function method()
+	{
+		return $this->method;
+	}
+
+	public function params()
+	{
+		return $this->params;
 	}
 }
