@@ -17,21 +17,28 @@ class ServiceContainer
      * 
      * @var
      */
-    private $_map = array();
+    protected $map = array();
     
     /**
      * Contains the configuration for the services.
      * 
      * @var array
      */
-    private $_config = array();
+    protected $config = array();
     
     /**
      * Contains the shared service instances.
      * 
      * @var array
      */
-    private $_services = array();
+    protected $services = array();
+    
+    /**
+     * Holds all instantiated instances.
+     * 
+     * @var array
+     */
+    protected static $instances = array();
     
     /**
      * Instantiates the container setting the config for all services.
@@ -55,7 +62,7 @@ class ServiceContainer
      */
     public function map($service, $class)
     {
-        $this->_map[$service] = $class;
+        $this->map[$service] = $class;
         return $this;
     }
     
@@ -69,10 +76,10 @@ class ServiceContainer
      */
     public function get($service)
     {
-        if (!isset($this->_services[$service])) {
-            $this->_services[$service] = $this->getNew($service);
+        if (!isset($this->services[$service])) {
+            $this->services[$service] = $this->getNew($service);
         }
-        return $this->_services[$service];
+        return $this->services[$service];
     }
     
     /**
@@ -86,8 +93,8 @@ class ServiceContainer
     public function getNew($service, array $config = array())
     {
         // get the class name and it's config
-        $class   = $this->_getMappedClassFromName($service);
-        $current = isset($this->_config[$service]) ? $this->_config[$service] : array();
+        $class   = $this->getMappedClassFromName($service);
+        $current = isset($this->config[$service]) ? $this->config[$service] : array();
         $config  = array_replace_recursive($current, $config);
         
         // the service may be a method protected or private and exist on 
@@ -133,7 +140,7 @@ class ServiceContainer
      */
     public function getConfig()
     {
-        return $this->_config;
+        return $this->config;
     }
     
     /**
@@ -147,15 +154,15 @@ class ServiceContainer
     public function setConfigFor($service, array $config)
     {
         // reset the instance if there is one
-        if (isset($this->_services[$service])) {
-            unset($this->_services[$service]);
+        if (isset($this->services[$service])) {
+            unset($this->services[$service]);
         }
         
         // get the current config if it exists, or default to empty
-        $current = isset($this->_config[$service]) ? $this->_config[$service] : array();
+        $current = isset($this->config[$service]) ? $this->config[$service] : array();
         
         // merge config recursively
-        $this->_config[$service] = array_replace_recursive($current, $config);
+        $this->config[$service] = array_replace_recursive($current, $config);
         
         return $this;
     }
@@ -169,10 +176,10 @@ class ServiceContainer
      */
     public function getConfigFor($service)
     {
-        if (!isset($this->_config[$service])) {
+        if (!isset($this->config[$service])) {
             throw new ServiceContainer\Exception('The service "' . $service . '" is not configured yet.');
         }
-        return $this->_config[$service];
+        return $this->config[$service];
     }
     
     /**
@@ -185,12 +192,12 @@ class ServiceContainer
      * 
      * @return \Europa\ServiceContainer
      */
-    public function getInstance(array $config = array(), $name = 'default')
+    public static function getInstance(array $config = array(), $name = 'default')
     {
-        if (!isset(self::$_instances[$name])) {
-            self::$_instances[$name] = new static($config);
+        if (!isset(self::$instances[$name])) {
+            self::$instances[$name] = new static($config);
         }
-        return self::$_instances[$name];
+        return self::$instances[$name];
     }
     
     /**
@@ -200,11 +207,11 @@ class ServiceContainer
      * 
      * @return string
      */
-    private function _getMappedClassFromName($service)
+    protected function getMappedClassFromName($service)
     {
         $class = $service;
-        if (isset($this->_map[$service])) {
-            $class = $this->_map[$service];
+        if (isset($this->map[$service])) {
+            $class = $this->map[$service];
         }
         return $class;
     }
