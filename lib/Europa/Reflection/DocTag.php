@@ -1,0 +1,90 @@
+<?php
+
+namespace Europa\Reflection;
+
+abstract class DocTag
+{
+	/**
+	 * A generic tag string for abstract tag elements that don't
+	 * require any extra parseing besides name and value.
+	 * 
+	 * @var string
+	 */
+	protected $tagString;
+
+	/**
+	 * Returns the name of the tag.
+	 * 
+	 * @return string
+	 */
+	abstract public function tag();
+
+	/**
+	 * Constructs a new doc tag. If a tag string is specified then it's parsed.
+	 * 
+	 * @param string $tagString The tag to parse.
+	 * 
+	 * @return \Europa\Reflection\DocTagAbstract
+	 */
+	public function __construct($tagString = null)
+	{
+		if ($tagString) {
+			$this->parse($tagString);
+		}
+	}
+
+	/**
+	 * Returns the full doc tag including the name and tag string.
+	 * 
+	 * @return string
+	 */
+	public function __toString()
+	{
+		return $this->compile();
+	}
+
+	/**
+	 * Removes any new-line formatting including the asterisks.
+	 * 
+	 * @parma string $tagString The tag string without the tag name.
+	 * 
+	 * @return void
+	 */
+	public function parse($tagString)
+	{
+		$str = trim($tagString);
+		$str = explode("\n", $str);
+		foreach ($str as $k => $part) {
+			$part = trim($part);
+
+			// if they are empty comment lines, unset and continue
+			if ($part === '*' || $part === '*/') {
+				unset($str[$k]);
+				continue;
+			}
+
+			// if it begins with an asterisk, format it
+			if ($part[0] === '*') {
+				$part = substr($part, 1);
+				$part = trim($part);
+			}
+
+			$str[$k] = $part;
+		}
+		$this->tagString = implode(' ', $str);
+	}
+
+	/**
+	 * Compiles the tag and returns it as a string.
+	 * 
+	 * @return string
+	 */
+	public function compile()
+	{
+		$str = $this->name;
+		if ($this->value) {
+			$str .= ' ' . $this->tagString;
+		}
+		return $str;
+	}
+}

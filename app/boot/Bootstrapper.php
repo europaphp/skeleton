@@ -18,7 +18,7 @@ class Bootstrapper extends Europa\Bootstrapper
      * 
      * @var string
      */
-    private $_base;
+    private $base;
     
     /**
      * Sets error reporting.
@@ -38,7 +38,7 @@ class Bootstrapper extends Europa\Bootstrapper
      */
     public function setBasePath()
     {
-        $this->_base = realpath(dirname(__FILE__) . '/../../');
+        $this->base = realpath(dirname(__FILE__) . '/../../');
     }
     
     /**
@@ -48,7 +48,7 @@ class Bootstrapper extends Europa\Bootstrapper
      */
     public function requireLoader()
     {
-        require $this->_base . '/lib/Europa/Loader.php';
+        require $this->base . '/lib/Europa/Loader.php';
     }
     
     /**
@@ -58,9 +58,11 @@ class Bootstrapper extends Europa\Bootstrapper
      */
     public function addLoadPaths()
     {
-        \Europa\Loader::addPath($this->_base . '/app/controllers');
-        \Europa\Loader::addPath($this->_base . '/app/helpers');
-        \Europa\Loader::addPath($this->_base . '/app/views');
+        \Europa\Loader::addPath($this->base . '/app/controllers');
+        \Europa\Loader::addPath($this->base . '/app/views');
+        \Europa\Loader::addPath($this->base . '/app/helpers');
+        \Europa\Loader::addPath($this->base . '/app/filters');
+        \Europa\Loader::addPath($this->base . '/app/forms');
     }
     
     /**

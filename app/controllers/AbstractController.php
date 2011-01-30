@@ -1,7 +1,7 @@
 <?php
 
 /**
- * An example of controller abstraction that sets up the views.
+ * An example of controller abstraction that sets up a default view scheme.
  * 
  * @category Controllers
  * @package  Europa
@@ -11,12 +11,13 @@
 abstract class AbstractController extends \Europa\Controller
 {
     /**
-     * Sets up the views.
+     * Sets up the a default view scheme.
      * 
      * @return void
      */
 	public function init()
 	{
+		session_start();
 		$this->setView(
 			new \Europa\View\Layout(
 				new \Europa\View\Php('DefaultLayout'),
