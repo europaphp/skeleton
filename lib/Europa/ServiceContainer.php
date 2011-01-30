@@ -1,5 +1,7 @@
 <?php
 
+namespace Europa;
+
 /**
  * An extensible dependency injection container.
  * 
@@ -8,327 +10,202 @@
  * @author   Trey Shugart
  * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-namespace Europa
+class ServiceContainer
 {
-    class ServiceContainer implements \Iterator, \ArrayAccess, \Countable
+    /**
+     * Contains a service name to class name map.
+     * 
+     * @var
+     */
+    private $_map = array();
+    
+    /**
+     * Contains the configuration for the services.
+     * 
+     * @var array
+     */
+    private $_config = array();
+    
+    /**
+     * Contains the shared service instances.
+     * 
+     * @var array
+     */
+    private $_services = array();
+    
+    /**
+     * Instantiates the container setting the config for all services.
+     * 
+     * @param array $config The configuration for all of the services.
+     * 
+     * @return \Europa\ServiceContainer
+     */
+    public function __construct(array $config = array())
     {
-        /**
-         * Contains a service name to class name map.
-         * 
-         * @var
-         */
-        private $_map = array();
+        $this->setConfig($config);
+    }
+    
+    /**
+     * Maps a name to a class.
+     * 
+     * @param string $service The name of the service.
+     * @param string $class   The name of the class it maps to.
+     * 
+     * @return \Europa\ServiceContainer
+     */
+    public function map($service, $class)
+    {
+        $this->_map[$service] = $class;
+        return $this;
+    }
+    
+    /**
+     * Returns the specified service. If the service instance doesn't exist
+     * yet then it is created, cached and returned.
+     * 
+     * @param string $service The name of the service.
+     * 
+     * @return mixed
+     */
+    public function get($service)
+    {
+        if (!isset($this->_services[$service])) {
+            $this->_services[$service] = $this->getNew($service);
+        }
+        return $this->_services[$service];
+    }
+    
+    /**
+     * Returns a new instance of the specified service.
+     * 
+     * @param string $service The name of the service.
+     * @param array  $config  Any custom config just for this instance.
+     * 
+     * @return mixed
+     */
+    public function getNew($service, array $config = array())
+    {
+        // get the class name and it's config
+        $class   = $this->_getMappedClassFromName($service);
+        $current = isset($this->_config[$service]) ? $this->_config[$service] : array();
+        $config  = array_replace_recursive($current, $config);
         
-        /**
-         * Contains the configuration for the services.
-         * 
-         * @var array
-         */
-        private $_config = array();
-        
-        /**
-         * Contains the shared service instances.
-         * 
-         * @var array
-         */
-        private $_services = array();
-        
-        /**
-         * Instantiates the container setting the config for all services.
-         * 
-         * @param array $config The configuration for all of the services.
-         * 
-         * @return Europa_ServiceContainer
-         */
-        public function __construct(array $config = array())
-        {
-            foreach ($config as $name => $value) {
-                $this->offsetSet($name, $value);
-            }
+        // the service may be a method protected or private and exist on 
+        // the current object
+        if (method_exists($this, $service)) {
+            $method = new Reflection\Method($this, $service);
+            return call_user_func_array(
+                array($this, $service),
+                $method->mergeNamedArgs($config)
+            );
         }
         
-        /**
-         * Returns a new instance of the specifie service and passes it's configuration to
-         * it's constructor. If any config is passed to the __call'ed method, then it is
-         * merged with the default config.
-         * 
-         * @param string $service The service to return a new instance for.
-         * @param array  $args    The configuration for the service to merge with the default.
-         * 
-         * @return mixed
-         */
-        public function __call($service, array $args = array())
-        {
-            if (!isset($args[0])) {
-                $args[0] = array();
-            }
-            if (!is_array($args[0])) {
-                throw new Europa_ServiceContainer_Exception(
-                    "The argument passed to the {$service} service constructor must be an array."
-                );
-            }
-            $class  = $this->_getMappedClassFromName($service);
-            $config = isset($this->_config[$service]) ? $this->_config[$service] : array();
-            $config = $this->_merge($config, $args[0]);
-            if (method_exists($this, $service)) {
-                return $this->$service($config);
-            }
-            return new $class($config);
+        // or just default to using the passing the config to the class
+        if (method_exists($class, '__construct')) {
+            $method = new Reflection\Method($class, '__construct');
+            $class  = new \ReflectionClass($class);
+            return $class->invokeArgs($method->mergeNamedArgs($config));
         }
         
-        /**
-         * Returns the specified service. If this service hasn't been instantiated yet,
-         * it will be.
-         * 
-         * @param string $service The name of the service.
-         * 
-         * @return mixed
-         */
-        public function __get($service)
-        {
-            if (!isset($this->_services[$service])) {
-                $this->_services[$service] = $this->__call($service);
-            }
-            return $this->_services[$service];
+        // if no constructor present, just return a new instance
+        return new $class;
+    }
+    
+    /**
+     * Sets global configuration.
+     * 
+     * @param array $config The global config to set.
+     * 
+     * @return \Europa\ServiceContainer
+     */
+    public function setConfig(array $configs)
+    {
+        foreach ($configs as $name => $config) {
+            $this->setConfigFor($name, $config);
+        }
+        return $this;
+    }
+    
+    /**
+     * Returns the full configuration array.
+     * 
+     * @return array
+     */
+    public function getConfig()
+    {
+        return $this->_config;
+    }
+    
+    /**
+     * Sets the configuration for the specified service.
+     * 
+     * @param string $service The name of the service to set the configuration for.
+     * @param array  $config  The configuration for the service.
+     * 
+     * @return \Europa\ServiceContainer
+     */
+    public function setConfigFor($service, array $config)
+    {
+        // reset the instance if there is one
+        if (isset($this->_services[$service])) {
+            unset($this->_services[$service]);
         }
         
-        /**
-         * Maps a service name to a dependency class.
-         * 
-         * @param string $class The class name of the dependency.
-         * 
-         * @return Europa_ServiceContainer
-         */
-        public function __set($name, $class)
-        {
-            $this->_map[$name] = $class;
-            return $this;
-        }
+        // get the current config if it exists, or default to empty
+        $current = isset($this->_config[$service]) ? $this->_config[$service] : array();
         
-        /**
-         * Returns whether or not the service has been shared.
-         * 
-         * @param string $service The name of the service.
-         * 
-         * @return bool
-         */
-        public function __isset($service)
-        {
-            return isset($this->_services[$service]);
-        }
+        // merge config recursively
+        $this->_config[$service] = array_replace_recursive($current, $config);
         
-        /**
-         * Unsets the shared instance of the specified service.
-         * 
-         * @param string $service The name of the servide.
-         * 
-         * @return mixed
-         */
-        public function __unset($service)
-        {
-            if (isset($this->_services[$service])) {
-                unset($this->_services[$service]);
-            }
-            return $this;
+        return $this;
+    }
+    
+    /**
+     * Returns the configuration array for the specified service.
+     * 
+     * @param strign $service The service to return the configuration for.
+     * 
+     * @return array
+     */
+    public function getConfigFor($service)
+    {
+        if (!isset($this->_config[$service])) {
+            throw new ServiceContainer\Exception('The service "' . $service . '" is not configured yet.');
         }
-        
-        /**
-         * Returns the configuration for the service.
-         * 
-         * @param string $name The name of the service.
-         * 
-         * @return array
-         */
-        public function offsetGet($name)
-        {
-            // always an array
-            if (!$this->offsetExists($name)) {
-                $this->_config[$name] = array();
-            }
-            
-            // return the config
-            return $this->_config[$name];
+        return $this->_config[$service];
+    }
+    
+    /**
+     * Creates a new instance using the specified configuration and name. If no
+     * name is specified, then a default instance is created and can fascilitate
+     * the singleton pattern.
+     * 
+     * @param array  $config The configuration array.
+     * @param string $name   The instance name. Defaults to "default".
+     * 
+     * @return \Europa\ServiceContainer
+     */
+    public function getInstance(array $config = array(), $name = 'default')
+    {
+        if (!isset(self::$_instances[$name])) {
+            self::$_instances[$name] = new static($config);
         }
-        
-        /**
-         * Sets the configuration for the service.
-         * 
-         * @param string $name   The name of the service.
-         * @param mixed  $config The config for the service.
-         * 
-         * @return Europa_ServiceContainer
-         */
-        public function offsetSet($name, $value)
-        {
-            // make sure the value can be iterated over
-            if (!is_array($value) && !is_object($value)) {
-                throw new Europa_ServiceContainer_Exception(
-                    "The configuration for {$name} must be traversible."
-                );
-            }
-            
-            // set the values
-            foreach ($value as $k => $v) {
-                if (!isset($this->_config[$name]) || !is_array($this->_config[$name])) {
-                    $this->_config[$name] = array();
-                }
-                $this->_config[$name][$k] = $v;
-            }
-            
-            // chain
-            return $this;
+        return self::$_instances[$name];
+    }
+    
+    /**
+     * Returns the class name form the given service name.
+     * 
+     * @param string $service The service name.
+     * 
+     * @return string
+     */
+    private function _getMappedClassFromName($service)
+    {
+        $class = $service;
+        if (isset($this->_map[$service])) {
+            $class = $this->_map[$service];
         }
-        
-        /**
-         * Checks to make sure the given service has configuration set. If it is set
-         * to an empty array, then it returns false.
-         * 
-         * @param string $name The name of the service.
-         * 
-         * @return bool
-         */
-        public function offsetExists($name)
-        {
-            return isset($this->_config[$name]) && count($this->_config[$name]) > 0;
-        }
-        
-        /**
-         * Resets the configuration for the object. Same as setting it to an empty array.
-         * 
-         * @param string $name The name of the service.
-         * 
-         * @return Europa_ServiceContainer
-         */
-        public function offsetUnset($name)
-        {
-            // reset to an empty array
-            $this->_config[$name] = array();
-            return $this;
-        }
-        
-        /**
-         * Returns the current service in the collection.
-         * 
-         * @return mixed
-         */
-        public function current()
-        {
-            return current($this->_services);
-        }
-        
-        /**
-         * Returns the name of the current service in the collection.
-         * 
-         * @return string
-         */
-        public function key()
-        {
-            return key($this->_services);
-        }
-        
-        /**
-         * Moves to the next service in the collection.
-         * 
-         * @return Europa_ServiceContainer
-         */
-        public function next()
-        {
-            next($this->_services);
-            return $this;
-        }
-        
-        /**
-         * Returns to the first service in the collection.
-         * 
-         * @return mixed
-         */
-        public function rewind()
-        {
-            reset($this->_services);
-            return $this;
-        }
-        
-        /**
-         * Returns whether or not we can keep iterating through the service collection.
-         * 
-         * @return bool
-         */
-        public function valid()
-        {
-            return !is_null($this->current());
-        }
-        
-        /**
-         * Returns the number of services in the collection.
-         * 
-         * @return int
-         */
-        public function count()
-        {
-            return count($this->_services);
-        }
-        
-        /**
-         * Returns the class name form the given service name.
-         * 
-         * @param string $service The service name.
-         * 
-         * @return string
-         */
-        private function _getMappedClassFromName($service)
-        {
-            $class = $service;
-            if (isset($this->_map[$service])) {
-                $class = $this->_map[$service];
-            }
-            return $class;
-        }
-        
-        /**
-         * Works with _recurse to be a replacement for array_repalce_recursive
-         * for PHP versions less than 5.3.0.
-         * 
-         * @param array $array1 The first array.
-         * @param array $array2 The second array.
-         * 
-         * @return array
-         */
-        private function _merge(array $array1, $array2)
-        {
-            $args  = func_get_args();
-            $array = $args[0];
-            if (!is_array($array)) {
-                return $array;
-            }
-            for ($i = 1; $i < count($args); $i++) {
-                if (is_array($args[$i])) {
-                    $array = $this->_recurse($array, $args[$i]);
-                }
-            }
-            return $array;
-        }
-        
-        /**
-         * Used by _merge to be a replacement for array_repalce_recursive
-         * for PHP versions less than 5.3.0.
-         * 
-         * @param array $array1 The first array.
-         * @param array $array2 The second array.
-         * 
-         * @return array
-         */
-        private function _recurse($array1, $array2)
-        {
-            foreach ($array2 as $key => $value) {
-                if (!isset($array1[$key]) || (isset($array1[$key]) && !is_array($array1[$key]))) {
-                    $array1[$key] = array();
-                }
-                if (is_array($value)) {
-                    $value = $this->_recurse($array1[$key], $value);
-                }
-                $array1[$key] = $value;
-            }
-            return $array1;
-        }
+        return $class;
     }
 }

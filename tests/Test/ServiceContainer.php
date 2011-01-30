@@ -18,13 +18,14 @@ class Test_ServiceContainer extends Testes_Test
                 'router' => array()
             )
         );
-        $this->_container->router = '\Europa\Router';
+        $this->_container->map('router', '\Europa\Router');
     }
     
     public function testSetupConfig()
     {
+        $config = $this->_container->getConfigFor('request');
         $this->assert(
-            $this->_container['request']['class'] === '\Europa\Request\Http',
+            $config['class'] === '\Europa\Request\Http',
             'The service container class does not match.'
         );
     }
@@ -32,7 +33,7 @@ class Test_ServiceContainer extends Testes_Test
     public function testSetupMap()
     {
         $this->assert(
-            $this->_container->router instanceof \Europa\Router,
+            $this->_container->get('router') instanceof \Europa\Router,
             'The required dependency was not returned.'
         );
     }
@@ -40,56 +41,47 @@ class Test_ServiceContainer extends Testes_Test
     public function testOverride()
     {
         $this->assert(
-            $this->_container->request instanceof \Europa\Request\Http,
+            $this->_container->get('request') instanceof \Europa\Request\Http,
             'The required dependency was not returned.'
         );
     }
     
     public function testCustomOverride()
     {
-        $valid = $this->_container->request->test1 === true
-              && $this->_container->request->test2 === true;
+        $valid = $this->_container->get('request')->test1 === true
+              && $this->_container->get('request')->test2 === true;
         $this->assert($valid, 'The request variables were not properly set.');
     }
     
     public function testFreshOverrideWithMergedConfig()
     {
-        $configOverride = array(
-            'params' => array(
-                'test2' => false
+        $this->_container->setConfigFor(
+            'request',
+            array(
+                'params' => array(
+                    'test2' => false
+                )
             )
         );
         
-        $request = $this->_container->request($configOverride);
-        $valid   = $request->test1 === true
-                && $request->test2 === false;
-        $this->assert($valid, 'Configuration overriding is not working.');
-    }
-    
-    public function testCache()
-    {
         $this->assert(
-            isset($this->_container->request),
-            'Dependency caching is not working.'
+            $this->_container->get('request')->test1 === true,
+            'The configuration was not merged.'
         );
-    }
-    
-    public function testUnset()
-    {
-        unset($this->_container->request);
+        
         $this->assert(
-            !isset($this->_container->request),
-            'Unsetting is not working.'
+            $this->_container->get('request')->test2 === false,
+            'The configuration was not merged.'
         );
     }
 }
 
 class Container extends \Europa\ServiceContainer
 {
-    protected function request(array $config = array())
+    protected function request($class, array $params = array())
     {
-        $request = new $config['class'];
-        foreach ($config['params'] as $name => $value) {
+        $request = new $class($this->get('router'));
+        foreach ($params as $name => $value) {
             $request->__set($name, $value);
         }
         return $request;
