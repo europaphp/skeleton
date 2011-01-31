@@ -55,7 +55,7 @@ namespace Europa\Validator
          * Array access set.
          * 
          * @param int    $offset  The message offset to add the message at.
-         * @param stirng $message The message to add to the message.
+         * @param string $message The message to add to the message.
          * 
          * @return Europa_Multimessage
          */
@@ -78,7 +78,7 @@ namespace Europa\Validator
          * 
          * @return Europa_Multimessage
          */
-        public function offsetGet($offset = null)
+        public function offsetGet($offset)
         {
             if (!is_numeric($offset)) {
                 $offset = $this->count();
