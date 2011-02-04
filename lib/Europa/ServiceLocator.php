@@ -67,6 +67,31 @@ class ServiceLocator
     }
     
     /**
+     * Calls the specified service using getNew().
+     * 
+     * @param string $name The name of the service to call.
+     * @param array  $args The configuration to pass. The first element must be an array if specified.
+     * 
+     * @return mixed
+     */
+    public function __call($name, array $args = array())
+    {
+        return $this->getNew($name, isset($args[0]) && is_array($args[0]) ? $args[0] : array());
+    }
+    
+    /**
+     * Returns the specified service using get().
+     * 
+     * @param string $name The service to get.
+     * 
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        return $this->get($name);
+    }
+    
+    /**
      * Maps a name to a class.
      * 
      * @param string $service The name of the service.
@@ -123,7 +148,7 @@ class ServiceLocator
         
         // or just default to using the passing the config to the class
         if (method_exists($class, '__construct')) {
-            $method = new Reflection\Method($class, '__construct');
+            $method = new Reflection\MethodReflector($class, '__construct');
             $class  = new \ReflectionClass($class);
             return $class->invokeArgs($method->mergeNamedArgs($config));
         }
