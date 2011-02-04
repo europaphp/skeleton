@@ -1,10 +1,10 @@
 <?php
 
-class Test_Reflection_Method extends Testes_Test
+class Test_Reflection_MethodReflector extends Testes_Test
 {
     public function testParameterMapping()
     {
-        $method = new \Europa\Reflection\Method('Test_Reflection_MappingProvider', 'someMethod');
+        $method = new \Europa\Reflection\MethodReflector('Test_Reflection_MappingProvider', 'someMethod');
         
         try {
             $result = $method->mergeNamedArgs(
