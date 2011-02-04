@@ -8,10 +8,10 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-namespace Europa\ServiceContainer
+namespace Europa\ServiceLocator
 {
-	class Exception extends \Europa\Exception
-	{
-	    
-	}
+    class Exception extends \Europa\Exception
+    {
+        
+    }
 }
