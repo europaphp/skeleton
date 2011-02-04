@@ -4,31 +4,31 @@ namespace Europa\Controller;
 
 class FilterAbstract implements FilterInterface
 {
-	protected $controller;
+    protected $controller;
 
-	protected $method;
+    protected $method;
 
-	protected $params;
+    protected $params;
 
-	public function __construct(\Europa\Controller $controller, $method, array $params = array())
-	{
-		$this->controller = $controller;
-		$this->method     = $method;
-		$this->params     = $params;
-	}
+    public function __construct(\Europa\Controller $controller, $method, array $params = array())
+    {
+        $this->controller = $controller;
+        $this->method     = $method;
+        $this->params     = $params;
+    }
 
-	public function filter()
-	{
-		
-	}
+    public function filter()
+    {
+        
+    }
 
-	public function method()
-	{
-		return $this->method;
-	}
+    public function method()
+    {
+        return $this->method;
+    }
 
-	public function params()
-	{
-		return $this->params;
-	}
+    public function params()
+    {
+        return $this->params;
+    }
 }

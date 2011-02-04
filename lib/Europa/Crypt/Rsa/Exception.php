@@ -10,8 +10,8 @@
  */
 namespace Europa\Crypt\Rsa
 {
-	class Exception extends \Europa\Exception
-	{
-	    
-	}
+    class Exception extends \Europa\Exception
+    {
+        
+    }
 }

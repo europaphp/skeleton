@@ -9,7 +9,7 @@ require_once dirname(__FILE__) . '/../../lib/Europa/Bootstrapper.php';
  * @category Bootstrapping
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
+ * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
 class Bootstrapper extends Europa\Bootstrapper
 {

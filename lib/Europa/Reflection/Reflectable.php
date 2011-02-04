@@ -12,10 +12,10 @@ namespace Europa\Reflection;
  */
 interface Reflectable
 {
-	/**
-	 * Returns the appropriate doc block instance.
-	 * 
-	 * @return \Europa\Reflection\DocBlock
-	 */
-	public function getDocBlock();
+    /**
+     * Returns the appropriate doc block instance.
+     * 
+     * @return \Europa\Reflection\DocBlock
+     */
+    public function getDocBlock();
 }

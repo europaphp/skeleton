@@ -2,9 +2,9 @@
 
 class LogOutController extends AbstractController
 {
-	public function get()
-	{
-		unset($_SESSION['isLoggedIn']);
-		$this->redirect();
-	}
+    public function get()
+    {
+        unset($_SESSION['isLoggedIn']);
+        $this->redirect();
+    }
 }

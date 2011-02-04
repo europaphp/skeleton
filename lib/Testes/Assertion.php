@@ -7,7 +7,7 @@
  * @category Assertions
  * @package  Testes
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/
+ * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/
  */
 class Testes_Assertion extends Testes_Exception
 {

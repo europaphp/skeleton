@@ -11,5 +11,5 @@
  */
 class Test_Validator extends Testes_Suite
 {
-	
+    
 }

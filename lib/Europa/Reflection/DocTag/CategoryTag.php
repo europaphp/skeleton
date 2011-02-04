@@ -4,8 +4,8 @@ namespace Europa\Reflection\DocTag;
 
 class CategoryTag extends \Europa\Reflection\DocTag
 {
-	public function tag()
-	{
-		return 'category';
-	}
+    public function tag()
+    {
+        return 'category';
+    }
 }

@@ -8,7 +8,7 @@ namespace Europa\Form;
  * @category Forms
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
+ * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
 abstract class ElementList extends Base implements Renderable, Listable
 {

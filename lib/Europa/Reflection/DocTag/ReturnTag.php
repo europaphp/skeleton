@@ -91,12 +91,12 @@ class ReturnTag extends \Europa\Reflection\DocTag
 
             // check for shorthand specifications
             switch ($type) {
-            	case 'bool':
-            		$type = 'boolean';
-            		break;
-            	case 'int':
-            		$type = 'integer';
-            		break;
+                case 'bool':
+                    $type = 'boolean';
+                    break;
+                case 'int':
+                    $type = 'integer';
+                    break;
             }
             
             // check actual type against specified type

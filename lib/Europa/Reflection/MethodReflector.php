@@ -26,16 +26,6 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
      * @var array
      */
     private $returnTypes;
-
-    /**
-     * Returns the doc block instance for this method.
-     * 
-     * @return \Europa\Reflection\DocBlock
-     */
-    public function getDocBlock()
-    {
-        return new DocBlock($this->getDocComment());
-    }
     
     /**
      * Takes the passed named parameters and returns a merged array of the passed parameters
@@ -43,10 +33,11 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
      * 
      * @param array $params        The parameters to merge.
      * @param bool  $caseSensitive Whether or not to make them case insensitive.
+     * @param bool  $throw         Whether or not to throw exceptions if a required parameter is not defined.
      * 
      * @return array The merged parameters.
      */
-    public function mergeNamedArgs(array $params, $caseSensitive = false)
+    public function mergeNamedArgs(array $params, $caseSensitive = false, $throw = true)
     {
         // resulting merged parameters will be stored here
         $merged = array();
@@ -70,7 +61,7 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
             } elseif ($param->isOptional()) {
                 $merged[$pos] = $param->getDefaultValue();
             // throw exceptions when required params aren't defined
-            } else {
+            } elseif ($throw) {
                 $class = get_class($this);
                 throw new \Europa\Reflection\Exception(
                     "Parameter \"{$param->getName()}\" for \"{$this->getDeclaringClass()->getName()}->{$this->getName()}()\" was not defined."
@@ -79,6 +70,34 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
         }
         
         return $merged;
+    }
+
+    /**
+     * Instead of just calling with the arguments in their natural order, this method allows
+     * the method to be called with arguments which keys match the original method definition
+     * of names.
+     * 
+     * Note, that reflection can only call public members of an object, therefore, you cannot
+     * invoke protected or private methods with this method.
+     * 
+     * @param object $instance The object instance to call the method on.
+     * @param array  $args     The named arguments to merge and pass to the method.
+     * 
+     * @return mixed
+     */
+    public function invokeNamedArgs($instance, array $args = array())
+    {
+        return $this->invokeArgs($instance, $this->mergeNamedArgs($args));
+    }
+
+    /**
+     * Returns the doc block instance for this method.
+     * 
+     * @return \Europa\Reflection\DocBlock
+     */
+    public function getDocBlock()
+    {
+        return new DocBlock($this->getDocComment());
     }
 
     /**

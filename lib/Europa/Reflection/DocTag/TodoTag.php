@@ -4,8 +4,8 @@ namespace Europa\Reflection\DocTag;
 
 class TodoTag extends \Europa\Reflection\DocTag
 {
-	public function tag()
-	{
-		return 'todo';
-	}
+    public function tag()
+    {
+        return 'todo';
+    }
 }

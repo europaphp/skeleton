@@ -71,16 +71,16 @@ class Europa_Sniffs_Commenting_ClassCommentSniff extends Europa_Sniffs_Commentin
                          'allow_multiple' => false,
                          'order_text'     => 'follows @package',
                         ),
-	'author' => array(
-		'required'       => true,
-		'allow_multiple' => true,
-		'order_text'     => 'folows @package/subpackage'
-	),
-	'license' => array(
-		'required'       => true,
-		'allow_multiple' => false,
-		'order_text'     => 'follows @author'
-	),
+    'author' => array(
+        'required'       => true,
+        'allow_multiple' => true,
+        'order_text'     => 'folows @package/subpackage'
+    ),
+    'license' => array(
+        'required'       => true,
+        'allow_multiple' => false,
+        'order_text'     => 'follows @author'
+    ),
         'link'       => array(
                          'required'       => false,
                          'allow_multiple' => true,

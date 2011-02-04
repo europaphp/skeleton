@@ -66,7 +66,7 @@ class Europa_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
      * @var array
      */
     protected $tags = array(
-			/*
+            /*
                        'category'   => array(
                                         'required'       => true,
                                         'allow_multiple' => false,
@@ -122,7 +122,7 @@ class Europa_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
                                         'allow_multiple' => false,
                                         'order_text'     => 'follows @since (if used) or @see (if used) or @link',
                                        ),
-			*/
+            */
                 );
 
 
@@ -149,7 +149,7 @@ class Europa_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
      */
     public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
     {
-	return;
+    return;
         $this->currentFile = $phpcsFile;
 
         // We are only interested if this is the first open tag.

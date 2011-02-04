@@ -6,7 +6,7 @@
  * @category String
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
+ * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
 namespace Europa
 {
@@ -144,7 +144,7 @@ namespace Europa
          */
         public function toMethod()
         {
-            return $this->toLowercase()->toClass()->lcfirst()->replace('_', '');
+            return $this->toClass()->lcfirst()->replace('_', '');
         }
         
         /**

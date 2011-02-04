@@ -21,7 +21,7 @@ try {
     // dispatch and echo the result
     echo $router->dispatch();
 } catch (\Exception $e) {
-	$error = new ErrorController(new \Europa\Request\Http);
-	$error->exception = $e;
-	echo $error;
+    $error = new ErrorController(new \Europa\Request\Http);
+    $error->exception = $e;
+    echo $error;
 }

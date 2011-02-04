@@ -1,6 +1,6 @@
 <?php
 
-class Test_ServiceContainer extends Testes_Test
+class Test_ServiceLocator extends Testes_Test
 {
     private $_container;
     
@@ -76,7 +76,7 @@ class Test_ServiceContainer extends Testes_Test
     }
 }
 
-class Container extends \Europa\ServiceContainer
+class Container extends \Europa\ServiceLocator
 {
     protected function request($class, array $params = array())
     {

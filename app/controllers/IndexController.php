@@ -6,7 +6,7 @@
  * @category Controllers
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
+ * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
 class IndexController extends AbstractController
 {
@@ -15,8 +15,8 @@ class IndexController extends AbstractController
      * 
      * @return void
      */
-	public function get()
-	{
-		
-	}
+    public function get()
+    {
+        
+    }
 }
