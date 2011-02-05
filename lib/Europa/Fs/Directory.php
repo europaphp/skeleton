@@ -472,7 +472,7 @@ namespace Europa\Fs
         /**
          * Returns the current item in the iteration.
          * 
-         * @return \Europa\Fs\Directory|Europa_Fs_File
+         * @return \Europa\Fs\Directory|\Europa\Fs\File
          */
         public function current()
         {

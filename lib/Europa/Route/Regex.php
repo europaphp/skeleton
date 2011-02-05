@@ -42,7 +42,7 @@ namespace Europa\Route
          * @param string $reverse    The string used to reverse engineer the route.
          * @param array  $map        The string to use when reverse engineering the expression.
          * 
-         * @return Europa_Route
+         * @return uropa\RouteRoute
          */
         public function __construct($expression, $reverse = null, array $map = array())
         {

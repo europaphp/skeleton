@@ -1,5 +1,7 @@
 <?php
 
+namespace Europa\Controller;
+
 /**
  * An example of an abstract controller to act as a base class for all
  * controllers.
@@ -9,16 +11,7 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-namespace Europa\Controller
+class Exception extends \Europa\Exception
 {
-    class Exception extends \Europa\Exception
-    {
-        /**
-         * Thrown when an action is not found by default in
-         * Europa_Controller_Action.
-         * 
-         * @var int
-         */
-        const ACTION_NOT_FOUND = 1;
-    }
+    
 }

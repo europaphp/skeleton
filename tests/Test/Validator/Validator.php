@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Tests for validating Europa_Validator.
+ * Tests for validating uropa\RouteValidator.
  * 
  * @category Tests
  * @package  Europa

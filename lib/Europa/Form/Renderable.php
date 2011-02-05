@@ -96,14 +96,14 @@ namespace Europa\Form
         /**
          * Sets an array of attributes all at once.
          * 
-         * @return Europa_Form_Element
+         * @return \Europa\Form\Element
          */
         public function setAttributes(array $attributes = array());
         
         /**
          * Returns the attributes.
          * 
-         * @return Europa_Form_Element
+         * @return \Europa\Form\Element
          */
         public function getAttributes();
 

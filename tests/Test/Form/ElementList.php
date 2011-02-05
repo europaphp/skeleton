@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Tests for validating Europa_Form_ElementList.
+ * Tests for validating \Europa\Form\ElementList.
  * 
  * @category Tests
  * @package  Europa
@@ -14,7 +14,7 @@ class Test_Form_ElementList extends \Testes_Test
     /**
      * The list that is being used for the test.
      * 
-     * @var Europa_Form_ElementList
+     * @var \Europa\Form\ElementList
      */
     private $_list;
     
@@ -102,7 +102,7 @@ class Test_Form_ElementList extends \Testes_Test
 }
 
 /**
- * Dummy class for validating the Europa_Form_ElementList
+ * Dummy class for validating the \Europa\Form\ElementList
  * 
  * @category Tests
  * @package  Europa

@@ -13,7 +13,7 @@ class DispatchHelper
     /**
      * The request object that is used for this dispatch call.
      * 
-     * @var Europa_Request
+     * @var \Europa\Request
      */
     protected $request;
 
@@ -21,19 +21,19 @@ class DispatchHelper
      * Constructs a dispatch helper and passes in the required parameters. The request can be auto-detected
      * if not specified, or overridden if specified.
      * 
-     * @param Europa_View    $view    The view that called the helper.
-     * @param array          $params  An array of parameters to pass off to the new request.
-     * @param Europa_Request $request A request to override a default request with.
+     * @param \Europa\View    $view    The view that called the helper.
+     * @param array           $params  An array of parameters to pass off to the new request.
+     * @param \Europa\Request $request A request to override a default request with.
      * 
      * @return DispatchHelper
      */
-    public function __construct(Europa_View $view, $controller, array $params = array(), Europa_Request $request = null)
+    public function __construct(uropa\View $view, $controller, array $params = array(), uropa\Request $request = null)
     {
         // auto-detection of request or overriding of request detection
         if ($request) {
             $this->request = $request;
         } else {
-            $this->request = Europa_Request::isCli() ? new Europa_Request_Cli : new Europa_Request_Http;
+            $this->request = uropa\Request::isCli() ? new \Europa\Requst\Cli : new \Europa\Requst\Http;
         }
         
         $this->request->setController($controller);
@@ -52,10 +52,10 @@ class DispatchHelper
         // catch any exceptions and trigger them accordingly
         try {
             return (string) $this->request->dispatch();
-        } catch (Europa_Exception $e) {
+        } catch (uropaxception $e) {
             $e->trigger();
         } catch (Exception $e) {
-            $e = new Europa_Exception($e->getMessage(), $e->getCode());
+            $e = new uropaxception($e->getMessage(), $e->getCode());
             $e->trigger();
         }
     }

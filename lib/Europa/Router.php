@@ -27,6 +27,31 @@ namespace Europa
         protected $routes = array();
         
         /**
+         * Returns the specified route if it exists.
+         * 
+         * @param string $name The name of the route.
+         * 
+         * @return \Europa\Route
+         */
+        public function __get($name)
+        {
+            return $this->getRoute($name);
+        }
+        
+        /**
+         * Shorthand for setting a named route.
+         * 
+         * @param string $name  The name of the route.
+         * @param mixed  $route The route to set.
+         * 
+         * @return void
+         */
+        public function __set($name, $route)
+        {
+            $this->setRoute($name, $route);
+        }
+        
+        /**
          * Performs route matching. The parameters are returned if matched.
          * 
          * @param string $subject The subject to match.
@@ -46,16 +71,25 @@ namespace Europa
         }
 
         /**
-         * Sets a route.
+         * Sets a route. If the first argument is an instance of \Europa\Route, then the
+         * route is set for that. Otherwise, it's set as a route to match against.
+         * 
+         * If the $route parameter is null, then that route is removed if it exists.
          * 
          * @param string        $name  The name of the route.
          * @param \Europa\Route $route The route to use.
          * 
          * @return \Europa\Router
          */
-        public function setRoute($name, \Europa\Route $route)
+        public function setRoute($name, \Europa\Route $route = null)
         {
-            $this->routes[$name] = $route;
+            if ($name instanceof Route) {
+                $this->route = $name;
+            } elseif ($route) {
+                $this->routes[$name] = $route;
+            } elseif (isset($this->routes[$name])) {
+                unset($this->routes[$name]);
+            }
             return $this;
         }
 
@@ -64,22 +98,22 @@ namespace Europa
          * 
          * @param string $name The name of the route to get.
          * 
-         * @return \Europa\Route|null
+         * @return \Europa\Route
          */
-        public function getRoute($name = null)
+        public function getRoute($name)
         {
-            // if a name isn't specified, return the matched route
+            // if no name is specified, return the matched route
             if (!$name) {
                 return $this->route;
             }
             
-            // if a name is specified, return that route
-            if (isset($this->routes[$name])) {
-                return $this->routes[$name];
+            // if a name is specified, but doesn't exist, throw an exception
+            if (!isset($this->routes[$name])) {
+                throw new Exception('The route "' . $name . '" does not exist.');
             }
             
-            // by default return nothing
-            return null;
+            // return the specified route
+            return $this->routes[$name];
         }
         
         /**

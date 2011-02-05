@@ -25,9 +25,9 @@ abstract class ElementList extends Base implements Renderable, Listable
      * @param \Europa\Form\Base $element The element to add.
      * @param mixed             $offset  The offset to set the element at.
      * 
-     * @return Europa_Form_ElementList
+     * @return \Europa\Form\Element\List
      */
-    public function addElement(\Europa\Form\Base $element, $offset = null)
+    public function addElement(Base $element, $offset = null)
     {
         // append if offset is null
         if (is_null($offset)) {
@@ -157,8 +157,8 @@ abstract class ElementList extends Base implements Renderable, Listable
     /**
      * Adds an element at the given offset.
      * 
-     * @param mixed $offset The offset to set the element at.
-     * @param Europa_Form_Base $element The element to set.
+     * @param mixed             $offset  The offset to set the element at.
+     * @param \Europa\Form\Base $element The element to set.
      * 
      * @return void
      */

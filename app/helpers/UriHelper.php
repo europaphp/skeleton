@@ -27,7 +27,7 @@ class UriHelper
     /**
      * Instantiates the url formatter and sets properties.
      * 
-     * @param Europa_View $view
+     * @param uropa\View $view
      * @param string      $url
      * @param array       $params
      * 

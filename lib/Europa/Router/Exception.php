@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The exception class for Europa_Router.
+ * The exception class for uropa\RouteRouter.
  * 
  * @category Exceptions
  * @package  Europa

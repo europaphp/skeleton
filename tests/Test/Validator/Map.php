@@ -1,13 +1,12 @@
 <?php
 
 /**
- * Tests for validating Europa_Validator_Map
+ * Tests for validating \Europa\Validator\Map
  * 
  * @category Tests
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
 class Test_Validator_Map extends Testes_Test
 {
@@ -42,7 +41,7 @@ class Test_Validator_Map extends Testes_Test
     /**
      * The validator map doing the validation.
      * 
-     * @var Europa_Validator_Map
+     * @var \Europa\Validator\Map
      */
     private $_validator;
     

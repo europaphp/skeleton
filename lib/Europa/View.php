@@ -61,9 +61,9 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
     }
         
     /**
-     * Similar to calling a helper via Europa_View->__call(), but treats the
+     * Similar to calling a helper via uropa\View->__call(), but treats the
      * helper as a singleton and once instantiated, that instance is always
-     * returned for the duration of the Europa_View object's lifespan unless
+     * returned for the duration of the uropa\View object's lifespan unless
      * unset.
      * 
      * If the parameter can't be found, then it attempts to find it in the
@@ -140,7 +140,7 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
      * 
      * @param mixed $params The params to set. Can be any iterable value.
      * 
-     * @return Europa_View
+     * @return uropa\View
      */
     public function setParams($params)
     {
@@ -186,7 +186,7 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
     /**
      * Removes all parameters.
      * 
-     * @return Europa_View
+     * @return uropa\View
      */
     public function removeParams()
     {
@@ -200,7 +200,7 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
      * @param string $name  The parameter name.
      * @param mixed  $value The parameter value.
      * 
-     * @return Europa_View
+     * @return uropa\View
      */
     public function offsetSet($name, $value)
     {
@@ -237,7 +237,7 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
      * 
      * @param string $name The parameter name.
      * 
-     * @return Europa_View
+     * @return uropa\View
      */
     public function offsetUnset($name)
     {
@@ -268,7 +268,7 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
     /**
      * Moves to the next parameter.
      * 
-     * @return Europa_View
+     * @return uropa\View
      */
     public function next()
     {
@@ -279,7 +279,7 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
     /**
      * Resets iteration.
      * 
-     * @return Europa_View
+     * @return uropa\View
      */
     public function rewind()
     {
