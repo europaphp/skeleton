@@ -13,6 +13,13 @@ namespace Europa;
 abstract class View implements \ArrayAccess, \Iterator, \Countable
 {
     /**
+     * The direct children of this view.
+     * 
+     * @var array
+     */
+    protected $children = array();
+    
+    /**
      * The parameters and helpers bound to the view.
      * 
      * @var array
@@ -54,9 +61,9 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
     {
         array_unshift($args, $this);
         if ($this->serviceLocator) {
-            return $this->serviceLocator->getNew($name, $args);
+            return $this->serviceLocator->create($name, $args);
         } elseif (static::$defaultServiceLocator) {
-            return static::$defaultServiceLocator->getNew($name, $args);
+            return static::$defaultServiceLocator->create($name, $args);
         }
         throw new Exception('Call to undefined method "' . get_class($this) . '::' . $name . '()".');
     }
@@ -121,6 +128,63 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
     public function __unset($name)
     {
         unset($this->params[$name]);
+    }
+    
+    /**
+     * Sets a child view. Setting children allows views to gather information about child views.
+     * This is helpful, for example, if you want to load all css or js for the current view
+     * and all of its children.
+     * 
+     * @return \Europa\View
+     */
+    public function setChild($name, \Europa\View $view)
+    {
+        $this->children[$name] = $view;
+        return $this;
+    }
+    
+    /**
+     * Returns the specified child. If the child does not exist, an exception is thrown.
+     * 
+     * @throws \Europa\View\Exception If no child exists.
+     * 
+     * @return \Europa\View
+     */
+    public function getChild($name)
+    {
+        if (!isset($this->children[$name])) {
+            throw new View\Exception('The child "' . $name . '" does not exist for view "' . get_class($this) . ' (' . $this->getScript() . '").');
+        }
+        return $this->children[$name];
+    }
+    
+    /**
+     * Returns all of the children belonging to this view.
+     * 
+     * @return array
+     */
+    public function getChildren()
+    {
+        return $this->children;
+    }
+    
+    /**
+     * Returns a flat array containing all of the descendants for this view. Since the array
+     * is flattened and the child names may conflict, they are formatted to represent their
+     * ancestry. For example: "parent:child:grandchild".
+     * 
+     * @return array
+     */
+    public function getDescendants($separator = ':')
+    {
+        $descendants = array();
+        foreach ($this->getChildren() as $name => $child) {
+            $descendants[$name] = $child;
+            foreach ($child->getDescendants() as $grandChildName => $grandChild) {
+                $descendants[$name . $separator . $grandChildName] = $grandChild;
+            }
+        }
+        return $descendants;
     }
 
     /**
