@@ -27,6 +27,13 @@ class ServiceLocator
     protected $config = array();
     
     /**
+     * A method queue for the services.
+     * 
+     * @var array
+     */
+    protected $queue = array();
+    
+    /**
      * Contains the shared service instances.
      * 
      * @var array
@@ -64,11 +71,13 @@ class ServiceLocator
     public function __construct(array $config = array())
     {
         $this->setConfig($config);
-        $this->setFormatter(static::$defaultFormatter);
+        if (static::$defaultFormatter) {
+            $this->setFormatter(static::$defaultFormatter);
+        }
     }
     
     /**
-     * Calls the specified service using getNew().
+     * Calls the specified service using create().
      * 
      * @param string $name The name of the service to call.
      * @param array  $args The configuration to pass. The first element must be an array if specified.
@@ -81,7 +90,7 @@ class ServiceLocator
         if (!is_array($config)) {
             throw new Exception('The parameter passed to "' . $name . '" must be an array.');
         }
-        return $this->getNew($name, $config);
+        return $this->create($name, $config);
     }
     
     /**
@@ -122,9 +131,23 @@ class ServiceLocator
     public function get($service, array $config = array())
     {
         if (!isset($this->services[$service])) {
-            $this->services[$service] = $this->getNew($service, $config);
+            $this->refresh($service, $config);
         }
         return $this->services[$service];
+    }
+    
+    /**
+     * Re-configures a cached object.
+     * 
+     * @param string $service The object to refresh.
+     * @param array  $config  The configuration for the object.
+     * 
+     * @return \Europa\ServiceContainer
+     */
+    public function refresh($service, array $config = array())
+    {    
+        $this->services[$service] = $this->create($service, $config);
+        return $this;
     }
     
     /**
@@ -135,7 +158,7 @@ class ServiceLocator
      * 
      * @return mixed
      */
-    public function getNew($service, array $config = array())
+    public function create($service, array $config = array())
     {
         // get the mapped or formatted name and it's config
         $class   = $this->getMappedClassFromName($service);
@@ -152,14 +175,41 @@ class ServiceLocator
         }
         
         // or just default to using the passing the config to the class
+        $classReflector = new \ReflectionClass($class);
         if (method_exists($class, '__construct')) {
             $method = new Reflection\MethodReflector($class, '__construct');
-            $class  = new \ReflectionClass($class);
-            return $class->newInstanceArgs($method->mergeNamedArgs($config));
+            $class  = $classReflector->newInstanceArgs($method->mergeNamedArgs($config));
+        } else {
+            $class = new $class;
         }
         
-        // if no constructor present, just return a new instance
-        return new $class;
+        // go through the method queue and call them
+        if (isset($this->queue[$service])) {
+            foreach ($this->queue[$service] as $method => $args) {
+                $method = new Reflection\MethodReflector($class, $method);
+                $method->invokeNamedArgs($class, $args);
+            }
+        }
+        
+        return $class;
+    }
+    
+    /**
+     * Queues up a method to be called when the specified service is created.
+     * 
+     * @param string $service The service to call the method on.
+     * @param string $method  The method to call.
+     * @param array  $args    The arguments to pass to the method.
+     * 
+     * @return \Europa\ServiceLocator
+     */
+    public function queueMethodFor($service, $method, array $args = array())
+    {
+        if (!isset($this->queue[$service])) {
+            $this->queue[$service] = array();
+        }
+        $this->queue[$service][$method] = $args;
+        return $this;
     }
     
     /**
