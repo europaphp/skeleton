@@ -21,14 +21,13 @@ class Bootstrapper extends Europa\Bootstrapper
     private $base;
     
     /**
-     * Sets error reporting.
+     * Sets up the session.
      * 
      * @return void
      */
-    public function setErrorReporting()
+    public function startSession()
     {
-        error_reporting(E_ALL ^ E_STRICT);
-        ini_set('display_errors', 'on');
+        session_start();
     }
     
     /**
@@ -73,5 +72,35 @@ class Bootstrapper extends Europa\Bootstrapper
     public function registerAutoloading()
     {
         \Europa\Loader::registerAutoload();
+    }
+    
+    /**
+     * Sets up the service locator.
+     * 
+     * @return void
+     */
+    public function setUpServiceLocator()
+    {
+        $locator = \Europa\ServiceLocator::getInstance();
+        $locator->map('request', '\Europa\Request\Http');
+        $locator->map('router', '\Europa\Router\Request');
+        $locator->map('layout', '\Europa\View\Php');
+        $locator->map('view', '\Europa\View\Php');
+        $locator->map('helper', '\Europa\ServiceLocator');
+        
+        // make sure the router gets a configured request
+        $locator->setConfigFor('router', array($locator->get('request')));
+        
+        // helper formatter is set for every instance
+        $locator->queueMethodFor('helper', 'setFormatter', array(function($service) {
+            return \Europa\String::create($service)->toClass() . 'Helper';
+        }));
+        
+        // when the view is constructed, it requires it's own service locator
+        $locator->queueMethodFor('view', 'setServiceLocator', array($locator->create('helper')));
+        
+        // when the layout is constructed, it needs to know about its view and requires its own service locator
+        $locator->queueMethodFor('layout', 'setChild', array('view', $locator->get('view')));
+        $locator->queueMethodFor('layout', 'setServiceLocator', array($locator->create('helper')));
     }
 }

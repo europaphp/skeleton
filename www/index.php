@@ -1,27 +1,18 @@
 <?php
 
+// can be overridden in bootstrap if need be
+error_reporting(E_ALL ^ E_STRICT);
+ini_set('display_errors', 'on');
+
 // for showing off
 define('EUROPA_START_TIME', microtime());
 
 // load the bootstrap
 require dirname(__FILE__) . '/../app/boot/bootstrap.php';
 
-// dispatch the request catching any exceptions
+// any exceptions will routed to the error controller
 try {
-    // request routing
-    $router = new \Europa\Router\Request(new \Europa\Request\Http);
-    
-    // default route matches root/uri/index.php/request/uri to Request\UriController
-    $router['default'] = new \Europa\Route\Regex(
-        'index\.php/(?<controller>.+)',
-        'index.php/:controller',
-        array('controller' => 'index')
-    );
-    
-    // dispatch and echo the result
-    echo $router->dispatch();
+    echo \Europa\ServiceLocator::getInstance()->router;
 } catch (\Exception $e) {
-    $error = new ErrorController(new \Europa\Request\Http);
-    $error->exception = $e;
-    echo $error;
+    echo \Europa\ServiceLocator::getInstance()->request->setController('error');
 }
