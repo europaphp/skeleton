@@ -14,7 +14,7 @@ namespace Europa;
 class Loader
 {
     /**
-     * Contains all load paths that uropa\RouteLoader will use when searching for a
+     * Contains all load paths that Europa\RouteLoader will use when searching for a
      * file.
      * 
      * @var array

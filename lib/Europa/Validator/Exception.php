@@ -7,7 +7,7 @@ namespace Europa\Validator;
  * messages can be bound.
  * 
  * @category messages
- * @package  uropa\Routemessage
+ * @package  Europa\Routemessage
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */

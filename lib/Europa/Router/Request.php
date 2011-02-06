@@ -15,20 +15,35 @@ class Request extends \Europa\Router
     /**
      * The request to route.
      * 
-     * @var uropa\Request
+     * @var Europa\Request
      */
     private $request;
     
     /**
      * Sets up the request router using the specified request.
      * 
-     * @param uropa\Request $request The request to route.
+     * @param Europa\Request $request The request to route.
      * 
      * @return \Europa\Router\Request
      */
     public function __construct(\Europa\Request $request)
     {
         $this->request = $request;
+    }
+    
+    /**
+     * Dispatches, converts the request to a string and returns it.
+     * 
+     * @return string
+     */
+    public function __toString()
+    {
+        try {
+            return $this->dispatch()->__toString();
+        } catch (\Exception $e) {
+            $e = new Exception($e->getMessage(), $e->getCode());
+            $e->trigger();
+        }
     }
     
     /**
@@ -43,14 +58,14 @@ class Request extends \Europa\Router
     
     /**
      * Dispatches the set request. If $subject is specified, then it overwrits the
-     * default uropa\Request->__toString() return value for route matching.
+     * default Europa\Request->__toString() return value for route matching.
      * 
      * The request that was routed is returned. If the request isn't matched, then
      * false is returned.
      * 
      * @param string $subject The subject being routed.
      * 
-     * @return uropa\Request
+     * @return Europa\Request
      */
     public function dispatch($subject = null)
     {

@@ -35,18 +35,26 @@ namespace Europa
         private $_params = array('controller' => 'index');
         
         /**
-         * Converts the request back into the original string representation.
-         * 
-         * @return string
-         */
-        abstract public function __toString();
-        
-        /**
          * Returns the request method.
          * 
          * @return string
          */
         abstract public function method();
+        
+        /**
+         * Automates dispatching and converting the controller to a string.
+         * 
+         * @return string
+         */
+        public function __toString()
+        {
+            try {
+                return $this->dispatch()->__toString();
+            } catch (\Exception $e) {
+                $e = new Exception($e->getMessage(), $e->getCode());
+                $e->trigger();
+            }
+        }
         
         /**
          * Returns the specified request parameter.

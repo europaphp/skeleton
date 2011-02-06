@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The exception class for uropa\Request.
+ * The exception class for Europa\Request.
  * 
  * @category Exceptions
  * @package  Europa
@@ -28,7 +28,7 @@ namespace Europa\Request
         
         /**
          * Thrown when a controller class is instantiated and it is not an instance
-         * of uropa\RouteController.
+         * of Europa\RouteController.
          * 
          * @var int
          */
