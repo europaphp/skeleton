@@ -2,37 +2,6 @@
 
 class Test_Loader extends Testes_Test
 {
-    private $_dummyDir;
-    
-    private $_dummyFile;
-    
-    private $_fileHandle;
-    
-    public function setUp()
-    {
-        $this->_dummyDir  = dirname(__FILE__) . '/../DummyNamespace';
-        $this->_dummyFile = $this->_dummyDir . DIRECTORY_SEPARATOR . 'LoaderDummyTestClass.php';
-        
-        mkdir($this->_dummyDir);
-        chmod($this->_dummyDir, 0777);
-        
-        $this->_fileHandle = fopen($this->_dummyFile, 'w+');
-        chmod($this->_dummyFile, 0777);
-        
-        fwrite($this->_fileHandle, '<?php namespace DummyNamespace; class LoaderDummyTestClass {}');
-        
-        \Europa\Loader::addPath($this->_dummyDir);
-    }
-
-    public function tearDown()
-    {
-        if (file_exists($this->_dummyFile)) {
-            fclose($this->_fileHandle);
-            unlink($this->_dummyFile);
-            unlink($this->_dummyDir);
-        }
-    }
-    
     public function testRegisterAutoload()
     {
         \Europa\Loader::registerAutoload();
@@ -52,8 +21,16 @@ class Test_Loader extends Testes_Test
     public function testLoadClass()
     {
         $this->assert(
-            \Europa\Loader::loadClass('DummyNamespace\LoaderDummyTestClass'),
-            'Unalbe to load class.'
+            \Europa\Loader::loadClass('Europa\Request'),
+            'Unable to load class.'
+        );
+    }
+    
+    public function testSearch()
+    {
+        $this->assert(
+            \Europa\Loader::search('Europa/Form.php'),
+            'Could not find file.'
         );
     }
     

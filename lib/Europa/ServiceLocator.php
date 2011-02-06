@@ -64,6 +64,7 @@ class ServiceLocator
     public function __construct(array $config = array())
     {
         $this->setConfig($config);
+        $this->setFormatter(static::$defaultFormatter);
     }
     
     /**
@@ -76,7 +77,11 @@ class ServiceLocator
      */
     public function __call($name, array $args = array())
     {
-        return $this->getNew($name, isset($args[0]) && is_array($args[0]) ? $args[0] : array());
+        $config = isset($args[0]) ? $args[0] : array();
+        if (!is_array($config)) {
+            throw new Exception('The parameter passed to "' . $name . '" must be an array.');
+        }
+        return $this->getNew($name, $config);
     }
     
     /**
@@ -132,7 +137,7 @@ class ServiceLocator
      */
     public function getNew($service, array $config = array())
     {
-        // get the class name and it's config
+        // get the mapped or formatted name and it's config
         $class   = $this->getMappedClassFromName($service);
         $current = isset($this->config[$service]) ? $this->config[$service] : array();
         $config  = array_replace_recursive($current, $config);
@@ -150,7 +155,7 @@ class ServiceLocator
         if (method_exists($class, '__construct')) {
             $method = new Reflection\MethodReflector($class, '__construct');
             $class  = new \ReflectionClass($class);
-            return $class->invokeArgs($method->mergeNamedArgs($config));
+            return $class->newInstanceArgs($method->mergeNamedArgs($config));
         }
         
         // if no constructor present, just return a new instance
@@ -249,7 +254,7 @@ class ServiceLocator
         if (!is_callable($formatter)) {
             throw new Exception('The passed formatter is not callable.');
         }
-        self::$defaultFormatter = $formatter;
+        static::$defaultFormatter = $formatter;
     }
     
     /**
@@ -264,10 +269,10 @@ class ServiceLocator
      */
     public static function getInstance(array $config = array(), $name = 'default')
     {
-        if (!isset(self::$instances[$name])) {
-            self::$instances[$name] = new static($config);
+        if (!isset(static::$instances[$name])) {
+            static::$instances[$name] = new static($config);
         }
-        return self::$instances[$name];
+        return static::$instances[$name];
     }
     
     /**
@@ -283,7 +288,7 @@ class ServiceLocator
         if (isset($this->map[$service])) {
             $class = $this->map[$service];
         } elseif ($this->formatter) {
-            $class = $this->formatter($class);
+            $class = call_user_func($this->formatter, $service);
         }
         return $class;
     }

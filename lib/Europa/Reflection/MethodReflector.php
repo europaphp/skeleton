@@ -41,10 +41,12 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
     {
         // resulting merged parameters will be stored here
         $merged = array();
-        
-        // apply case-insensitivity
-        if (!$caseSensitive) {
-            foreach ($params as $name => $value) {
+
+        // apply strict position parameters and case sensitivity
+        foreach ($params as $name => $value) {
+            if (is_numeric($name)) {
+                $merged[(int) $name] = $value;
+            } elseif (!$caseSensitive) {
                 $params[strtolower($name)] = $value;
             }
         }
@@ -53,19 +55,11 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
         foreach ($this->getParameters() as $param) {
             $pos  = $param->getPosition();
             $name = $caseSensitive ? $name : strtolower($param->getName());
-            
-            // apply named parameters
+
             if (array_key_exists($name, $params)) {
                 $merged[$pos] = $params[$name];
-            // set default values
             } elseif ($param->isOptional()) {
                 $merged[$pos] = $param->getDefaultValue();
-            // throw exceptions when required params aren't defined
-            } elseif ($throw) {
-                $class = get_class($this);
-                throw new \Europa\Reflection\Exception(
-                    "Parameter \"{$param->getName()}\" for \"{$this->getDeclaringClass()->getName()}->{$this->getName()}()\" was not defined."
-                );
             }
         }
         
