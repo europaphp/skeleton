@@ -1,7 +1,7 @@
 <?php
 
 /**
- * uropa\RouteForm test suite.
+ * Europa\RouteForm test suite.
  * 
  * @category Tests
  * @package  Europa
