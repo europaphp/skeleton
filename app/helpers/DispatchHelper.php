@@ -27,13 +27,13 @@ class DispatchHelper
      * 
      * @return DispatchHelper
      */
-    public function __construct(uropa\View $view, $controller, array $params = array(), uropa\Request $request = null)
+    public function __construct(uropa\View $view, $controller, array $params = array(), Europa\Request $request = null)
     {
         // auto-detection of request or overriding of request detection
         if ($request) {
             $this->request = $request;
         } else {
-            $this->request = uropa\Request::isCli() ? new \Europa\Requst\Cli : new \Europa\Requst\Http;
+            $this->request = Europa\Request::isCli() ? new \Europa\Requst\Cli : new \Europa\Requst\Http;
         }
         
         $this->request->setController($controller);
@@ -55,7 +55,7 @@ class DispatchHelper
         } catch (uropaxception $e) {
             $e->trigger();
         } catch (Exception $e) {
-            $e = new uropaxception($e->getMessage(), $e->getCode());
+            $e = new Europaxception($e->getMessage(), $e->getCode());
             $e->trigger();
         }
     }

@@ -1,70 +1,38 @@
 <?php
 
 /**
- * A helper that autoloads js files.
+ * JavaScript auto-loader.
  * 
  * @category Helpers
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class JsHelper
+class JsHelper extends ScriptHelper
 {
     /**
-     * The css file associated to this instance.
+     * The default js path.
      * 
      * @var string
      */
-    protected $file;
+    protected static $defaultPath = 'js';
     
     /**
-     * The path to all css files.
+     * The default suffix for js files.
      * 
      * @var string
      */
-    protected static $path = 'js';
+    protected static $defaultSuffix = 'js';
     
     /**
-     * Constructs the helper.
+     * Builds the tag.
      * 
-     * @return CssHelper
-     */
-    public function __construct(\Europa\View $view, $file = null)
-    {
-        if (!$file) {
-            $file = $view->getScript();
-        }
-        $this->file = $file;
-    }
-    
-    /**
-     * Returns the link to the stylesheet.
+     * @param string $file The file to build the tag for.
      * 
      * @return string
      */
-    public function __toString()
+    protected function compileTag($file)
     {
-        $file = '/';
-        if ($root = \Europa\Request\Http::root()) {
-            $file .= $root . '/';
-        }
-        $file .= self::$path . '/' . $this->file . '.js';
-        $path  = $_SERVER['DOCUMENT_ROOT'] . $file;
-        if (file_exists($path)) {
-            return '<script type="text/javascript" src="' . $file . '"></script>';
-        }
-        return '';
-    }
-    
-    /**
-     * Sets the global css path.
-     * 
-     * @param string $path The path to the css files.
-     * 
-     * @return void
-     */
-    public static function path($path = null)
-    {
-        self::$path = trim($path, '/');
+        return '<script type="text/javascript" src="' . $file . '"></script>';
     }
 }

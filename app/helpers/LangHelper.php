@@ -34,7 +34,7 @@ class LangHelper
     /**
      * Constructs the language helper and parses the required ini file.
      * 
-     * @param uropa\View $view The view that called the helper.
+     * @param Europa\View $view The view that called the helper.
      * 
      * @return LangHelper
      */

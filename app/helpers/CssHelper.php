@@ -1,70 +1,38 @@
 <?php
 
 /**
- * A helper that autoloads css files.
+ * Stylesheet auto-loader.
  * 
  * @category Helpers
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class CssHelper
+class CssHelper extends ScriptHelper
 {
     /**
-     * The css file associated to this instance.
+     * The default css path.
      * 
      * @var string
      */
-    protected $file;
+    protected static $defaultPath = 'css';
     
     /**
-     * The path to all css files.
+     * The default suffix for css files.
      * 
      * @var string
      */
-    protected static $path = 'css';
+    protected static $defaultSuffix = 'css';
     
     /**
-     * Constructs the helper.
+     * Builds the tag.
      * 
-     * @return CssHelper
-     */
-    public function __construct(\Europa\View $view, $file = null)
-    {
-        if (!$file) {
-            $file = $view->getScript();
-        }
-        $this->file = $file;
-    }
-    
-    /**
-     * Returns the link to the stylesheet.
+     * @param string $file The file to build the tag for.
      * 
      * @return string
      */
-    public function __toString()
+    protected function compileTag($file)
     {
-        $file = '/';
-        if ($root = Europa\Request\Http::root()) {
-            $file .= $root . '/';
-        }
-        $file .= self::$path . '/' . $this->file . '.css';
-        $path  = $_SERVER['DOCUMENT_ROOT'] . $file;
-        if (file_exists($path)) {
-            return '<link rel="stylesheet" type="text/css" href="' . $file . '" />';
-        }
-        return '';
-    }
-    
-    /**
-     * Sets the global css path.
-     * 
-     * @param string $path The path to the css files.
-     * 
-     * @return void
-     */
-    public static function path($path = null)
-    {
-        self::$path = trim($path, '/');
+        return '<link rel="stylesheet" type="text/css" href="' . $file . '" />';
     }
 }
