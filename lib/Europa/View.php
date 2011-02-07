@@ -69,13 +69,12 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
     }
         
     /**
-     * Similar to calling a helper via Europa\View->__call(), but treats the
-     * helper as a singleton and once instantiated, that instance is always
-     * returned for the duration of the Europa\View object's lifespan unless
-     * unset.
+     * Attempts to retrieve a parameter by name. If the parameter is not found, then it attempts
+     * to use the service locator to find a helper. If nothing is found, it returns null.
      * 
-     * If the parameter can't be found, then it attempts to find it in the
-     * service locator.
+     * If a service locator is found, a new instance of the service is created and set as the
+     * specified parameter. Subsequent invocations to __get will then return the same instance.
+     * If you require a new instance every time, invoke __call.
      * 
      * @param string $name The name of the property to get or helper to load.
      * 
@@ -86,11 +85,15 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
         if (isset($this->params[$name])) {
             return $this->params[$name];
         } elseif ($this->serviceLocator) {
-            return $this->serviceLocator->get($name, array($this));
+            $loc = $this->serviceLocator;
         } elseif (static::$defaultServiceLocator) {
-            return static::$defaultServiceLocator->get($name, array($this));
+            $loc = static::$defaultServiceLocator;
+        } else {
+            return null;
         }
-        return null;
+        
+        $this->params[$name] = $loc->create($name, array($this));
+        return $this->params[$name];
     }
     
     /**
