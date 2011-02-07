@@ -2,14 +2,14 @@
 <html>
     <head>
         <?php echo $this->css; ?>
+        <?php echo $this->js; ?>
         <title><?php echo $this->lang->title ?></title>
     </head>
     <body>
         <div id="body"><?php echo $this->getChild('view'); ?></div>
         <div id="footer">
-            <?php echo $this->lang->time(round(microtime() - EUROPA_START_TIME, 4)); ?>
-            <?php echo $this->lang->memory(array('megabytes' => round(memory_get_peak_usage() / 1024 / 1024, 2))); ?>
+            <?php echo $this->lang->time(\Europa\Registry::get('bench')->getTime(3)); ?>
+            <?php echo $this->lang->memory(array('megabytes' => \Europa\Registry::get('bench')->getMemory(2))); ?>
         </div>
-        <?php echo $this->js; ?>
     </body>
 </html>

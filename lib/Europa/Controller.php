@@ -155,7 +155,7 @@ abstract class Controller
         
         // check to make sure it exists and if not, throw an exception
         if (!method_exists($this, $method)) {
-            throw new Controller\Exception('The method "{get_class($this)}::{$method}()" is not supported.');
+            throw new Controller\Exception('The request method "' . $method . '" is not supported by "' . get_class($this) . '".');
         }
 
         // for manipulating the specified controller method
@@ -169,8 +169,8 @@ abstract class Controller
         $this->applyFilters(
             array_merge(
                 array(),
-                $classReflector->getDocBlock()->getTag('preFilter', true),
-                $methodReflector->getDocBlock()->getTag('preFilter', true)
+                $classReflector->getDocBlock()->getTag('filter', true),
+                $methodReflector->getDocBlock()->getTag('filter', true)
             ),
             $method,
             $params
@@ -192,17 +192,6 @@ abstract class Controller
         
         // post-action before applying filters
         $this->postAction();
-
-        // apply post-action filters
-        $this->applyFilters(
-            array_merge(
-                array(),
-                $classReflector->getDocBlock()->getTag('postFilter', true),
-                $methodReflector->getDocBlock()->getTag('postFilter', true)
-            ),
-            $method,
-            $params
-        );
     }
     
     /**
