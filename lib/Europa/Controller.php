@@ -16,9 +16,9 @@ namespace Europa;
  *   - trace
  *   - connect
  * 
- * @category  Controllers
- * @package   Europa
- * @author    Trey Shugart <treshugart@gmail.com>
+ * @category Controllers
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
 abstract class Controller
@@ -57,20 +57,19 @@ abstract class Controller
      */
     public function __toString()
     {
-        // pre-rendering event is always called
-        $this->preRender();
-        
-        // render the view and call the post-render event
-        // only if a view exists
-        if ($this->view) {
-            $view = $this->view->__toString();
-            $this->postRender();
-        } else {
-            $view = '';
+        if (!$this->view) {
+            return '';
         }
         
-        // return output
-        return $view;
+        try {
+            $this->postRender();
+            $view = $this->view->__toString();
+            $this->preRender();
+            return $view;
+        } catch (Exception $e) {
+            $e = new Controller\Exception($e->getMessage(), $e->getCode());
+            $e->trigger();
+        }
     }
     
     /**
@@ -78,7 +77,7 @@ abstract class Controller
      * 
      * @return \Europa\Request
      */
-    public function getRequest()
+    public function request()
     {
         return $this->request;
     }
@@ -120,7 +119,7 @@ abstract class Controller
     public function forward($to, array $params = array())
     {
         // modify the request and dispach it's return value
-        $request = $this->getRequest();
+        $request = $this->request();
         $request->setParams($params);
         $request->setController($to);
         return $request->dispatch();
@@ -140,8 +139,7 @@ abstract class Controller
     }
     
     /**
-     * Makes sure the appropriate parameters are passed to init and the request
-     * method action.
+     * Makes sure the appropriate parameters are passed to init and the request method action.
      * 
      * @return void
      * 
@@ -150,120 +148,77 @@ abstract class Controller
     public function action()
     {
         // we call the approprate method for the specified request method
-        $request = $this->getRequest();
+        $request = $this->request();
         $method  = $request->method();
         
-        // check to make sure it exists and if not, throw an exception
         if (!method_exists($this, $method)) {
             throw new Controller\Exception('The request method "' . $method . '" is not supported by "' . get_class($this) . '".');
         }
-
-        // for manipulating the specified controller method
-        $methodReflector = new Reflection\MethodReflector($this, $method);
-        $classReflector  = new Reflection\ClassReflector($this);
-
-        // use named parameters from the request for the controller method
-        $params = $methodReflector->mergeNamedArgs($request->getParams());
-
-        // apply pre-action filters
-        $this->applyFilters(
-            array_merge(
-                array(),
-                $classReflector->getDocBlock()->getTag('filter', true),
-                $methodReflector->getDocBlock()->getTag('filter', true)
-            ),
-            $method,
-            $params
-        );
         
-        // pre-action after applying filters
         $this->preAction();
 
-        // call the appropriate method
-        $viewParams = call_user_func_array(
+        // call the appropriate method using named parameters
+        $reflector = new Reflection\MethodReflector($this, $method);
+        $params = call_user_func_array(
             array($this, $method),
-            $params
+            $reflector->mergeNamedArgs($request->getParams())
         );
-
+        
         // set view params if they were specified
-        if ($viewParams && $this->view) {
+        if ($params && $this->view) {
             $this->view->setParams($viewParams);
         }
         
-        // post-action before applying filters
         $this->postAction();
     }
     
     /**
-     * Construction event.
+     * Initialization hook.
      * 
      * @return void
      */
-    protected function init()
+    public function init()
     {
         
     }
     
     /**
-     * Pre-actioning event.
+     * Initialization hook.
      * 
      * @return void
      */
-    protected function preAction()
+    public function preAction()
     {
         
     }
     
     /**
-     * Post-actioning event.
+     * Initialization hook.
      * 
      * @return void
      */
-    protected function postAction()
+    public function postAction()
     {
         
     }
     
     /**
-     * Gets called prior to rendering.
+     * Initialization hook.
      * 
      * @return void
      */
-    protected function preRender()
+    public function preRender()
     {
         
     }
     
     /**
-     * Gets called after rendering.
+     * Initialization hook.
      * 
      * @return void
      */
-    protected function postRender()
+    public function postRender()
     {
         
-    }
-
-    private function applyFilters(array $filters, &$method, array &$params = array())
-    {
-         // execute each behavior in the order it was defined
-        foreach ($filters as $filter) {
-            $class = $filter->getClass();
-            $class = new $class($this, $method, $params);
-
-            // make sure we can call the appropriate methods
-            if (!$class instanceof \Europa\Controller\FilterInterface) {
-                throw new Exception('The filter "{get_class($class)}" must derive from "\\Europa\\Controller\\FilterInterface".');
-            }
-
-            // general filter method
-            $class->filter();
-
-            // method for changing the method to call
-            $method = $class->method();
-
-            // method to filter any parameters
-            $params = $class->params();
-        }
     }
 }
