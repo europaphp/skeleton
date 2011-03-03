@@ -65,7 +65,7 @@ class LangHelper
         }
         
         // set the language variables
-        $this->ini = parse_ini_file($path);
+        $this->ini = parseini_file($path);
     }
     
     /**
@@ -94,7 +94,8 @@ class LangHelper
     }
     
     /**
-     * Returns the specified language variable without any formatting.
+     * Returns the specified language variable without any formatting. If the
+     * variable isn't found, the name is passed through and returned.
      * 
      * @return string
      */
@@ -103,7 +104,7 @@ class LangHelper
         if (isset($this->ini[$name])) {
             return $this->ini[$name];
         }
-        return null;
+        return $name;
     }
     
     /**
@@ -113,7 +114,7 @@ class LangHelper
      */
     public function toArray()
     {
-        return $this->_ini;
+        return $this->ini;
     }
     
     /**
