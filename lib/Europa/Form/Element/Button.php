@@ -1,5 +1,7 @@
 <?php
 
+namespace Europa\Form\Element;
+
 /**
  * A default form button.
  * 
@@ -8,25 +10,19 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-namespace Europa\Form\Element
+class Button extends \Europa\Form\Element
 {
-    class Button extends Input
+    /**
+     * Converts the button to a string.
+     * 
+     * @return string
+     */
+    public function __toString()
     {
-        /**
-         * Constructs and sets defaults.
-         * 
-         * @return \Europa\Form\Element\Button
-         */
-        public function __construct(array $attributes = array())
-        {
-            // pre-set value that can be overridden
-            $this->value = 'Button';
-            
-            // construct with attributes
-            parent::__construct($attributes);
-            
-            // force submit type
-            $this->type = 'button';
+        $this->type = 'button';
+        if (!$this->label) {
+            $this->label = 'Button';
         }
+        return '<button ' . $this->getAttributeString() . '>' . $this->label . '</button>';
     }
 }

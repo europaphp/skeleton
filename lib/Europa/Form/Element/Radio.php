@@ -3,26 +3,24 @@
 namespace Europa\Form\Element;
 
 /**
- * A default form submit button.
+ * A generic radio button.
  * 
  * @category Forms
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Submit extends Button
+class Radio extends Checkbox
 {
     /**
-     * Converts the button to a string.
+     * Returns the radio button as a string.
      * 
      * @return string
      */
     public function __toString()
     {
-        $this->type = 'submit';
-        if (!$this->label) {
-            $this->label = 'Submit';
-        }
-        return '<button ' . $this->getAttributeString() . '>' . $this->label . '</button>';
+        $this->type = 'radio';
+        $this->detectChecked();
+        return '<input ' . $this->getAttributeString() . ' />';
     }
 }
