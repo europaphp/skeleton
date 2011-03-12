@@ -65,7 +65,7 @@ class LangHelper
         }
         
         // set the language variables
-        $this->ini = parseini_file($path);
+        $this->ini = parse_ini_file($path);
     }
     
     /**
