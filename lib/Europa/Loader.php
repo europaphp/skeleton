@@ -21,6 +21,11 @@ class Loader
      */
     protected static $paths = array();
 
+    /**
+     * The separators used for namespaces.
+     * 
+     * @var array
+     */
     protected static $separators = array('_', '\\');
     
     /**
@@ -121,11 +126,12 @@ class Loader
      * Adds a path to the load paths. Uses realpath to determine path validity.
      * If the path is unable to be resolve, an exception is thrown.
      * 
-     * @param string $path The path to add to the list of load paths.
+     * @param string $path              The path to add to the list of load paths.
+     * @param bool   $addToIncludePaths Whether or not to add it to PHP's include paths.
      * 
      * @return mixed
      */
-    public static function addPath($path)
+    public static function addPath($path, $addToIncludePaths = false)
     {
         $realpath = realpath($path);
 
@@ -139,7 +145,11 @@ class Loader
                 Loader\Exception::INVALID_PATH
             );
         }
+
         self::$paths[] = $realpath;
+        if ($addToIncludePaths) {
+            set_include_path(get_include_path() . PATH_SEPARATOR . $realpath);
+        }
     }
     
     /**

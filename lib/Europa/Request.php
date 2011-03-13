@@ -50,21 +50,6 @@ abstract class Request implements \Iterator, \ArrayAccess, \Countable
     }
     
     /**
-     * Returns the specified request parameter.
-     * 
-     * @param string $name The name of the parameter.
-     * 
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        if ($this->__isset($name)) {
-            return $this->params[$name];
-        }
-        return null;
-    }
-    
-    /**
      * Sets the specified request parameter.
      * 
      * @param string $name  The name of the parameter.
@@ -74,8 +59,19 @@ abstract class Request implements \Iterator, \ArrayAccess, \Countable
      */
     public function __set($name, $value)
     {
-        $this->params[$name] = $value;
-        return $this;
+        return $this->setParam($name, $value);
+    }
+    
+    /**
+     * Returns the specified request parameter.
+     * 
+     * @param string $name The name of the parameter.
+     * 
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        return $this->getParam($name);
     }
     
     /**
@@ -87,7 +83,7 @@ abstract class Request implements \Iterator, \ArrayAccess, \Countable
      */
     public function __isset($name)
     {
-        return isset($this->params[$name]);
+        return $this->hasParam($name);
     }
     
     /**
@@ -99,8 +95,8 @@ abstract class Request implements \Iterator, \ArrayAccess, \Countable
      */
     public function __unset($name)
     {
-        if ($this->__isset($name)) {
-            unset($this->params[$name]);
+        if ($this->hasParam($name)) {
+            $this->removeParam($name);
         }
         return $this;
     }
@@ -132,6 +128,33 @@ abstract class Request implements \Iterator, \ArrayAccess, \Countable
         
         $controller->action();
         return $controller;
+    }
+
+    public function setParam($name, $value)
+    {
+        $this->params[$name] = $value;
+        return $this;
+    }
+
+    public function getParam($name)
+    {
+        if (isset($this->params[$name])) {
+            return $this->params[$name];
+        }
+        return null;
+    }
+
+    public function hasParam($name)
+    {
+        return isset($this->params[$name]);
+    }
+
+    public function removeParam($name)
+    {
+        if (isset($this->params[$name])) {
+            unset($this->params[$name]);
+        }
+        return $this;
     }
     
     /**

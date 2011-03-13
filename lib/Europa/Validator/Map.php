@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Validator;
+use Europa\ArrayObject;
 
 /**
  * Acts as a validation suite, but maps validators to input data.
@@ -25,7 +26,7 @@ class Map extends Suite
         $data         = new ArrayObject($data);
         $this->preValidate($data);
         foreach ($this as $id => $validator) {
-            $validator->validate($data[$index]);
+            $validator->validate($data[$id]);
         }
         $this->postValidate($data);
         return $this;
