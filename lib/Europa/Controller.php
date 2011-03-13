@@ -1,6 +1,11 @@
 <?php
 
 namespace Europa;
+use Europa\Controller\Exception;
+use Europa\Request\Http;
+use Europa\Reflection\ClassReflector;
+use Europa\Reflection\MethodReflector;
+use Europa\View;
 
 /**
  * The base controller for all controller classes.
@@ -36,6 +41,13 @@ abstract class Controller
      * @var \Europa\View
      */
     private $view;
+
+    /**
+     * Whether or not to apply filters to action.
+     * 
+     * @var bool
+     */
+    private $useFilters = false;
     
     /**
      * Constructs a new controller using the specified request.
@@ -62,12 +74,12 @@ abstract class Controller
         }
         
         try {
-            $this->postRender();
+            $this->preRender();
             $view = $this->view->__toString();
             $this->preRender();
             return $view;
-        } catch (Exception $e) {
-            $e = new Controller\Exception($e->getMessage(), $e->getCode());
+        } catch (\Exception $e) {
+            $e = new Exception($e->getMessage(), $e->getCode());
             $e->trigger();
         }
     }
@@ -134,8 +146,21 @@ abstract class Controller
      */
     public function redirect($to)
     {
-        header('Location: ' . Request\Http::format($to));
+        header('Location: ' . Http::format($to));
         exit;
+    }
+
+    /**
+     * Switches filters on or off.
+     * 
+     * @param bool $switch True of false for filter application.
+     * 
+     * @return \Europa\Controller
+     */
+    public function useFilters($switch = true)
+    {
+        $this->useFilters = (bool) $switch;
+        return $this;
     }
     
     /**
@@ -152,13 +177,15 @@ abstract class Controller
         $method  = $request->method();
         
         if (!method_exists($this, $method)) {
-            throw new Controller\Exception('The request method "' . $method . '" is not supported by "' . get_class($this) . '".');
+            throw new Exception('The request method "' . $method . '" is not supported by "' . get_class($this) . '".');
         }
-        
+
+        // apply custom filters before pre-action for security
+        $this->applyFilterTo($method);
         $this->preAction();
 
         // call the appropriate method using named parameters
-        $reflector = new Reflection\MethodReflector($this, $method);
+        $reflector = new MethodReflector($this, $method);
         $params = call_user_func_array(
             array($this, $method),
             $reflector->mergeNamedArgs($request->getParams())
@@ -220,5 +247,26 @@ abstract class Controller
     public function postRender()
     {
         
+    }
+
+    /**
+     * Applies filters to the specified method.
+     * 
+     * @return void
+     */
+    private function applyFilterTo($method)
+    {
+        if (!$this->useFilters) {
+            return;
+        }
+
+        $class         = new ClassReflector($this);
+        $method        = new MethodReflector($this, $method);
+        $classFilters  = $class->getDocBlock()->getTag('filter', true);
+        $methodFilters = $method->getDocBlock()->getTag('filter', true);
+        foreach (array_merge($classFilters, $methodFilters) as $filter) {
+            $filter = $filter->getInstance();
+            $filter->filter($this);
+        }
     }
 }

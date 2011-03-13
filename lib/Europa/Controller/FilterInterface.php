@@ -1,10 +1,9 @@
 <?php
 
 namespace Europa\Controller;
+use Europa\Controller;
 
 interface FilterInterface
 {
-    public function __construct(\Europa\Controller $controller, \Europa\Controller\FilterData $data);
-
-    public function filter();
+    public function filter(Controller $controller);
 }
