@@ -18,16 +18,14 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
      * 
      * @var array
      */
-    protected $data;
+    private $data;
     
     /**
      * Constructs a new object making sure values are passed through offsetSet.
      * 
-     * @param mixed  $data
-     * @param int    $flags
-     * @param string $interatorClass
+     * @param mixed $data Any data to initialize the array object with.
      * 
-     * @return Europa_ArrayObject
+     * @return \Europa\ArrayObject
      */
     public function __construct($data = array())
     {
