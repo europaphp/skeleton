@@ -21,4 +21,9 @@ class ClassReflector extends \ReflectionClass implements Reflectable
     {
         return new DocBlock($this->getDocComment());
     }
+    
+    public function getDependencies()
+    {
+        return new ClassDependency($this);
+    }
 }
