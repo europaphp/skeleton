@@ -2,20 +2,27 @@
 
 namespace Europa\Reflection;
 
+/**
+ * Represents a docblock.
+ * 
+ * @category Reflection
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
+ */
 class DocBlock
 {
-    protected $description = null;
+    private $description = null;
 
-    protected $tags = array();
+    private $tags = array();
 
-    protected $map = array(
+    private $map = array(
         'author'     => '\Europa\Reflection\DocTag\AuthorTag',
         'category'   => '\Europa\Reflection\DocTag\CategoryTag',
+        'filter'     => '\Europa\Reflection\DocTag\FilterTag',
         'license'    => '\Europa\Reflection\DocTag\LicenseTag',
         'package'    => '\Europa\Reflection\DocTag\PackageTag',
         'param'      => '\Europa\Reflection\DocTag\ParamTag',
-        'postFilter' => '\Europa\Reflection\DocTag\PostFilterTag',
-        'preFilter'  => '\Europa\Reflection\DocTag\PreFilterTag',
         'return'     => '\Europa\Reflection\DocTag\ReturnTag',
         'subpackage' => '\Europa\Reflection\DocTag\SubpackageTag',
         'todo'       => '\Europa\Reflection\DocTag\TodoTag'
@@ -172,6 +179,11 @@ class DocBlock
     {
         $parts = explode(' ', $string, 2);
         $name  = $parts[0];
+
+        if (!isset($this->map[$name])) {
+            throw new Exception('Unknown doc tag "' . $name . '".');
+        }
+
         $class = $this->map[$name];
         return new $class(isset($parts[1]) ? $parts[1] : null);
     }

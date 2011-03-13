@@ -19,13 +19,6 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
      * @var string
      */
     private $docString;
-
-    /**
-     * The cached return types.
-     * 
-     * @var array
-     */
-    private $returnTypes;
     
     /**
      * Takes the passed named parameters and returns a merged array of the passed parameters
