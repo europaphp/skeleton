@@ -1,6 +1,8 @@
 <?php
 
 namespace Europa;
+use Europa\Reflection\ClassReflector;
+use Europa\Reflection\MethodReflector;
 
 /**
  * An extensible dependency injection container.
@@ -167,7 +169,7 @@ class ServiceLocator
         
         // the service may be a method protected or private and exist on the current object
         if (method_exists($this, $service)) {
-            $method = new Reflection\MethodReflector($this, $service);
+            $method = new MethodReflector($this, $service);
             return call_user_func_array(
                 array($this, $service),
                 $method->mergeNamedArgs($config)
@@ -175,9 +177,9 @@ class ServiceLocator
         }
         
         // or just default to using the passing the config to the class
-        $classReflector = new \ReflectionClass($class);
+        $classReflector = new ClassReflector($class);
         if (method_exists($class, '__construct')) {
-            $method = new Reflection\MethodReflector($class, '__construct');
+            $method = new MethodReflector($class, '__construct');
             $class  = $classReflector->newInstanceArgs($method->mergeNamedArgs($config));
         } else {
             $class = new $class;
@@ -186,7 +188,7 @@ class ServiceLocator
         // go through the method queue and call them
         if (isset($this->queue[$service])) {
             foreach ($this->queue[$service] as $method => $args) {
-                $method = new Reflection\MethodReflector($class, $method);
+                $method = new MethodReflector($class, $method);
                 $method->invokeNamedArgs($class, $args);
             }
         }
