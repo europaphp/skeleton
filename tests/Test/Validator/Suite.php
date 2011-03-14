@@ -20,7 +20,7 @@ class Test_Validator_Suite extends Testes_Test
      */
     public function testFailAllValidators()
     {
-        $suite = Suite::create()->required()->number();
+        $suite = Suite::required()->number();
         $this->assert(
             $suite->validate(null)->isValid() === false,
             'Could not fail all validators.'
@@ -34,7 +34,7 @@ class Test_Validator_Suite extends Testes_Test
      */
     public function testPassAllValidators()
     {
-        $suite = Suite::create()->required()->number();
+        $suite = Suite::required()->number();
         $this->assert(
             $suite->validate('1')->isValid() === true,
             'Could not pass all validators.'
@@ -48,7 +48,7 @@ class Test_Validator_Suite extends Testes_Test
      */
     public function testPassOneValidator()
     {
-        $suite = Suite::create()->required()->number();
+        $suite = Suite::required()->number();
         $this->assert(
             $suite->validate('something')->isValid() === false,
             'Could not pass one validator.'
