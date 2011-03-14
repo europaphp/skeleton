@@ -13,11 +13,45 @@ namespace Europa\Validator;
 class Suite implements Validatable, \ArrayAccess, \Iterator, \Countable
 {
     /**
+     * The messages directly bound to the suite.
+     * 
+     * @var array
+     */
+    private $messages = array();
+    
+    /**
      * Contains all validators attached to the suite.
      * 
      * @var array
      */
-    protected $validators = array();
+    private $validators = array();
+    
+    /**
+     * Rule to class mapping.
+     * 
+     * @var array
+     */
+    private static $map = array(
+        'alpha'        => '\Europa\Validator\Rule\Alpha',
+        'alphaNumeric' => '\Europa\Validator\Rule\AlphaNumeric',
+        'email'        => '\Europa\Validator\Rule\Email',
+        'number'       => '\Europa\Validator\Rule\Number',
+        'numberRange'  => '\Europa\Validator\Rule\NumberRange',
+        'required'     => '\Europa\Validator\Rule\Required'
+    );
+    
+    /**
+     * Instantiates a validator and returns the current one.
+     * 
+     * @param string $validator The name of the validator.
+     * @param array  $args      The validator __construct arguments.
+     * 
+     * @return \Europa\Validator
+     */
+    public function __call($validator, array $args = array())
+    {
+        return $this->addValidatorTo($validator, $args);
+    }
     
     /**
      * Validates the value against all validators in the suite.
@@ -41,7 +75,7 @@ class Suite implements Validatable, \ArrayAccess, \Iterator, \Countable
      * @param string $message The main validation message.
      * @param string $class   The exception class to throw.
      * 
-     * @throws \Exception
+     * @throws \Europa\Validator\Exception
      */
     public function validateAndThrow($value, $class = '\Europa\Validator\Exception')
     {
@@ -96,6 +130,21 @@ class Suite implements Validatable, \ArrayAccess, \Iterator, \Countable
     }
     
     /**
+     * Adds a message to the last specified validator.
+     * 
+     * @param string $message The message that is being added.
+     * 
+     * @return \Europa\Validator\Validatable
+     */
+    public function addMessage($message)
+    {
+        if ($this->validators) {
+            end($this->validators)->addMessage($message);
+        }
+        return $this;
+    }
+    
+    /**
      * Returns all error messages.
      * 
      * @return array
@@ -140,7 +189,7 @@ class Suite implements Validatable, \ArrayAccess, \Iterator, \Countable
     }
     
     /**
-     * Moves the internal pointer foward to the next validator in the suite.
+     * Moves the internal pointer forward to the next validator in the suite.
      * 
      * @return void
      */
@@ -172,14 +221,23 @@ class Suite implements Validatable, \ArrayAccess, \Iterator, \Countable
     /**
      * Sets the specified validator.
      * 
-     * @param int|string $index
+     * @param int|string                    $index The position of the validator.
      * @param \Europa\Validator\Validatable $value The validator to set.
      * 
      * @return void
      */
     public function offsetSet($index, $value)
     {
-        $this->add($value, $index);
+        if (!$value instanceof Validatable) {
+            throw new Exception('Item added to suite must be an instance of "\Europa\Validator\Validatable".');
+        }
+        
+        if (!is_null($index)) {
+            $this->add($value);
+        } else {
+            $this->set($index, $value);
+        }
+        return $this;
     }
     
     /**
@@ -187,14 +245,13 @@ class Suite implements Validatable, \ArrayAccess, \Iterator, \Countable
      * 
      * @param int|string $index The index to get the validator from.
      * 
-     * @return \Europa\Validator\Validatable|null
+     * @throws \Europa\Validator\Exception If specified index is not found.
+     * 
+     * @return \Europa\Validator\Validatable
      */
     public function offsetGet($index)
     {
-        if ($this->offsetExists($index)) {
-            return $this->validators[$index];
-        }
-        return null;
+        return $this->get($index);
     }
     
     /**
@@ -206,7 +263,7 @@ class Suite implements Validatable, \ArrayAccess, \Iterator, \Countable
      */
     public function offsetExists($index)
     {
-        return isset($this->validators[$index]);
+        return $this->has($index);
     }
     
     /**
@@ -214,19 +271,24 @@ class Suite implements Validatable, \ArrayAccess, \Iterator, \Countable
      * 
      * @param int|string $index The offset to unset.
      * 
-     * @return void
+     * @return \Europa\Validator\Suite
      */
     public function offsetUnset($index)
     {
-        // remove the validator
-        if ($this->offsetExists($index)) {
-            unset($this->validators[$index]);
-        }
-        
-        // remove any errors associated to the valdiator
-        if (isset($this->_errors[$index])) {
-            unset($this->_errors[$index]);
-        }
+        return $this->remove($index);
+    }
+    
+    /**
+     * Adds an item to the suite.
+     * 
+     * @param \Europa\Validator\Validatable $validator The validator to add.
+     * 
+     * @return \Europa\Validator\Suite
+     */
+    public function add(Validatable $validator)
+    {
+        $this->validators[$this->count()] = $validator;
+        return $this;
     }
     
     /**
@@ -237,12 +299,124 @@ class Suite implements Validatable, \ArrayAccess, \Iterator, \Countable
      * 
      * @return \Europa\Validator\Validatable
      */
-    protected function add(Validatable $validator, $index = null)
+    public function set($index, Validatable $validator)
     {
-        if (is_null($index)) {
-            $index = $this->count();
-        }
         $this->validators[$index] = $validator;
         return $this;
+    }
+    
+    /**
+     * Returns the specified validator.
+     * 
+     * @param int|string $index The index to get the validator from.
+     * 
+     * @return \Europa\Validator\Validatable|null
+     */
+    public function get($index)
+    {
+        if (!$this->offsetExists($index)) {
+            throw new Exception('The validator at offset "' . $index . '" does not exist.');
+        }
+        return $this->validators[$index];
+    }
+    
+    /**
+     * Returns whether or not the specified validator exists.
+     * 
+     * @param int|string $index The validator to check for.
+     * 
+     * @return bool
+     */
+    public function has($index)
+    {
+        return isset($this->validators[$index]);
+    }
+    
+    /**
+     * Unsets the specified validator if it exists.
+     * 
+     * @param int|string $index The offset to unset.
+     * 
+     * @return \Europa\Validator\Suite
+     */
+    public function remove($index)
+    {
+        // remove the validator
+        if ($this->offsetExists($index)) {
+            unset($this->validators[$index]);
+        }
+        return $this;
+    }
+    
+    /**
+     * Instantiates a validator and returns the current one.
+     * 
+     * @param string $validator The name of the validator.
+     * @param array  $args      The validator __construct arguments.
+     * 
+     * @return \Europa\Validator\Suite
+     */
+    protected function addValidatorTo($source, array $args = array(), Suite $destination = null)
+    {
+        // if destination isn't specified, default to the current object
+        $destination = $destination ? $destination : $this;
+        
+        if (isset(self::$map[$source])) {
+            $source = self::$map[$source];
+        } else {
+            throw new Exception('The validator "' . $source . '" does not exist in the validator mapping.');
+        }
+
+        try {
+            $source = new \ReflectionClass($source);
+        } catch (\ReflectionException $e) {
+            throw new Exception('The validator class "' . $source . '" could not be found.');
+        }
+
+        if ($source->hasMethod('__construct')) {
+            $source = $source->newInstanceArgs($args);
+        } else {
+            $source = $source->newInstance();
+        }
+        
+        $destination->add($source);
+        return $this;
+    }
+    
+    /**
+     * Instantiates a validator and returns the current one.
+     * 
+     * @param string $validator The name of the validator.
+     * @param array  $args      The validator __construct arguments.
+     * 
+     * @return \Europa\Validator\Suite
+     */
+    public static function __callStatic($validator, array $args = array())
+    {
+        $self = new static;
+        return $self->addValidatorTo($validator, $args);
+    }
+    
+    /**
+     * Globally (using "self" not "static") maps a rule to a class.
+     * 
+     * @param string $name The name of the rule to map.
+     * @param string $class The class name that corresponds to the rule name.
+     * 
+     * @return void
+     */
+    public static function mapRule($name, $class)
+    {
+        self::$map[$name] = $class;
+    }
+    
+    /**
+     * Creates a new instance.
+     * 
+     * @return \Europa\Validator\Suite
+     */
+    public static function create()
+    {
+        return new static;
     }
 }
