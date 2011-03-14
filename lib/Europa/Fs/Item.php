@@ -2,7 +2,7 @@
 
 namespace Europa\Fs;
 
-class Item extends \SplFileObject
+abstract class Item extends \SplFileObject
 {
     
 }
