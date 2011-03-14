@@ -18,7 +18,7 @@ class Test_Validator_Validator extends Testes_Test
      */
     public function testRequired()
     {
-        $required = new \Europa\Validator\Required;
+        $required = new \Europa\Validator\Rule\Required;
         $valid    = $required->validate(true)->isValid()
             && $required->validate('something')->isValid()
             && !$required->validate(null)->isValid()
@@ -36,7 +36,7 @@ class Test_Validator_Validator extends Testes_Test
      */
     public function testNumber()
     {
-        $number = new \Europa\Validator\Number;
+        $number = new \Europa\Validator\Rule\Number;
         $valid  = $number->validate('0')->isValid()
             && $number->validate(0)->isValid()
             && !$number->validate(null)->isValid()
@@ -55,7 +55,7 @@ class Test_Validator_Validator extends Testes_Test
      */
     public function testNumberRange()
     {
-        $range = new \Europa\Validator\NumberRange(1, 10);
+        $range = new \Europa\Validator\Rule\NumberRange(1, 10);
         $valid = $range->validate(1)->isValid()
             && $range->validate(10)->isValid();
         
@@ -69,7 +69,7 @@ class Test_Validator_Validator extends Testes_Test
      */
     public function testAlpha()
     {
-        $alpha = new \Europa\Validator\Alpha;
+        $alpha = new \Europa\Validator\Rule\Alpha;
         $valid = $alpha->validate('something')->isValid()
             && !$alpha->validate('s0m3th1ng')->isValid();
         
@@ -83,7 +83,7 @@ class Test_Validator_Validator extends Testes_Test
      */
     public function testAlphaNumeric()
     {
-        $alnum = new \Europa\Validator\AlphaNumeric;
+        $alnum = new \Europa\Validator\Rule\AlphaNumeric;
         $valid = $alnum->validate('s0m3th1ng')->isValid()
             && $alnum->validate('000000000')->isValid()
             && $alnum->validate('something')->isValid()

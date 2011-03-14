@@ -1,5 +1,7 @@
 <?php
 
+use Europa\Validator\Rule\Required;
+
 /**
  * Tests for validating \Europa\Form\ElementList.
  * 
@@ -57,7 +59,7 @@ class Test_Form_ElementList extends \Testes_Test
      */
     public function testValidation()
     {
-        $required = new \Europa\Validator\Required;
+        $required = new Required;
         $required->addMessage('Name is required.');
         
         $this->assert(

@@ -1,5 +1,7 @@
 <?php
 
+use Europa\Validator\Suite;
+
 /**
  * Tests for validating \Europa\Validator\Suite
  * 
@@ -18,9 +20,7 @@ class Test_Validator_Suite extends Testes_Test
      */
     public function testFailAllValidators()
     {
-        $suite   = new \Europa\Validator\Suite;
-        $suite[] = new \Europa\Validator\Required;
-        $suite[] = new \Europa\Validator\Number;
+        $suite = Suite::create()->required()->number();
         $this->assert(
             $suite->validate(null)->isValid() === false,
             'Could not fail all validators.'
@@ -34,9 +34,7 @@ class Test_Validator_Suite extends Testes_Test
      */
     public function testPassAllValidators()
     {
-        $suite   = new \Europa\Validator\Suite;
-        $suite[] = new \Europa\Validator\Required;
-        $suite[] = new \Europa\Validator\Number;
+        $suite = Suite::create()->required()->number();
         $this->assert(
             $suite->validate('1')->isValid() === true,
             'Could not pass all validators.'
@@ -50,9 +48,7 @@ class Test_Validator_Suite extends Testes_Test
      */
     public function testPassOneValidator()
     {
-        $suite   = new \Europa\Validator\Suite;
-        $suite[] = new \Europa\Validator\Required;
-        $suite[] = new \Europa\Validator\Number;
+        $suite = Suite::create()->required()->number();
         $this->assert(
             $suite->validate('something')->isValid() === false,
             'Could not pass one validator.'

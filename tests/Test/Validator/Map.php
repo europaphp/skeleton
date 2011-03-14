@@ -1,5 +1,7 @@
 <?php
 
+use Europa\Validator\Map;
+
 /**
  * Tests for validating \Europa\Validator\Map
  * 
@@ -25,25 +27,11 @@ class Test_Validator_Map extends Testes_Test
     const AGE_ERROR = 'You must be between 18 and 25.';
     
     /**
-     * The name error message.
-     * 
-     * @var string
-     */
-    const DOB_ERROR = 'Please enter your date of birth.';
-    
-    /**
-     * The test data to be validated.
-     * 
-     * @var array
-     */
-    private $_data = array();
-    
-    /**
      * The validator map doing the validation.
      * 
      * @var \Europa\Validator\Map
      */
-    private $_validator;
+    private $validator;
     
     /**
      * Sets up the validator test.
@@ -52,23 +40,9 @@ class Test_Validator_Map extends Testes_Test
      */
     public function setUp()
     {
-        // validation data
-        $this->_data = array(
-            'name' => 'Trey Shugart',
-            'age'  => 18,
-            'dob'  => '1983-01-02'
-        );
-        
-        // create a validation map
-        $this->_validator         = new \Europa\Validator\Map;
-        $this->_validator['name'] = new \Europa\Validator\Required;
-        $this->_validator['age']  = new \Europa\Validator\NumberRange(18, 25);
-        $this->_validator['dob']  = new \Europa\Validator\Required;
-        
-        // and add error messages
-        $this->_validator['name']->addMessage(self::NAME_ERROR);
-        $this->_validator['age']->addMessage(self::AGE_ERROR);
-        $this->_validator['dob']->addMessage(self::DOB_ERROR);
+        $this->validator = Map::create()
+            ->name->required()->addMessage(self::NAME_ERROR)
+            ->age->number()->numberRange(18, 25)->addMessage(self::AGE_ERROR);
     }
     
     /**
@@ -78,9 +52,24 @@ class Test_Validator_Map extends Testes_Test
      */
     public function testValidation()
     {
+        $data = array(
+            'name' => 'Trey Shugart',
+            'age'  => 28
+        );
+        
         $this->assert(
-            $this->_validator->validate($this->_data)->isValid(),
+            !$this->validator->validate($data)->isValid(),
             'Validation failing.'
+        );
+        
+        $this->assert(
+            count($this->validator->getMessages()) === 1,
+            'Only 1 validation error should have been raised.'
+        );
+        
+        $this->assert(
+            end($this->validator->getMessages()) === self::AGE_ERROR,
+            'The error that was raised should have been the date-of-birth error.'
         );
     }
 }
