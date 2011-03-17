@@ -2,7 +2,10 @@
 
 // all we need to do is include the bootstrap
 require dirname(__FILE__) . '/../app/boot/bootstrap.php';
-\Europa\Loader::addPath(dirname(__FILE__) . '/../tests');
+
+$loader = new \Europa\Loader;
+$loader->addPath(dirname(__FILE__) . '/../tests');
+$loader->register();
 
 $tests = new \Test;
 $tests->run();
@@ -16,7 +19,7 @@ if ($assertions = $tests->assertions()) {
            , $assertion->getTestLine()
            , '): '
            , $assertion->getMessage()
-           , '. In: '
+           , ' In: '
            , $assertion->getTestClass()
            , '->'
            , $assertion->getTestMethod()
