@@ -48,37 +48,20 @@ class Bootstrapper extends Europa\Bootstrapper
     }
     
     /**
-     * Requires the loader.
-     * 
-     * @return void
-     */
-    public function requireLoader()
-    {
-        require $this->base . '/lib/Europa/Loader.php';
-    }
-    
-    /**
      * Adds load paths to the loader for autoloading.
      * 
      * @return void
      */
-    public function addLoadPaths()
+    public function setUpLoader()
     {
-        \Europa\Loader::addPath($this->base . '/app/controllers');
-        \Europa\Loader::addPath($this->base . '/app/views');
-        \Europa\Loader::addPath($this->base . '/app/helpers');
-        \Europa\Loader::addPath($this->base . '/app/filters');
-        \Europa\Loader::addPath($this->base . '/app/forms');
-    }
-    
-    /**
-     * Registers autoloading.
-     * 
-     * @return void
-     */
-    public function registerAutoloading()
-    {
-        \Europa\Loader::registerAutoload();
+        require $this->base . '/lib/Europa/Loader.php';
+        $loader = new \Europa\Loader;
+        $loader->addPath($this->base . '/app/controllers');
+        $loader->addPath($this->base . '/app/views');
+        $loader->addPath($this->base . '/app/helpers');
+        $loader->addPath($this->base . '/app/filters');
+        $loader->addPath($this->base . '/app/forms');
+        $loader->register();
     }
     
     /**
