@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa;
+use Europa\Loader\Exception;
 
 /**
  * Handles class loading in Europa. Uses custom load paths due to the
@@ -14,112 +15,106 @@ namespace Europa;
 class Loader
 {
     /**
-     * Contains all load paths that Europa\RouteLoader will use when searching for a
-     * file.
+     * Contains all load paths that Europa\RouteLoader will use when searching for a file.
      * 
      * @var array
      */
-    protected static $paths = array();
+    private $paths = array();
 
     /**
      * The separators used for namespaces.
      * 
      * @var array
      */
-    protected static $separators = array('_', '\\');
+    private $separators = array('_', '\\');
     
     /**
-     * Searches for a file and loads it if it is found.
+     * Maps classes to their absolute paths.
      * 
-     * @param string $className The Class to search for.
-     * @param mixed  $paths     Alternate search paths to search in first.
+     * @var array
+     */
+    private $map = array();
+    
+    /**
+     * Maps the specified class to the specified file. Also takes an array of $class to
+     * $file mappings as the first argument.
+     * 
+     * @param string $map  The class to map, or array of $class => $file mapping.
+     * @param string $file The file to map to if the first argument is not an array.
+     * 
+     * @return \Europa\Loader
+     */
+    public function map($map, $file)
+    {
+        if (!is_array($map)) {
+            $map = array($map => $file);
+        }
+        
+        foreach ($map as $class => $file) {
+            $this->map[$class] = $file;
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Returns the class mapping.
+     * 
+     * @return array
+     */
+    public function getMapping()
+    {
+        return $this->map;
+    }
+    
+    /**
+     * Searches for a class and loads it if it is found. If the class is found, it true
+     * is returned. Otherwise false is returned.
+     * 
+     * @param string $class The class to search for.
      * 
      * @return bool
      */
-    public static function load($file, $paths = null)
+    public function load($class)
     {
-        if ($file = self::search($file, $paths)) {
+        if (class_exists($class, false)) {
+            return $this;
+        }
+        
+        if ($file = $this->search($class)) {
             include $file;
             return true;
         }
+        
         return false;
     }
     
     /**
-     * Searches for a class and loads it if it is found.
-     * 
-     * @param string $className The Class to search for.
-     * @param mixed  $paths     Alternate search paths to search in first.
-     * 
-     * @return bool
-     */
-    public static function loadClass($className, $paths = null)
-    {
-        // if the class already exists, then we don't need to load it
-        if (class_exists($className, false)) {
-            return true;
-        }
-        
-        // format the classname to a file
-        $file = str_replace(self::$separators, DIRECTORY_SEPARATOR, $className);
-        $file = $file . '.php';
-        if (self::load($file, $paths) && class_exists($className, false)) {
-            return true;
-        }
-        return false;
-    }
-    
-    /**
-     * Searches for a file and returns it's path if it is found.
-     * 
-     * @param string $file  The file to load, relative to the search paths.
-     * @param mixed  $paths Alternate load paths to search in first.
-     * 
-     * @return mixed
-     */
-    public static function search($file, $paths = null)
-    {
-        // make use of specified paths, but fall back to default paths
-        if ($paths) {
-            $paths = array_merge((array) $paths, self::$paths);
-        } else {
-            $paths = self::$paths;
-        }
-        
-        // a path must be defined
-        if (!$paths) {
-            // we require the exception files here since they won't be autoloadable
-            require_once realpath(dirname(__FILE__) . '/Exception.php');
-            require_once realpath(dirname(__FILE__) . '/Loader/Exception.php');
-            throw new Loader\Exception(
-                'At least one load path must be defined.',
-                Loader\Exception::NOpaths_DEFINED
-            );
-        }
-        
-        // search in all paths and return the fullpath if found
-        foreach ($paths as $path) {
-            $fullPath = $path . DIRECTORY_SEPARATOR . $file;
-            if (is_file($fullPath)) {
-                return $fullPath;
-            }
-        }
-        return false;
-    }
-    
-    /**
-     * Searches for the specified class and returns the file if found or false
-     * if not found.
+     * Searches for the specified class and returns the file if found or false if not found.
+     * If the class is found, it is cached in the class map.
      * 
      * @param string $class The class to search for.
-     * @param mixed  $paths Alternate load paths to search in first.
      * 
      * @return bool|string
      */
-    public static function searchClass($class, $paths = null)
+    public function search($class)
     {
-        $file = str_replace(self::$separators, DIRECTORY_SEPARATOR, $class) . '.php';
-        return self::search($file, $paths);
+        if (isset($this->map[$class])) {
+            return $this->map[$class];
+        }
+        
+        $file = str_replace($this->separators, DIRECTORY_SEPARATOR, $class);
+        $file = trim($file, DIRECTORY_SEPARATOR);
+        $file = $file . '.php';
+        foreach ($this->paths as $path) {
+            $path = $path . DIRECTORY_SEPARATOR . $file;
+            if (file_exists($path)) {
+                $this->map[$class] = $path;
+                return $path;
+            }
+        }
+        
+        return false;
     }
     
     /**
@@ -129,9 +124,11 @@ class Loader
      * @param string $path              The path to add to the list of load paths.
      * @param bool   $addToIncludePaths Whether or not to add it to PHP's include paths.
      * 
-     * @return mixed
+     * @throws \Europa\Loader\Exception If the path does not exist.
+     * 
+     * @return \Europa\Loader
      */
-    public static function addPath($path, $addToIncludePaths = false)
+    public function addPath($path, $addToIncludePaths = false)
     {
         $realpath = realpath($path);
 
@@ -140,33 +137,30 @@ class Loader
             // we require the exception files here since they may not be autoloadable yet
             require_once realpath(dirname(__FILE__) . '/Exception.php');
             require_once realpath(dirname(__FILE__) . '/Loader/Exception.php');
-            throw new Loader\Exception(
+            throw new Exception(
                 'Path ' . $path . ' does not exist.',
-                Loader\Exception::INVALID_PATH
+                Exception::INVALID_PATH
             );
         }
 
-        self::$paths[] = $realpath;
+        $this->paths[] = $realpath;
         if ($addToIncludePaths) {
             set_include_path(get_include_path() . PATH_SEPARATOR . $realpath);
         }
+        
+        return $this;
     }
     
     /**
      * Registers the auto-load handler and automatically registers the
      * Europa install path to the load paths.
      * 
-     * @param mixed $callback The custom callback function to register, if any. If not
-     *                        specified, then it defaults to "loadClass".
-     * 
-     * @return void
+     * @return \Europa\Loader
      */
-    public static function registerAutoload($callback = null)
+    public function register()
     {
-        if (!$callback) {
-            $callback = array('\Europa\Loader', 'loadClass');
-        }
-        spl_autoload_register($callback);
-        self::addPath(dirname(__FILE__) . '/../');
+        spl_autoload_register(array($this, 'load'));
+        $this->addPath(dirname(__FILE__) . '/../');
+        return $this;
     }
 }
