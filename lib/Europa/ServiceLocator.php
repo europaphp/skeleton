@@ -3,6 +3,7 @@
 namespace Europa;
 use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
+use Europa\ServiceLocator\Exception;
 
 /**
  * An extensible dependency injection container.
@@ -43,18 +44,11 @@ class ServiceLocator
     protected $services = array();
     
     /**
-     * The class formatter for the current instance.
+     * The formatter for class names to use if there is no map.
      * 
      * @var mixed
      */
-    protected $formatter;
-    
-    /**
-     * The default formatter for all instances.
-     * 
-     * @var mixed
-     */
-    protected static $defaultFormatter;
+    private $formatter = array();
     
     /**
      * Holds all instantiated instances.
@@ -73,9 +67,6 @@ class ServiceLocator
     public function __construct(array $config = array())
     {
         $this->setConfig($config);
-        if (static::$defaultFormatter) {
-            $this->setFormatter(static::$defaultFormatter);
-        }
     }
     
     /**
@@ -90,9 +81,9 @@ class ServiceLocator
     {
         $config = isset($args[0]) ? $args[0] : array();
         if (!is_array($config)) {
-            throw new Exception('The parameter passed to "' . $name . '" must be an array.');
+            throw new Exception('The parameter passed to service "' . $name . '" must be an array.');
         }
-        return $this->create($name, $config);
+        return $this->get($name, $config);
     }
     
     /**
@@ -122,6 +113,20 @@ class ServiceLocator
     }
     
     /**
+     * Sets a dependency instance to a service name.
+     * 
+     * @
+     */
+    public function set($service, $instance)
+    {
+        if (!is_object($instance)) {
+            throw new Exception('The service "' . $service . '" must be a valid object instance.');
+        }
+        $this->services[$service] = $instance;
+        return $this;
+    }
+    
+    /**
      * Returns the specified service. If the service instance doesn't exist
      * yet then it is created, cached and returned.
      * 
@@ -132,24 +137,11 @@ class ServiceLocator
      */
     public function get($service, array $config = array())
     {
-        if (!isset($this->services[$service])) {
-            $this->refresh($service, $config);
+        // only refresh the service if being reconfigured or doesn't exist yet
+        if (!isset($this->services[$service]) || $config) {
+            $this->services[$service] = $this->create($service, $config);
         }
         return $this->services[$service];
-    }
-    
-    /**
-     * Re-configures a cached object.
-     * 
-     * @param string $service The object to refresh.
-     * @param array  $config  The configuration for the object.
-     * 
-     * @return \Europa\ServiceContainer
-     */
-    public function refresh($service, array $config = array())
-    {    
-        $this->services[$service] = $this->create($service, $config);
-        return $this;
     }
     
     /**
@@ -163,29 +155,36 @@ class ServiceLocator
     public function create($service, array $config = array())
     {
         // get the mapped or formatted name and it's config
-        $class   = $this->getMappedClassFromName($service);
         $current = isset($this->config[$service]) ? $this->config[$service] : array();
         $config  = array_replace_recursive($current, $config);
         
         // the service may be a method protected or private and exist on the current object
         if (method_exists($this, $service)) {
             $method = new MethodReflector($this, $service);
-            return call_user_func_array(
-                array($this, $service),
-                $method->mergeNamedArgs($config)
-            );
+            return call_user_func_array(array($this, $service), $method->mergeNamedArgs($config));
+        }
+        
+        // if there is a class formatter, format the service name
+        if ($this->formatter) {
+            $service = call_user_func($this->formatter, $service);
         }
         
         // or just default to using the passing the config to the class
-        $classReflector = new ClassReflector($class);
+        try {
+            $class = new ClassReflector(isset($this->map[$service]) ? $this->map[$service] : $service);
+        } catch (\Exception $e) {
+            throw new Exception('Could not locate the service "' . $service . '".');
+        }
+        
+        // if a constructor exists, pass named arguments to it
         if (method_exists($class, '__construct')) {
             $method = new MethodReflector($class, '__construct');
-            $class  = $classReflector->newInstanceArgs($method->mergeNamedArgs($config));
+            $class  = $class->newInstanceArgs($method->mergeNamedArgs($config));
         } else {
             $class = new $class;
         }
         
-        // go through the method queue and call them
+        // go through the method queue and call them using named arguments
         if (isset($this->queue[$service])) {
             foreach ($this->queue[$service] as $method => $args) {
                 $method = new MethodReflector($class, $method);
@@ -197,20 +196,17 @@ class ServiceLocator
     }
     
     /**
-     * Queues up a method to be called when the specified service is created.
+     * Forces a refresh by removing the cached instance.
      * 
-     * @param string $service The service to call the method on.
-     * @param string $method  The method to call.
-     * @param array  $args    The arguments to pass to the method.
+     * @param string $service The service to refresh.
      * 
      * @return \Europa\ServiceLocator
      */
-    public function queueMethodFor($service, $method, array $args = array())
+    public function refresh($service)
     {
-        if (!isset($this->queue[$service])) {
-            $this->queue[$service] = array();
+        if (isset($this->services[$service])) {
+            unset($this->services[$service]);
         }
-        $this->queue[$service][$method] = $args;
         return $this;
     }
     
@@ -230,16 +226,6 @@ class ServiceLocator
     }
     
     /**
-     * Returns the full configuration array.
-     * 
-     * @return array
-     */
-    public function getConfig()
-    {
-        return $this->config;
-    }
-    
-    /**
      * Sets the configuration for the specified service.
      * 
      * @param string $service The name of the service to set the configuration for.
@@ -249,6 +235,9 @@ class ServiceLocator
      */
     public function setConfigFor($service, array $config)
     {
+        // if setting the config for a service, we must make sure that it's refreshed
+        $this->refresh($service);
+        
         // reset the instance if there is one
         if (isset($this->services[$service])) {
             unset($this->services[$service]);
@@ -264,84 +253,69 @@ class ServiceLocator
     }
     
     /**
-     * Returns the configuration array for the specified service.
+     * Queues up a method to be called when the specified service is created.
      * 
-     * @param strign $service The service to return the configuration for.
-     * 
-     * @return array
-     */
-    public function getConfigFor($service)
-    {
-        if (!isset($this->config[$service])) {
-            throw new ServiceLocator\Exception('The service "' . $service . '" is not configured yet.');
-        }
-        return $this->config[$service];
-    }
-
-    /**
-     * Sets the specified formatter for the current instance.
-     * 
-     * @param mixed $formatter A callable formatter to use for class formatting.
+     * @param string $service The service to call the method on.
+     * @param string $method  The method to call.
+     * @param array  $args    The arguments to pass to the method.
      * 
      * @return \Europa\ServiceLocator
      */
-    public function setFormatter($formatter)
+    public function queueMethodFor($service, $method, array $args = array())
     {
-        if (!is_callable($formatter)) {
-            throw new Exception('The passed formatter is not callable.');
+        // if queueing another method, we must make sure the object is refresh when retrieved
+        $this->refresh($service);
+        
+        // if the queue isn't set up, then initialize it
+        if (!isset($this->queue[$service])) {
+            $this->queue[$service] = array();
         }
-        $this->formatter = $formatter;
+        
+        // and add it to the queue
+        // the method name is the key and the arguments its value
+        $this->queue[$service][$method] = $args;
         return $this;
     }
     
     /**
-     * Sets a default formatter for all instances.
+     * Sets the formatter to use for a service if no mapped class is found.
      * 
-     * @param mixed $formatter A callable formatter to use for class formatting.
+     * @param mixed $callback A callable callback to use for formatting service names to class names.
      * 
-     * @return void
+     * @return \Europa\ServiceLocator
      */
-    public static function setDefaultFormatter($formatter)
+    public function setFormatter($callback)
     {
-        if (!is_callable($formatter)) {
-            throw new Exception('The passed formatter is not callable.');
+        if (!is_callable($callback)) {
+            throw new Exception('The supplied callback is not callable.');
         }
-        static::$defaultFormatter = $formatter;
+        $this->formatter = $callback;
+        return $this;
     }
     
     /**
      * Creates a new instance using the specified configuration and name. If no
-     * name is specified, then a default instance is created and can fascilitate
+     * name is specified, then a default instance is created and can facilitate
      * the singleton pattern.
      * 
-     * @param array  $config The configuration array.
-     * @param string $name   The instance name. Defaults to "default".
+     * @param mixed  $config The configuration array or the name of the instance. Defaults to 'default'.
+     * @param string $name   The instance name if a config array is passed. Defaults to "default".
      * 
      * @return \Europa\ServiceLocator
      */
-    public static function getInstance(array $config = array(), $name = 'default')
+    public static function getInstance($config = array(), $name = 'default')
     {
+        // allow a string as the first argument
+        if (is_string($config)) {
+            $name   = $config;
+            $config = array();
+        }
+        
+        // if an instance isn't defined yet, create one and statically cache it
         if (!isset(static::$instances[$name])) {
             static::$instances[$name] = new static($config);
         }
+        
         return static::$instances[$name];
-    }
-    
-    /**
-     * Returns the class name form the given service name.
-     * 
-     * @param string $service The service name.
-     * 
-     * @return string
-     */
-    protected function getMappedClassFromName($service)
-    {
-        $class = $service;
-        if (isset($this->map[$service])) {
-            $class = $this->map[$service];
-        } elseif ($this->formatter) {
-            $class = call_user_func($this->formatter, $service);
-        }
-        return $class;
     }
 }
