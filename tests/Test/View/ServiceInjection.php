@@ -11,11 +11,10 @@ class Test_View_ServiceInjection extends Testes_Test
         $this->view    = new \Europa\View\Php;
         $this->locator = new \Europa\ServiceLocator;
         
+        $this->view->setServiceLocator($this->locator);
         $this->locator->setFormatter(function($service) {
             return \Europa\String::create($service)->toClass() . 'ServiceInjector';
         });
-        
-        \Europa\View\Php::setDefaultServiceLocator($this->locator);
     }
     
     public function testNewInstanceRetrieval()

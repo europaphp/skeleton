@@ -1,21 +1,17 @@
 <?php
 
+use Europa\Request\Http;
+
 class Test_ServiceLocator extends Testes_Test
 {
     private $container;
     
     public function setUp()
     {
-        // set up helper loading
-        Container::setDefaultFormatter(function($service) {
-            return \Europa\String::create($service)->toClass() . 'Service';
-        });
-        
         $this->container = new Container(
             array(
                 'request' => array(
-                    'class'  => '\Europa\Request\Http',
-                    'params' => array(
+                    array(
                         'test1' => true,
                         'test2' => true
                     )
@@ -24,6 +20,9 @@ class Test_ServiceLocator extends Testes_Test
             )
         );
         $this->container->map('router', '\Europa\Router');
+        $this->container->setFormatter(function($service) {
+            return \Europa\String::create($service)->toClass() . 'Service';
+        });
     }
     
     public function testDefaultFormatter()
@@ -35,15 +34,6 @@ class Test_ServiceLocator extends Testes_Test
         } catch (Exception $e) {
             $this->assert(false, 'Could not find service class');
         }
-    }
-    
-    public function testSetupConfig()
-    {
-        $config = $this->container->getConfigFor('request');
-        $this->assert(
-            $config['class'] === '\Europa\Request\Http',
-            'The service container class does not match.'
-        );
     }
     
     public function testSetupMap()
@@ -65,26 +55,17 @@ class Test_ServiceLocator extends Testes_Test
     public function testCustomOverride()
     {
         $valid = $this->container->get('request')->test1 === true
-              && $this->container->get('request')->test2 === true;
+            && $this->container->get('request')->test2 === true;
         $this->assert($valid, 'The request variables were not properly set.');
     }
     
     public function testFreshOverrideWithMergedConfig()
     {
-        $this->container->setConfigFor(
-            'request',
-            array(
-                'params' => array(
-                    'test2' => false
-                )
-            )
-        );
-        
+        $this->container->setConfigFor('request', array(array('test2' => false)));
         $this->assert(
             $this->container->get('request')->test1 === true,
             'The configuration was not merged.'
         );
-        
         $this->assert(
             $this->container->get('request')->test2 === false,
             'The configuration was not merged.'
@@ -94,9 +75,9 @@ class Test_ServiceLocator extends Testes_Test
 
 class Container extends \Europa\ServiceLocator
 {
-    protected function request($class, array $params = array())
+    protected function request(array $params = array())
     {
-        $request = new $class($this->get('router'));
+        $request = new Http($this->get('router'));
         foreach ($params as $name => $value) {
             $request->__set($name, $value);
         }

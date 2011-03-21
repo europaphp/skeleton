@@ -1,13 +1,14 @@
 <?php
 
+use Europa\Loader;
+
 class Test_Loader extends Testes_Test
 {
     private $loader;
     
     public function setUp()
     {
-        $this->loader = new \Europa\Loader;
-        $this->loader->register();
+        Loader::register();
     }
     
     public function testRegisterAutoload()
@@ -15,7 +16,7 @@ class Test_Loader extends Testes_Test
         $funcs = spl_autoload_functions();
         foreach ($funcs as $func) {
             if (is_array($func)
-                && $func[0] === $this->loader
+                && $func[0] === 'Europa\Loader'
                 && $func[1] === 'load'
             ) {
                 return;
@@ -27,15 +28,15 @@ class Test_Loader extends Testes_Test
     public function testSearch()
     {
         $this->assert(
-            $this->loader->search('Europa/Form'),
+            Loader::search('Europa/Form'),
             'Could not find file.'
         );
     }
     
-    public function testLoadClass()
+    public function testLoad()
     {
         $this->assert(
-            $this->loader->load('Europa\Request'),
+            Loader::load('Europa\Request'),
             'Unable to load class.'
         );
     }
@@ -43,7 +44,7 @@ class Test_Loader extends Testes_Test
     public function testAddPath()
     {
         try {
-            $this->loader->addPath('.');
+            Loader::addPath('.');
         } catch (Exception $e) {
             $this->assert(false, 'Could not add load path.');
         }
