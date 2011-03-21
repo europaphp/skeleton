@@ -10,7 +10,7 @@ namespace Europa;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Router implements \Iterator, \ArrayAccess, \Countable
+class Router implements \Iterator, \Countable
 {
     /**
      * The route that is matched upon querying.
@@ -185,56 +185,5 @@ class Router implements \Iterator, \ArrayAccess, \Countable
     public function valid()
     {
         return (bool) $this->current();
-    }
-    
-    /**
-     * Returns the specified route.
-     * 
-     * @param mixed $offset The route to get.
-     * 
-     * @return \Europa\Route|null
-     */
-    public function offsetGet($offset)
-    {
-        return $this->getRoute($offset);
-    }
-    
-    /**
-     * Sets the specified route.
-     * 
-     * @param mixed         $offset The name of the route.
-     * @param \Europa\Route $route  The route to set.
-     * 
-     * @return void
-     */
-    public function offsetSet($offset, $route)
-    {
-        $this->setRoute($offset, $route);
-    }
-    
-    /**
-     * Checks to see if a route exists.
-     * 
-     * @param mixed $offset The route to check for.
-     * 
-     * @return bool
-     */
-    public function offsetExists($offset)
-    {
-        return isset($this->routes);
-    }
-    
-    /**
-     * Removes a route.
-     * 
-     * @param mixed $offset The route to remove.
-     * 
-     * @return void
-     */
-    public function offsetUnset($offset)
-    {
-        if (isset($this->routes[$offset])) {
-            unset($this->routes[$offset]);
-        }
     }
 }

@@ -57,7 +57,7 @@ class Request extends \Europa\Router
     }
     
     /**
-     * Dispatches the set request. If $subject is specified, then it overwrits the
+     * Dispatches the set request. If $subject is specified, then it overwrites the
      * default Europa\Request->__toString() return value for route matching.
      * 
      * The request that was routed is returned. If the request isn't matched, then
