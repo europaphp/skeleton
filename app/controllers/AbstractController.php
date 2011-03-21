@@ -1,5 +1,7 @@
 <?php
 
+use Europa\ServiceLocator;
+
 /**
  * An example of controller abstraction that sets up a default view scheme.
  * 
@@ -17,7 +19,7 @@ abstract class AbstractController extends \Europa\Controller
      */
     public function init()
     {
-        $locator = \Europa\ServiceLocator::getInstance();
+        $locator = ServiceLocator::getInstance();
         $locator->get('layout')->setScript('DefaultLayout');
         $locator->get('view')->setScript(str_replace('Controller', 'View', get_class($this)));
         $this->setView($locator->get('layout'));

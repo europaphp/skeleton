@@ -3,6 +3,10 @@
 // autoloading isn't enabled yet, so required the bootstrapper
 require_once dirname(__FILE__) . '/../../lib/Europa/Bootstrapper.php';
 
+use Europa\Loader;
+use Europa\ServiceLocator;
+use Europa\Bootstrapper as ParentBootstrapper;
+
 /**
  * Bootstraps the sample application.
  * 
@@ -11,7 +15,7 @@ require_once dirname(__FILE__) . '/../../lib/Europa/Bootstrapper.php';
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Bootstrapper extends Europa\Bootstrapper
+class Bootstrapper extends ParentBootstrapper
 {
     /**
      * The application base path.
@@ -55,13 +59,12 @@ class Bootstrapper extends Europa\Bootstrapper
     public function setUpLoader()
     {
         require $this->base . '/lib/Europa/Loader.php';
-        $loader = new \Europa\Loader;
-        $loader->addPath($this->base . '/app/controllers');
-        $loader->addPath($this->base . '/app/views');
-        $loader->addPath($this->base . '/app/helpers');
-        $loader->addPath($this->base . '/app/filters');
-        $loader->addPath($this->base . '/app/forms');
-        $loader->register();
+        Loader::addPath($this->base . '/app/controllers');
+        Loader::addPath($this->base . '/app/views');
+        Loader::addPath($this->base . '/app/helpers');
+        Loader::addPath($this->base . '/app/filters');
+        Loader::addPath($this->base . '/app/forms');
+        Loader::register();
     }
     
     /**
@@ -72,7 +75,7 @@ class Bootstrapper extends Europa\Bootstrapper
      */
     public function configureServiceLocator()
     {
-        $this->locator = \Europa\ServiceLocator::getInstance();
+        $this->locator = ServiceLocator::getInstance();
         $this->locator->map('request', '\Europa\Request\Http');
         $this->locator->map('router', '\Europa\Router\Request');
         $this->locator->map('layout', '\Europa\View\Php');
