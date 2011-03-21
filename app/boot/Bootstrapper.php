@@ -4,6 +4,7 @@
 require_once dirname(__FILE__) . '/../../lib/Europa/Bootstrapper.php';
 
 use Europa\Loader;
+use Europa\Route\Regex;
 use Europa\ServiceLocator;
 use Europa\Bootstrapper as ParentBootstrapper;
 
@@ -77,7 +78,7 @@ class Bootstrapper extends ParentBootstrapper
     {
         $this->locator = ServiceLocator::getInstance();
         $this->locator->map('request', '\Europa\Request\Http');
-        $this->locator->map('router', '\Europa\Router\Request');
+        $this->locator->map('router', '\Europa\Router');
         $this->locator->map('layout', '\Europa\View\Php');
         $this->locator->map('view', '\Europa\View\Php');
         $this->locator->map('helper', '\Europa\ServiceLocator');
@@ -90,7 +91,10 @@ class Bootstrapper extends ParentBootstrapper
      */
     public function configureRouter()
     {
-        $this->locator->setConfigFor('router', array($this->locator->get('request')));
+        $this->locator->queueMethodFor('router', 'setRoute', array(
+            'default',
+            new Regex('(index\.php)?/?(?<controller>.+)?', null, array('controller' => 'index'))
+        ));
     }
     
     /**

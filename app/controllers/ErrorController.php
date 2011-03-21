@@ -10,5 +10,13 @@
  */
 class ErrorController extends AbstractController
 {
-    
+    /**
+     * Displays the error page.
+     * 
+     * @return void
+     */
+    public function get()
+    {
+        
+    }
 }

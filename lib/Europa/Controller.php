@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa;
-use Europa\Controller\Exception;
+use Europa\Controller\Exception as ControllerException;
 use Europa\Request\Http;
 use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
@@ -79,7 +79,7 @@ abstract class Controller
             $this->preRender();
             return $view;
         } catch (\Exception $e) {
-            $e = new Exception($e->getMessage(), $e->getCode());
+            $e = new ControllerException($e->getMessage(), $e->getCode());
             $e->trigger();
         }
     }
@@ -144,7 +144,7 @@ abstract class Controller
      * 
      * @return void
      */
-    public function redirect($to)
+    public function redirect($to = null)
     {
         header('Location: ' . Http::format($to));
         exit;
@@ -174,7 +174,7 @@ abstract class Controller
     {
         $method = $this->request->method();
         if (!method_exists($this, $method)) {
-            throw new Exception('The request method "' . $method . '" is not supported by "' . get_class($this) . '".');
+            throw new ControllerException('The request method "' . $method . '" is not supported by "' . get_class($this) . '".');
         }
 
         // apply custom filters before pre-action for security

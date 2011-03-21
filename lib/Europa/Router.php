@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa;
+use Europa\Route;
 
 /**
  * A basic router.
@@ -15,7 +16,7 @@ class Router implements \Iterator, \Countable
     /**
      * The route that is matched upon querying.
      * 
-     * @var \Europa\Route|null
+     * @var Route|null
      */
     protected $route = null;
     
@@ -31,7 +32,7 @@ class Router implements \Iterator, \Countable
      * 
      * @param string $name The name of the route.
      * 
-     * @return \Europa\Route
+     * @return Route
      */
     public function __get($name)
     {
@@ -71,17 +72,17 @@ class Router implements \Iterator, \Countable
     }
 
     /**
-     * Sets a route. If the first argument is an instance of \Europa\Route, then the
+     * Sets a route. If the first argument is an instance of Route, then the
      * route is set for that. Otherwise, it's set as a route to match against.
      * 
      * If the $route parameter is null, then that route is removed if it exists.
      * 
      * @param string        $name  The name of the route.
-     * @param \Europa\Route $route The route to use.
+     * @param Route $route The route to use.
      * 
-     * @return \Europa\Router
+     * @return Router
      */
-    public function setRoute($name, \Europa\Route $route = null)
+    public function setRoute($name, Route $route = null)
     {
         if ($name instanceof Route) {
             $this->route = $name;
@@ -98,7 +99,7 @@ class Router implements \Iterator, \Countable
      * 
      * @param string $name The name of the route to get.
      * 
-     * @return \Europa\Route
+     * @return Route
      */
     public function getRoute($name)
     {
@@ -119,7 +120,7 @@ class Router implements \Iterator, \Countable
     /**
      * Clears the route that was matched by the query.
      * 
-     * @return \Europa\Router
+     * @return Router
      */
     public function clear()
     {

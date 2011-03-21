@@ -1,5 +1,6 @@
 <?php
 
+use Europa\Controller;
 use Europa\ServiceLocator;
 
 /**
@@ -10,7 +11,7 @@ use Europa\ServiceLocator;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class AbstractController extends \Europa\Controller
+abstract class AbstractController extends Controller
 {
     /**
      * Sets up the a default view scheme.

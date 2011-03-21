@@ -1,5 +1,9 @@
 <?php
 
+use Europa\Exception;
+use Europa\Request;
+use Europa\View;
+
 /**
  * Creates and dispatches a request given the specified parameters.
  * 
@@ -27,13 +31,13 @@ class DispatchHelper
      * 
      * @return DispatchHelper
      */
-    public function __construct(uropa\View $view, $controller, array $params = array(), Europa\Request $request = null)
+    public function __construct(View $view, $controller, array $params = array(), Request $request = null)
     {
         // auto-detection of request or overriding of request detection
         if ($request) {
             $this->request = $request;
         } else {
-            $this->request = Europa\Request::isCli() ? new \Europa\Requst\Cli : new \Europa\Requst\Http;
+            $this->request = Request::isCli() ? new \Europa\Requst\Cli : new \Europa\Requst\Http;
         }
         
         $this->request->setController($controller);
@@ -52,10 +56,10 @@ class DispatchHelper
         // catch any exceptions and trigger them accordingly
         try {
             return (string) $this->request->dispatch();
-        } catch (uropaxception $e) {
-            $e->trigger();
         } catch (Exception $e) {
-            $e = new Europaxception($e->getMessage(), $e->getCode());
+            $e->trigger();
+        } catch (\Exception $e) {
+            $e = new Exception($e->getMessage(), $e->getCode());
             $e->trigger();
         }
     }

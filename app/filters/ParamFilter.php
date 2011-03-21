@@ -23,7 +23,7 @@ class ParamFilter implements FilterInterface
 	 */
     public function filter(Controller $controller)
     {
-    	$request = $controller->request();
+    	$request = $controller->getRequest();
         foreach ($request->getParams() as $name => $value) {
         	$request->setParam($name, String::create($value)->cast());
         }

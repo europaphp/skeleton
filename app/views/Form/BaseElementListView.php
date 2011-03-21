@@ -3,7 +3,7 @@
     <dt><label for="<?php echo $element->id; ?>"><?php echo $element->label; ?></label></dt>
     <dd>
         <?php if ($element instanceof \Europa\Form\ElementList): ?>
-        <?php echo new static('DefaultElementList', array('list' => $element)); ?>
+        <?php echo new static($this->getScript(), array('list' => $element)); ?>
         <?php else: ?>
         <?php echo $element; ?>
         <?php endif; ?>

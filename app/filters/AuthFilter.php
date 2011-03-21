@@ -2,10 +2,9 @@
 
 use Europa\Controller;
 use Europa\Controller\FilterInterface;
-use Europa\String;
 
 /**
- * Authorization filter for filtering an unathoried user.
+ * Authorization filter for filtering an unathorized user.
  * 
  * @category Filters
  * @package  Europa
@@ -24,7 +23,7 @@ class AuthFilter implements FilterInterface
     public function filter(Controller $controller)
     {
         if (!isset($_SESSION['isLoggedIn']) || !$_SESSION['isLoggedIn']) {
-            $this->controller->forward('log-in');
+            $controller->redirect('index.php/log-in');
         }
     }
 }

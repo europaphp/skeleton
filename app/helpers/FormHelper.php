@@ -1,5 +1,8 @@
 <?php
 
+use Europa\String;
+use Europa\View;
+
 /**
 * Contains general HTML form elements that can be automated for the view.
 * 
@@ -11,11 +14,25 @@
 class FormHelper
 {
     /**
+     * The default namespace to use.
+     * 
+     * @var string
+     */
+    const NS = 'Europa\Form\Element';
+    
+    /**
      * The view that called the helper.
      * 
      * @var \Europa\View
      */
     private $view;
+    
+    /**
+     * The form element namespace to use.
+     * 
+     * @var string
+     */
+    private $namespace;
     
     /**
      * Constructs a new form helper.
@@ -24,9 +41,10 @@ class FormHelper
      * 
      * @return FormHelper
      */
-    public function __construct(\Europa\View $view)
+    public function __construct(View $view, $namespace = self::NS)
     {
-        $this->view = $view;
+        $this->view      = $view;
+        $this->namespace = $namespace;
     }
     
     /**
@@ -54,7 +72,7 @@ class FormHelper
     private function generateElement($name, array $attributes = array())
     {
         if (!isset($attributes['id']) && isset($attributes['name'])) {
-            $attributes['id'] = Europa_String::create($attributes['name'])->slug('-')->__toString();
+            $attributes['id'] = String::create($attributes['name'])->slug('-')->__toString();
         }
         
         if (!isset($attributes['value']) && isset($attributes['name'])) {
@@ -73,7 +91,7 @@ class FormHelper
             $attributes['label'] = $this->view->lang->__get($attributes['title']);
         }
         
-        $class = 'Europa_Form_Element_' . ucfirst($name);
+        $class = '\\' . $this->namespace . '\\' . ucfirst($name);
         return new $class($attributes);
     }
 }

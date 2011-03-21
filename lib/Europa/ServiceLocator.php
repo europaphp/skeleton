@@ -175,7 +175,7 @@ class ServiceLocator
         }
         
         // pass configuration if __construct exists
-        if (method_exists($class, '__construct')) {
+        if ($class->hasMethod('__construct')) {
             $class = $class->newInstanceArgs($config);
         } else {
             $class = $class->newInstance();

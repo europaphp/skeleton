@@ -62,6 +62,55 @@ abstract class Request implements \Iterator, \Countable
      */
     public function __set($name, $value)
     {
+        $this->setParam($name, $value);
+    }
+    
+    /**
+     * Returns the specified request parameter.
+     * 
+     * @param string $name The name of the parameter.
+     * 
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        return $this->getParam($name);
+    }
+    
+    /**
+     * Checks for the specified parameter.
+     * 
+     * @param string $name The parameter to check for.
+     * 
+     * @return \Europa\Request
+     */
+    public function __isset($name)
+    {
+        return $this->hasParam($name);
+    }
+    
+    /**
+     * Unsets the specified parameter.
+     * 
+     * @param string $name The parameter to unset.
+     * 
+     * @return \Europa\Request
+     */
+    public function __unset($name)
+    {
+        return $this->removeParam($name);
+    }
+    
+    /**
+     * Sets the specified request parameter.
+     * 
+     * @param string $name  The name of the parameter.
+     * @param mixed  $value The value of the parameter.
+     * 
+     * @return mixed
+     */
+    public function setParam($name, $value)
+    {
         $this->params[$name] = $value;
         return $this;
     }
@@ -73,7 +122,7 @@ abstract class Request implements \Iterator, \Countable
      * 
      * @return mixed
      */
-    public function __get($name)
+    public function getParam($name)
     {
         if (isset($this->params[$name])) {
             return $this->params[$name];
@@ -88,7 +137,7 @@ abstract class Request implements \Iterator, \Countable
      * 
      * @return \Europa\Request
      */
-    public function __isset($name)
+    public function hasParam($name)
     {
         return isset($this->params[$name]);
     }
@@ -100,7 +149,7 @@ abstract class Request implements \Iterator, \Countable
      * 
      * @return \Europa\Request
      */
-    public function __unset($name)
+    public function removeParam($name)
     {
         if (isset($this->params[$name])) {
             unset($this->params[$name]);
@@ -123,6 +172,16 @@ abstract class Request implements \Iterator, \Countable
             }
         }
         return $this;
+    }
+    
+    /**
+     * Returns the bound parameters.
+     * 
+     * @return array
+     */
+    public function getParams()
+    {
+        return $this->params;
     }
     
     /**
