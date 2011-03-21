@@ -1,12 +1,10 @@
 <?php
 
 namespace Europa;
-use Europa\Reflection\ClassReflector;
-use Europa\Reflection\MethodReflector;
 use Europa\ServiceLocator\Exception;
 
 /**
- * An extensible dependency injection container.
+ * A highly configurable dependency injection container.
  * 
  * @category DependencyInjection
  * @package  Europa
@@ -20,28 +18,28 @@ class ServiceLocator
      * 
      * @var
      */
-    protected $map = array();
+    private $map = array();
     
     /**
      * Contains the configuration for the services.
      * 
      * @var array
      */
-    protected $config = array();
+    private $config = array();
     
     /**
      * A method queue for the services.
      * 
      * @var array
      */
-    protected $queue = array();
+    private $queue = array();
     
     /**
      * Contains the shared service instances.
      * 
      * @var array
      */
-    protected $services = array();
+    private $services = array();
     
     /**
      * The formatter for class names to use if there is no map.
@@ -155,40 +153,38 @@ class ServiceLocator
     public function create($service, array $config = array())
     {
         // get the mapped or formatted name and it's config
+        $class   = $service;
         $current = isset($this->config[$service]) ? $this->config[$service] : array();
         $config  = array_replace_recursive($current, $config);
         
         // the service may be a method protected or private and exist on the current object
         if (method_exists($this, $service)) {
-            $method = new MethodReflector($this, $service);
-            return call_user_func_array(array($this, $service), $method->mergeNamedArgs($config));
+            return call_user_func_array(array($this, $service), $config);
         }
         
         // if there is a class formatter, format the service name
         if ($this->formatter) {
-            $service = call_user_func($this->formatter, $service);
+            $class = call_user_func($this->formatter, $service);
         }
         
-        // or just default to using the passing the config to the class
+        // if a constructor exists, pass named arguments to it
         try {
-            $class = new ClassReflector(isset($this->map[$service]) ? $this->map[$service] : $service);
+            $class = new \ReflectionClass(isset($this->map[$service]) ? $this->map[$service] : $class);
         } catch (\Exception $e) {
             throw new Exception('Could not locate the service "' . $service . '".');
         }
         
-        // if a constructor exists, pass named arguments to it
+        // pass configuration if __construct exists
         if (method_exists($class, '__construct')) {
-            $method = new MethodReflector($class, '__construct');
-            $class  = $class->newInstanceArgs($method->mergeNamedArgs($config));
+            $class = $class->newInstanceArgs($config);
         } else {
-            $class = new $class;
+            $class = $class->newInstance();
         }
         
         // go through the method queue and call them using named arguments
         if (isset($this->queue[$service])) {
             foreach ($this->queue[$service] as $method => $args) {
-                $method = new MethodReflector($class, $method);
-                $method->invokeNamedArgs($class, $args);
+                call_user_func_array(array($class, $method), $args);
             }
         }
         
