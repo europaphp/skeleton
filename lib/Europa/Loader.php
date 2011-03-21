@@ -15,25 +15,32 @@ use Europa\Loader\Exception;
 class Loader
 {
     /**
+     * The default file suffix.
+     * 
+     * @var string
+     */
+    const SUFFIX = 'php';
+    
+    /**
      * Contains all load paths that Europa\RouteLoader will use when searching for a file.
      * 
      * @var array
      */
-    private $paths = array();
+    private static $paths = array();
 
     /**
      * The separators used for namespaces.
      * 
      * @var array
      */
-    private $separators = array('_', '\\');
+    private static $separators = array('_', '\\');
     
     /**
      * Maps classes to their absolute paths.
      * 
      * @var array
      */
-    private $map = array();
+    private static $map = array();
     
     /**
      * Maps the specified class to the specified file. Also takes an array of $class to
@@ -44,17 +51,15 @@ class Loader
      * 
      * @return \Europa\Loader
      */
-    public function map($map, $file)
+    public static function map($map, $file)
     {
         if (!is_array($map)) {
             $map = array($map => $file);
         }
         
         foreach ($map as $class => $file) {
-            $this->map[$class] = $file;
+            self::$map[$class] = $file;
         }
-        
-        return $this;
     }
     
     /**
@@ -62,9 +67,9 @@ class Loader
      * 
      * @return array
      */
-    public function getMapping()
+    public static function getMapping()
     {
-        return $this->map;
+        return self::$map;
     }
     
     /**
@@ -75,13 +80,13 @@ class Loader
      * 
      * @return bool
      */
-    public function load($class)
+    public static function load($class)
     {
         if (class_exists($class, false)) {
-            return $this;
+            return true;
         }
         
-        if ($file = $this->search($class)) {
+        if ($file = self::search($class)) {
             include $file;
             return true;
         }
@@ -97,19 +102,18 @@ class Loader
      * 
      * @return bool|string
      */
-    public function search($class)
+    public static function search($class)
     {
-        if (isset($this->map[$class])) {
-            return $this->map[$class];
+        if (isset(self::$map[$class])) {
+            return self::$map[$class];
         }
         
-        $file = str_replace($this->separators, DIRECTORY_SEPARATOR, $class);
+        $file = str_replace(self::$separators, DIRECTORY_SEPARATOR, $class);
         $file = trim($file, DIRECTORY_SEPARATOR);
-        $file = $file . '.php';
-        foreach ($this->paths as $path) {
-            $path = $path . DIRECTORY_SEPARATOR . $file;
+        foreach (self::$paths as $path => $suffix) {
+            $path = $path . DIRECTORY_SEPARATOR . $file . '.' . $suffix;
             if (file_exists($path)) {
-                $this->map[$class] = $path;
+                self::$map[$class] = $path;
                 return $path;
             }
         }
@@ -128,7 +132,7 @@ class Loader
      * 
      * @return \Europa\Loader
      */
-    public function addPath($path, $addToIncludePaths = false)
+    public static function addPath($path, $suffix = self::SUFFIX, $addToIncludePaths = false)
     {
         $realpath = realpath($path);
 
@@ -143,12 +147,10 @@ class Loader
             );
         }
 
-        $this->paths[] = $realpath;
+        self::$paths[$realpath] = $suffix;
         if ($addToIncludePaths) {
             set_include_path(get_include_path() . PATH_SEPARATOR . $realpath);
         }
-        
-        return $this;
     }
     
     /**
@@ -157,10 +159,9 @@ class Loader
      * 
      * @return \Europa\Loader
      */
-    public function register()
+    public static function register()
     {
-        spl_autoload_register(array($this, 'load'));
-        $this->addPath(dirname(__FILE__) . '/../');
-        return $this;
+        spl_autoload_register(array('\Europa\Loader', 'load'));
+        self::addPath(dirname(__FILE__) . '/../');
     }
 }
