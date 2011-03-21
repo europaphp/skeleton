@@ -10,7 +10,7 @@ use Europa\View;
 /**
  * The base controller for all controller classes.
  * 
- * The following methods are supported with variable parameters:
+ * The following methods are supported with any number of user-defined parameters:
  *   - cli
  *   - options
  *   - get
@@ -89,7 +89,7 @@ abstract class Controller
      * 
      * @return \Europa\Request
      */
-    public function request()
+    public function getRequest()
     {
         return $this->request;
     }
@@ -131,7 +131,7 @@ abstract class Controller
     public function forward($to, array $params = array())
     {
         // modify the request and dispach it's return value
-        $request = $this->request();
+        $request = $this->getRequest();
         $request->setParams($params);
         $request->setController($to);
         return $request->dispatch();
@@ -172,10 +172,7 @@ abstract class Controller
      */
     public function action()
     {
-        // we call the approprate method for the specified request method
-        $request = $this->request();
-        $method  = $request->method();
-        
+        $method = $this->request->method();
         if (!method_exists($this, $method)) {
             throw new Exception('The request method "' . $method . '" is not supported by "' . get_class($this) . '".');
         }
@@ -188,7 +185,7 @@ abstract class Controller
         $reflector = new MethodReflector($this, $method);
         $params = call_user_func_array(
             array($this, $method),
-            $reflector->mergeNamedArgs($request->getParams())
+            $reflector->mergeNamedArgs(iterator_to_array($this->request))
         );
         
         // set view params if they were specified
