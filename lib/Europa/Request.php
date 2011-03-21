@@ -1,6 +1,9 @@
 <?php
 
 namespace Europa;
+use Europa\Controller;
+use Europa\Loader;
+use Europa\Request\Exception;
 
 /**
  * The heart of EuropaPHP. This is where it all starts and ends.
@@ -10,7 +13,7 @@ namespace Europa;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class Request implements \Iterator, \ArrayAccess, \Countable
+abstract class Request implements \Iterator, \Countable
 {
     /**
      * The key used to get the controller from the request params.
@@ -59,7 +62,8 @@ abstract class Request implements \Iterator, \ArrayAccess, \Countable
      */
     public function __set($name, $value)
     {
-        return $this->setParam($name, $value);
+        $this->params[$name] = $value;
+        return $this;
     }
     
     /**
@@ -71,7 +75,10 @@ abstract class Request implements \Iterator, \ArrayAccess, \Countable
      */
     public function __get($name)
     {
-        return $this->getParam($name);
+        if (isset($this->params[$name])) {
+            return $this->params[$name];
+        }
+        return null;
     }
     
     /**
@@ -83,7 +90,7 @@ abstract class Request implements \Iterator, \ArrayAccess, \Countable
      */
     public function __isset($name)
     {
-        return $this->hasParam($name);
+        return isset($this->params[$name]);
     }
     
     /**
@@ -95,9 +102,37 @@ abstract class Request implements \Iterator, \ArrayAccess, \Countable
      */
     public function __unset($name)
     {
-        if ($this->hasParam($name)) {
-            $this->removeParam($name);
+        if (isset($this->params[$name])) {
+            unset($this->params[$name]);
         }
+        return $this;
+    }
+    
+    /**
+     * Bulk sets parameters.
+     * 
+     * @param mixed $params The params to set.
+     * 
+     * @return \Europa\Request
+     */
+    public function setParams($params)
+    {
+        if (is_array($params) || is_object($params)) {
+            foreach ($params as $name => $value) {
+                $this->__set($name, $value);
+            }
+        }
+        return $this;
+    }
+    
+    /**
+     * Clears request parameters.
+     * 
+     * @return \Europa\Request
+     */
+    public function clear()
+    {
+        $this->params = array();
         return $this;
     }
 
@@ -109,16 +144,16 @@ abstract class Request implements \Iterator, \ArrayAccess, \Countable
     public function dispatch()
     {
         $controller = $this->formatController();
-        if (!\Europa\Loader::loadClass($controller)) {
-            throw new \Europa\Request\Exception(
+        if (!Loader::load($controller)) {
+            throw new Exception(
                 'Could not load controller ' . $controller . '.',
-                \Europa\Request\Exception::CONTROLLER_NOT_FOUND
+                Exception::CONTROLLER_NOT_FOUND
             );
         }
         
         $controller = new $controller($this);
-        if (!$controller instanceof \Europa\Controller) {
-            throw new \Europa\Request\Exception(
+        if (!$controller instanceof Controller) {
+            throw new Exception(
                 'Class '
                 . get_class($controller) 
                 . ' is not a valid controller instance.'
@@ -128,110 +163,6 @@ abstract class Request implements \Iterator, \ArrayAccess, \Countable
         
         $controller->action();
         return $controller;
-    }
-
-    public function setParam($name, $value)
-    {
-        $this->params[$name] = $value;
-        return $this;
-    }
-
-    public function getParam($name)
-    {
-        if (isset($this->params[$name])) {
-            return $this->params[$name];
-        }
-        return null;
-    }
-
-    public function hasParam($name)
-    {
-        return isset($this->params[$name]);
-    }
-
-    public function removeParam($name)
-    {
-        if (isset($this->params[$name])) {
-            unset($this->params[$name]);
-        }
-        return $this;
-    }
-    
-    /**
-     * Sets parameters.
-     * 
-     * @param mixed $params The params to set.
-     * 
-     * @return \Europa\Request
-     */
-    public function setParams($params)
-    {
-        // check for appropriate parameters
-        if (is_array($params) || is_object($params)) {
-            foreach ($params as $name => $value) {
-                $this->__set($name, $value);
-            }
-        }
-        return $this;
-    }
-    
-    /**
-     * Returns the parameters.
-     * 
-     * @return array
-     */
-    public function getParams()
-    {
-        return $this->params;
-    }
-    
-    /**
-     * Checks to see if all of the passed params are in the request.
-     * 
-     * @return bool
-     */
-    public function hasParams(array $params)
-    {
-        foreach ($params as $name) {
-            if (!$this->__isset($name)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    /**
-     * Removes the parameters.
-     * 
-     * @return \Europa\Request
-     */
-    public function removeParams()
-    {
-        $this->params = array();
-        return $this;
-    }
-    
-    /**
-     * Merges in the passed parameters.
-     * 
-     * @param array $params The parameters to merge.
-     * 
-     * @return \Europa\Request
-     */
-    public function mergeParams($params)
-    {
-        // get the old
-        $oldParams = $this->params;
-        
-        // set the new to handle objects as well
-        $this->setParams($params);
-        
-        // get the new
-        $newParams = $this->params;
-        
-        // merge and set
-        $this->params = array_merge($this->params, $params);
-        return $this;
     }
     
     /**
@@ -378,63 +309,6 @@ abstract class Request implements \Iterator, \ArrayAccess, \Countable
     public function valid()
     {
         return isset($this->params[$this->key()]);
-    }
-    
-    /**
-     * Alias for \Europa\Request->set().
-     * 
-     * @param string $offset The parameter.
-     * @param mixed  $value  The value.
-     * 
-     * @return mixed
-     * 
-     * @see \Europa\Request->set();
-     */
-    public function offsetSet($offset, $value)
-    {
-        return $this->__set($offset, $value);
-    }
-    
-    /**
-     * Alias for \Europa\Request->get().
-     * 
-     * @param string $offset The parameter.
-     * 
-     * @return \Europa\Request
-     * 
-     * @see \Europa\Request->get();
-     */
-    public function offsetGet($offset)
-    {
-        return $this->__get($offset);
-    }
-    
-    /**
-     * Alias for \Europa\Request->has().
-     * 
-     * @param string $offset The parameter.
-     * 
-     * @return mixed
-     * 
-     * @see \Europa\Request->has();
-     */
-    public function offsetExists($offset)
-    {
-        return $this->__isset($offset);
-    }
-    
-    /**
-     * Alias for \Europa\Request->clear().
-     * 
-     * @param string $offset The parameter.
-     * 
-     * @return mixed
-     * 
-     * @see \Europa\Request->clear();
-     */
-    public function offsetUnset($offset)
-    {
-        return $this->__unset($offset);
     }
     
     /**
