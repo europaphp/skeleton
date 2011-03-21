@@ -32,14 +32,6 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
      * @var \Europa\ServiceLocator
      */
     protected $serviceLocator;
-    
-    /**
-     * The default service locator to use. This is overridden by the more specific
-     * instance-specified service locator.
-     * 
-     * @var \Europa\ServiceLocator
-     */
-    protected static $defaultServiceLocator;
        
     /**
      * Renders the view in whatever way necessary.
@@ -62,8 +54,6 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
         array_unshift($args, $this);
         if ($this->serviceLocator) {
             return $this->serviceLocator->create($name, $args);
-        } elseif (static::$defaultServiceLocator) {
-            return static::$defaultServiceLocator->create($name, $args);
         }
         throw new Exception('Call to undefined method "' . get_class($this) . '::' . $name . '()".');
     }
@@ -86,8 +76,6 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
             return $this->params[$name];
         } elseif ($this->serviceLocator) {
             $loc = $this->serviceLocator;
-        } elseif (static::$defaultServiceLocator) {
-            $loc = static::$defaultServiceLocator;
         } else {
             return null;
         }
@@ -373,17 +361,5 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
     public function count()
     {
         return count($this->params);
-    }
-
-    /**
-     * Sets the default service locator to use if none is specified for the instance.
-     * 
-     * @param \Europa\ServiceLocator $serviceLocator The service locator to use by default.
-     * 
-     * @return void
-     */
-    public static function setDefaultServiceLocator(ServiceLocator $serviceLocator)
-    {
-        static::$defaultServiceLocator = $serviceLocator;
     }
 }

@@ -24,13 +24,6 @@ class Php extends \Europa\View
     private $script = null;
     
     /**
-     * The script suffix.
-     * 
-     * @var string
-     */
-    private $suffix = 'php';
-    
-    /**
      * Construct the view and sets defaults.
      * 
      * @param string $script The script to render.
@@ -53,7 +46,7 @@ class Php extends \Europa\View
     public function __toString()
     {
         // format the script
-        $script = $this->getScript() . '.' . $this->getSuffix();
+        $script = $this->getScript();
         
         // include it and trigger an error for any exceptions since you can't throw
         // exceptions inside __toString
@@ -95,28 +88,5 @@ class Php extends \Europa\View
     public function getScript()
     {
         return $this->script;
-    }
-    
-    /**
-     * Sets the view suffix.
-     * 
-     * @param string $suffix The suffix to use.
-     * 
-     * @return \Europa\View\Php
-     */
-    public function setSuffix($suffix)
-    {
-        $this->suffix = $suffix;
-        return $this;
-    }
-    
-    /**
-     * Returns the set suffix.
-     * 
-     * @return string
-     */
-    public function getSuffix()
-    {
-        return $this->suffix;
     }
 }
