@@ -233,7 +233,7 @@ class Http extends \Europa\Request
      * 
      * The Europa request URI represents the part after the public folder in 
      * which the dispatching file resides. If the the full URI is 
-     * http://localhost/yoursite/subfoler/controller/action and the
+     * http://localhost/yoursite/subfolder/controller/action and the
      * dispatching file is in "subfolder', then this will contain
      * "controller/action". 
      * 
@@ -313,6 +313,33 @@ class Http extends \Europa\Request
         }
         
         return $uri;
+    }
+    
+    /**
+     * Returns the user's real IP address based on the available environment variables.
+     * 
+     * @return string
+     */
+    public static function ip()
+    {
+        if (isset($_SERVER['HTTP_TRUE_CLIENT_IP'])) {
+            return $_SERVER['HTTP_TRUE_CLIENT_IP'];
+        }
+        
+        if (isset($_SERVER['X_FORWARDED_FOR'])) {
+            return $_SERVER['X_FORWARDED_FOR'];
+        }
+        
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $values = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+            return $values[0];
+        }
+        
+        if (isset($_SERVER['REMOTE_ADDR'])) {
+            return $_SERVER['REMOTE_ADDR'];
+        }
+        
+        return null;
     }
     
     /**
