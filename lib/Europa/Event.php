@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa;
+use Europa\Event\Triggerable;
 
 /**
  * An event class for managing multiple events and event stacks.
@@ -27,7 +28,7 @@ class Event
      * 
      * @return void
      */
-    public static function bind($name, \Europa\Event\Triggerable $handler)
+    public static function bind($name, Triggerable $handler)
     {
         // make sure the event has it's own stack
         if (!self::isBound($name)) {
@@ -46,7 +47,7 @@ class Event
      * 
      * @return bool
      */
-    public static function unbind($name, \Europa\Event\Triggerable $handler = null)
+    public static function unbind($name, Triggerable $handler = null)
     {
         if (self::isBound($name)) {
             if ($handler) {
