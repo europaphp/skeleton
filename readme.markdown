@@ -241,6 +241,7 @@ If we don't like the parameter name "controller", all we need to do is set a dif
 
     <?php
     
+    use Europa\Loader;
     use Europa\Request\Http;
     use Europa\String;
     
@@ -256,8 +257,6 @@ If we don't like the naming convention of `[name]Controller`, then we set a diff
 If you want to change the default path of `application/controllers`, all you have to do is change the load path:
 
     <?php
-    
-    use Europa\Loader;
     
     Loader::addPath('/my/custom/controller/path');
 
