@@ -250,7 +250,7 @@ If we don't like the parameter name "controller", all we need to do is set a dif
 If we don't like the naming convention of `[name]Controller`, then we set a different formatter:
 
     $request->setControllerFormatter(function(Http $request) {
-        return '\Controller\\' . String::create($request->getController())->toClass();
+        return '\Controller' . String::create($request->getController())->toClass();
     });
 
 If you want to change the default path of `application/controllers`, all you have to do is change the load path:
