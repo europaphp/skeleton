@@ -181,26 +181,28 @@ There is also one other way to configure a service and that is to extend `\Europ
 
 This is a little bit more straight forward if dynamic configuration isn't necessary. Also, dynamic configuration is slightly slower due to the use of dynamic function calls. However, this is still up for you to decide.
 
-Accessing services are done in a few different ways. New objects are always created when accessing through method syntax or calling `\Europa\ServiceLocator::create()`:
+By explicitly creating new objects, we tell the locator not to use transient services.
 
     <?php
     
     use Europa\ServiceLocator;
     
     $locator = ServiceLocator::getInstance();
-    $layout  = $locator->layout();
     $layout  = $locator->create('layout');
 
-If we use property syntax or `\Europa\ServiceLocator::get()`, a new instance is created if it doesn't already exist, otherwise the one that has already been created is returned:
+However, if we want to create the service if it doesn't exist and reuse it, we can just retrieve it:
 
-    $layout = $locator->layout;
     $layout = $locator->get('layout');
 
 Custom configuration can also be passed at the time of calling:
 
-    $config = array('custom' => 'configuration');
-    $layout = $locator->layout($config);
-    $layout = $locator->create($layout, $config);
+    $layout = $locator->get('layout', array('arg1', 'arg2'));
+    $layout = $locator->create('layout', array('arg1', 'arg2'));
+
+If you do pass a configuration to `get` and the object already exists, it is re-configured, cached for future retrievals and returned.
+
+From Request to Response
+------------------------
 
 License
 -------
