@@ -142,7 +142,7 @@ Now when we access a layout, it is pre-configured:
     
     use Europa\ServiceLocator;
     
-    echo ServiceLocator::getInstance()->layout;
+    echo ServiceLocator::getInstance()->get('layout');
 
 There is also one other way to configure a service and that is to extend `\Europa\ServiceLocator` and define methods that contain the same name as the service which you are configuring.
 
@@ -200,6 +200,10 @@ Custom configuration can also be passed at the time of calling:
     $layout = $locator->create('layout', array('arg1', 'arg2'));
 
 If you do pass a configuration to `get` and the object already exists, it is re-configured, cached for future retrievals and returned.
+
+If you want to set a service from an external source, you can register it:
+
+    $locator->register('externalService', new \ExternalService);
 
 From Request to Response
 ------------------------

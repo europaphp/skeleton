@@ -68,35 +68,6 @@ class ServiceLocator
     }
     
     /**
-     * Calls the specified service using create().
-     * 
-     * @param string $name The name of the service to call.
-     * @param array  $args The configuration to pass. The first element must be an array if specified.
-     * 
-     * @return mixed
-     */
-    public function __call($name, array $args = array())
-    {
-        $config = isset($args[0]) ? $args[0] : array();
-        if (!is_array($config)) {
-            throw new Exception('The parameter passed to service "' . $name . '" must be an array.');
-        }
-        return $this->get($name, $config);
-    }
-    
-    /**
-     * Returns the specified service using get().
-     * 
-     * @param string $name The service to get.
-     * 
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        return $this->get($name);
-    }
-    
-    /**
      * Maps a name to a class.
      * 
      * @param string $service The name of the service.
@@ -113,9 +84,12 @@ class ServiceLocator
     /**
      * Sets a dependency instance to a service name.
      * 
-     * @
+     * @param string $service  The name of the service to register.
+     * @param object $instance The service instance to register.
+     * 
+     * @return \Europa\ServiceLocator
      */
-    public function set($service, $instance)
+    public function register($service, $instance)
     {
         if (!is_object($instance)) {
             throw new Exception('The service "' . $service . '" must be a valid object instance.');
