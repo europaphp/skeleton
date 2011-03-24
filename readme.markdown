@@ -188,22 +188,37 @@ By explicitly creating new objects, we tell the locator not to use transient ser
     use Europa\ServiceLocator;
     
     $locator = ServiceLocator::getInstance();
+    $layout  = $locator->layout();
     $layout  = $locator->create('layout');
 
 However, if we want to create the service if it doesn't exist and reuse it, we can just retrieve it:
 
     $layout = $locator->get('layout');
+    $layout = $locator->layout;
 
 Custom configuration can also be passed at the time of calling:
 
     $layout = $locator->get('layout', array('arg1', 'arg2'));
     $layout = $locator->create('layout', array('arg1', 'arg2'));
+    $layout = $locator->layout('arg1', 'arg2');
 
 If you do pass a configuration to `get` and the object already exists, it is re-configured, cached for future retrievals and returned.
 
 If you want to set a service from an external source, you can register it:
 
     $locator->register('externalService', new \ExternalService);
+
+Just in case you have separate service locator configurations, you can manage instances using `\Europa\ServiceLocator::getInstance($name)`. If the specified instance is not found, it is created and cached for later retrieval. If not specifying a name, it allows you to use the service locator like a singleton since for most applications, you won't need to retrieve more than one instance.
+
+    <?php
+    
+    use Europa\ServiceLocator;
+    
+    // default instance
+    $locator = ServiceLocator::getInstance();
+    
+    // a separate instance
+    $locator = ServiceLocator::getInstance('myOtherConfiguration');
 
 From Request to Response
 ------------------------
