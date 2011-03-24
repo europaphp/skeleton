@@ -12,7 +12,7 @@ You're a software engineer/architect that needs a solid, scalable backbone to dr
 Setting Up Your Application
 ---------------------------
 
-Application setup has been exemplified in the bundled sample app bootstrapper: app/boot/Bootstrapper.php. Rather than use a single file for setup - for example, with a `bootstrap.php` file or in the `index.php` file - `\Europa\Bootstrapper` was created to facilitate maintainability by organizing each step of the setup process into smaller appropriately named methods.
+Application setup has been exemplified in the bundled sample app bootstrapper: app/boot/Bootstrapper.php. Rather than use one big file of slop for setup, `\Europa\Bootstrapper` was created to facilitate maintainability by organizing each step of the setup process into smaller, appropriately named methods.
 
     <?php
     
@@ -70,7 +70,7 @@ Or manually map classes:
 
     Loader::map('\MyNamespace\MyClass', '/path/to/MyNamespace/MyClass.php');
 
-The loader will first look for a class in the mapping and load the corresponding file if it is found. If not, it will go through the load paths and attempt to find it there. This is useful if you only need to specify a handful of mappings for the most commonly used classes.
+The loader will first look for a class in the mapping and load the corresponding file if it is found. If not, it will go through the load paths and attempt to find it there. This is useful if need to specify a handful of mappings for the most commonly used classes and don't really care if the stragglers are searched for in the load paths.
 
 At any time, we can register the `\Europa\Loader::load()` method as an autoloader by calling `\Europa\Loader::register()`.
 
@@ -78,7 +78,7 @@ At any time, we can register the `\Europa\Loader::load()` method as an autoloade
 
 Registering the loader as an autoloader doesn't restrict the API so you are still free to do anything you need to with the loader such as add more load paths.
 
-The loader is an integral part of EuropaPHP. It isn't required for most parts of the framework, for example, if you already have compatible loading functionality. However, `\Europa\View\Php` exclusively uses the loader for loading view files. If you are using the view rendering layer, you at least need to specify a path where your views can be found.
+The loader is an integral part of EuropaPHP. It isn't required for most parts of the framework - such as if you already have compatible loading functionality - however, `\Europa\View\Php` exclusively uses the loader for loading view files. If you are using the view rendering layer, you at least need to specify a path where your views can be found.
 
 The mapper can also be useful but in all reality, this will be a micro-optimization for a lot of applications. For some, though, it could make all the difference.
 
@@ -220,8 +220,46 @@ Just in case you have separate service locator configurations, you can manage in
     // a separate instance
     $locator = ServiceLocator::getInstance('myOtherConfiguration');
 
-From Request to Response
-------------------------
+Requests
+--------
+
+Using a request can be as simple as instantiating the object and `echo`ing it.
+
+    <?php
+    
+    use Europa\Request\Http;
+    
+    echo new Http;
+
+This would, by default, route the request to an `\IndexController` if no controller is specified. A controller can be specified simply by using a `$_REQUEST` variable by the name of controller:
+
+    http://derp/europa?controller=test
+
+This would route the request to the `\TestController`.
+
+If we don't like the parameter name "controller", all we need to do is set a different key:
+
+    <?php
+    
+    use Europa\Request\Http;
+    use Europa\String;
+    
+    $request = new Http;
+    $request->setControllerKey('my-custom-controller-name');
+
+If we don't like the naming convention of `[name]Controller`, then we set a different formatter:
+
+    $request->setControllerFormatter(function(Http $request) {
+        return '\Controller\\' . String::create($request->getController())->toClass();
+    });
+
+If you want to change the default path of `application/controllers`, all you have to do is change the load path:
+
+    <?php
+    
+    use Europa\Loader;
+    
+    Loader::addPath('/my/custom/controller/path');
 
 License
 -------
