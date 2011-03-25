@@ -17,7 +17,7 @@ class Regex implements \Europa\Route
      * 
      * @var string
      */
-    private $_expression;
+    private $expression;
     
     /**
      * Since it is very difficult to reverse engineer a regular expression
@@ -26,14 +26,14 @@ class Regex implements \Europa\Route
      * 
      * @var string
      */
-    private $_reverse;
+    private $reverse;
     
     /**
      * The mapping used to map matched parameters or bind hard-coded parameters.
      * 
      * @var array
      */
-    private $_map;
+    private $map;
     
     /**
      * Constructs the route and sets required properties.
@@ -46,9 +46,9 @@ class Regex implements \Europa\Route
      */
     public function __construct($expression, $reverse = null, array $map = array())
     {
-        $this->_expression = $expression;
-        $this->_reverse    = $reverse;
-        $this->_map        = $map;
+        $this->expression = $expression;
+        $this->reverse    = $reverse;
+        $this->map        = $map;
     }
     
     /**
@@ -60,7 +60,7 @@ class Regex implements \Europa\Route
      */
     public function reverse(array $params = array())
     {
-        $parsed = $this->_reverse;
+        $parsed = $this->reverse;
         foreach ($params as $name => $value) {
             $parsed = str_replace(':' . $name, $value, $parsed);
         }
@@ -82,7 +82,7 @@ class Regex implements \Europa\Route
         $params  = array();
         
         // get some matches or return false if not matched
-        if (!preg_match('#' . $this->_expression . '#', $subject, $matches)) {
+        if (!preg_match('#' . $this->expression . '#', $subject, $matches)) {
             return false;
         }
         
@@ -90,7 +90,7 @@ class Regex implements \Europa\Route
         array_shift($matches);
         
         // map default and hardcoded values
-        foreach ($this->_map as $name => $value) {
+        foreach ($this->map as $name => $value) {
             // a string key denotes a hardcoded value
             if (is_string($name)) {
                 $params[$name] = $value;

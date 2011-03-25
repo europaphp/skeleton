@@ -297,6 +297,141 @@ If you want to change the default path of `application/controllers`, all you hav
 
 Since controller paths are autoloaded, you can specify more than one.
 
+Controllers
+-----------
+
+Controllers in Europa differ from controller implementations in other frameworks. Each controller is in essence a "single action" controller, but each controller has the ability to support different request methods as defined in the [HTTP 1.1 specification](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html).
+
+### Defining Your Controllers
+
+Below is an example of a controler that supports `GET` and `POST`.
+
+    <?php
+    
+    use Europa\Controller;
+    
+    class MyController extends Controller
+    {
+        public function get()
+        {
+            
+        }
+        
+        public function post()
+        {
+            
+        }
+    }
+
+So if you dispatch a request to the `MyController`, depending on the request method, `get()` or `post()` may be called. If a request methods that is specified doesn't exist in the controller, then a `\Europa\Controller\Exception` is thrown indication that the specified method is not supported.
+
+### Mapping Request Parameters to Action Parameters
+
+Request parameters can be auto-mapped to action parameters just by defining parameters in your action methods:
+
+    public function get($id)
+    {
+        
+    }
+
+In the above example, the `id` parameter is required and an exception will be thrown if it is not supplied. We can also specify optional parameters by supplying a default value:
+    
+    public function post($id = null)
+    {
+        if ($id) {
+            // update
+        } else {
+            // insert
+        }
+    }
+
+The `id` parameter is optional and therefore if it is not supplied in the request it will default to `null`. Since request parameters are mapped to action parameters by name, the order in which they are specified does not matter.
+
+Requests, Routers and Routes
+----------------------------
+
+Routes in Europa are simple ways of being able to query given a string and to reverse engineer given a set of parameters.
+
+### Querying and Reverse Engineering
+
+Reverse engineering allows for flexible url's:
+
+    <?php
+    
+    use Europa\Route\Regex;
+    
+    $expression = 'user/(?<username>[a-zA-Z0-9]+/?)+';
+    $reverse    = 'user/:username';
+    $defaults   = array('controller' => 'user');
+    $route      = new Regex($expression, $reverse, $defaults);
+    
+    // array('controller' => 'user', 'username' => 'tres');
+    $route->query('user/tres');
+    
+    // 'user/derper'
+    $route->reverseEngineer(array('username' => 'derper'));
+
+If the url changes, we still reverse engineer it in the same way given the parameters are the same:
+
+    $expression = 'u/(?<username>[a-zA-Z0-9]+/?)+';
+    $reverse    = 'u/:username';
+    $route      = new Regex($expression, $reverse, $defaults);
+    
+    // 'u/derper'
+    $route->reverseEngineer(array('username' => 'derper'));
+
+### Applying Routes to Routers
+
+The router is designed to be able to map any string to a set of parameters, not just a request.
+
+    <?php
+    
+    use Europa\Router;
+    use Europa\Route\Regex;
+    
+    $router = new Router;
+    $router->setRoute('default', new Regex('(?<controller>[^\?]+)?'), ':controller', array(
+        'controller' => 'index'
+    ));
+    
+    // array('controller' => 'index')
+    $router->query(null);
+    
+    // array('controller' => 'user')
+    $router->query('user');
+    
+    // array('controller' => 'user/profile')
+    $router->query('user/profile?id=1');
+
+### Routing a Request
+
+This can be used in conjunction with the request to dispatch to a controller:
+
+    <?php
+    
+    use Europa\Request\Http;
+    use Europa\Router;
+    use Europa\Route\Regex;
+    
+    $router = new Router;
+    $router->setRoute('default', new Regex('(?<controller>[^\?]+)?'), array(
+        'controller' => 'index'
+    ));
+    
+    $request = new Http;
+    echo $request->setParams($params);
+
+### Handling Rogue Requests
+
+We can also instantiate controllers manually, so if a request isn't matched, we can force an error controller:
+
+    $request = new Http;
+    if ($params = $router->query(Http::uri())) {
+        echo $request->setParams($params);
+    } else {
+        echo new \ErrorController($request);
+    }
+
 Validation
 ----------
 
