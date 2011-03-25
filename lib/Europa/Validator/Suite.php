@@ -10,7 +10,7 @@ namespace Europa\Validator;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Suite implements Validatable, \ArrayAccess, \Iterator, \Countable
+class Suite implements Validatable, \Iterator, \Countable
 {
     /**
      * The messages directly bound to the suite.
@@ -219,66 +219,6 @@ class Suite implements Validatable, \ArrayAccess, \Iterator, \Countable
     }
     
     /**
-     * Sets the specified validator.
-     * 
-     * @param int|string                    $index The position of the validator.
-     * @param \Europa\Validator\Validatable $value The validator to set.
-     * 
-     * @return void
-     */
-    public function offsetSet($index, $value)
-    {
-        if (!$value instanceof Validatable) {
-            throw new Exception('Item added to suite must be an instance of "\Europa\Validator\Validatable".');
-        }
-        
-        if (!is_null($index)) {
-            $this->add($value);
-        } else {
-            $this->set($index, $value);
-        }
-        return $this;
-    }
-    
-    /**
-     * Returns the specified validator.
-     * 
-     * @param int|string $index The index to get the validator from.
-     * 
-     * @throws \Europa\Validator\Exception If specified index is not found.
-     * 
-     * @return \Europa\Validator\Validatable
-     */
-    public function offsetGet($index)
-    {
-        return $this->get($index);
-    }
-    
-    /**
-     * Returns whether or not the specified validator exists.
-     * 
-     * @param int|string $index The validator to check for.
-     * 
-     * @return bool
-     */
-    public function offsetExists($index)
-    {
-        return $this->has($index);
-    }
-    
-    /**
-     * Unsets the specified validator if it exists.
-     * 
-     * @param int|string $index The offset to unset.
-     * 
-     * @return \Europa\Validator\Suite
-     */
-    public function offsetUnset($index)
-    {
-        return $this->remove($index);
-    }
-    
-    /**
      * Adds an item to the suite.
      * 
      * @param \Europa\Validator\Validatable $validator The validator to add.
@@ -294,7 +234,7 @@ class Suite implements Validatable, \ArrayAccess, \Iterator, \Countable
     /**
      * Adds the specified validator to the suite.
      * 
-     * @param int|string                    $index     The index to add the validator at.
+     * @param mixed                         $index     The index to add the validator at.
      * @param \Europa\Validator\Validatable $validator The validator to add.
      * 
      * @return \Europa\Validator\Validatable

@@ -311,9 +311,136 @@ Validation with a single validator is very simple:
     use Europa\Validator\Rule\Email;
     
     $email = new Email;
+    $email->addMessage('Please enter a valid email.');
     $valid = $email->validate('treshugart@gmail.com')->isValid();
 
-However, if you did this with a lot of data, your code would look like a cat took a nap on your keyboard.
+However, if you did this with a lot of data, your code would look like a cat took a nap on your keyboard. This is why there is validation suites.
+
+### Suites
+
+This is an example of the "verbose" way to build a validation suite:
+
+    <?php
+    
+    use Europa\Validator\Rule\Required;
+    use Europa\Validator\Rule\Number;
+    use Europa\Validator\Rule\NumberRange;
+    use Europa\Validator\Suite;
+    
+    $suite    = new Suite;
+    $required = new Required;
+    $number   = new Number;
+    $range    = new NumberRange(1, 10);
+    
+    $required->addMessage('This field is required.');
+    $number->addMessage('The value must be a number.');
+    $number->addMessage('The value must be a number between 1 and 10.');
+
+    $suite->add($required)->add($number)->add($range);
+
+The same thing, but just a *bit* shorter:
+
+    <?php
+    
+    use Europa\Validator\Suite;
+    
+    $suite = Suite::required()->addMessage('This field is required.')
+        ->number()->addMessage('The value must be a number.')
+        ->numberRange(1, 10)->addMessage('The value must be a number between 1 and 10.');
+
+And now we can apply those validators to a value:
+
+    // false
+    $suite->validate(11)->isValid();
+
+Validation suites can have suites applied to them instead of just raw validators which allows for any number of levels of validators:
+
+    $numberSuite  = Suite::number()->numberRange(21);
+    $userAgeSuite = Suite::required()->add($numberSuite);
+    
+    // false
+    $userAgeSuite->validate(19)->isValid();
+
+### Maps
+
+A validation map is for mapping an array of values to a suite of suites/validators. A good example of this would be validating `$_POST` data or the data inside a model entity before saving to the database.
+
+Using a validation map is similar to using a suite, but with a few differences. First, setting validators on the map require you to map the index of the validator to a corresponding index in the data you are validating.
+
+    <?php
+    
+    use Europa\Validator\Map;
+    use Europa\Validator\Rule\Email;
+    
+    $user = array('email' => 'treshugart@gmail.com', 'name' => 'Trey Shugart');
+    $map  = new Map;
+    $map->set('email', Suite::required()->email());
+    
+    // true
+    $map->validate($user)->isValid();
+
+You can use `\Europa\Validator\Map::add()`, however, that will only increment the index and may not correspond to a value in the data array, os it is safer to explicitly map the validator to a specific index in the data array.
+
+The shorter way of doing the above:
+
+    <?php
+    
+    use Europa\Validator\Map;
+    
+    $user = array('email' => 'treshugart@gmail.com', 'name' => 'Trey Shugart');
+    $map  = new Map;
+    
+    // true
+    $map->email->required()->email()->validate($user)->isValid();
+
+You can even use sub-mappings:
+
+    $data
+        'metadata' => array(
+            'name'    => 'Trey Shugart',
+            'address' => array(
+                'street' => 'some street'
+            )
+        )
+    );
+    
+    $user = new Map;
+    $meta = new Map;
+    $addr = new Map;
+    
+    $user->set('metadata', $meta);
+    $meta->name->required()->alphaNumeric()->set('address', $addr);
+    $addr->street->required()->alphaNumeric();
+    
+    // true
+    $user->validate($data)->isValid();
+
+### Error Messages
+
+Error messages can be applied to any type of validator whether it is a map, suite or validator. When retrieving these messages, only the failed validation messages are returned.
+
+    <?php
+    
+    use Europa\Validator\Suite;
+    use Europa\Validator\Required;
+    
+    $required = new Required;
+    $required->addMessage('This field is required.');
+    
+    // array();
+    $required->getMessages();
+    $required->validate('some value')->getMessages();
+    
+    // array('This field is required.');
+    $required->validate(null)->getMessages();
+
+When messages are retrieved from a map or suite, they are returned as a flat, merged array comprising of all of the messages from each failed validator.
+
+    $suite = Suite::required()->addMessage('This field is required.');
+    $suite->email()->addMessage('Please enter a valid email address.');
+    
+    // array('This field is required.', 'Please enter a valid email address.');
+    $suite->validate(null)->getMessages();
 
 License
 -------
