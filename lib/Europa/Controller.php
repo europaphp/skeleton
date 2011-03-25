@@ -183,14 +183,16 @@ abstract class Controller
 
         // call the appropriate method using named parameters
         $reflector = new MethodReflector($this, $method);
+        
+        // methods can return parameters for the view
         $params = call_user_func_array(
             array($this, $method),
             $reflector->mergeNamedArgs(iterator_to_array($this->request))
         );
         
-        // set view params if they were specified
+        // set view params if they were specified and we have a view
         if ($params && $this->view) {
-            $this->view->setParams($viewParams);
+            $this->view->setParams($params);
         }
         
         $this->postAction();

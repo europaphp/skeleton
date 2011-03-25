@@ -36,10 +36,20 @@ Application setup has been exemplified in the bundled sample app bootstrapper: a
     
 Methods that are NOT declared as `public` in visibility are NOT called as part of the bootstrapping process. The method `boot` also has the reserved functionality of running each bootstrap method and therefore is defined as `final` and cannot be re-defined. In addition to `private` methods and `\Europa\Bootstrapper::boot()`, magic methods (anything beginning with two underscores) are not called.
 
+To boot up your application:
+
+    <?php
+    
+    require '/path/to/your/Bootstrapper.php';
+    $bootstrapper = new Bootstrapper;
+    $bootstrapper->boot();
+
 Class Loading
 -------------
 
 Class loading is handled through `\Europa\Loader`. Since autoloading is registered globally by nature, there is no reason to instantiate an instance of `\Europa\Loader`. If you structure your application properly, use descriptive names and namespaces or suffixes, you won't have any issues with conflicting load paths.
+
+### Path Specification
 
 Specifying paths are as simple as a single method call.
 
@@ -58,6 +68,10 @@ Europa's load paths are handled manually which significantly increases speed rat
     Loader::addPath('/usr/bin/php', 'php', true);
     Loader::addPath('/path/to/my/libraries', 'php', true);
 
+Since the loader searches paths in the order in which they were defined, the most frequently used paths should be specified first.
+
+### Class Mapping
+
 We all know that file operations can be costly. If you have a module system that contains sub-directories of modules that mimic the main application's path, you may end up with hundreds of load paths. In order to implement your own caching mechanism, the loader allows you to export a class map so that you can cache it and then apply it to the loader.
 
     $classMap = Loader::getMapping();
@@ -70,7 +84,9 @@ Or manually map classes:
 
     Loader::map('\MyNamespace\MyClass', '/path/to/MyNamespace/MyClass.php');
 
-The loader will first look for a class in the mapping and load the corresponding file if it is found. If not, it will go through the load paths and attempt to find it there. This is useful if need to specify a handful of mappings for the most commonly used classes and don't really care if the stragglers are searched for in the load paths.
+The loader will first look for a class in the mapping and load the corresponding file if it is found. If not, it will go through the load paths and attempt to find it there. This is useful if need to specify a handful of mappings for the most commonly used classes and don't really care if the stragglers are searched for in the load paths. In all reality, this will be a micro-optimization for a lot of applications. For some, though, it could make all the difference.
+
+### Autoloading
 
 At any time, we can register the `\Europa\Loader::load()` method as an autoloader by calling `\Europa\Loader::register()`.
 
@@ -78,14 +94,16 @@ At any time, we can register the `\Europa\Loader::load()` method as an autoloade
 
 Registering the loader as an autoloader doesn't restrict the API so you are still free to do anything you need to with the loader such as add more load paths.
 
-The loader is an integral part of EuropaPHP. It isn't required for most parts of the framework - such as if you already have compatible loading functionality - however, `\Europa\View\Php` exclusively uses the loader for loading view files. If you are using the view rendering layer, you at least need to specify a path where your views can be found.
+### Dependencies
 
-The mapper can also be useful but in all reality, this will be a micro-optimization for a lot of applications. For some, though, it could make all the difference.
+The loader is an integral part of EuropaPHP. It isn't required for most parts of the framework - such as if you already have compatible loading functionality - however, `\Europa\View\Php` exclusively uses the loader for loading view files. If you are using the view rendering layer, you at least need to specify a path where your views can be found.
 
 Dependency Injection Through a Service Locator
 ----------------------------------------------
 
 Something that the sample app also makes liberal use of is a service locator. `\Europa\ServiceLocator` allows you to set up, configure and automate the creation of components and their dependencies.
+
+### Mapping
 
 In the sample app, we have two view objects that we require, a layout and a view. The layout requires that the view be applied to it and the view also requires a separate service locator instance for locating helpers.
 
@@ -109,6 +127,8 @@ First we set up the mapping for these:
             $this->locator->map('helper', '\Europa\ServiceLocator');
         }
     }
+
+### Configuration - Constructor Parameters and Method-Call Automation
     
 Once mapped, we configure the components. Since both the layout and the view require helpers, we configure the helper service locator to auto-format service names before they are loaded.
 
@@ -132,9 +152,14 @@ Finally, we can set up the layout which requires both a helper and a view:
 
     public function configureLayout()
     {
+        $this->locator->setConfigFor('layout', array());
         $this->locator->queueMethodFor('layout', 'setChild', array('view', $this->locator->view));
         $this->locator->queueMethodFor('layout', 'setServiceLocator', array($this->locator->helper));
     }
+
+By calling `\Europa\ServiceLocator::setConfigFor()` we tell the service locator to pass the specified arguments to the constructor of the service. If this is called multiple times, configuration is continually merged.
+
+### Extending
 
 Now when we access a layout, it is pre-configured:
 
@@ -179,7 +204,9 @@ There is also one other way to configure a service and that is to extend `\Europ
         }
     }
 
-This is a little bit more straight forward if dynamic configuration isn't necessary. Also, dynamic configuration is slightly slower due to the use of dynamic function calls. However, this is still up for you to decide.
+This is a little bit more straight forward if dynamic configuration isn't necessary. Also, dynamic configuration is slightly slower due to the use of dynamic function calls. However, this is still up for you to decide. You can even mix the two paradigms.
+
+### Accessing
 
 By explicitly creating new objects, we tell the locator not to use transient services.
 
@@ -207,6 +234,8 @@ If you do pass a configuration to `get` and the object already exists, it is re-
 If you want to set a service from an external source, you can register it:
 
     $locator->register('externalService', new \ExternalService);
+
+### Multi-Instance Usage
 
 Just in case you have separate service locator configurations, you can manage instances using `\Europa\ServiceLocator::getInstance($name)`. If the specified instance is not found, it is created and cached for later retrieval. If not specifying a name, it allows you to use the service locator like a singleton since for most applications, you won't need to retrieve more than one instance.
 
@@ -237,6 +266,8 @@ This would, by default, route the request to an `\IndexController` if no control
 
 This would route the request to the `\TestController`.
 
+### Custom Controller Parameter Name
+
 If we don't like the parameter name "controller", all we need to do is set a different key:
 
     <?php
@@ -248,17 +279,41 @@ If we don't like the parameter name "controller", all we need to do is set a dif
     $request = new Http;
     $request->setControllerKey('my-custom-controller-name');
 
+### Custom Controller Naming Convention
+
 If we don't like the naming convention of `[name]Controller`, then we set a different formatter:
 
     $request->setControllerFormatter(function(Http $request) {
         return '\Controller' . String::create($request->getController())->toClass();
     });
 
+### Custom Controller Paths
+
 If you want to change the default path of `application/controllers`, all you have to do is change the load path:
 
     <?php
     
     Loader::addPath('/my/custom/controller/path');
+
+Since controller paths are autoloaded, you can specify more than one.
+
+Validation
+----------
+
+Europa's validators are very flexible and include many different ways to validate data.
+
+### Simple Validation
+
+Validation with a single validator is very simple:
+
+    <?php
+    
+    use Europa\Validator\Rule\Email;
+    
+    $email = new Email;
+    $valid = $email->validate('treshugart@gmail.com')->isValid();
+
+However, if you did this with a lot of data, your code would look like a cat took a nap on your keyboard.
 
 License
 -------
