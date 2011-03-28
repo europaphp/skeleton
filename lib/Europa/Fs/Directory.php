@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Fs;
+use Europa\Fs\Directory\Exception;
 
 /**
  * A general object for manipulating directories and multiple files.
@@ -18,21 +19,7 @@ class Directory extends Item implements \Countable, \Iterator
      * 
      * @var array
      */
-    protected $items = array();
-    
-    /**
-     * The filters applied to the current listing.
-     * 
-     * @var array
-     */
-    protected $filters = array();
-    
-    /**
-     * Contains whether or not the current listing is flat.
-     * 
-     * @var bool
-     */
-    protected $isFlat = false;
+    private $items = array();
     
     /**
      * Opens the directory an constructs the parent info object.
@@ -43,14 +30,14 @@ class Directory extends Item implements \Countable, \Iterator
      */
     public function __construct($path)
     {
-        $this->_path = realpath($path);
-        if (!$path || !$this->_path) {
+        $realpath = realpath($path);
+        if (!$path || !$realpath) {
             throw new Directory\Exception(
                 'The path ' . $path . ' must be a valid.'
             );
         }
-        parent::__construct($this->_path);
-        $this->unflatten();
+        parent::__construct($realpath);
+        $this->refresh();
     }
     
     /**
@@ -165,7 +152,7 @@ class Directory extends Item implements \Countable, \Iterator
      * 
      * @return \Europa\Fs\Directory
      */
-    public function move(\Europa\Fs\Directory $destination, $fileOverwrite = true)
+    public function move(Directory $destination, $fileOverwrite = true)
     {
         $this->copy($destination, $fileOverwrite);
         $this->delete();
@@ -184,7 +171,7 @@ class Directory extends Item implements \Countable, \Iterator
         $oldPath = $this->getPathname();
         $newPath = dirname($oldPath) . DIRECTORY_SEPARATOR . basename($newName);
         if (!@rename($oldPath, $newPath)) {
-            throw new Directory\Exception(
+            throw new Exception(
                 'Path ' . $oldPath . ' could not be renamed to ' . $newPath . '.'
             );
         }
@@ -204,7 +191,7 @@ class Directory extends Item implements \Countable, \Iterator
         
         // then delete it
         if (!@rmdir($this->getPathname())) {
-            throw new Directory\Exception(
+            throw new Exception(
                 'Could not remove directory ' . $this->getPathname() . '.'
             );
         }
@@ -266,6 +253,38 @@ class Directory extends Item implements \Countable, \Iterator
     }
     
     /**
+     * Refreshes the file/directory listing.
+     * 
+     * @return \Europa\Fs\Directory
+     */
+    public function refresh()
+    {
+        $this->items = array();
+        foreach ($this->getIterator() as $item) {
+            if ($item->isDot()) {
+                continue;
+            }
+            $isDir = $item->isDir();
+            $item  = $item->getPathname();
+            $this->items[] = $isDir ? new Directory($item) : new File($item);
+        }
+        return $this;
+    }
+    
+    public function flatten()
+    {
+        $items = array();
+        foreach ($this->items as $item) {
+            if ($item instanceof Directory) {
+                $items = array_merge($items, $item->flatten());
+            } else {
+                $items[] = $item;
+            }
+        }
+        return $items;
+    }
+    
+    /**
      * Applies the filter to the current listing.
      * 
      * @param mixed $filter The callback filter to run against each item.
@@ -274,107 +293,20 @@ class Directory extends Item implements \Countable, \Iterator
      */
     public function filter($filter)
     {
-        if (is_callable($filter, true)) {
-            $this->filters[] = $filter;
+        // only apply if it's callable
+        if (!is_callable($filter, true)) {
+            throw new Exception('The passed filter must be callable.');
         }
-        return $this;
-    }
-    
-    /**
-     * Removes the last filter on the listing. If $all is set to true, then all
-     * filters are removed.
-     * 
-     * @param bool $all Whether or not to move all filters.
-     * 
-     * @return \Europa\Fs\Directory
-     */
-    public function unfilter($all = false)
-    {
-        if ($all) {
-            $this->filters = array();
-        } elseif (count($this->filters)) {
-            array_pop($this->filters);
-        }
-        return $this;
-    }
-    
-    /**
-     * Returns whether or not the current listing has filters applied to it.
-     * 
-     * @return bool
-     */
-    public function hasFilters()
-    {
-        return count($this->filters) > 0;
-    }
-    
-    /**
-     * Flattens the directory structure so a single iteration is all that is
-     * needed to iterate over every file.
-     * 
-     * @return array
-     */
-    public function flatten()
-    {
-        // mark as flat
-        $this->isFlat = true;
         
-        // then flatten
-        $this->items = array();
-        foreach ($this->getIterator() as $item) {
-            
-            if ($item->isDot()) {
-                continue;
-            }
-            
-            // convert to path
-            $item = $item->getPathname();
-            if (!$this->_filter($item)) {
-                continue;
-            }
-            
-            // if it's a directory, flatten it
-            if (is_dir($item)) {
-                // Add it to the items array
-                $this->items[] = $item;
-                
-                $item = self::open($item);
-                foreach ($this->filters as $filter) {
-                    $item->filter($filter);
-                }
-                foreach ($item->flatten() as $sub) {
-                    $this->items[] = $sub->getPathname();
-                }
-            // if it's a file just add it
-            } else {
-                $this->items[] = $item;
+        // filter out each item
+        foreach ($this->items as $index => $item) {
+            if ($item instanceof Directory) {
+                $item->filter($filter);
+            } elseif (call_user_func($filter, $item) === false) {
+                unset($this->items[$index]);
             }
         }
         
-        return $this;
-    }
-    
-    /**
-     * Resets the directory listing back to the default.
-     * 
-     * @return \Europa\Fs\Directory
-     */
-    public function unflatten()
-    {
-        // mark as un-flat
-        $this->isFlat = false;
-        
-        // then un-flatten
-        $this->items = array();
-        foreach ($this->getIterator() as $item) {
-            if ($item->isDot()) {
-                continue;
-            }
-            $item = $item->getPathname();
-            if ($this->_filter($item)) {
-                $this->items[] = $item;
-            }
-        }
         return $this;
     }
     
@@ -386,30 +318,12 @@ class Directory extends Item implements \Countable, \Iterator
     public function sort()
     {
         sort($this->items);
-        return $this;
-    }
-    
-    /**
-     * Returns whether or not the current listing is flat.
-     * 
-     * @return bool
-     */
-    public function isFlat()
-    {
-        return $this->isFlat;
-    }
-    
-    /**
-     * Refreshes the current listing.
-     * 
-     * @return \Europa\Fs\Directory
-     */
-    public function refresh()
-    {
-        if ($this->isFlat()) {
-            return $this->flatten();
+        foreach ($this->items as $item) {
+            if ($item instanceof Directory) {
+                $item->sort();
+            }
         }
-        return $this->unflatten();
+        return $this;
     }
     
     /**
@@ -505,14 +419,7 @@ class Directory extends Item implements \Countable, \Iterator
      */
     public function current()
     {
-        $item = current($this->items);
-        if (!$item) {
-            return;
-        }
-        if (is_dir($item)) {
-            return self::open($item);
-        }
-        return new File($item);
+        return current($this->items);
     }
     
     /**
@@ -612,23 +519,5 @@ class Directory extends Item implements \Countable, \Iterator
             $dir->delete();
         }
         return self::create($path, $mask);
-    }
-    
-    /**
-     * Applies the filters to the current item and returns whether the item is
-     * valid or not based on the filter's return value.
-     * 
-     * @param string $item The path to the item.
-     * 
-     * @return bool
-     */
-    protected function _filter($item)
-    {
-        foreach ($this->filters as $filter) {
-            if (!call_user_func($filter, $item)) {
-                return false;
-            }
-        }
-        return true;
     }
 }
