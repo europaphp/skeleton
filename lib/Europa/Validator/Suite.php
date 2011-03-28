@@ -215,7 +215,7 @@ class Suite implements Validatable, \Iterator, \Countable
      */
     public function valid()
     {
-        return $this->offsetExists($this->key());
+        return $this->has($this->key());
     }
     
     /**
@@ -254,7 +254,7 @@ class Suite implements Validatable, \Iterator, \Countable
      */
     public function get($index)
     {
-        if (!$this->offsetExists($index)) {
+        if (!$this->has($index)) {
             throw new Exception('The validator at offset "' . $index . '" does not exist.');
         }
         return $this->validators[$index];
@@ -282,7 +282,7 @@ class Suite implements Validatable, \Iterator, \Countable
     public function remove($index)
     {
         // remove the validator
-        if ($this->offsetExists($index)) {
+        if ($this->has($index)) {
             unset($this->validators[$index]);
         }
         return $this;
