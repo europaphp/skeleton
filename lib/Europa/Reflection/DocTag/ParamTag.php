@@ -60,8 +60,8 @@ class ParamTag extends \Europa\Reflection\DocTag
 
         // split in to type/description parts (only two parts are allowed);
         $parts = preg_replace('/\s+/', ' ', $this->tagString);
-        $parts = explode(' ', $this->tagString, 3);
-
+        $parts = preg_split('/\s+/', $this->tagString, 3);
+        
         // set the type
         $this->type = trim($parts[0]);
 
