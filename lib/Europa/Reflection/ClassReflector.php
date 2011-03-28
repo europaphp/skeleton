@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Reflection;
+use Europa\Reflection\MethodReflector;
 
 /**
  * Extension to \ReflectionClass to implement doc block getting/parsing.
@@ -18,6 +19,18 @@ class ClassReflector extends \ReflectionClass implements Reflectable
      * @var string
      */
     private $docString;
+    
+    /**
+     * Overridden to get the \Europa\Reflection\MethodReflector instance for a method.
+     * 
+     * @param string $method The name of the method to get.
+     * 
+     * @return \Europa\Reflection\MethodReflector
+     */
+    public function getMethod($method)
+    {
+        return new MethodReflector($this->getName(), $method);
+    }
 
     /**
      * Returns the doc block for the class.
