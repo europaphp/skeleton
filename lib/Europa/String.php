@@ -101,6 +101,28 @@ class String implements \Countable
     }
     
     /**
+     * Splits upper-case words using the specified separator.
+     * 
+     * @param string $separator The separator to separate camel words with. Defaults to empty space.
+     * 
+     * @return \Europa\String
+     */
+    public function splitUcWords($separator = '')
+    {
+        $parts = array('');
+        foreach (str_split($this->string) as $char) {
+            $lower = strtolower($char);
+            if ($char === $lower) {
+                $parts[count($parts) - 1] .= $lower;
+            } else {
+                $parts[] = $lower;
+            }
+        }
+        $this->string = implode($separator, $parts);
+        return $this;
+    }
+    
+    /**
      * Formats the string into a valid class name according to convention.
      * 
      * @return \Europa\String
@@ -196,24 +218,39 @@ class String implements \Countable
     }
     
     /**
+     * Makes the first letter lowercase.
+     * 
+     * @return \Europa\String
+     */
+    public function lcFirst()
+    {
+        $this->string[0] = strtolower($this->string[0]);
+        return $this;
+    }
+    
+    /**
      * Makes the first letter uppercase.
      * 
      * @return \Europa\String
      */
-    public function ucfirst()
+    public function ucFirst()
     {
         $this->string[0] = strtoupper($this->string[0]);
         return $this;
     }
     
     /**
-     * Makes the first letter lowercase.
+     * Lowercases each word in the string.
      * 
      * @return \Europa\String
      */
-    public function lcfirst()
+    public function lcWords()
     {
-        $this->string[0] = strtolower($this->string[0]);
+        $parts = explode(' ', $this->string);
+        foreach ($parts as &$part) {
+            $part = lcfirst($part);
+        }
+        $this->string = implode(' ', $parts);
         return $this;
     }
     
@@ -222,7 +259,7 @@ class String implements \Countable
      * 
      * @return \Europa\String
      */
-    public function ucwords()
+    public function ucWords()
     {
         $this->string = ucwords($this->string);
         return $this;
