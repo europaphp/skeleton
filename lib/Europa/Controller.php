@@ -69,13 +69,9 @@ abstract class Controller
      */
     public function __toString()
     {
-        if (!$this->view) {
-            return '';
-        }
-        
         try {
             $this->preRender();
-            $view = $this->view->__toString();
+            $view = $this->view ? $this->view->__toString() : '';
             $this->preRender();
             return $view;
         } catch (\Exception $e) {
