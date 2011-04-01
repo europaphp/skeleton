@@ -72,7 +72,7 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
      */
     public function __get($name)
     {
-        if (isset($this->params[$name])) {
+        if (array_key_exists($name, $this->params)) {
             return $this->params[$name];
         } elseif ($this->serviceLocator) {
             $loc = $this->serviceLocator;
