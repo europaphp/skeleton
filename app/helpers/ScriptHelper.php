@@ -1,5 +1,8 @@
 <?php
 
+use Europa\Request\Http;
+use EUropa\View;
+
 /**
  * A base helper that auto-loads files.
  * 
@@ -62,13 +65,13 @@ abstract class ScriptHelper
      * 
      * @return ScriptHelper
      */
-    public function __construct(\Europa\View $view, $files = array())
+    public function __construct(View $view, $files = array())
     {
         $this->files = (array) $files;
         if (!$this->files) {
             $this->files[] = $view->getScript();
             foreach ($view->getDescendants() as $name => $desc) {
-                $this->files[] = $desc->getScript();
+                $this->files[] = str_replace(array('\\', '/'), '/', $desc->getScript());
             }
         }
         $this->setPath(static::getDefaultPath());
@@ -84,16 +87,17 @@ abstract class ScriptHelper
     {
         $string = '';
         foreach ($this->files as $file) {
+            $file = '/' . $file;
             if ($this->suffix) {
                 $file .= '.' . $this->suffix;
             }
             
             if ($this->path) {
-                $file = $this->path . '/' . $file;
+                $file = '/' . $this->path . $file;
             }
             
-            if ($root = Europa\Request\Http::root()) {
-                $file = '/' . $root . '/' . $file;
+            if ($root = Http::root()) {
+                $file = '/' . $root . $file;
             }
             
             if (file_exists($_SERVER['DOCUMENT_ROOT'] . $file)) {
@@ -112,7 +116,7 @@ abstract class ScriptHelper
      */
     public function setPath($path)
     {
-        $this->path = $path;
+        $this->path = trim($path, '/');
         return $this;
     }
     
