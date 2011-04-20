@@ -361,23 +361,7 @@ class Http extends \Europa\Request
      */
     public function redirect($uri)
     {
-        header('Location: ' . $this->format($uri));
+        header('Location: ' . $uri);
         exit;
-    }
-    
-    /**
-     * Formats the passed in URI using the Europa root URI.
-     * 
-     * @return string
-     */
-    public function format($uri)
-    {
-        // check for full or absolute paths
-        if (strpos($uri, 'http://') === 0 || strpos($uri, '/') === 0) {
-            return $uri;
-        }
-        
-        // if not, then prepend the root
-        return '/' . $this->getRootUri() . '/' . ltrim($uri, '/');
     }
 }
