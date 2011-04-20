@@ -21,6 +21,9 @@ use Europa\View;
  *   - trace
  *   - connect
  * 
+ * Additionally, if an above request method is not found, the controller will look for a method called "all" to catch
+ * all request that are made to the controller.
+ * 
  * @category Controllers
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
@@ -28,6 +31,13 @@ use Europa\View;
  */
 abstract class Controller
 {
+    /**
+     * The default method to call if one matching the request method is not defined.
+     * 
+     * @var string
+     */
+    const CATCH_ALL = 'all';
+    
     /**
      * The request used to dispatch to this controller.
      * 
@@ -63,21 +73,16 @@ abstract class Controller
     }
     
     /**
-     * Renders the set view.
+     * Renders the set view if it exists. If it does not exist, an empty string is returned.
      * 
      * @return string
      */
-    public function __toString()
+    public function render()
     {
-        try {
-            $this->preRender();
-            $view = $this->view ? $this->view->__toString() : '';
-            $this->preRender();
-            return $view;
-        } catch (\Exception $e) {
-            $e = new ControllerException($e->getMessage(), $e->getCode());
-            $e->trigger();
-        }
+        $this->preRender();
+        $view = $this->view ? $this->view->render() : '';
+        $this->preRender();
+        return $view;
     }
     
     /**
@@ -142,7 +147,7 @@ abstract class Controller
      */
     public function redirect($to = null)
     {
-        header('Location: ' . Http::format($to));
+        header('Location: ' . $this->getRequest()->format($to));
         exit;
     }
 
@@ -155,7 +160,7 @@ abstract class Controller
      */
     public function useFilters($switch = true)
     {
-        $this->useFilters = (bool) $switch;
+        $this->useFilters = $switch ? true : false;
         return $this;
     }
     
@@ -168,13 +173,23 @@ abstract class Controller
      */
     public function action()
     {
-        $method = $this->request->method();
+        $method = $this->request->getMethod();
+        
+        // first check to see if the specified method exists
+        // if it doesn't, assign a catch-all and re-check
         if (!method_exists($this, $method)) {
-            throw new ControllerException('The request method "' . $method . '" is not supported by "' . get_class($this) . '".');
+            if (method_exists($this, static::CATCH_ALL)) {
+                $method = static::CATCH_ALL;
+            } else {
+                throw new ControllerException(
+                    'The request method "' . $method . '" is not supported by "' . get_class($this) . '". Additionally'
+                    . ', a catch-all action "' . static::CATCH_ALL . '" was not specified.'
+                );
+            }
         }
 
         // apply custom filters before pre-action for security
-        $this->applyFilterTo($method);
+        $this->applyFiltersTo($method);
         $this->preAction();
 
         // call the appropriate method using named parameters
@@ -183,7 +198,7 @@ abstract class Controller
         // methods can return parameters for the view
         $params = call_user_func_array(
             array($this, $method),
-            $reflector->mergeNamedArgs(iterator_to_array($this->request))
+            $reflector->mergeNamedArgs($this->request->getParams())
         );
         
         // set view params if they were specified and we have a view
@@ -249,12 +264,12 @@ abstract class Controller
      * 
      * @return void
      */
-    private function applyFilterTo($method)
+    private function applyFiltersTo($method)
     {
         if (!$this->useFilters) {
             return;
         }
-
+        
         $class         = new ClassReflector($this);
         $method        = new MethodReflector($this, $method);
         $classFilters  = $class->getDocBlock()->getTag('filter', true);

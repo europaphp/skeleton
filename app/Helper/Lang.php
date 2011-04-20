@@ -1,5 +1,9 @@
 <?php
 
+namespace Helper;
+use Europa\Exception;
+use Europa\View;
+
 /**
  * A helper for parsing INI language files in the context of a given view.
  * 
@@ -8,41 +12,41 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class LangHelper
+class Lang
 {
     /**
      * Contains the ini values parsed out of the ini file.
      * 
      * @var array
      */
-    protected $ini = array();
+    private $ini = array();
     
     /**
      * The language to use.
      * 
      * @var string
      */
-    protected static $lang = 'en_US';
+    private static $lang = 'en_US';
     
     /**
      * The base path to the language files.
      * 
      * @var string
      */
-    protected static $path;
+    private static $path;
     
     /**
      * Constructs the language helper and parses the required ini file.
      * 
-     * @param Europa\View $view The view that called the helper.
+     * @param \Europa\View $view The view that called the helper.
      * 
-     * @return LangHelper
+     * @return \LangHelper
      */
-    public function __construct(\Europa\View $view, $fileOverride = null, $langOverride = null, $pathOverride = null)
+    public function __construct(View $view, $fileOverride = null, $langOverride = null, $pathOverride = null)
     {
         // set a default path if one doesn't exist
         if (!self::$path) {
-            self::path(dirname(__FILE__) . '/../lang');
+            self::path(dirname(__FILE__) . '/../Lang');
         }
         
         // allow view script language override
@@ -57,15 +61,12 @@ class LangHelper
               . DIRECTORY_SEPARATOR
               . $file
               . '.ini';
+        $path = str_replace(array('//', '\\'), DIRECTORY_SEPARATOR, $path);
         
         // make sure the language fle exists
-        if (!file_exists($path)) {
-            $e = new \Europa\Exception('The language file "' . $path . '" does not exist.');
-            $e->trigger();
+        if (file_exists($path)) {
+            $this->ini = parse_ini_file($path);
         }
-        
-        // set the language variables
-        $this->ini = parse_ini_file($path);
     }
     
     /**
@@ -105,6 +106,18 @@ class LangHelper
             return $this->ini[$name];
         }
         return $name;
+    }
+    
+    /**
+     * Returns whether or not the specified language variable exists.
+     * 
+     * @param string $name The name of the language variable to check for.
+     * 
+     * @return bool
+     */
+    public function __isset($name)
+    {
+        return isset($this->ini[$name]);
     }
     
     /**
@@ -148,7 +161,7 @@ class LangHelper
     {
         $realpath = realpath($path);
         if (!$realpath) {
-            $e = new \Europa\Exception('The language file base path "' . $path . '" does not exist.');
+            $e = new Exception('The language file base path "' . $path . '" does not exist.');
             $e->trigger();
         }
         self::$path = $realpath;

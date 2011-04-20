@@ -1,28 +1,31 @@
 <?php
 
+namespace Helper;
+use Helper\Script;
+
 /**
- * Stylesheet auto-loader.
+ * JavaScript auto-loader.
  * 
  * @category Helpers
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class CssHelper extends ScriptHelper
+class Js extends Script
 {
     /**
-     * The default css path.
+     * The default js path.
      * 
      * @var string
      */
-    protected static $defaultPath = 'css';
+    protected static $defaultPath = 'js';
     
     /**
-     * The default suffix for css files.
+     * The default suffix for js files.
      * 
      * @var string
      */
-    protected static $defaultSuffix = 'css';
+    protected static $defaultSuffix = 'js';
     
     /**
      * Builds the tag.
@@ -33,6 +36,6 @@ class CssHelper extends ScriptHelper
      */
     protected function compileTag($file)
     {
-        return '<link rel="stylesheet" type="text/css" href="' . $file . '" />';
+        return '<script type="text/javascript" src="' . $file . '"></script>';
     }
 }

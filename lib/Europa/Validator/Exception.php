@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Validator;
+use Europa\Exception as BaseException;
 
 /**
  * An validation exception class. Just like an exception except that multiple
@@ -11,7 +12,7 @@ namespace Europa\Validator;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Exception extends \Europa\Exception implements \ArrayAccess, \Iterator, \Countable
+class Exception extends BaseException implements \ArrayAccess, \Iterator, \Countable
 {
     /**
      * The message messages.

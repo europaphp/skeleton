@@ -1,5 +1,7 @@
 <?php
 
+namespace Controller;
+
 /**
  * A controller that will handle all errors.
  * 
@@ -8,15 +10,17 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright(c) 2010 Trey Shugart http://europaphp.org/license
  */
-class ErrorController extends AbstractController
+class Error extends Base
 {
     /**
      * Displays the error page.
      * 
      * @return void
      */
-    public function get()
+    public function all()
     {
-        
+        return array(
+            'url' => $this->getRequest()->getRequestUri(),
+        );
     }
 }

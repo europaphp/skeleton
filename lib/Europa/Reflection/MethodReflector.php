@@ -21,8 +21,10 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
     private $docString;
     
     /**
-     * Takes the passed named parameters and returns a merged array of the passed parameters
-     * and the method's default parameters in the order in which they were defined.
+     * Takes the passed named parameters and returns a merged array of the passed parameters and the method's default
+     * parameters in the order in which they were defined. If a required parameter is not defined and $throw is true,
+     * an exception is thrown indicating the parameter that was not defined. If $throw is false, the required parameter
+     * is set to null if not defined.
      * 
      * @param array $params        The parameters to merge.
      * @param bool  $caseSensitive Whether or not to make them case insensitive.
@@ -43,7 +45,7 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
                 $params[strtolower($name)] = $value;
             }
         }
-
+        
         // we check each parameter and set accordingly
         foreach ($this->getParameters() as $param) {
             $pos  = $param->getPosition();
@@ -53,6 +55,10 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
                 $merged[$pos] = $params[$name];
             } elseif ($param->isOptional()) {
                 $merged[$pos] = $param->getDefaultValue();
+            } elseif ($throw) {
+                throw new Exception('The required parameter "' . $name . '" was not specified.');
+            } else {
+                $meged[$pos] = null;
             }
         }
         

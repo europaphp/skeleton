@@ -1,12 +1,13 @@
 <?php
 
 // autoloading isn't enabled yet, so required the bootstrapper
-require_once dirname(__FILE__) . '/../../lib/Europa/Bootstrapper.php';
+require_once dirname(__FILE__) . '/../lib/Europa/Bootstrapper.php';
 
+use Europa\Bootstrapper as ParentBootstrapper;
 use Europa\Loader;
 use Europa\Route\Regex;
 use Europa\ServiceLocator;
-use Europa\Bootstrapper as ParentBootstrapper;
+use Europa\String;
 
 /**
  * Bootstraps the sample application.
@@ -49,7 +50,7 @@ class Bootstrapper extends ParentBootstrapper
      */
     public function setBasePath()
     {
-        $this->base = realpath(dirname(__FILE__) . '/../../');
+        $this->base = realpath(dirname(__FILE__) . '/../');
     }
     
     /**
@@ -60,11 +61,7 @@ class Bootstrapper extends ParentBootstrapper
     public function setUpLoader()
     {
         require $this->base . '/lib/Europa/Loader.php';
-        Loader::addPath($this->base . '/app/controllers');
-        Loader::addPath($this->base . '/app/views');
-        Loader::addPath($this->base . '/app/helpers');
-        Loader::addPath($this->base . '/app/filters');
-        Loader::addPath($this->base . '/app/forms');
+        Loader::addPath($this->base . '/app');
         Loader::register();
     }
     
@@ -106,7 +103,7 @@ class Bootstrapper extends ParentBootstrapper
     public function configureViewHelpers()
     {
         $this->locator->queueMethodFor('helper', 'setFormatter', array(function($service) {
-            return \Europa\String::create($service)->toClass() . 'Helper';
+            return '\Helper' . String::create($service)->toClass();
         }));
     }
     
@@ -117,7 +114,8 @@ class Bootstrapper extends ParentBootstrapper
      */
     public function configureView()
     {
-        $this->locator->queueMethodFor('view', 'setServiceLocator', array($this->locator->get('helper')));
+        $this->locator->queueMethodFor('view', 'setPath', array($this->base . '/app/View'));
+        $this->locator->queueMethodFor('view', 'setHelperLocator', array($this->locator->get('helper')));
     }
     
     /**
@@ -127,7 +125,8 @@ class Bootstrapper extends ParentBootstrapper
      */
     public function configureLayout()
     {
-        $this->locator->queueMethodFor('layout', 'setChild', array('view', $this->locator->get('view')));
-        $this->locator->queueMethodFor('layout', 'setServiceLocator', array($this->locator->get('helper')));
+        $this->locator->queueMethodFor('layout', 'setPath', array($this->base . '/app/View'));
+        $this->locator->queueMethodFor('layout', '__set', array('view', $this->locator->get('view')));
+        $this->locator->queueMethodFor('layout', 'setHelperLocator', array($this->locator->get('helper')));
     }
 }

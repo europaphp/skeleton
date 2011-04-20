@@ -46,7 +46,7 @@ class Test_Request_Params_Http extends Testes_Test
     
     public function testHttpParamClearing()
     {
-        $this->request->clear();
+        $this->request->clearParams();
         $this->assert(
             $this->request->bulk2 === null,
             'Parameter removing not working.'

@@ -1,5 +1,8 @@
 <?php
 
+namespace Helper;
+use Europa\View;
+
 /**
  * Contains general HTML elements that can be automated for the view.
  * 
@@ -8,7 +11,7 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class HtmlHelper
+class Html
 {
     /**
      * The view that called the helper.
@@ -24,7 +27,7 @@ class HtmlHelper
      * 
      * @return string
      */
-    public function __construct(\Europa\View $view)
+    public function __construct(View $view)
     {
         $this->view = $view;
     }
@@ -40,7 +43,7 @@ class HtmlHelper
      */
     public function link($uri = null, $label = null, array $params = array())
     {
-        $uri   = new UriHelper($this->view, $uri, $params);
+        $uri   = new Uri($this->view, $uri, $params);
         $uri   = $uri->__toString();
         $label = $label ? $this->view->lang->$label : $uri;
         return '<a href="' . $uri . '">' . $label . '</a>';
@@ -57,7 +60,7 @@ class HtmlHelper
      */
     public function img($uri = null, $alt = null, array $params = array())
     {
-        $uri = new UriHelper($this->view, $uri, $params);
+        $uri = new Uri($this->view, $uri, $params);
         $uri = $uri->__toString();
         $alt = $alt ? $this->view->lang->$alt : $uri;
         return '<img src="' . $uri . '" alt="' . $alt . '" />';

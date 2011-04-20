@@ -33,11 +33,11 @@ class Directory extends Item implements \Countable, \Iterator
         $realpath = realpath($path);
         if (!$path || !$realpath) {
             throw new Directory\Exception(
-                'The path ' . $path . ' must be a valid.'
+                'The path "' . $path . '" must be a valid directory.'
             );
         }
         parent::__construct($realpath);
-        $this->refresh();
+        $this->unflatten();
     }
     
     /**
@@ -253,45 +253,49 @@ class Directory extends Item implements \Countable, \Iterator
     }
     
     /**
+     * Returns a flat recursive file listing of the current directory.
+     * 
+     * @return array
+     */
+    public function flatten()
+    {
+        foreach ($this->items as $index => $item) {
+            if (is_dir($item)) {
+                $this->items = array_merge($this->items, static::open($item)->flatten()->getItems());
+                unset($this->items[$index]);
+            } else {
+                $this->items[] = $item;
+            }
+        }
+        return $this;
+    }
+    
+    /**
      * Refreshes the file/directory listing.
      * 
      * @return \Europa\Fs\Directory
      */
-    public function refresh()
+    public function unflatten()
     {
         $this->items = array();
         foreach ($this->getIterator() as $item) {
             if ($item->isDot()) {
                 continue;
             }
-            $isDir = $item->isDir();
-            $item  = $item->getPathname();
-            $this->items[] = $isDir ? new Directory($item) : new File($item);
+            $this->items[] = $item->getPathname();
         }
         return $this;
-    }
-    
-    public function flatten()
-    {
-        $items = array();
-        foreach ($this->items as $item) {
-            if ($item instanceof Directory) {
-                $items = array_merge($items, $item->flatten());
-            } else {
-                $items[] = $item;
-            }
-        }
-        return $items;
     }
     
     /**
      * Applies the filter to the current listing.
      * 
      * @param mixed $filter The callback filter to run against each item.
+     * @param array $data   Any custom data to pass to the callback.
      * 
      * @return \Europa\Fs\Directory
      */
-    public function filter($filter)
+    public function filter($filter, array $data = array())
     {
         // only apply if it's callable
         if (!is_callable($filter, true)) {
@@ -300,9 +304,7 @@ class Directory extends Item implements \Countable, \Iterator
         
         // filter out each item
         foreach ($this->items as $index => $item) {
-            if ($item instanceof Directory) {
-                $item->filter($filter);
-            } elseif (call_user_func($filter, $item) === false) {
+            if (call_user_func_array($filter, array_merge(array($item), $data)) === false) {
                 unset($this->items[$index]);
             }
         }
@@ -334,20 +336,11 @@ class Directory extends Item implements \Countable, \Iterator
      * 
      * @return array
      */
-    public function search($regex, $basenameOnly = true)
+    public function search($regex)
     {
-        $items = array();
-        foreach ($this->items as $item) {
-            $name = $item;
-            if ($basenameOnly) {
-                $name = basename($name);
-            }
-            if (preg_match($regex, $name)) {
-                $items[] = $item;
-            }
-        }
-        $this->items = $items;
-        return $this;
+        return $this->filter(function($item, $regex) {
+            return preg_match($regex, $item) ? true : false;
+        }, array($regex));
     }
     
     /**
@@ -360,14 +353,9 @@ class Directory extends Item implements \Countable, \Iterator
      */
     public function searchIn($regex)
     {
-        $items = array();
-        foreach ($this->items as $item) {
-            if (is_file($item) && File::open($item)->searchIn($regex)) {
-                $items[] = $item;
-            }
-        }
-        $this->items = $items;
-        return $this;
+        return $this->filter(function($item, $regex) {
+            return is_file($item) && File::open($item)->search($regex);
+        }, array($regex));
     }
     
     /**
@@ -383,7 +371,7 @@ class Directory extends Item implements \Countable, \Iterator
     public function searchAndReplace($regex, $replacement)
     {
         $items = array();
-        foreach ($this->searchIn($regex) as $file) {
+        foreach ($this->searchIn($regex)->getItems() as $file) {
             $count = File::open($file)->searchAndReplace($regex, $replacement);
             if ($count) {
                 $items[] = $file;

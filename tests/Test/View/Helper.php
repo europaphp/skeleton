@@ -1,6 +1,11 @@
 <?php
 
-class Test_View_ServiceInjection extends Testes_Test
+use Europa\ServiceLocator;
+use Europa\String;
+use Europa\View;
+use Europa\View\Php;
+
+class Test_View_Helper extends Testes_Test
 {
     private $view;
     
@@ -8,12 +13,12 @@ class Test_View_ServiceInjection extends Testes_Test
     
     public function setUp()
     {
-        $this->view    = new \Europa\View\Php;
-        $this->locator = new \Europa\ServiceLocator;
+        $this->view    = new Php;
+        $this->locator = new ServiceLocator;
         
-        $this->view->setServiceLocator($this->locator);
+        $this->view->setHelperLocator($this->locator);
         $this->locator->setFormatter(function($service) {
-            return \Europa\String::create($service)->toClass() . 'ServiceInjector';
+            return String::create($service)->toClass() . 'ServiceInjector';
         });
     }
     
@@ -30,7 +35,7 @@ class Test_View_ServiceInjection extends Testes_Test
 
 class TestServiceInjector
 {
-    public function __construct(\Europa\View $view)
+    public function __construct(View $view)
     {
         
     }

@@ -1,5 +1,6 @@
 <?php
 
+namespace Helper;
 use Europa\Request\Http;
 use EUropa\View;
 
@@ -11,7 +12,7 @@ use EUropa\View;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class ScriptHelper
+abstract class Script
 {
     /**
      * The files associated to this instance.
@@ -69,10 +70,7 @@ abstract class ScriptHelper
     {
         $this->files = (array) $files;
         if (!$this->files) {
-            $this->files[] = $view->getScript();
-            foreach ($view->getDescendants() as $name => $desc) {
-                $this->files[] = str_replace(array('\\', '/'), '/', $desc->getScript());
-            }
+            $this->files = $this->getFilesFor($view);
         }
         $this->setPath(static::getDefaultPath());
         $this->setSuffix(static::getDefaultSuffix());
@@ -96,7 +94,7 @@ abstract class ScriptHelper
                 $file = '/' . $this->path . $file;
             }
             
-            if ($root = Http::root()) {
+            if ($root = Http::create()->getRootUri()) {
                 $file = '/' . $root . $file;
             }
             
@@ -151,6 +149,24 @@ abstract class ScriptHelper
     public function getSuffix()
     {
         return $this->suffix;
+    }
+    
+    /**
+     * Recursively gets the files for the specified view.
+     * 
+     * @param \Europa\View $view The view to get the files for.
+     * 
+     * @return array
+     */
+    private function getFilesFor(View $view)
+    {
+        $files = array($view->getScript());
+        foreach ($view->getParams() as $param) {
+            if ($param instanceof View) {
+                $files = array_merge($files, $this->getFilesFor($param));
+            }
+        }
+        return $files;
     }
     
     /**

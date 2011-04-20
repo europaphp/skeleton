@@ -89,8 +89,8 @@ abstract class DocTag
      */
     public function compile()
     {
-        $str = $this->name;
-        if ($this->value) {
+        $str = $this->tag();
+        if ($this->tagString) {
             $str .= ' ' . $this->tagString;
         }
         return $str;

@@ -1,5 +1,7 @@
 <?php
 
+namespace Controller;
+
 /**
  * A default controller for a base implementation.
  * 
@@ -8,7 +10,7 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class IndexController extends AbstractController
+class Index extends Base
 {
     /**
      * The default request method.

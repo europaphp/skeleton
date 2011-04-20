@@ -3,7 +3,10 @@
 namespace Europa;
 use Europa\Controller;
 use Europa\Loader;
+use Europa\Request\Cli;
 use Europa\Request\Exception;
+use Europa\Request\Http;
+use Europa\String;
 
 /**
  * The heart of EuropaPHP. This is where it all starts and ends.
@@ -13,7 +16,7 @@ use Europa\Request\Exception;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class Request implements \Iterator, \Countable
+abstract class Request
 {
     /**
      * The key used to get the controller from the request params.
@@ -38,21 +41,6 @@ abstract class Request implements \Iterator, \Countable
     private $params = array('controller' => 'index');
     
     /**
-     * Automates dispatching and converting the controller to a string.
-     * 
-     * @return string
-     */
-    public function __toString()
-    {
-        try {
-            return $this->dispatch()->__toString();
-        } catch (\Exception $e) {
-            $e = new Exception($e->getMessage(), $e->getCode());
-            $e->trigger();
-        }
-    }
-    
-    /**
      * Sets the specified request parameter.
      * 
      * @param string $name  The name of the parameter.
@@ -62,7 +50,7 @@ abstract class Request implements \Iterator, \Countable
      */
     public function __set($name, $value)
     {
-        $this->setParam($name, $value);
+        return $this->setParam($name, $value);
     }
     
     /**
@@ -189,7 +177,7 @@ abstract class Request implements \Iterator, \Countable
      * 
      * @return \Europa\Request
      */
-    public function clear()
+    public function removeParams()
     {
         $this->params = array();
         return $this;
@@ -204,19 +192,14 @@ abstract class Request implements \Iterator, \Countable
     {
         $controller = $this->formatController();
         if (!Loader::load($controller)) {
-            throw new Exception(
-                'Could not load controller ' . $controller . '.',
-                Exception::CONTROLLER_NOT_FOUND
-            );
+            throw new Exception('Could not load controller ' . $controller . '.', Exception::CONTROLLER_NOT_FOUND);
         }
         
         $controller = new $controller($this);
         if (!$controller instanceof Controller) {
             throw new Exception(
-                'Class '
-                . get_class($controller) 
-                . ' is not a valid controller instance.'
-                . 'Controller classes must derive from \Europa\Controller.'
+                'Class ' . get_class($controller)  . ' is not a valid controller instance. Controller classes must '
+                . 'derive from \Europa\Controller.'
             );
         }
         
@@ -286,7 +269,7 @@ abstract class Request implements \Iterator, \Countable
         if ($this->controllerFormatter) {
             return call_user_func($this->controllerFormatter, $this);
         }
-        return \Europa\String::create($this->getController())->toClass() . 'Controller';
+        return 'Controller' . String::create($this->getController())->toClass();
     }
     
     /**
@@ -299,75 +282,13 @@ abstract class Request implements \Iterator, \Countable
     public function setControllerFormatter($callback)
     {
         if (!is_callable($callback, true)) {
-            throw new \Europa\Request\Exception(
+            throw new Exception(
                 'The specified controller formatter is not valid.',
-                \Europa\Request\Exception::INVALID_CONTROLLER_FORMATTER
+                Exception::INVALID_CONTROLLER_FORMATTER
             );
         }
         $this->controllerFormatter = $callback;
         return $this;
-    }
-    
-    /**
-     * Returns the parameter count.
-     * 
-     * @return int
-     */
-    public function count()
-    {
-        return count($this->params);
-    }
-    
-    /**
-     * Returns the current parameter.
-     * 
-     * @return mixed
-     */
-    public function current()
-    {
-        return current($this->params);
-    }
-    
-    /**
-     * Returns the parameter key.
-     * 
-     * @return string
-     */
-    public function key()
-    {
-        return key($this->params);
-    }
-    
-    /**
-     * Moves to the next parameter.
-     * 
-     * @return \Europa\Request
-     */
-    public function next()
-    {
-        next($this->params);
-        return $this;
-    }
-    
-    /**
-     * Resets iteration.
-     * 
-     * @return \Europa\Request
-     */
-    public function rewind()
-    {
-        reset($this->params);
-        return $this;
-    }
-    
-    /**
-     * Returns whether or not the iteration can continue.
-     * 
-     * @return bool
-     */
-    public function valid()
-    {
-        return isset($this->params[$this->key()]);
     }
     
     /**
@@ -378,5 +299,28 @@ abstract class Request implements \Iterator, \Countable
     public static function isCli()
     {
         return defined('STDIN');
+    }
+    
+    /**
+     * Creates a new instance of the statically called request.
+     * 
+     * @return \Europa\Request
+     */
+    public static function create()
+    {
+        return new static;
+    }
+    
+    /**
+     * Auto-detects the request type and returns the appropriate request instance.
+     * 
+     * @return \Europa\Request
+     */
+    public static function autoDetect()
+    {
+        if (static::isCli()) {
+            return new Cli;
+        }
+        return new Http;
     }
 }

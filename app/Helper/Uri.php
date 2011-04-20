@@ -1,5 +1,9 @@
 <?php
 
+namespace Helper;
+use Europa\Request\Http;
+use Europa\View;
+
 /**
  * A helper for formatting a passed in url.
  * 
@@ -8,7 +12,7 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class UriHelper
+class Uri
 {
     /**
      * The url to format.
@@ -31,9 +35,9 @@ class UriHelper
      * @param string      $url
      * @param array       $params
      * 
-     * @return UrlHelper
+     * @return \Helper\Uri
      */
-    public function __construct(\Europa\View $view, $url = null, array $params = array())
+    public function __construct(View $view, $url = null, array $params = array())
     {
         $this->url    = $url;
         $this->params = $params;
@@ -47,7 +51,7 @@ class UriHelper
     public function __toString()
     {
         $url = '/';
-        if ($root = Europa\Request\Http::root()) {
+        if ($root = Http::create()->getRootUri()) {
             $url .= $root . '/';
         }
         if ($this->url) {

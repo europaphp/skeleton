@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Fs;
+use Europa\File\Exception;
 
 /**
  * A general object for manipulating single files.
@@ -69,6 +70,7 @@ class File extends Item
                 'Could not delete file ' . $this->getPathname() . '.'
             );
         }
+        return $this;
     }
     
     /**
@@ -121,16 +123,15 @@ class File extends Item
      * 
      * @return \Europa\Fs\File
      */
-    public function rename($newName)
+    public function rename($newPath)
     {
         $oldPath = $this->getPathname();
-        $newPath = $this->getPath() . DIRECTORY_SEPARATOR . basename($newName);
         if (!@rename($oldPath, $newPath)) {
-            throw new File\Exception(
+            throw new Exception(
                 'Could not rename file from ' . $oldPath . ' to ' . $newPath . '.'
             );
         }
-        return new self($newPath);
+        return new static($newPath);
     }
     
     /**
@@ -154,7 +155,7 @@ class File extends Item
      * 
      * @return false|array
      */
-    public function searchIn($regex)
+    public function search($regex)
     {
         preg_match_all($regex, file_get_contents($this->getPathname()), $matches);
         if (count($matches[0])) {

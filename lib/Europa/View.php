@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa;
+use Europa\View\Exception;
 
 /**
  * A base class for views in Europa.
@@ -10,107 +11,81 @@ namespace Europa;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class View implements \ArrayAccess, \Iterator, \Countable
+abstract class View
 {
-    /**
-     * The direct children of this view.
-     * 
-     * @var array
-     */
-    protected $children = array();
-    
     /**
      * The parameters and helpers bound to the view.
      * 
      * @var array
      */
-    protected $params = array();
-
+    private $params = array();
+    
     /**
-     * The service container used for helpers.
+     * The children of the current view.
      * 
-     * @var \Europa\ServiceLocator
+     * @var array
      */
-    protected $serviceLocator;
-       
+    private $children = array();
+    
+    /**
+     * The parent associated to the current view.
+     * 
+     * @var \Europa\View|null
+     */
+    private $parent;
+    
+    /**
+     * Whether or not to cascade parameters.
+     * 
+     * @var bool
+     */
+    private $cascadeParams = true;
+    
     /**
      * Renders the view in whatever way necessary.
      * 
      * @return string
      */
-    abstract public function __toString();
-        
-    /**
-     * Attempts to call the specified method on the specified locator if it exists.
-     * If none exists, then an undefined method exception is thrown.
-     * 
-     * @param string $name The specified service to locate and return.
-     * @param array  $args The configuration for the service.
-     * 
-     * @return mixed
-     */
-    public function __call($name, array $args = array())
-    {
-        array_unshift($args, $this);
-        if ($this->serviceLocator) {
-            return $this->serviceLocator->create($name, $args);
-        }
-        throw new Exception('Call to undefined method "' . get_class($this) . '::' . $name . '()".');
-    }
-        
-    /**
-     * Attempts to retrieve a parameter by name. If the parameter is not found, then it attempts
-     * to use the service locator to find a helper. If nothing is found, it returns null.
-     * 
-     * If a service locator is found, a new instance of the service is created and set as the
-     * specified parameter. Subsequent invocations to __get will then return the same instance.
-     * If you require a new instance every time, invoke __call.
-     * 
-     * @param string $name The name of the property to get or helper to load.
-     * 
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        if (array_key_exists($name, $this->params)) {
-            return $this->params[$name];
-        } elseif ($this->serviceLocator) {
-            $loc = $this->serviceLocator;
-        } else {
-            return null;
-        }
-        
-        $this->params[$name] = $loc->create($name, array($this));
-        return $this->params[$name];
-    }
+    abstract public function render();
     
     /**
-     * Sets a parameter.
+     * Sets the specified parameter.
      * 
-     * @param string $name  The parameter to set.
-     * @param mixed  $value The value to set.
+     * @param string $name The parameter to set.
      * 
-     * @return bool
+     * @return void
      */
     public function __set($name, $value)
     {
-        $this->params[$name] = $value;
+        return $this->setParam($name, $value);
     }
     
     /**
-     * Returns whether a parameter is set or not.
+     * Returns the value of the specified parameter. If it is not found, then it returns null.
      * 
-     * @param string $name The parameter to check.
+     * @param string $name The parameter to get.
+     * 
+     * @return void
+     */
+    public function __get($name)
+    {
+        return $this->getParam($name);
+    }
+    
+    /**
+     * Checks to see if the specified parameter is set.
+     * 
+     * @param string $name The parameter to check for.
      * 
      * @return bool
      */
     public function __isset($name)
     {
-        return array_key_exists($name, $this->params);
+        return $this->hasParam($name);
     }
     
     /**
-     * Unsets a parameter
+     * Unsets the specified parameter.
      * 
      * @param string $name The parameter to unset.
      * 
@@ -118,92 +93,95 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
      */
     public function __unset($name)
     {
-        unset($this->params[$name]);
+        return $this->removeParam($name);
     }
     
     /**
-     * Sets a child view. Setting children allows views to gather information about child views.
-     * This is helpful, for example, if you want to load all css or js for the current view
-     * and all of its children.
+     * Tells the view whether or not to allow parameter cascading.
+     * 
+     * @param bool $switch Whether or not to cascade parameters.
      * 
      * @return \Europa\View
      */
-    public function setChild($name, \Europa\View $view)
+    public function cascadeParams($switch = true)
     {
-        $this->children[$name] = $view;
+        $this->cascadeParams = $switch ? true : false;
         return $this;
     }
     
     /**
-     * Returns the specified child. If the child does not exist, an exception is thrown.
+     * Sets a parameter on the view. Additionally, the parameter is set on all child views if parameter cascading is
+     * enabled.
      * 
-     * @throws \Europa\View\Exception If no child exists.
+     * @param string $name  The parameter name.
+     * @param mixed  $value The parameter value.
      * 
      * @return \Europa\View
      */
-    public function getChild($name)
+    public function setParam($name, $value)
     {
-        if (!isset($this->children[$name])) {
-            throw new View\Exception('The child "' . $name . '" does not exist for view "' . get_class($this) . ' (' . $this->getScript() . '").');
-        }
-        return $this->children[$name];
-    }
-    
-    /**
-     * Returns all of the children belonging to this view.
-     * 
-     * @return array
-     */
-    public function getChildren()
-    {
-        return $this->children;
-    }
-    
-    /**
-     * Returns a flat array containing all of the descendants for this view. Since the array
-     * is flattened and the child names may conflict, they are formatted to represent their
-     * ancestry. For example: "parent:child:grandchild".
-     * 
-     * @return array
-     */
-    public function getDescendants($separator = ':')
-    {
-        $descendants = array();
-        foreach ($this->getChildren() as $name => $child) {
-            $descendants[$name] = $child;
-            foreach ($child->getDescendants() as $grandChildName => $grandChild) {
-                $descendants[$name . $separator . $grandChildName] = $grandChild;
+        $this->params[$name] = $value;
+        if ($this->cascadeParams) {
+            foreach ($this->children as $child) {
+                $child->setParam($name, $value);
             }
         }
-        return $descendants;
+        return $this;
     }
-
+    
     /**
-     * Sets the service locator to use for calling helpers.
+     * Gets a parameter from the view.
      * 
-     * @param \Europa\ServiceLocator $serviceLocator The service locator to use for helpers.
+     * @param string $name The parameter name.
+     * 
+     * @return mixed
+     */
+    public function getParam($name)
+    {
+        if ($this->__isset($name)) {
+            return $this->params[$name];
+        }
+        return null;
+    }
+    
+    /**
+     * Returns whether or not the specified parameter exists.
+     * 
+     * @param string $name The parameter name.
+     * 
+     * @return bool
+     */
+    public function hasParam($name)
+    {
+        return array_key_exists($name, $this->params);
+    }
+    
+    /**
+     * Removes the specified parameter.
+     * 
+     * @param string $name The parameter name.
      * 
      * @return \Europa\View
      */
-    public function setServiceLocator(ServiceLocator $serviceLocator)
+    public function removeParam($name)
     {
-        $this->serviceLocator = $serviceLocator;
+        if ($this->hasParam($name)) {
+            unset($this->params[$name]);
+        }
         return $this;
     }
     
     /**
      * Applies a group of parameters to the view.
      * 
-     * @param mixed $params The params to set. Can be any iterable value.
+     * @param mixed $params The params to set.
      * 
-     * @return Europa\View
+     * @return \Europa\View
      */
-    public function setParams($params)
+    public function setParams(array $params)
     {
-        if (is_array($params) || is_object($params)) {
-            foreach ($params as $name => $value) {
-                $this->$name = $value;
-            }
+        foreach ($params as $name => $value) {
+            $this->setParam($name, $value);
         }
         return $this;
     }
@@ -211,32 +189,11 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
     /**
      * Returns the parameters bound to the view.
      * 
-     * In most cases, this is will only be used when determining which
-     * properties are public internally or when serializing view objects
-     * externally.
-     * 
      * @return array
      */
     public function getParams()
     {
         return $this->params;
-    }
-    
-    /**
-     * Returns whether or not the passed parameters exist.
-     * 
-     * @param array $params The parameters to check for.
-     * 
-     * @return bool
-     */
-    public function hasParams(array $params)
-    {
-        foreach ($params as $name) {
-            if (!$this->__isset($name)) {
-                return false;
-            }
-        }
-        return true;
     }
     
     /**
@@ -251,115 +208,125 @@ abstract class View implements \ArrayAccess, \Iterator, \Countable
     }
     
     /**
-     * Sets the specified parameter.
+     * Adds a child to the current view by name.
      * 
-     * @param string $name  The parameter name.
-     * @param mixed  $value The parameter value.
+     * @param string       $name The name of the child.
+     * @param \Europa\View $view The child to set.
      * 
-     * @return Europa\View
+     * @return \Europa\View
      */
-    public function offsetSet($name, $value)
+    public function setChild($name, View $view)
     {
-        $this->__set($name, $value);
+        $this->children[$name] = $view;
+        $view->setParent($this);
         return $this;
     }
     
     /**
-     * Returns the specified parameter.
+     * Returns the specified child instance by its name. If the child does not exist an exception is thrown.
      * 
-     * @param string $name The parameter name.
+     * @param string $name The name of the child to get.
      * 
-     * @return mixed
+     * @return \Europa\View
      */
-    public function offsetGet($name)
+    public function getChild($name)
     {
-        return $this->__get($name);
+        if (!isset($this->children[$name])) {
+            throw new Exception('The child "' . $name . '" does not exist for "' . $this->getScript() . '"');
+        }
+        return $this->children[$name];
     }
     
     /**
-     * Returns whether or not the specified parameter exists.
+     * Removes the specified child from the current view. The specified child can be either an instance of the child
+     * that you want to remove or a string representing the name of the child that was specified when it was set.
      * 
-     * @param string $name The parameter name.
+     * @param \Europa\View|string $childToRemove The instance of name of the child to remove.
      * 
-     * @return bool
+     * @return \Europa\View
      */
-    public function offsetExists($name)
+    public function removeChild($childToRemove)
     {
-        return $this->__isset($name);
-    }
-    
-    /**
-     * Unsets the specified parameter.
-     * 
-     * @param string $name The parameter name.
-     * 
-     * @return Europa\View
-     */
-    public function offsetUnset($name)
-    {
-        $this->__unset($name);
+        foreach ($this->children as $name => $child) {
+            if ($childToRemove instanceof View) {
+                $matched = $childToRemove === $child;
+            } else {
+                $matched = $childToRemove === $name;
+            }
+            
+            if ($matched) {
+                unset($this->children[$name]);
+                break;
+            }
+        }
         return $this;
     }
     
     /**
-     * Returns the current parameter.
+     * Returns all of the descendants of the current view as a flat array.
      * 
-     * @return mixed
+     * @return array
      */
-    public function current()
+    public function getDescendants()
     {
-        return current($this->params);
+        $descendants = array();
+        foreach ($this->children as $name => $child) {
+            $descendants[$name] = $child;
+            foreach ($child->getDescendants() as $descName => $descChild) {
+                $descendatns[$name] = $desc;
+            }
+        }
+        return $descendants;
     }
     
     /**
-     * Returns the current parameter name.
+     * Sets the immediate parent of the current view. If the child has a current parent, it is removed from that parent
+     * as views can only have a single parent.
      * 
-     * @return string
-     */
-    public function key()
-    {
-        return key($this->params);
-    }
-    
-    /**
-     * Moves to the next parameter.
+     * @param \Europa\View $view The parent.
      * 
-     * @return Europa\View
+     * @return \Europa\View
      */
-    public function next()
+    public function setParent(View $view)
     {
-        next($this->params);
+        $this->parent = $view;
         return $this;
     }
     
     /**
-     * Resets iteration.
+     * Returns the immediate parent of the current view if it exists.
      * 
-     * @return Europa\View
+     * @return \Europa\View|null
      */
-    public function rewind()
+    public function getParent()
     {
-        reset($this->params);
+        return $this->parent;
+    }
+    
+    /** 
+     * Detaches the parent of the current view from the current view.
+     * 
+     * @return \Europa\View
+     */
+    public function removeParent()
+    {
+        $this->parent->removeChild($this);
         return $this;
     }
     
     /**
-     * Returns whether or not iteration is still valid.
+     * Returns the ancestors of the current view as a flat array. The first parent being the first and the top-most
+     * being the last.
      * 
-     * @return bool
+     * @return array
      */
-    public function valid()
+    public function getAncestors()
     {
-        return isset($this->{$this->key()});
-    }
-    
-    /**
-     * Returns the number of parameters.
-     * 
-     * @return int
-     */
-    public function count()
-    {
-        return count($this->params);
+        $parent    = $this->getParent();
+        $ancestors = array();
+        while ($parent->getParent() instanceof View) {
+            $ancestors[] = $parent->getParent();
+        }
+        return $ancestors;
     }
 }

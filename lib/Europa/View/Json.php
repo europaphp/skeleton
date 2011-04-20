@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\View;
+use Europa\View;
 
 /**
  * A view class for rendering JSON data from bound parameters.
@@ -10,7 +11,7 @@ namespace Europa\View;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Json extends \Europa\View
+class Json extends View
 {
     /**
      * Constructs the view and sets parameters.
@@ -29,9 +30,8 @@ class Json extends \Europa\View
      * 
      * @return string
      */
-    public function __toString()
+    public function render()
     {
-        // if no headers have been sent, make sure we send the correct mime type
         if (!headers_sent()) {
             header('Content-Type: Application/JSON');
         }

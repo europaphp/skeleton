@@ -1,5 +1,6 @@
 <?php
 
+namespace Helper;
 use Europa\View;
 
 /**
@@ -10,7 +11,7 @@ use Europa\View;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class CaptureHelper
+class Capture
 {
     /**
      * The view that called the helper.

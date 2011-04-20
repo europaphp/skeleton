@@ -87,7 +87,7 @@ class Http extends \Europa\Request
      *
      * @return string
      */
-    public static function method()
+    public function getMethod()
     {
         if (isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
             $method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
@@ -107,7 +107,7 @@ class Http extends \Europa\Request
      * 
      * @return array
      */
-    public static function headers()
+    public function getHeaders()
     {
         static $server;
         if (!isset($server)) {
@@ -132,9 +132,9 @@ class Http extends \Europa\Request
      * 
      * @return string
      */
-    public static function header($name)
+    public function getHeader($name)
     {
-        $headers = static::headers();
+        $headers = $this->getHeaders();
         if (isset($headers[$name])) {
             return $headers[$name];
         }
@@ -147,10 +147,10 @@ class Http extends \Europa\Request
      * 
      * @return array
      */
-    public static function accepts($type = null)
+    public function getAcceptedContentTypes($type = null)
     {
         // parse out accept headers
-        $accept = static::header('Accept');
+        $accept = $this->getHeader('Accept');
         $accept = explode(',', $accept);
         array_walk($accept, 'trim');
         
@@ -168,10 +168,10 @@ class Http extends \Europa\Request
      * 
      * @return string
      */
-    public static function scheme()
+    public function getScheme()
     {
         $scheme = 'http';
-        if (static::isSecure()) {
+        if ($this->isSecure()) {
             $scheme .= 's';
         }
         return $scheme;
@@ -182,7 +182,7 @@ class Http extends \Europa\Request
      * 
      * @return string
      */
-    public static function host()
+    public function getHost()
     {
         if (isset($_SERVER['HTTP_HOST'])) {
             return $_SERVER['HTTP_HOST'];
@@ -195,7 +195,7 @@ class Http extends \Europa\Request
      * 
      * @return int
      */
-    public static function port()
+    public function getPort()
     {
         return (int) $_SERVER['SERVER_PORT'];
     }
@@ -215,7 +215,7 @@ class Http extends \Europa\Request
      *
      * @return string
      */
-    public static function root()
+    public function getRootUri()
     {
         static $root;
         if (!isset($root)) {
@@ -242,7 +242,7 @@ class Http extends \Europa\Request
      * 
      * @return string
      */
-    public static function uri()
+    public function getRequestUri()
     {
         static $requestUri;
         if (!isset($requestUri)) {
@@ -258,7 +258,7 @@ class Http extends \Europa\Request
             
             // format the rest
             $requestUri = trim($requestUri, '/');
-            $requestUri = substr($requestUri, strlen(static::root()));
+            $requestUri = substr($requestUri, strlen($this->getRootUri()));
             $requestUri = trim($requestUri, '/');
         }
         return $requestUri;
@@ -269,7 +269,7 @@ class Http extends \Europa\Request
      * 
      * @return string
      */
-    public static function query()
+    public function getQuery()
     {
         return $_SERVER['QUERY_STRING'];
     }
@@ -279,36 +279,36 @@ class Http extends \Europa\Request
      * 
      * @return string
      */
-    public static function full()
+    public function getFullUri()
     {
         $uri = 'http';
         
         // ssl
-        if (static::isSecure()) {
+        if ($this->isSecure()) {
             $uri .= 's';
         }
         
         // host
-        $uri .= '://' .  static::host();
+        $uri .= '://' . $this->getHost();
         
         // port
-        $port = static::port();
+        $port = $this->getPort();
         if (!$port != 80) {
             $uri .= ':' . $port;
         }
         
         // Europa root uri
-        if ($rootUri = static::root()) {
+        if ($rootUri = $this->getRootUri()) {
             $uri .= '/' . $rootUri;
         }
         
         // Europa request uri
-        if ($requestUri = static::request()) {
+        if ($requestUri = $this->getRequestUri()) {
             $uri .= '/' . $requestUri;
         }
         
         // query string
-        if ($queryString = static::query()) {
+        if ($queryString = $this->getQuery()) {
             $uri .= '?' . $queryString;
         }
         
@@ -320,7 +320,7 @@ class Http extends \Europa\Request
      * 
      * @return string
      */
-    public static function ip()
+    public function getIp()
     {
         if (isset($_SERVER['HTTP_TRUE_CLIENT_IP'])) {
             return $_SERVER['HTTP_TRUE_CLIENT_IP'];
@@ -347,7 +347,7 @@ class Http extends \Europa\Request
      * 
      * @return bool
      */
-    public static function isSecure()
+    public function isSecure()
     {
         return isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
     }
@@ -359,9 +359,9 @@ class Http extends \Europa\Request
      * 
      * @return void
      */
-    public static function redirect($uri)
+    public function redirect($uri)
     {
-        header('Location: ' . static::format($uri));
+        header('Location: ' . $this->format($uri));
         exit;
     }
     
@@ -370,7 +370,7 @@ class Http extends \Europa\Request
      * 
      * @return string
      */
-    public static function format($uri)
+    public function format($uri)
     {
         // check for full or absolute paths
         if (strpos($uri, 'http://') === 0 || strpos($uri, '/') === 0) {
@@ -378,6 +378,6 @@ class Http extends \Europa\Request
         }
         
         // if not, then prepend the root
-        return '/' . static::root() . '/' . ltrim($uri, '/');
+        return '/' . $this->getRootUri() . '/' . ltrim($uri, '/');
     }
 }

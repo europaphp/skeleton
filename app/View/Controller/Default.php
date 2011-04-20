@@ -6,9 +6,9 @@
         <title><?php echo $this->lang->title ?></title>
     </head>
     <body>
-        <div id="body"><?php echo $this->getChild('view'); ?></div>
+        <div id="body"><?php echo $this->view->setParams($this->getParams())->render(); ?></div>
         <div id="footer">
-            <p>Nope, no token "rendered in" benchmark here.</p>
+            <p><?php echo $this->lang->time(round(microtime(true) - START_TIME, 3)); ?></p>
         </div>
     </body>
 </html>

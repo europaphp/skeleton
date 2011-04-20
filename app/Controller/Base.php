@@ -1,5 +1,6 @@
 <?php
 
+namespace Controller;
 use Europa\Controller;
 use Europa\ServiceLocator;
 
@@ -11,7 +12,7 @@ use Europa\ServiceLocator;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class AbstractController extends Controller
+abstract class Base extends Controller
 {
     /**
      * Sets up the a default view scheme.
@@ -20,9 +21,8 @@ abstract class AbstractController extends Controller
      */
     public function init()
     {
-        $locator = ServiceLocator::getInstance();
-        $locator->get('layout')->setScript('DefaultLayout');
-        $locator->get('view')->setScript(str_replace('Controller', 'View', get_class($this)));
-        $this->setView($locator->get('layout'));
+        $layout = ServiceLocator::getInstance()->get('layout');
+        $layout->setScript('Controller/Default')->view->setScript(get_class($this));
+        $this->setView($layout);
     }
 }

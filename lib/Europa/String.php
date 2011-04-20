@@ -165,7 +165,7 @@ class String implements \Countable
      */
     public function toMethod()
     {
-        return $this->toClass()->lcfirst()->replace('_', '');
+        return $this->toClass()->replace('\\', '')->lcFirst();
     }
     
     /**

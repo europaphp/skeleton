@@ -44,7 +44,7 @@ class Cli extends Request
      * 
      * @return string
      */
-    public function method()
+    public function getMethod()
     {
         return static::METHOD;
     }
@@ -81,6 +81,7 @@ class Cli extends Request
     {
         $args = $_SERVER['argv'];
         $cmds = array();
+        
         array_shift($args);
         foreach ($args as $arg) {
             if (strpos($arg, '-') !== false) {
@@ -101,6 +102,7 @@ class Cli extends Request
     {
         $args = $_SERVER['argv'];
         $skip = false;
+        
         array_shift($args);
         foreach ($args as $index => $param) {
             if ($skip) {
@@ -113,15 +115,13 @@ class Cli extends Request
                 $cut   = $param[1] === '-' ? 2 : 1;
                 $param = substr($param, $cut, strlen($param));
                 $next  = isset($args[$index + 1]) ? $args[$index + 1] : false;
-            
-                if ($next && $next[0] !== '-') {
+                
+                if ($next !== false && $next[0] !== '-') {
                     $this->setParam($param, $next);
                     $skip = true;
                 } else {
                     $this->setParam($param, true);
                 }
-            } else {
-                $this->_commands[] = $param;
             }
         }
         

@@ -33,7 +33,7 @@ class Loader
      * 
      * @var array
      */
-    private static $separators = array('_', '\\');
+    private static $separators = array('_', '\\', '/');
     
     /**
      * Maps classes to their absolute paths.
@@ -87,7 +87,7 @@ class Loader
         }
         
         if ($file = self::search($class)) {
-            include $file;
+            require_once $file;
             return true;
         }
         
@@ -110,11 +110,11 @@ class Loader
         
         $file = str_replace(self::$separators, DIRECTORY_SEPARATOR, $class);
         $file = trim($file, DIRECTORY_SEPARATOR);
-        foreach (self::$paths as $path => $suffix) {
-            $path = $path . DIRECTORY_SEPARATOR . $file . '.' . $suffix;
-            if (file_exists($path)) {
-                self::$map[$class] = $path;
-                return $path;
+        foreach (self::$paths as $path => $suffixes) {
+            $fullpath = $path . DIRECTORY_SEPARATOR . $file . '.php';
+            if (file_exists($fullpath)) {
+                self::$map[$class] = $fullpath;
+                return $fullpath;
             }
         }
         
@@ -132,7 +132,7 @@ class Loader
      * 
      * @return \Europa\Loader
      */
-    public static function addPath($path, $suffix = self::SUFFIX, $addToIncludePaths = false)
+    public static function addPath($path, $addToIncludePaths = false)
     {
         $realpath = realpath($path);
 
@@ -147,7 +147,7 @@ class Loader
             );
         }
 
-        self::$paths[$realpath] = $suffix;
+        self::$paths[$realpath] = $realpath;
         if ($addToIncludePaths) {
             set_include_path(get_include_path() . PATH_SEPARATOR . $realpath);
         }
