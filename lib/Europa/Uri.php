@@ -12,6 +12,20 @@ class Uri
     private $scheme;
     
     /**
+     * The username set on the URI.
+     * 
+     * @var string
+     */
+    private $username;
+    
+    /**
+     * The password set on the URI.
+     * 
+     * @var string
+     */
+    private $password;
+    
+    /**
      * The host set on the URI.
      * 
      * @var string
@@ -38,6 +52,13 @@ class Uri
      * @var array
      */
     private $params = array();
+    
+    /**
+     * The fragment portion of the URI.
+     * 
+     * @var string
+     */
+    private $fragment;
     
     /**
      * A port map for default scheme ports.
@@ -236,6 +257,52 @@ class Uri
     }
     
     /**
+     * Sets the username on the URI.
+     * 
+     * @param string $user The username to set.
+     * 
+     * @return \Europa\Uri
+     */
+    public function setUsername($user)
+    {
+        $this->username = $user;
+        return $this;
+    }
+    
+    /**
+     * Returns the set username.
+     * 
+     * @return string
+     */
+    public function getUsername()
+    {
+        return $this->username;
+    }
+    
+    /**
+     * Sets the password.
+     * 
+     * @param string $pass The password to set.
+     *
+     * @return \Europa\Uri
+     */
+    public function setPassword($pass)
+    {
+        $this->password = $pass;
+        return $this;
+    }
+    
+    /**
+     * Returns the set password.
+     * 
+     * @return string
+     */
+    public function getPassword()
+    {
+        return $this->password;
+    }
+    
+    /**
      * Sets the specified host.
      * 
      * @param string $host The host to set.
@@ -267,7 +334,13 @@ class Uri
     public function getHostPart()
     {
         if ($host = $this->getHost()) {
-            return $this->getSchemePart() . $host . $this->getPortPart();
+            $auth = '';
+            if ($user = $this->getUsername()) {
+                $pass = $this->getPassword();
+                $pass = $pass ? ':' . $pass : '';
+                $auth = $user . $pass . '@';
+            }
+            return $this->getSchemePart() . $auth . $host . $this->getPortPart();
         }
         return null;
     }
@@ -319,6 +392,17 @@ class Uri
         return null;
     }
     
+    public function setRoot($root)
+    {
+        $this->root = trim($root, '/');
+        return $this;
+    }
+    
+    public function getRoot()
+    {
+        return $this->root;
+    }
+    
     /**
      * Takes the specified request, normalizes it and then sets it.
      * 
@@ -343,17 +427,21 @@ class Uri
     }
     
     /**
-     * Returns the request part of the URI. If a request part exists, it is returned with the leading forward slash. If
-     * it does not exist, then null is returned.
+     * Returns the request part of the URI that includes the root and request. A leading forward slash is always
+     * returned.
      * 
      * @return string
      */
     public function getRequestPart()
     {
-        if ($request = $this->getRequest()) {
-            return '/' . $request;
+        $root    = $this->getRoot();
+        $request = $this->getRequest();
+        
+        if ($root && $request) {
+            $root .= '/';
         }
-        return null;
+        
+        return '/' . $root . $request;
     }
     
     /** 
@@ -409,22 +497,57 @@ class Uri
     }
     
     /**
+     * Sets the fragment.
+     * 
+     * @param string $frag The fragment to set.
+     * 
+     * @return \Europa\Uri
+     */
+    public function setFragment($frag)
+    {
+        $this->fragment = trim($frag, '#');
+        return $this;
+    }
+    
+    /**
+     * Gets the fragment.
+     * 
+     * @return string
+     */
+    public function getFragment()
+    {
+        return $this->fragment;
+    }
+    
+    /**
+     * Formats and returns the fragment.
+     * 
+     * @return string
+     */
+    public function getFragmentPart()
+    {
+        if ($frag = $this->getFragment()) {
+            return '#' . $frag;
+        }
+        return null;
+    }
+    
+    /**
      * Returns the full URI that was used in the request.
      * 
      * @return string
      */
     public function toString()
     {
-        return $this->getHostPart() . $this->getRequestPart() . $this->getQueryPart();
-    }
-    
-    public static function getRootUri()
-    {
+        $host    = $this->getHostPart();
+        $request = $this->getRequestPart();
+        $query   = $this->getQueryPart();
+        $frag    = $this->getFragmentPart();
         
-    }
-    
-    public static function getRequestUri()
-    {
+        if ($host && $request === '/' && !$query && !$frag) {
+            $request = '';
+        }
         
+        return $host . $request . $query . $frag;
     }
 }
