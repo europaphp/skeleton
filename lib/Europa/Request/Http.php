@@ -78,13 +78,6 @@ class Http extends Request
     private $headers = array();
     
     /**
-     * The request URI.
-     * 
-     * @var \Europa\Uri
-     */
-    private $uri;
-    
-    /**
      * Sets any defaults that may need setting.
      * 
      * @return \Europa\Request\Http
@@ -94,7 +87,6 @@ class Http extends Request
         $this->initDefaultParams();
         $this->initDefaultMethod();
         $this->initDefaultHeaders();
-        $this->initDefaultUri();
         $this->initDefaultIp();
     }
     
@@ -351,44 +343,6 @@ class Http extends Request
     }
     
     /**
-     * Initializes the default URI instance.
-     * 
-     * @return \Europa\Request\Http
-     */
-    private function initDefaultUri()
-    {
-        $uri = new Uri;
-        $uri->setScheme('http');
-        
-        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
-            $uri->setScheme('https');
-        }
-        
-        if (isset($_SERVER['HTTP_HOST'])) {
-            $uri->setHost($_SERVER['HTTP_HOST']);
-        }
-        
-        if (isset($_SERVER['SERVER_PORT'])) {
-            $uri->setPort($_SERVER['SERVER_PORT']);
-        }
-        
-        if ($root = $this->detectRootUri()) {
-            $uri->setRoot($root);
-        }
-        
-        if ($request = $this->detectRequestUri()) {
-            $uri->setRequest($request);
-        }
-        
-        if (isset($_SERVER['QUERY_STRING'])) {
-            $uri->setQuery($_SERVER['QUERY_STRING']);
-        }
-        
-        $this->setUri($uri);
-        return $this;
-    }
-    
-    /**
      * Initializes the default ip address.
      * 
      * @return \Europa\Request\Http
@@ -407,51 +361,5 @@ class Http extends Request
             $ip = $_SERVER['REMOTE_ADDR'];
         }
         return $this->setIp($ip);
-    }
-    
-    /**
-     * Auto-detects the root URI if it is available.
-     * 
-     * @return string
-     */
-    private function detectRooturi()
-    {
-        if (!isset($_SERVER['DOCUMENT_ROOT']) || !isset($_SERVER['SCRIPT_FILENAME'])) {
-            return null;
-        }
-        
-        $path = $_SERVER['DOCUMENT_ROOT'];
-        $file = dirname($_SERVER['SCRIPT_FILENAME']);
-        $root = substr($file, strlen($path));
-        $root = trim($root, '/');
-        return $root;
-    }
-    
-    /**
-     * Auto-detects the request URI if it is available.
-     * 
-     * @return string
-     */
-    private function detectRequestUri()
-    {
-        if (!isset($_SERVER['REQUEST_URI'])) {
-            return null;
-        }
-        
-        // remove the root uri from the request uri to get the relative
-        // request uri for the framework
-        $requestUri = isset($_SERVER['HTTP_X_REWRITE_URL'])
-            ? $_SERVER['HTTP_X_REWRITE_URL']
-            : $_SERVER['REQUEST_URI'];
-        
-        // remove the query string
-        $requestUri = explode('?', $requestUri);
-        $requestUri = $requestUri[0];
-        
-        // format the rest
-        $requestUri = trim($requestUri, '/');
-        $requestUri = substr($requestUri, strlen($this->getRootUri()));
-        $requestUri = trim($requestUri, '/');
-        return $requestUri;
     }
 }

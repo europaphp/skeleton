@@ -550,4 +550,121 @@ class Uri
         
         return $host . $request . $query . $frag;
     }
+    
+    /**
+     * Auto-detects and sets all available parts of the URI and returns an instance of it.
+     * 
+     * @return \Europa\Uri
+     */
+    public static function detect()
+    {
+        $uri = new static;
+        $uri->setScheme(static::detectScheme());
+        $uri->setHost(static::detectHost());
+        $uri->setPort(static::detectPort());
+        $uri->setRoot(static::detectRoot());
+        $uri->setRequest(static::detectRequest());
+        $uri->setQuery(static::detectQuery());
+        return $uri;
+    }
+    
+    /**
+     * Auto-detects the scheme if it is available.
+     * 
+     * @return string
+     */
+    public static function detectScheme()
+    {
+        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+            return 'https';
+        } elseif (isset($_SERVER['HTTP_HOST'])) {
+            return 'http';
+        }
+        return null;
+    }
+    
+    /**
+     * Auto-detects the host if it is available.
+     * 
+     * @return string
+     */
+    public static function detectHost()
+    {
+        if (isset($_SERVER['HTTP_HOST'])) {
+            return $_SERVER['HTTP_HOST'];
+        }
+        return null;
+    }
+    
+    /**
+     * Auto-detects the port if it is available.
+     * 
+     * @return string
+     */
+    public static function detectPort()
+    {
+        if (isset($_SERVER['SERVER_PORT'])) {
+            return $_SERVER['SERVER_PORT'];
+        }
+        return null;
+    }
+    
+    /**
+     * Auto-detects the root URI if it is available.
+     * 
+     * @return string
+     */
+    public static function detectRoot()
+    {
+        if (!isset($_SERVER['DOCUMENT_ROOT']) || !isset($_SERVER['SCRIPT_FILENAME'])) {
+            return null;
+        }
+        
+        $path = $_SERVER['DOCUMENT_ROOT'];
+        $file = dirname($_SERVER['SCRIPT_FILENAME']);
+        $root = substr($file, strlen($path));
+        $root = trim($root, '/');
+        return $root;
+    }
+    
+    /**
+     * Auto-detects the request URI if it is available.
+     * 
+     * @return string
+     */
+    public static function detectRequest()
+    {
+        if (!isset($_SERVER['REQUEST_URI'])) {
+            return null;
+        }
+        
+        // remove the root uri from the request uri to get the relative
+        // request uri for the framework
+        $requestUri = isset($_SERVER['HTTP_X_REWRITE_URL'])
+            ? $_SERVER['HTTP_X_REWRITE_URL']
+            : $_SERVER['REQUEST_URI'];
+        
+        // remove the query string
+        $requestUri = explode('?', $requestUri);
+        $requestUri = $requestUri[0];
+        
+        // format the rest
+        $requestUri = trim($requestUri, '/');
+        $requestUri = substr($requestUri, strlen(static::detectRoot()));
+        $requestUri = trim($requestUri, '/');
+        return $requestUri;
+    }
+    
+    /**
+     * Auto-detects the query if it is available.
+     * 
+     * @return string
+     */
+    public static function detectQuery()
+    {
+        if (isset($_SERVER['QUERY_STRING'])) {
+            return $_SERVER['QUERY_STRING'];
+        }
+        return null;
+    }
 }

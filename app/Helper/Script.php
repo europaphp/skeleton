@@ -1,7 +1,7 @@
 <?php
 
 namespace Helper;
-use Europa\Request\Http;
+use Europa\Uri;
 use EUropa\View;
 
 /**
@@ -94,7 +94,7 @@ abstract class Script
                 $file = '/' . $this->path . $file;
             }
             
-            if ($root = Http::create()->getRootUri()) {
+            if ($root = Uri::detect()->getRoot()) {
                 $file = '/' . $root . $file;
             }
             

@@ -4,6 +4,7 @@ define('START_TIME', microtime(true));
 
 use Europa\Request\Http;
 use Europa\ServiceLocator;
+use Europa\Uri;
 
 // can be overridden in bootstrap if need be
 error_reporting(E_ALL ^ E_STRICT);
@@ -19,7 +20,7 @@ $locator = ServiceLocator::getInstance();
 $request = $locator->get('request');
 $router  = $locator->get('router');
 try {
-    $params = $router->query($request->getRequestUri());
+    $params = $router->query(Uri::detect()->getRequest());
     if (!$params) {
         throw new Exception('The required request parameters were not defined.');
     }
