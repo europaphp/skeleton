@@ -182,6 +182,34 @@ abstract class Request
         $this->params = array();
         return $this;
     }
+    
+    
+    /**
+     * Sets the appropriate method.
+     * 
+     * @param string $method The method to set.
+     * 
+     * @return \Europa\Request
+     */
+    public function setMethod($method)
+    {
+        $this->method = $method;
+        return $this;
+    }
+    
+    /**
+     * Returns the request method from the server vars and formats it. Defaults to "get".
+     * It also allows the use of an "HTTP_X_HTTP_METHOD_OVERRIDE" header which can be
+     * used to override default request methods. Generally this is bad practice, but
+     * certain clients do no support certain methods in the HTTP specification such as
+     * Flash.
+     *
+     * @return string
+     */
+    public function getMethod()
+    {
+        return $this->method;
+    }
 
     /**
      * Directly dispatches the request
@@ -309,18 +337,5 @@ abstract class Request
     public static function create()
     {
         return new static;
-    }
-    
-    /**
-     * Auto-detects the request type and returns the appropriate request instance.
-     * 
-     * @return \Europa\Request
-     */
-    public static function autoDetect()
-    {
-        if (static::isCli()) {
-            return new Cli;
-        }
-        return new Http;
     }
 }
