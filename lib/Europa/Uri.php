@@ -40,6 +40,13 @@ class Uri
     private $port;
     
     /**
+     * The root URI.
+     * 
+     * @var string
+     */
+    private $root;
+    
+    /**
      * The request set on the URI.
      * 
      * @var string
@@ -69,6 +76,18 @@ class Uri
         'http'  => 80,
         'https' => 443
     );
+    
+    /**
+     * Constructs a new URI.
+     * 
+     * @param string $uri A URI to parse and apply to the current URI.
+     * 
+     * @return \Europa\Uri
+     */
+    public function __construct($uri = null)
+    {
+        $this->fromString($uri);
+    }
     
     /**
      * Aliases toString for magic string conversion.
@@ -392,12 +411,24 @@ class Uri
         return null;
     }
     
+    /**
+     * Sets the root portion of the URI. Useful if working with sub-directories and manipulating the rest of the URI.
+     * 
+     * @param string $root The root of the URI.
+     * 
+     * @return \Europa\Uri
+     */
     public function setRoot($root)
     {
         $this->root = trim($root, '/');
         return $this;
     }
     
+    /**
+     * Returns the root if any.
+     * 
+     * @return string
+     */
     public function getRoot()
     {
         return $this->root;
@@ -405,6 +436,8 @@ class Uri
     
     /**
      * Takes the specified request, normalizes it and then sets it.
+     * 
+     * @todo Auto-detect the root URI in the request and set it if it is specified.
      * 
      * @param string $request The request to set.
      * 
@@ -447,39 +480,25 @@ class Uri
     /** 
      * Sets the query for the URI. The query string is parsed and parameters set.
      * 
-     * @todo Handle arrays and objects.
-     * 
      * @param string $query The query to set.
      * 
      * @return \Europa\Uri
      */
     public function setQuery($query)
     {
-        $query = trim($query, '?');
-        $query = explode('&', $query);
-        foreach ($query as $part) {
-            $parts = explode('=', $part, 2);
-            $name  = urldecode($parts[0]);
-            $value = isset($parts[1]) ? urldecode($parts[1]) : null;
-            $this->setParam($name, $value);
-        }
+        parse_str(trim($query, '?'), $params);
+        $this->setParams($params);
         return $this;
     }
     
     /**
      * Returns the query string in the current request.
      * 
-     * @todo Handle array's and objects.
-     * 
      * @return string
      */
     public function getQuery()
     {
-        $queries = array();
-        foreach ($this->params as $name => $value) {
-            $queries[] = urlencode($name) . '=' . urlencode($value);
-        }
-        return $queries ? implode('&', $queries) : null;
+        return http_build_query($this->getParams());
     }
     
     /**
@@ -549,6 +568,51 @@ class Uri
         }
         
         return $host . $request . $query . $frag;
+    }
+    
+    /**
+     * Parses the passed URI and applies it to the current instance.
+     * 
+     * @param string $uri The URI to parse and apply to the current instance.
+     * 
+     * @return \Europa\Uri
+     */
+    public function fromString($uri)
+    {
+        $uri = parse_url($uri);
+        if (!$uri) {
+            return $this;
+        }
+        
+        $map = array(
+            'scheme'   => 'setScheme',
+            'user'     => 'setUsername',
+            'pass'     => 'setPassword',
+            'host'     => 'setHost',
+            'port'     => 'setPort',
+            'path'     => 'setRequest',
+            'query'    => 'setQuery',
+            'fragment' => 'setFragment'
+        );
+        
+        foreach ($map as $index => $method) {
+            if (isset($uri[$index])) {
+                $this->$method($uri[$index]);
+            }
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Redirects the user to the current specified URI.
+     * 
+     * @return void
+     */
+    public function redirect()
+    {
+        header('Location: ' . $this->toString());
+        exit;
     }
     
     /**

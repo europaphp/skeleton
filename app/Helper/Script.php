@@ -2,7 +2,7 @@
 
 namespace Helper;
 use Europa\Uri;
-use EUropa\View;
+use Europa\View;
 
 /**
  * A base helper that auto-loads files.
@@ -85,7 +85,7 @@ abstract class Script
     {
         $string = '';
         foreach ($this->files as $file) {
-            $file = '/' . $file;
+            $file = '/' . str_replace('\\', '/', $file);
             if ($this->suffix) {
                 $file .= '.' . $this->suffix;
             }
@@ -161,10 +161,8 @@ abstract class Script
     private function getFilesFor(View $view)
     {
         $files = array($view->getScript());
-        foreach ($view->getParams() as $param) {
-            if ($param instanceof View) {
-                $files = array_merge($files, $this->getFilesFor($param));
-            }
+        foreach ($view->getDescendants() as $child) {
+            $files[] = $child->getScript();
         }
         return $files;
     }

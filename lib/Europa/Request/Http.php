@@ -280,19 +280,6 @@ class Http extends Request
     }
     
     /**
-     * Redirects the request to the specified uri.
-     * 
-     * @param string $uri The uri to redirect to.
-     * 
-     * @return void
-     */
-    public function redirect($uri)
-    {
-        header('Location: ' . $uri);
-        exit;
-    }
-    
-    /**
      * Initializes the default parameters for the http request.
      * 
      * @return \Europa\Request\Http

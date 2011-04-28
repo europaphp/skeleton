@@ -133,7 +133,6 @@ class Php extends View
             $path .= '.' . $suffix;
         }
         
-        $path     = str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $path);
         $realpath = realpath($path);
         if (!$realpath) {
             throw new Exception('Could not locate the view "' . $path . '".');
@@ -216,7 +215,7 @@ class Php extends View
      */
     public function setScript($script)
     {
-        $this->script = $script;
+        $this->script = str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $script);
         return $this;
     }
     

@@ -110,4 +110,17 @@ class Test_Uri extends Testes_Test
         $uri->setFragment('grenade');
         $this->assert($uri->toString() === 'http://user:pass@127.0.0.1:8080/my/request/uri?test1=0&test2=1&test3=2#grenade', 'URI should contain correct scheme, host, port, request, query and fragment.');
     }
+    
+    public function testFromString()
+    {
+        $uri = new \Europa\Uri('http://trey:shugart@europaphp.org:80/documentation?component=Uri#properties');
+        $this->assert($uri->getScheme() === 'http', 'Scheme was not parsed properly.');
+        $this->assert($uri->getUsername() === 'trey', 'Username was not parsed properly.');
+        $this->assert($uri->getPassword() === 'shugart', 'Password was not parsed properly.');
+        $this->assert($uri->getHost() === 'europaphp.org', 'Host was not parsed properly.');
+        $this->assert($uri->getPort() === 80, 'Port was not parsed properly.');
+        $this->assert($uri->getRequest() === 'documentation', 'Request was not parsed properly.');
+        $this->assert($uri->getQuery() === 'component=Uri', 'Query was not parsed properly.');
+        $this->assert($uri->getFragment() === 'properties', 'Fragment was not parsed properly.');
+    }
 }

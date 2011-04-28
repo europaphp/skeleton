@@ -80,7 +80,11 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
      */
     public function invokeNamedArgs($instance, array $args = array())
     {
-        return $this->invokeArgs($instance, $this->mergeNamedArgs($args));
+        // only merged named parameters if necessary
+        if ($args && $this->getNumberOfParameters() > 0) {
+            return $this->invokeArgs($instance, $this->mergeNamedArgs($args));
+        }
+        return $this->invoke($instance);
     }
 
     /**

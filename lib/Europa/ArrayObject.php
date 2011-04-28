@@ -216,10 +216,10 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
     /**
      * Returns the iterator for the array.
      * 
-     * @return ArrayIterator
+     * @return \ArrayIterator
      */
     public function getIterator()
     {
-        return new ArrayIterator($this->data);
+        return new \ArrayIterator($this->data);
     }
 }
