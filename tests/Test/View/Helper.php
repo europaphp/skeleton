@@ -1,11 +1,13 @@
 <?php
 
+namespace Test\View;
+use Europa\Unit\Test\Test;
 use Europa\ServiceLocator;
 use Europa\String;
 use Europa\View;
 use Europa\View\Php;
 
-class Test_View_Helper extends Testes_Test
+class Helper extends Test
 {
     private $view;
     
@@ -18,7 +20,7 @@ class Test_View_Helper extends Testes_Test
         
         $this->view->setHelperLocator($this->locator);
         $this->locator->setFormatter(function($service) {
-            return String::create($service)->toClass() . 'ServiceInjector';
+            return '\Provider\View\Helper' . String::create($service)->toClass();
         });
     }
     
@@ -30,18 +32,5 @@ class Test_View_Helper extends Testes_Test
     public function testCachedInstanceRetrieval()
     {
         $this->assert($this->view->test->test(), 'The service injector class was not found.');
-    }
-}
-
-class TestServiceInjector
-{
-    public function __construct(View $view)
-    {
-        
-    }
-    
-    public function test()
-    {
-        return true;
     }
 }

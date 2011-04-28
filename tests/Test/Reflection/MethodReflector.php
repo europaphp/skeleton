@@ -1,10 +1,14 @@
 <?php
 
-class Test_Reflection_MethodReflector extends Testes_Test
+namespace Test\Reflection;
+use Europa\Reflection\MethodReflector as MethodReflectorObject;
+use Europa\Unit\Test\Test;
+
+class MethodReflector extends Test
 {
     public function testParameterMapping()
     {
-        $method = new \Europa\Reflection\MethodReflector('Test_Reflection_MappingProvider', 'someMethod');
+        $method = new MethodReflectorObject('\Provider\Reflection\Mapping', 'someMethod');
         
         try {
             $result = $method->mergeNamedArgs(
@@ -13,8 +17,8 @@ class Test_Reflection_MethodReflector extends Testes_Test
                     'name' => 'Name'
                 )
             );
-        } catch (Exception $e) {
-            $this->assert(false, 'The parameters couldn\'t be merged.');
+        } catch (\Exception $e) {
+            $this->assert(false, "The parameters couldn't be merged.");
         }
         
         $this->assert(
@@ -23,18 +27,5 @@ class Test_Reflection_MethodReflector extends Testes_Test
             && $result[2] === true,
             'The parameters were not merged properly'
         );
-    }
-}
-
-class Test_Reflection_MappingProvider extends Test_Reflection_MappingProviderAbstract
-{
-    
-}
-
-abstract class Test_Reflection_MappingProviderAbstract
-{
-    public function someMethod($id, $name, $notRequired = true)
-    {
-        
     }
 }

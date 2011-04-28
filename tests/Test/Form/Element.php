@@ -1,6 +1,9 @@
 <?php
 
-class Test_Form_Element extends \Testes_Test
+namespace Test\Form;
+use Europa\Unit\Test\Test;
+
+class Element extends Test
 {
     public function testFill()
     {

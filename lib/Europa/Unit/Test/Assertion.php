@@ -1,15 +1,18 @@
 <?php
 
+namespace Europa\Unit\Test;
+use Europa\Unit\Exception;
+
 /**
  * The base assertion class. Exctends the exception class so it can be 
  * thrown. However, it is recommended to throw a fatal assertion instead.
  * 
  * @category Assertions
- * @package  Testes
+ * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/
  */
-class Testes_Assertion extends Testes_Exception
+class Assertion extends Exception
 {
     /**
      * The test information that made the assertion.
@@ -25,7 +28,7 @@ class Testes_Assertion extends Testes_Exception
      * @param string $message The message to give the assertion.
      * @param int    $code    The code to give the assertion.
      * 
-     * @return Testes_Assertion
+     * @return Assertion
      */
     public function __construct($message, $code = 0)
     {

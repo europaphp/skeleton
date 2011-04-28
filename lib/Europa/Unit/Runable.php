@@ -1,19 +1,21 @@
 <?php
 
+namespace Europa\Unit;
+
 /**
- * Interface for all suites and tests must implement.
+ * Interface that anything that is runable must implement.
  * 
- * @category UnitTesting
- * @package  Testes
+ * @category Benchmarking
+ * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  (c) 2010 Trey Shugart http://europaphp.org/license
  */
-interface Testes_Testable
+interface Runable
 {
     /**
      * Runs all tests.
      * 
-     * @return Testes_Testable
+     * @return Testable
      */
     public function run();
     
@@ -30,11 +32,4 @@ interface Testes_Testable
      * @return void
      */
     public function tearDown();
-    
-    /**
-     * Returns the failed assertions.
-     * 
-     * @return array
-     */
-    public function assertions();
 }

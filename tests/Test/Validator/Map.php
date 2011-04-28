@@ -1,6 +1,8 @@
 <?php
 
-use Europa\Validator\Map;
+namespace Test\Validator;
+use Europa\Unit\Test\Test;
+use Europa\Validator\Map as MapObject;
 
 /**
  * Tests for validating \Europa\Validator\Map
@@ -10,7 +12,7 @@ use Europa\Validator\Map;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class Test_Validator_Map extends Testes_Test
+class Map extends Test
 {
     /**
      * The name error message.
@@ -29,7 +31,7 @@ class Test_Validator_Map extends Testes_Test
     /**
      * The validator map doing the validation.
      * 
-     * @var \Europa\Validator\Map
+     * @var MapObject
      */
     private $validator;
     
@@ -40,7 +42,7 @@ class Test_Validator_Map extends Testes_Test
      */
     public function setUp()
     {
-        $this->validator = Map::create()
+        $this->validator = MapObject::create()
             ->name->required()->addMessage(self::NAME_ERROR)
             ->age->number()->numberRange(18, 25)->addMessage(self::AGE_ERROR);
     }

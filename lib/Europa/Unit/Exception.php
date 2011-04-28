@@ -1,17 +1,16 @@
 <?php
 
-namespace Test;
-use Europa\Unit\Test\Suite;
+namespace Europa\Unit;
 
 /**
- * Europa\RouteValidator test suite.
+ * The base exception class.
  * 
- * @category Tests
+ * @category UnitTesting
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class Validator extends Suite
+class Exception extends \Europa\Exception
 {
     
 }

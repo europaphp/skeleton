@@ -1,5 +1,13 @@
 <?php
 
+namespace Test\Validator;
+use Europa\Unit\Test\Test;
+use Europa\Validator\Rule\Required;
+use Europa\Validator\Rule\Number;
+use Europa\Validator\Rule\NumberRange;
+use Europa\Validator\Rule\Alpha;
+use Europa\Validator\Rule\AlphaNumeric;
+
 /**
  * Tests for validating Europa\RouteValidator.
  * 
@@ -9,7 +17,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-class Test_Validator_Validator extends Testes_Test
+class Validator extends Test
 {
     /**
      * Tests the required validator.
@@ -18,7 +26,7 @@ class Test_Validator_Validator extends Testes_Test
      */
     public function testRequired()
     {
-        $required = new \Europa\Validator\Rule\Required;
+        $required = new Required;
         $valid    = $required->validate(true)->isValid()
             && $required->validate('something')->isValid()
             && !$required->validate(null)->isValid()
@@ -36,7 +44,7 @@ class Test_Validator_Validator extends Testes_Test
      */
     public function testNumber()
     {
-        $number = new \Europa\Validator\Rule\Number;
+        $number = new Number;
         $valid  = $number->validate('0')->isValid()
             && $number->validate(0)->isValid()
             && !$number->validate(null)->isValid()
@@ -55,7 +63,7 @@ class Test_Validator_Validator extends Testes_Test
      */
     public function testNumberRange()
     {
-        $range = new \Europa\Validator\Rule\NumberRange(1, 10);
+        $range = new NumberRange(1, 10);
         $valid = $range->validate(1)->isValid()
             && $range->validate(10)->isValid();
         
@@ -69,7 +77,7 @@ class Test_Validator_Validator extends Testes_Test
      */
     public function testAlpha()
     {
-        $alpha = new \Europa\Validator\Rule\Alpha;
+        $alpha = new Alpha;
         $valid = $alpha->validate('something')->isValid()
             && !$alpha->validate('s0m3th1ng')->isValid();
         
@@ -83,7 +91,7 @@ class Test_Validator_Validator extends Testes_Test
      */
     public function testAlphaNumeric()
     {
-        $alnum = new \Europa\Validator\Rule\AlphaNumeric;
+        $alnum = new AlphaNumeric;
         $valid = $alnum->validate('s0m3th1ng')->isValid()
             && $alnum->validate('000000000')->isValid()
             && $alnum->validate('something')->isValid()

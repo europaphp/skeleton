@@ -1,6 +1,8 @@
 <?php
 
-class Test extends Testes_Suite
+use Europa\Unit\Test as Base;
+
+class Test extends Base
 {
     
 }

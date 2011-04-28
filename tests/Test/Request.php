@@ -1,12 +1,16 @@
 <?php
 
-class Test_Request extends Testes_Test
+namespace Test;
+use Europa\Request\Http;
+use Europa\Unit\Test\Test;
+
+class Request extends Test
 {
-    protected $request;
+    private $request;
     
     public function setUp()
     {
-        $this->request = new \Europa\Request\Http;
+        $this->request = new Http;
         $this->request->setParams(array('cascade1' => false, 'cascade2' => true))
             ->setParams(array('cascade1' => true, 'controller' => 'customcontroller'));
     }

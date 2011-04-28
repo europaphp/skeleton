@@ -1,14 +1,17 @@
 <?php
 
+namespace Europa\Unit\Test;
+use Europa\Unit\TestAbstract;
+
 /**
  * Base test calss. The subclasses only need implement the run method.
  * 
  * @category UnitTesting
  * @package  Testes
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-abstract class Testes_Test implements Testes_Testable
+abstract class Test extends TestAbstract implements Testable
 {
     /**
      * The default assertion code.
@@ -16,6 +19,13 @@ abstract class Testes_Test implements Testes_Testable
      * @var int
      */
     const DEFAULT_CODE = 0;
+
+    /**
+     * The test method prefix.
+     * 
+     * @var string
+     */
+    const PREFIX = 'test';
     
     /**
      * The failed assertion list.
@@ -25,30 +35,14 @@ abstract class Testes_Test implements Testes_Testable
     protected $assertions = array();
     
     /**
-     * Constructs the test and adds test methods.
-     * 
-     * @return Testes_Test
-     */
-    public function __construct()
-    {
-        $self = new ReflectionClass($this);
-        foreach ($self->getMethods() as $method) {
-            if (!$method->isPublic() || strpos($method->getName(), 'test') !== 0) {
-                continue;
-            }
-            $this->tests[] = $method->getName();
-        }
-    }
-    
-    /**
      * Runs all test methods.
      * 
-     * @return Testes_Test
+     * @return \Testes\UnitTest\Test
      */
     public function run()
     {
         $this->setUp();
-        foreach ($this->tests as $test) {
+        foreach ($this->getMethods() as $test) {
             $this->$test();
         }
         $this->tearDown();
@@ -82,12 +76,12 @@ abstract class Testes_Test implements Testes_Testable
      * @param string $description
      * @param int    $code
      * 
-     * @return Testes_Test
+     * @return \Testes\UnitTest\Test
      */
     public function assert($expression, $description, $code = self::DEFAULT_CODE)
     {
         if (!$expression) {
-            $this->assertions[] = new Testes_Assertion($description, $code);
+            $this->assertions[] = new Assertion($description, $code);
         }
         return $this;
     }
@@ -99,12 +93,12 @@ abstract class Testes_Test implements Testes_Testable
      * @param string $description
      * @param int    $code
      * 
-     * @return Testes_Test
+     * @return \Testes\UnitTest\Test
      */
     public function assertFatal($expression, $description, $code = self::DEFAULT_CODE)
     {
         if (!$expression) {
-            throw new Testes_FatalAssertion($description, $code);
+            throw new FatalAssertion($description, $code);
         }
         return $this;
     }

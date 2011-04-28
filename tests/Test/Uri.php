@@ -1,10 +1,14 @@
 <?php
 
-class Test_Uri extends Testes_Test
+namespace Test;
+use Europa\Unit\Test\Test;
+use Europa\Uri as UriObject;
+
+class Uri extends Test
 {
     public function testParameters()
     {
-        $uri = new \Europa\Uri;
+        $uri = new UriObject;
         
         $uri->test = true;
         $this->assert(isset($uri->test), 'Test parameter was not set.');
@@ -16,7 +20,7 @@ class Test_Uri extends Testes_Test
     
     public function testScheme()
     {
-        $uri = new \Europa\Uri;
+        $uri = new UriObject;
         
         $uri->setScheme('ftp');
         $this->assert($uri->getScheme() === 'ftp', 'Scheme was not set.');
@@ -25,7 +29,7 @@ class Test_Uri extends Testes_Test
     
     public function testHost()
     {
-        $uri = new \Europa\Uri;
+        $uri = new UriObject;
         
         $uri->setHost('localhost');
         $uri->setPort(80);
@@ -48,7 +52,7 @@ class Test_Uri extends Testes_Test
     
     public function testPort()
     {
-        $uri = new \Europa\Uri;
+        $uri = new UriObject;
         
         $uri->setPort('556');
         $this->assert($uri->getPort() === 556, 'The port was not set properly.');
@@ -57,7 +61,7 @@ class Test_Uri extends Testes_Test
     
     public function testRequest()
     {
-        $uri = new \Europa\Uri;
+        $uri = new UriObject;
         
         $uri->setRequest('/my/request/uri/');
         $this->assert($uri->getRequest() === 'my/request/uri', 'Request was not normalized.');
@@ -66,7 +70,7 @@ class Test_Uri extends Testes_Test
     
     public function testQuery()
     {
-        $uri = new \Europa\Uri;
+        $uri = new UriObject;
         
         $uri->setQuery('?test1=0&test2=1');
         $this->assert($uri->test1 === '0', 'Parameter "test1" was not set.');
@@ -77,7 +81,7 @@ class Test_Uri extends Testes_Test
     
     public function testFragment()
     {
-        $uri = new \Europa\Uri;
+        $uri = new UriObject;
         
         $uri->setFragment('grenade');
         $this->assert($uri->getFragment() === 'grenade', 'Fragment was not set properly.');
@@ -86,7 +90,7 @@ class Test_Uri extends Testes_Test
     
     public function testStringConversion()
     {
-        $uri = new \Europa\Uri;
+        $uri = new UriObject;
         
         $uri->setScheme('http');
         $this->assert($uri->toString() === '/', 'URI should only be a forward slash.');
@@ -113,7 +117,7 @@ class Test_Uri extends Testes_Test
     
     public function testFromString()
     {
-        $uri = new \Europa\Uri('http://trey:shugart@europaphp.org:80/documentation?component=Uri#properties');
+        $uri = new UriObject('http://trey:shugart@europaphp.org:80/documentation?component=Uri#properties');
         $this->assert($uri->getScheme() === 'http', 'Scheme was not parsed properly.');
         $this->assert($uri->getUsername() === 'trey', 'Username was not parsed properly.');
         $this->assert($uri->getPassword() === 'shugart', 'Password was not parsed properly.');

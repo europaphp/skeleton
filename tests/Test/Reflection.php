@@ -1,6 +1,9 @@
 <?php
 
-class Test_Reflection extends Testes_Suite
+namespace Test;
+use Europa\Unit\Test\Suite;
+
+class Reflection extends Suite
 {
     
 }

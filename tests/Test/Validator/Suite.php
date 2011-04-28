@@ -1,6 +1,8 @@
 <?php
 
-use Europa\Validator\Suite;
+namespace Test\Validator;
+use Europa\Unit\Test\Test;
+use Europa\Validator\Suite as SuiteObject;
 
 /**
  * Tests for validating \Europa\Validator\Suite
@@ -8,10 +10,9 @@ use Europa\Validator\Suite;
  * @category Tests
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class Test_Validator_Suite extends Testes_Test
+class Suite extends Test
 {
     /**
      * Tests to make sure it fails if all sub-tests fail.
@@ -20,7 +21,7 @@ class Test_Validator_Suite extends Testes_Test
      */
     public function testFailAllValidators()
     {
-        $suite = Suite::required()->number();
+        $suite = SuiteObject::required()->number();
         $this->assert(
             $suite->validate(null)->isValid() === false,
             'Could not fail all validators.'
@@ -34,7 +35,7 @@ class Test_Validator_Suite extends Testes_Test
      */
     public function testPassAllValidators()
     {
-        $suite = Suite::required()->number();
+        $suite = SuiteObject::required()->number();
         $this->assert(
             $suite->validate('1')->isValid() === true,
             'Could not pass all validators.'
@@ -48,7 +49,7 @@ class Test_Validator_Suite extends Testes_Test
      */
     public function testPassOneValidator()
     {
-        $suite = Suite::required()->number();
+        $suite = SuiteObject::required()->number();
         $this->assert(
             $suite->validate('something')->isValid() === false,
             'Could not pass one validator.'

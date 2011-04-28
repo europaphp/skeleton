@@ -1,5 +1,8 @@
 <?php
 
+namespace Test;
+use Europa\Unit\Test\Suite;
+
 /**
  * Europa\RouteForm test suite.
  * 
@@ -9,7 +12,7 @@
  * @license  (c) 2010 Trey Shugart
  * @link     http://europaphp.org/license
  */
-class Test_Form extends Testes_Suite
+class Form extends Suite
 {
      
 }

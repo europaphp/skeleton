@@ -1,11 +1,13 @@
 <?php
 
+use Europa\Loader;
+
 // all we need to do is include the bootstrap
 require dirname(__FILE__) . '/../app/Bootstrapper.php';
 $boot = new Bootstrapper;
 $boot->boot();
 
-$loader = new \Europa\Loader;
+$loader = new Loader;
 $loader->addPath(dirname(__FILE__) . '/../tests');
 $loader->register();
 
