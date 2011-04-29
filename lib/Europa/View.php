@@ -178,10 +178,12 @@ abstract class View
      * 
      * @return \Europa\View
      */
-    public function setParams(array $params)
+    public function setParams($params)
     {
-        foreach ($params as $name => $value) {
-            $this->setParam($name, $value);
+        if (is_array($params) || is_object($params)) {
+            foreach ($params as $name => $value) {
+                $this->setParam($name, $value);
+            }
         }
         return $this;
     }
