@@ -20,7 +20,7 @@ class Json extends View
      * 
      * @return \Europa\View\Json
      */
-    public function __construct($params = null)
+    public function __construct($params = array())
     {
         $this->setParams($params);
     }
@@ -35,6 +35,23 @@ class Json extends View
         if (!headers_sent()) {
             header('Content-Type: Application/JSON');
         }
-        return json_encode($this->getParams());
+        return json_encode($this->serializeToArray($this->getParams()));
+    }
+    
+    /**
+     * Serializes the passed in parameters into an array.
+     *  
+     * @return array
+     */
+    private function serializeToArray($data)
+    {
+        $array = array();
+        foreach ($data as $name => $item) {
+            if (is_array($item) || is_object($item)) {
+                $item = $this->serializeToArray($item);
+            }
+            $array[$name] = $item;
+        }
+        return $array;
     }
 }
