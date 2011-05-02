@@ -447,7 +447,7 @@ class Directory extends Item implements \Countable, \Iterator
      */
     public function valid()
     {
-        return $this->current() instanceof \SplFileInfo;
+        return $this->current();
     }
     
     /**
