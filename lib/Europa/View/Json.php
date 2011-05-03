@@ -35,7 +35,7 @@ class Json extends View
         if (!headers_sent()) {
             header('Content-Type: Application/JSON');
         }
-        return json_encode($this->serializeToArray($this->getParams()));
+        return json_encode($this->formatParamsToJsonArray());
     }
     
     /**
@@ -43,12 +43,13 @@ class Json extends View
      *  
      * @return array
      */
-    private function serializeToArray($data)
+    protected function formatParamsToJsonArray($data = null)
     {
         $array = array();
+        $data  = $data ? $data : $this->getParams();
         foreach ($data as $name => $item) {
             if (is_array($item) || is_object($item)) {
-                $item = $this->serializeToArray($item);
+                $item = $this->serializeParamsToArray($item);
             }
             $array[$name] = $item;
         }
