@@ -187,6 +187,7 @@ class DocBlock
 
     private function parseDocTagFromString($string)
     {
+        $string = preg_replace('#\t#', ' ', $string);
         $parts = explode(' ', $string, 2);
         $name  = strtolower($parts[0]);
 
