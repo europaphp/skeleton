@@ -323,7 +323,7 @@ class String implements \Countable
         if (!$val || strtolower($val) == 'null') {
             return null;
         }
-        if (isstring($val) && is_numeric($val)) {
+        if (is_string($val) && is_numeric($val)) {
             if (strpos($val, '.') === false) {
                 $val = (int) $val;
             } else {
