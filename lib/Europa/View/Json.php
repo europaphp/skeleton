@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\View;
+use Europa\View;
 
 /**
  * A view class for rendering JSON data from bound parameters.
@@ -10,7 +11,7 @@ namespace Europa\View;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Json extends \Europa\View
+class Json extends View
 {
     /**
      * Constructs the view and sets parameters.
@@ -19,7 +20,7 @@ class Json extends \Europa\View
      * 
      * @return \Europa\View\Json
      */
-    public function __construct($params = null)
+    public function __construct($params = array())
     {
         $this->setParams($params);
     }
@@ -29,12 +30,29 @@ class Json extends \Europa\View
      * 
      * @return string
      */
-    public function __toString()
+    public function render()
     {
-        // if no headers have been sent, make sure we send the correct mime type
         if (!headers_sent()) {
             header('Content-Type: Application/JSON');
         }
-        return json_encode($this->getParams());
+        return json_encode($this->formatParamsToJsonArray());
+    }
+    
+    /**
+     * Serializes the passed in parameters into an array.
+     *  
+     * @return array
+     */
+    protected function formatParamsToJsonArray($data = null)
+    {
+        $array = array();
+        $data  = $data ? $data : $this->getParams();
+        foreach ($data as $name => $item) {
+            if (is_array($item) || is_object($item)) {
+                $item = $this->serializeParamsToArray($item);
+            }
+            $array[$name] = $item;
+        }
+        return $array;
     }
 }

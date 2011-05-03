@@ -1,14 +1,16 @@
 <?php
 
-use Europa\Loader;
+namespace Test;
+use Europa\Unit\Test\Test;
+use Europa\Loader as LoaderObject;
 
-class Test_Loader extends Testes_Test
+class Loader extends Test
 {
     private $loader;
     
     public function setUp()
     {
-        Loader::register();
+        LoaderObject::register();
     }
     
     public function testRegisterAutoload()
@@ -28,7 +30,7 @@ class Test_Loader extends Testes_Test
     public function testSearch()
     {
         $this->assert(
-            Loader::search('Europa/Form'),
+            LoaderObject::search('Europa/Form'),
             'Could not find file.'
         );
     }
@@ -36,7 +38,7 @@ class Test_Loader extends Testes_Test
     public function testLoad()
     {
         $this->assert(
-            Loader::load('Europa\Request'),
+            LoaderObject::load('Europa\Request'),
             'Unable to load class.'
         );
     }
@@ -44,8 +46,8 @@ class Test_Loader extends Testes_Test
     public function testAddPath()
     {
         try {
-            Loader::addPath('.');
-        } catch (Exception $e) {
+            LoaderObject::addPath('.');
+        } catch (\Exception $e) {
             $this->assert(false, 'Could not add load path.');
         }
     }

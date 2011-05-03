@@ -19,12 +19,16 @@ class DocBlock
     private $map = array(
         'author'     => '\Europa\Reflection\DocTag\AuthorTag',
         'category'   => '\Europa\Reflection\DocTag\CategoryTag',
+        'deprecated' => '\Europa\Reflection\DocTag\DeprecatedTag',
         'filter'     => '\Europa\Reflection\DocTag\FilterTag',
+        'internal'   => '\Europa\Reflection\DocTag\InternalTag',
         'license'    => '\Europa\Reflection\DocTag\LicenseTag',
         'package'    => '\Europa\Reflection\DocTag\PackageTag',
         'param'      => '\Europa\Reflection\DocTag\ParamTag',
         'return'     => '\Europa\Reflection\DocTag\ReturnTag',
+        'see'        => '\Europa\Reflection\DocTag\SeeTag',
         'subpackage' => '\Europa\Reflection\DocTag\SubpackageTag',
+        'throws'     => '\Europa\Reflection\DocTag\ThrowsTag',
         'todo'       => '\Europa\Reflection\DocTag\TodoTag'
     );
 
@@ -80,7 +84,7 @@ class DocBlock
             }
             $this->tags[$name][] = $tag;
         } else {
-            $this->tags[$name] = $tag;
+            $this->tags[$name] = array($tag);
         }
 
         return $this;
@@ -99,10 +103,11 @@ class DocBlock
     {
         if (isset($this->tags[$name])) {
             $tag = $this->tags[$name];
-            if ($asArray && !is_array($tag)) {
-                return array($tag);
+            if (!$asArray && count($tag) === 1) {
+                return $tag[0];
+            } else {
+                return $tag;
             }
-            return $tag;
         }
         return $asArray ? array() : null;
     }
@@ -119,12 +124,12 @@ class DocBlock
              . ' * '. PHP_EOL;
         
         $last = null;
-        foreach ($this->tags as $tag) {
-            if ($last === $tag->tag()) {
-                $str .= ' * ' . PHP_EOL;
+        $longest = 0;
+        foreach ($this->tags as $tagGroup) {
+            foreach ($tagGroup as $tag) {
+                $str .= ' * @' . $tag->__toString() . PHP_EOL;
+                $last = $tag->tag();
             }
-            $str .= $tag->__toString() . PHP_EOL;
-            $last = $tag->tag();
         }
         return $str . ' */';
     }

@@ -1,18 +1,23 @@
 <?php
 
-class Test_Controller extends Testes_Test
+namespace Test;
+use Europa\Unit\Test\Test;
+use Europa\Request\Http;
+use Provider\Controller\TestNamedParamController;
+
+class Controller extends Test
 {
     public function testNamedParamMapping()
     {
-        $request    = new \Europa\Request\Http;
-        $controller = new Test_Controller_TestNamedParamController($request);
+        $request    = new Http;
+        $controller = new TestNamedParamController($request);
         
         $request->id   = 1;
         $request->name = 'Trey';
         
         try {
             $controller->action();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->assert(false, 'An error occurred while actioning the controller.');
         }
         
@@ -20,21 +25,5 @@ class Test_Controller extends Testes_Test
             $controller->id   === $request->id,
             $controller->name === $request->name
         );
-    }
-}
-
-class Test_Controller_TestNamedParamController extends \Europa\Controller
-{
-    public $id;
-    
-    public $name;
-    
-    public $notRequired;
-    
-    public function get($id, $name, $notRequired = true)
-    {
-        $this->id          = $id;
-        $this->name        = $name;
-        $this->notRequired = $notRequired;
     }
 }

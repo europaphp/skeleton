@@ -1,26 +1,30 @@
 <?php
 
+define('START_TIME', microtime(true));
+
 use Europa\Request\Http;
 use Europa\ServiceLocator;
+use Europa\Uri;
 
 // can be overridden in bootstrap if need be
 error_reporting(E_ALL ^ E_STRICT);
 ini_set('display_errors', 'on');
 
-// load the bootstrap
-require dirname(__FILE__) . '/../app/boot/bootstrap.php';
+// bootstrap the app
+require dirname(__FILE__) . '/../app/Bootstrapper.php';
+$boot = new Bootstrapper;
+$boot->boot();
 
 // any exceptions will routed to the error controller
+$locator = ServiceLocator::getInstance();
+$request = $locator->get('request');
+$router  = $locator->get('router');
 try {
-    $locator = ServiceLocator::getInstance();
-    $params  = $locator->router->query(Http::uri());
-    
+    $params = $router->query(Uri::detect()->getRequest());
     if (!$params) {
-        throw new Exception;
+        throw new Exception('The required request parameters were not defined.');
     }
-    
-    echo $locator->request->setParams($params)->dispatch();
+    echo $request->setParams($params)->dispatch()->render();
 } catch (\Exception $e) {
-    die($e);
-    echo ServiceLocator::getInstance()->request->setController('error');
+    echo $request->setController('error')->dispatch()->render();
 }

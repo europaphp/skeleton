@@ -165,7 +165,7 @@ class String implements \Countable
      */
     public function toMethod()
     {
-        return $this->toClass()->lcfirst()->replace('_', '');
+        return $this->toClass()->replace('\\', '')->lcFirst();
     }
     
     /**
@@ -323,7 +323,7 @@ class String implements \Countable
         if (!$val || strtolower($val) == 'null') {
             return null;
         }
-        if (isstring($val) && is_numeric($val)) {
+        if (is_string($val) && is_numeric($val)) {
             if (strpos($val, '.') === false) {
                 $val = (int) $val;
             } else {

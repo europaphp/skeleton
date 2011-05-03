@@ -31,6 +31,20 @@ class ClassReflector extends \ReflectionClass implements Reflectable
     {
         return new MethodReflector($this->getName(), $method);
     }
+    
+    /**
+     * Returns an array of \Europa\Reflection\MethodReflector instances.
+     * 
+     * @return array
+     */
+    public function getMethods()
+    {
+        $methods = array();
+        foreach (parent::getMethods() as $method) {
+            $methods[] = $this->getMethod($method->getName());
+        }
+        return $methods;
+    }
 
     /**
      * Returns the doc block for the class.

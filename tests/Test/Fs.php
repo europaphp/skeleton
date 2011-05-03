@@ -1,9 +1,11 @@
 <?php
 
+namespace Test;
+use Europa\Unit\Test\Test;
 use Europa\Fs\File;
 use Europa\Fs\Directory;
 
-class Test_Fs extends Testes_Test
+class Fs extends Test
 {
     public function testFileCreateOpenAndDelete()
     {

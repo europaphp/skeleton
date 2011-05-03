@@ -1,6 +1,9 @@
 <?php
 
+namespace Test\Form;
+use Europa\Unit\Test\Test;
 use Europa\Validator\Rule\Required;
+use Provider\Form\TestElementList;
 
 /**
  * Tests for validating \Europa\Form\ElementList.
@@ -8,17 +11,16 @@ use Europa\Validator\Rule\Required;
  * @category Tests
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
- * @license  (c) 2010 Trey Shugart
- * @link     http://europaphp.org/license
+ * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class Test_Form_ElementList extends \Testes_Test
+class ElementList extends Test
 {
     /**
      * The list that is being used for the test.
      * 
      * @var \Europa\Form\ElementList
      */
-    private $_list;
+    private $list;
     
     /**
      * Set up the test.
@@ -27,16 +29,16 @@ class Test_Form_ElementList extends \Testes_Test
      */
     public function setUp()
     {
-        $this->_list = new Test_Form_TestElementList;
+        $this->list = new TestElementList;
         
-        $this->_list['user[0][name]']           = new \Europa\Form\Element\Input;
-        $this->_list['user[0][bio]']            = new \Europa\Form\Element\Textarea;
-        $this->_list['user[0][name]']->value    = 'tres';
-        $this->_list['user[0][bio]']->value     = 'php dev';
-        $this->_list['user[zero][name]']        = new \Europa\Form\Element\Input;
-        $this->_list['user[zero][bio]']         = new \Europa\Form\Element\Textarea;
-        $this->_list['user[zero][name]']->value = 'tres';
-        $this->_list['user[zero][bio]']->value  = 'php dev';
+        $this->list['user[0][name]']           = new \Europa\Form\Element\Input;
+        $this->list['user[0][bio]']            = new \Europa\Form\Element\Textarea;
+        $this->list['user[0][name]']->value    = 'tres';
+        $this->list['user[0][bio]']->value     = 'php dev';
+        $this->list['user[zero][name]']        = new \Europa\Form\Element\Input;
+        $this->list['user[zero][bio]']         = new \Europa\Form\Element\Textarea;
+        $this->list['user[zero][name]']->value = 'tres';
+        $this->list['user[zero][bio]']->value  = 'php dev';
     }
     
     /**
@@ -47,7 +49,7 @@ class Test_Form_ElementList extends \Testes_Test
     public function testElementExistence()
     {
         $this->assert(
-            $this->_list['user[0][name]'] instanceof \Europa\Form\Element\Input,
+            $this->list['user[0][name]'] instanceof \Europa\Form\Element\Input,
             'Element does not exist.'
         );
     }
@@ -63,7 +65,7 @@ class Test_Form_ElementList extends \Testes_Test
         $required->addMessage('Name is required.');
         
         $this->assert(
-            $this->_list->validate()->isValid(),
+            $this->list->validate()->isValid(),
             'Element is not valid.'
         );
     }
@@ -75,7 +77,7 @@ class Test_Form_ElementList extends \Testes_Test
      */
     public function testNumericToArray()
     {
-        $toArray = $this->_list->toArray();
+        $toArray = $this->list->toArray();
         
         $valid = isset($toArray['user'][0]['name'])
             && isset($toArray['user'][1]['bio'])
@@ -92,7 +94,7 @@ class Test_Form_ElementList extends \Testes_Test
      */
     public function testStringToArray()
     {
-        $toArray = $this->_list->toArray();
+        $toArray = $this->list->toArray();
         
         $valid = isset($toArray['user']['zero']['name'])
               && isset($toArray['user']['zero']['bio'])
@@ -100,21 +102,5 @@ class Test_Form_ElementList extends \Testes_Test
               && $toArray['user']['zero']['bio']  === 'php dev';
         
         $this->assert($valid, 'String indicies in toArray failed.');
-    }
-}
-
-/**
- * Dummy class for validating the \Europa\Form\ElementList
- * 
- * @category Tests
- * @package  Europa
- * @author   Trey Shugart <treshugart@gmail.com>
- * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
- */
-class Test_Form_TestElementList extends \Europa\Form\ElementList
-{
-    public function __toString()
-    {
-        return '';
     }
 }

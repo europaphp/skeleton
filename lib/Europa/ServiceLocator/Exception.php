@@ -1,5 +1,8 @@
 <?php
 
+namespace Europa\ServiceLocator;
+use Europa\Exception as BaseException;
+
 /**
  * Service container exception class.
  * 
@@ -8,10 +11,7 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-namespace Europa\ServiceLocator
+class Exception extends BaseException
 {
-    class Exception extends \Europa\Exception
-    {
-        
-    }
+    
 }

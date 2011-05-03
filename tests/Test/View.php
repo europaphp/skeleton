@@ -1,6 +1,9 @@
 <?php
 
-class Test_View extends Testes_Suite
+namespace Test;
+use Europa\Unit\Test\Suite;
+
+class View extends Suite
 {
     
 }

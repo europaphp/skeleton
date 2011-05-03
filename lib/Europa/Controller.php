@@ -5,6 +5,7 @@ use Europa\Controller\Exception as ControllerException;
 use Europa\Request\Http;
 use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
+use Europa\Uri;
 use Europa\View;
 
 /**
@@ -21,6 +22,9 @@ use Europa\View;
  *   - trace
  *   - connect
  * 
+ * Additionally, if an above request method is not found, the controller will look for a method called "all" to catch
+ * all request that are made to the controller.
+ * 
  * @category Controllers
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
@@ -28,6 +32,13 @@ use Europa\View;
  */
 abstract class Controller
 {
+    /**
+     * The default method to call if one matching the request method is not defined.
+     * 
+     * @var string
+     */
+    const CATCH_ALL = 'all';
+    
     /**
      * The request used to dispatch to this controller.
      * 
@@ -63,21 +74,16 @@ abstract class Controller
     }
     
     /**
-     * Renders the set view.
+     * Renders the set view if it exists. If it does not exist, an empty string is returned.
      * 
      * @return string
      */
-    public function __toString()
+    public function render()
     {
-        try {
-            $this->preRender();
-            $view = $this->view ? $this->view->__toString() : '';
-            $this->preRender();
-            return $view;
-        } catch (\Exception $e) {
-            $e = new ControllerException($e->getMessage(), $e->getCode());
-            $e->trigger();
-        }
+        $this->preRender();
+        $view = $this->view ? $this->view->render() : '';
+        $this->postRender();
+        return $view;
     }
     
     /**
@@ -124,13 +130,13 @@ abstract class Controller
      * 
      * @return \Europa\Controller
      */
-    public function forward($to, array $params = array())
+    public function forward($method, $controller = null, array $params = array())
     {
-        // modify the request and dispach it's return value
-        $request = $this->getRequest();
-        $request->setParams($params);
-        $request->setController($to);
-        return $request->dispatch();
+        $request = $this->getRequest()->setMethod($method);
+        if ($controller) {
+            $request->setController($controller);
+        }
+        return $request->setParams($params)->dispatch();
     }
     
     /**
@@ -142,8 +148,8 @@ abstract class Controller
      */
     public function redirect($to = null)
     {
-        header('Location: ' . Http::format($to));
-        exit;
+        $to = new Uri($to);
+        $to->redirect();
     }
 
     /**
@@ -155,7 +161,7 @@ abstract class Controller
      */
     public function useFilters($switch = true)
     {
-        $this->useFilters = (bool) $switch;
+        $this->useFilters = $switch ? true : false;
         return $this;
     }
     
@@ -168,29 +174,10 @@ abstract class Controller
      */
     public function action()
     {
-        $method = $this->request->method();
-        if (!method_exists($this, $method)) {
-            throw new ControllerException('The request method "' . $method . '" is not supported by "' . get_class($this) . '".');
-        }
-
-        // apply custom filters before pre-action for security
-        $this->applyFilterTo($method);
+        $method = $this->request->getMethod();
+        $this->applyFiltersTo($method);
         $this->preAction();
-
-        // call the appropriate method using named parameters
-        $reflector = new MethodReflector($this, $method);
-        
-        // methods can return parameters for the view
-        $params = call_user_func_array(
-            array($this, $method),
-            $reflector->mergeNamedArgs(iterator_to_array($this->request))
-        );
-        
-        // set view params if they were specified and we have a view
-        if ($params && $this->view) {
-            $this->view->setParams($params);
-        }
-        
+        $this->applyParamsToView($this->executeMethod($method, $this->request->getParams()));
         $this->postAction();
     }
     
@@ -247,14 +234,15 @@ abstract class Controller
     /**
      * Applies filters to the specified method.
      * 
-     * @return void
+     * @param string $method The method to apply the filters to.
+     * 
+     * @return \Europa\Controller
      */
-    private function applyFilterTo($method)
+    private function applyFiltersTo($method)
     {
         if (!$this->useFilters) {
             return;
         }
-
         $class         = new ClassReflector($this);
         $method        = new MethodReflector($this, $method);
         $classFilters  = $class->getDocBlock()->getTag('filter', true);
@@ -263,5 +251,44 @@ abstract class Controller
             $filter = $filter->getInstance();
             $filter->filter($this);
         }
+        return $this;
+    }
+    
+    /**
+     * Executes the specified method.
+     * 
+     * @param string $method The method to execute.
+     * 
+     * @return \Europa\Controller
+     */
+    private function executeMethod($method, array $params = array())
+    {
+        // make sure the method exists or a catch-all is defined
+        if (!method_exists($this, $method)) {
+            if (!method_exists($this, static::CATCH_ALL)) {
+                throw new ControllerException(
+                    'The request method "' . $method . '" is not supported by "' . get_class($this) . '". Additionally'
+                    . ', a catch-all action "' . static::CATCH_ALL . '" was not specified.'
+                );
+            }
+            $method = static::CATCH_ALL;
+        }
+        $reflector = new MethodReflector($this, $method);
+        return $reflector->invokeNamedArgs($this, $params);
+    }
+    
+    /**
+     * Applies the passed parameters to the view.
+     * 
+     * @param mixed $params The parameters to apply to the view, if any.
+     * 
+     * @return \Europa\Controller
+     */
+    private function applyParamsToView($params)
+    {
+        if (is_array($params) && $this->view) {
+            $this->view->setParams($params);
+        }
+        return $this;
     }
 }

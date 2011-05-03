@@ -1,14 +1,20 @@
 <?php
 
+namespace Test;
 use Europa\Request\Http;
+use Europa\Router;
+use Europa\String;
+use Europa\Unit\Test\Test;
+use Provider\ServiceLocator\Locator;
+use Provider\ServiceLocator\TestService;
 
-class Test_ServiceLocator extends Testes_Test
+class ServiceLocator extends Test
 {
     private $container;
     
     public function setUp()
     {
-        $this->container = new Container(
+        $this->container = new Locator(
             array(
                 'request' => array(
                     array(
@@ -21,7 +27,7 @@ class Test_ServiceLocator extends Testes_Test
         );
         $this->container->map('router', '\Europa\Router');
         $this->container->setFormatter(function($service) {
-            return \Europa\String::create($service)->toClass() . 'Service';
+            return '\Provider\ServiceLocator' . String::create($service)->toClass() . 'Service';
         });
     }
     
@@ -29,9 +35,9 @@ class Test_ServiceLocator extends Testes_Test
     {
         try {
             if (!$this->container->test instanceof TestService) {
-                throw new Exception;
+                throw new \Exception;
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->assert(false, 'Could not find service class');
         }
     }
@@ -39,7 +45,7 @@ class Test_ServiceLocator extends Testes_Test
     public function testSetupMap()
     {
         $this->assert(
-            $this->container->get('router') instanceof \Europa\Router,
+            $this->container->get('router') instanceof Router,
             'The required dependency was not returned.'
         );
     }
@@ -47,7 +53,7 @@ class Test_ServiceLocator extends Testes_Test
     public function testOverride()
     {
         $this->assert(
-            $this->container->get('request') instanceof \Europa\Request\Http,
+            $this->container->get('request') instanceof Http,
             'The required dependency was not returned.'
         );
     }
@@ -71,21 +77,4 @@ class Test_ServiceLocator extends Testes_Test
             'The configuration was not merged.'
         );
     }
-}
-
-class Container extends \Europa\ServiceLocator
-{
-    protected function request(array $params = array())
-    {
-        $request = new Http($this->get('router'));
-        foreach ($params as $name => $value) {
-            $request->__set($name, $value);
-        }
-        return $request;
-    }
-}
-
-class TestService
-{
-    
 }
