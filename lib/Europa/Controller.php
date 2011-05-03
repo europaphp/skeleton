@@ -243,6 +243,7 @@ abstract class Controller
         if (!$this->useFilters) {
             return;
         }
+        
         $class         = new ClassReflector($this);
         $method        = new MethodReflector($this, $method);
         $classFilters  = $class->getDocBlock()->getTag('filter', true);

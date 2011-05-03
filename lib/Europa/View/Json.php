@@ -29,9 +29,10 @@ class Json extends View
      * JSON encodes the parameters on the view and returns them.
      * 
      * @return string
-     */
+     */    
     public function render()
     {
+        // if no headers have been sent, make sure we send the correct mime type
         if (!headers_sent()) {
             header('Content-Type: Application/JSON');
         }

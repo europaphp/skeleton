@@ -52,14 +52,14 @@ class Php extends View
      * 
      * @var string
      */
-    private static $defaultPath;
+    protected static $defaultPath;
     
     /**
      * Sets the default suffix.
      * 
      * @var string
      */
-    private static $defaultSuffix = 'php';
+    protected static $defaultSuffix = 'php';
     
     /**
      * Construct the view and sets defaults.
@@ -128,6 +128,20 @@ class Php extends View
      */
     public function render(array $params = array())
     {
+        $realpath = $this->getViewPath();
+        
+        ob_start();
+        include $realpath;
+        return ob_get_clean() . PHP_EOL;
+    }
+    
+    /**
+     * Get the path of the view file
+     * @throws Exception
+     * @return string
+     */
+    protected function getViewPath()
+    {
         $path = $this->getPath() . DIRECTORY_SEPARATOR . $this->getScript();
         if ($suffix = $this->getSuffix()) {
             $path .= '.' . $suffix;
@@ -137,10 +151,7 @@ class Php extends View
         if (!$realpath) {
             throw new Exception('Could not locate the view "' . $path . '".');
         }
-        
-        ob_start();
-        include $realpath;
-        return ob_get_clean() . PHP_EOL;
+        return $realpath;
     }
 
     /**

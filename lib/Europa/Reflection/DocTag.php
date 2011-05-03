@@ -72,7 +72,7 @@ abstract class DocTag
             }
 
             // if it begins with an asterisk, format it
-            if ($part[0] === '*') {
+            if (isset($part[0]) && $part[0] === '*') {
                 $part = substr($part, 1);
                 $part = trim($part);
             }

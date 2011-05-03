@@ -29,7 +29,11 @@ class DocBlock
         'see'        => '\Europa\Reflection\DocTag\SeeTag',
         'subpackage' => '\Europa\Reflection\DocTag\SubpackageTag',
         'throws'     => '\Europa\Reflection\DocTag\ThrowsTag',
-        'todo'       => '\Europa\Reflection\DocTag\TodoTag'
+        'todo'       => '\Europa\Reflection\DocTag\TodoTag',
+        'link'       => '\Europa\Reflection\DocTag\LinkTag',
+        'copyright'  => '\Europa\Reflection\DocTag\CopyrightTag',
+        'since'      => '\Europa\Reflection\DocTag\SinceTag',
+        'version'    => '\Europa\Reflection\DocTag\VersionTag',
     );
 
     public function __construct($docString = null)
@@ -152,6 +156,7 @@ class DocBlock
             $desc = $desc[1];
             $desc = explode("\n", $desc);
             foreach ($desc as $k => $part) {
+                $desc[$k] = trim(preg_replace('#^\*#', '', trim($part)));
                 if (!preg_match('/[a-zA-Z0-9]/', $part)) {
                     $desc[$k] = PHP_EOL;
                 }
@@ -183,7 +188,7 @@ class DocBlock
     private function parseDocTagFromString($string)
     {
         $parts = explode(' ', $string, 2);
-        $name  = $parts[0];
+        $name  = strtolower($parts[0]);
 
         if (!isset($this->map[$name])) {
             throw new Exception('Unknown doc tag "' . $name . '".');
