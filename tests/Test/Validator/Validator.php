@@ -100,4 +100,20 @@ class Validator extends Test
         
         $this->assert($valid, 'Alpha-numeric validator not working.');
     }
+    
+    /**
+     * Tests the in list validator.
+     * 
+     * @return bool
+     */
+    public function testInList()
+    {
+        $list = new \Europa\Validator\Rule\InList('in','the','list');
+        $valid = $list->validate('in')->isValid()
+            && $list->validate('the')->isValid()
+            && $list->validate('list')->isValid()
+            && !$list->validate('not in the list')->isValid();
+        
+        $this->assert($valid, 'In list validator not working.');
+    }
 }
