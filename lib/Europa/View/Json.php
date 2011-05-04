@@ -50,7 +50,7 @@ class Json extends View
         $data  = $data ? $data : $this->getParams();
         foreach ($data as $name => $item) {
             if (is_array($item) || is_object($item)) {
-                $item = $this->serializeParamsToArray($item);
+                $item = $this->formatParamsToJsonArray($item);
             }
             $array[$name] = $item;
         }

@@ -84,7 +84,7 @@ class Cli extends Request
         
         array_shift($args);
         foreach ($args as $arg) {
-            if (strpos($arg, '-') !== false) {
+            if (strpos($arg, '-') === 0) {
                 break;
             }
             $this->commands[] = $arg;

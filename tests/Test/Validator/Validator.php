@@ -108,7 +108,7 @@ class Validator extends Test
      */
     public function testInList()
     {
-        $list = new \Europa\Validator\Rule\InList('in','the','list');
+        $list = new \Europa\Validator\Rule\InList(array('in', 'the', 'list'));
         $valid = $list->validate('in')->isValid()
             && $list->validate('the')->isValid()
             && $list->validate('list')->isValid()
