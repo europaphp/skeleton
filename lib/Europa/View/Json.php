@@ -47,7 +47,7 @@ class Json extends View
     protected function formatParamsToJsonArray($data = null)
     {
         $array = array();
-        $data  = $data ? $data : $this->getParams();
+        $data  = !is_null($data) ? $data : $this->getParams();
         foreach ($data as $name => $item) {
             if (is_array($item) || is_object($item)) {
                 $item = $this->formatParamsToJsonArray($item);
