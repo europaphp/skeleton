@@ -36,7 +36,9 @@ class Json extends View
         if (!headers_sent()) {
             header('Content-Type: Application/JSON');
         }
-        return json_encode($this->formatParamsToJsonArray());
+        
+        $data = $this->formatParamsToJsonArray($this->getParams());
+        return json_encode($data);
     }
     
     /**
@@ -44,10 +46,9 @@ class Json extends View
      *  
      * @return array
      */
-    protected function formatParamsToJsonArray($data = null)
+    protected function formatParamsToJsonArray($data)
     {
         $array = array();
-        $data  = !is_null($data) ? $data : $this->getParams();
         foreach ($data as $name => $item) {
             if (is_array($item) || is_object($item)) {
                 $item = $this->formatParamsToJsonArray($item);
