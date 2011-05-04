@@ -128,14 +128,10 @@ class Php extends View
      */
     public function render(array $params = array())
     {
-        $path = $this->getPath() . DIRECTORY_SEPARATOR . $this->getScript();
-        if ($suffix = $this->getSuffix()) {
-            $path .= '.' . $suffix;
-        }
-        
+        $fullpath = $this->getFullPath();
         $realpath = realpath($path);
         if (!$realpath) {
-            throw new Exception('Could not locate the view "' . $path . '".');
+            throw new Exception('Could not locate the view "' . $realpath . '".');
         }
         
         ob_start();
@@ -227,6 +223,20 @@ class Php extends View
     public function getScript()
     {
         return $this->script;
+    }
+    
+    /**
+     * Compiles and returns the full path from the available information.
+     * 
+     * @return string
+     */
+    public function getFullPath()
+    {
+        $path = $this->getPath() . DIRECTORY_SEPARATOR . $this->getScript();
+        if ($suffix = $this->getSuffix()) {
+            $path .= '.' . $suffix;
+        }
+        return $path;
     }
     
     /**
