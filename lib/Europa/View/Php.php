@@ -128,14 +128,14 @@ class Php extends View
      */
     public function render(array $params = array())
     {
-        $fullpath = $this->getFullPath();
-        $realpath = realpath($path);
-        if (!$realpath) {
-            throw new Exception('Could not locate the view "' . $realpath . '".');
+        $fullPath = $this->getFullPath();
+        $realPath = realpath($fullPath);
+        if (!$realPath) {
+            throw new Exception('Could not locate the view "' . $realPath . '".');
         }
         
         ob_start();
-        include $realpath;
+        include $realPath;
         return ob_get_clean() . PHP_EOL;
     }
 
