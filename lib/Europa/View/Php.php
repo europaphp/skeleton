@@ -52,14 +52,14 @@ class Php extends View
      * 
      * @var string
      */
-    protected static $defaultPath;
+    private static $defaultPath;
     
     /**
      * Sets the default suffix.
      * 
      * @var string
      */
-    protected static $defaultSuffix = 'php';
+    private static $defaultSuffix = 'php';
     
     /**
      * Construct the view and sets defaults.
@@ -128,30 +128,15 @@ class Php extends View
      */
     public function render(array $params = array())
     {
-        $realpath = $this->getViewPath();
+        $fullpath = $this->getFullPath();
+        $realpath = realpath($path);
+        if (!$realpath) {
+            throw new Exception('Could not locate the view "' . $realpath . '".');
+        }
         
         ob_start();
         include $realpath;
         return ob_get_clean() . PHP_EOL;
-    }
-    
-    /**
-     * Get the path of the view file
-     * @throws Exception
-     * @return string
-     */
-    protected function getViewPath()
-    {
-        $path = $this->getPath() . DIRECTORY_SEPARATOR . $this->getScript();
-        if ($suffix = $this->getSuffix()) {
-            $path .= '.' . $suffix;
-        }
-        
-        $realpath = realpath($path);
-        if (!$realpath) {
-            throw new Exception('Could not locate the view "' . $path . '".');
-        }
-        return $realpath;
     }
 
     /**
@@ -238,6 +223,20 @@ class Php extends View
     public function getScript()
     {
         return $this->script;
+    }
+    
+    /**
+     * Compiles and returns the full path from the available information.
+     * 
+     * @return string
+     */
+    public function getFullPath()
+    {
+        $path = $this->getPath() . DIRECTORY_SEPARATOR . $this->getScript();
+        if ($suffix = $this->getSuffix()) {
+            $path .= '.' . $suffix;
+        }
+        return $path;
     }
     
     /**
