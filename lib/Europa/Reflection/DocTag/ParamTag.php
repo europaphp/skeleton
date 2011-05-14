@@ -2,52 +2,88 @@
 
 namespace Europa\Reflection\DocTag;
 
+/**
+* This is the param tag object (@param)
+*/
 class ParamTag extends \Europa\Reflection\DocTag
 {
+    /**
+    * Type of the parameter
+    */
     protected $type;
 
+    /**
+    * Name of the parameter
+    */
     protected $name;
 
+    /**
+    * Description of the parameter
+    */
     protected $description;
 
+    /**
+    * Return the tag object type
+    */
     public function tag()
     {
         return 'param';
     }
-
+    
+    /**
+    * Set the type of the parameter
+    */
     public function setType($type)
     {
         $this->type = $type;
         return $this;
     }
 
+    /**
+    * Return the type of the parameter
+    */
     public function getType()
     {
         return $this->type;
     }
 
+    /**
+    * Set the name of the parameter
+    */
     public function setName($name)
     {
         $this->name = $name;
         return $this;
     }
 
+    /**
+    * Return the name of the parameter
+    */
     public function getName()
     {
         return $this->name;
     }
-
+    
+    /**
+    * Set the description of the parameter
+    */
     public function setDescription($description)
     {
         $this->description = $description;
         return $this;
     }
 
+    /**
+    * Return the description of the parameter
+    */
     public function getDescription()
     {
         return $this->description;
     }
 
+    /**
+    * Parse the DocTag and set its attributes
+    */
     public function parse($tagString)
     {
         // use default parsing for generating the name and doc string
