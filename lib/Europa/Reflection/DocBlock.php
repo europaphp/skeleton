@@ -189,7 +189,7 @@ class DocBlock
     {
         $string = preg_replace('#\t#', ' ', $string);
         $parts = explode(' ', $string, 2);
-        $name  = strtolower($parts[0]);
+        $name  = trim(strtolower($parts[0]));
 
         if (!isset($this->map[$name])) {
             throw new Exception('Unknown doc tag "' . $name . '".');
