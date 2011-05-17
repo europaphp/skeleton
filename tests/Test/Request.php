@@ -56,4 +56,26 @@ class Request extends Test
             'Parameter removing not working.'
         );
     }
+
+    public function testHttpParamGettingUsingRegex()
+    {
+        $this->request->param1     = true;
+        $this->request->param2     = true;
+        $this->request->param3     = true;
+        $this->request->testParam1 = true;
+        $this->request->testParam2 = true;
+        $this->request->testParam3 = true;
+
+        $all = $this->request->searchParams('.*');
+        $this->assert(count($all) === 6, 'The total nubmer of parameters returned is incorrect.');
+
+        $firstThree = $this->request->searchParams('^param');
+        $this->assert(count($firstThree) === 3, 'First set of parameters expected.');
+
+        $lastThree = $this->request->searchParams('^test');
+        $this->assert(count($lastThree) === 3, 'Last set of parameters expected.');
+
+        $onlyTwos = $this->request->searchParams('(2)$');
+        $this->assert(count($onlyTwos) === 2, 'Only the parameters ending in two should have been returned.');
+    }
 }

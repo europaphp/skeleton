@@ -183,6 +183,26 @@ abstract class Request
         return $this;
     }
     
+    /**
+     * Returns the parameters whose names match the regex. The delimitter is automated so you don't have to type it
+     * everytime you search. The default delmitter is a forward slash.
+     * 
+     * @param string $pattern    The pattern to use for searching.
+     * @param string $delimitter The delimitter to use for the pattern.
+     * 
+     * @return array
+     */
+    public function searchParams($pattern, $delimitter = '/', $flags = null)
+    {
+        $params  = array();
+        $pattern = $delimitter . $pattern . $delimitter . $flags;
+        foreach ($this->params as $name => $value) {
+            if (preg_match($pattern, $name)) {
+                $params[$name] = $value;
+            }
+        }
+        return $params;
+    }
     
     /**
      * Sets the appropriate method.
