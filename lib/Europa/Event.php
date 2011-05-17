@@ -18,7 +18,7 @@ class Event
      * 
      * @var array
      */
-    protected static $stack = array();
+    protected static $stack = array ();
     
     /**
      * Binds an event handler to the stack.
@@ -31,12 +31,12 @@ class Event
     public static function bind($name, Triggerable $handler)
     {
         // make sure the event has it's own stack
-        if (!self::isBound($name)) {
-            self::$stack[$name] = array();
+        if (! self::isBound($name)) {
+            self::$stack [$name] = array ();
         }
         
         // and add it to the stack
-        self::$stack[$name][] = $handler;
+        self::$stack [$name] [] = $handler;
     }
     
     /**
@@ -51,14 +51,14 @@ class Event
     {
         if (self::isBound($name)) {
             if ($handler) {
-                foreach (self::$stack[$name] as $k => $bound) {
+                foreach (self::$stack [$name] as $k => $bound) {
                     if ($bound === $handler) {
-                        unset(self::$stack[$name][$k]);
+                        unset(self::$stack [$name] [$k]);
                         return true;
                     }
                 }
             }
-            unset(self::$stack[$name]);
+            unset(self::$stack [$name]);
             return true;
         }
         return false;
@@ -90,7 +90,7 @@ class Event
      */
     public static function isBound($name)
     {
-        return isset(self::$stack[$name]);
+        return isset(self::$stack [$name]);
     }
     
     /**
@@ -104,9 +104,9 @@ class Event
     {
         if ($name) {
             if (self::isBound($name)) {
-                return self::$stack[$name];
+                return self::$stack [$name];
             }
-            return array();
+            return array ();
         }
         return self::$stack;
     }

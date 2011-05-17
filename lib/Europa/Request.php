@@ -40,6 +40,7 @@ abstract class Request
      */
     private $params = array('controller' => 'index');
     
+
     /**
      * Sets the specified request parameter.
      * 
@@ -237,7 +238,7 @@ abstract class Request
      * @return \Europa\Controller
      */
     public function dispatch()
-    {
+    { 
         $controller = $this->formatController();
         if (!Loader::load($controller)) {
             throw new Exception('Could not load controller ' . $controller . '.', Exception::CONTROLLER_NOT_FOUND);
@@ -249,7 +250,7 @@ abstract class Request
                 'Class ' . get_class($controller)  . ' is not a valid controller instance. Controller classes must '
                 . 'derive from \Europa\Controller.'
             );
-        }
+        } 
         
         $controller->action();
         return $controller;
@@ -348,7 +349,6 @@ abstract class Request
     {
         return defined('STDIN');
     }
-    
     /**
      * Creates a new instance of the statically called request.
      * 
@@ -357,5 +357,18 @@ abstract class Request
     public static function create()
     {
         return new static;
+    }
+
+    /**
+     * Auto-detects the request type and returns the appropriate request instance.
+     * 
+     * @return \Europa\Request
+     */
+    public static function autoDetect()
+    {
+        if (static::isCli()) {
+            return new Cli;
+        }
+        return new Http;
     }
 }
