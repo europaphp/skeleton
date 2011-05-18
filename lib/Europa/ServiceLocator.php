@@ -186,8 +186,8 @@ class ServiceLocator
         
         // go through the method queue and call them using named arguments
         if (isset($this->queue[$service])) {
-            foreach ($this->queue[$service] as $method => $args) {
-                call_user_func_array(array($class, $method), $args);
+            foreach ($this->queue[$service] as $method) {
+                call_user_func_array(array($class, $method['method']), $method['args']);
             }
         }
         
@@ -272,7 +272,7 @@ class ServiceLocator
         
         // and add it to the queue
         // the method name is the key and the arguments its value
-        $this->queue[$service][$method] = $args;
+        $this->queue[$service][] = array('method' => $method, 'args' => $args);
         return $this;
     }
     
