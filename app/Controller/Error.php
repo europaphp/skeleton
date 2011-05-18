@@ -1,6 +1,7 @@
 <?php
 
 namespace Controller;
+use Europa\Uri;
 
 /**
  * A controller that will handle all errors.
@@ -20,7 +21,7 @@ class Error extends Base
     public function all()
     {
         return array(
-            'url' => $this->getRequest()->getRequestUri(),
+            'url' => Uri::detect()->getRequest(),
         );
     }
 }
