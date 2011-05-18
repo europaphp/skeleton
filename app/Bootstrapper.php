@@ -114,7 +114,7 @@ class Bootstrapper extends ParentBootstrapper
      */
     public function configureView()
     {
-        $this->locator->queueMethodFor('view', 'setPath', array($this->base . '/app/View'));
+        $this->locator->queueMethodFor('view', 'addPath', array($this->base . '/app/View'));
         $this->locator->queueMethodFor('view', 'setHelperLocator', array($this->locator->get('helper')));
     }
     
@@ -125,7 +125,7 @@ class Bootstrapper extends ParentBootstrapper
      */
     public function configureLayout()
     {
-        $this->locator->queueMethodFor('layout', 'setPath', array($this->base . '/app/View'));
+        $this->locator->queueMethodFor('layout', 'addPath', array($this->base . '/app/View'));
         $this->locator->queueMethodFor('layout', '__set', array('view', $this->locator->get('view')));
         $this->locator->queueMethodFor('layout', 'setHelperLocator', array($this->locator->get('helper')));
     }
