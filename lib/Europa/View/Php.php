@@ -22,16 +22,9 @@ class Php extends View
     /**
      * The script path to look in.
      * 
-     * @var string
+     * @var array
      */
-    private $path;
-    
-    /**
-     * The script suffix.
-     * 
-     * @var string
-     */
-    private $suffix;
+    private $paths;
     
     /**
      * The script to be rendered.
@@ -46,31 +39,6 @@ class Php extends View
      * @var \Europa\ServiceLocator
      */
     private $serviceLocator;
-    
-    /**
-     * Sets the default path for views.
-     * 
-     * @var string
-     */
-    private static $defaultPath;
-    
-    /**
-     * Sets the default suffix.
-     * 
-     * @var string
-     */
-    private static $defaultSuffix = 'php';
-    
-    /**
-     * Construct the view and sets defaults.
-     * 
-     * @return View
-     */
-    public function __construct()
-    {
-        $this->setPath(static::getDefaultPath());
-        $this->setSuffix(static::getDefaultSuffix());
-    }
     
     /**
      * Attempts to call the specified method on the specified locator if it exists.
@@ -108,35 +76,47 @@ class Php extends View
             return parent::getParam($name);
         }
         
+        // if no service locator is set, just return null
         if (!$this->serviceLocator) {
-            throw new Exception('Unable to get helper "' . $name . '" because no helper locator was set.');
+            return null;
         }
         
         try {
             return $this->serviceLocator->get($name, array($this));
         } catch (ServiceLocator\Exception $e) {
-            throw new Exception('Unable to get instance of helper "' . $name . '".');
+            
         }
+        
+        return null;
     }
     
     /**
      * Parses the view file and returns the result.
      * 
-     * @param array $params The parameters to render with the view.
-     * 
      * @return string
      */
-    public function render(array $params = array())
+    public function render()
     {
-        $fullPath = $this->getFullPath();
-        $realPath = realpath($fullPath);
-        if (!$realPath) {
-            throw new Exception('Could not locate the view "' . $realPath . '".');
+        $script = $this->getScript();
+        if (!$script) {
+            throw new Exception('Could not render view: No script was defined to render.');
         }
         
-        ob_start();
-        include $realPath;
-        return ob_get_clean() . PHP_EOL;
+        if (!$this->paths) {
+            throw new Exception('Could not render view: There are no paths to load from.');
+        }
+        
+        foreach ($this->paths as $path => $suffixes) {
+            foreach ($suffixes as $suffix) {
+                $file = $path . DIRECTORY_SEPARATOR . $this->getScript() . '.' . $suffix;
+                if (file_exists($file)) {
+                    ob_start();
+                    include $file;
+                    return ob_get_clean() . PHP_EOL;
+                }
+            }
+        }
+        throw new Exception("Could not locate the view {$this->getScript()}.");
     }
 
     /**
@@ -150,56 +130,6 @@ class Php extends View
     {
         $this->serviceLocator = $serviceLocator;
         return $this;
-    }
-    
-    /**
-     * Sets the view path.
-     * 
-     * @var string $path The view path.
-     * 
-     * @return \Europa\View\Php
-     */
-    public function setPath($path)
-    {
-        $realpath = realpath($path);
-        if (!$realpath) {
-            throw new Exception('The view path "' . $path . '" does not exist.');
-        }
-        $this->path = $realpath;
-        return $this;
-    }
-    
-    /**
-     * Returns the set view path.
-     * 
-     * @return string
-     */
-    public function getPath()
-    {
-        return $this->path;
-    }
-    
-    /**
-     * Sets the view suffix to use.
-     * 
-     * @param string $suffix The view suffix to use. Default is "php".
-     * 
-     * @return \Europa\View\Php
-     */
-    public function setSuffix($suffix)
-    {
-        $this->suffix = $suffix;
-        return $this;
-    }
-    
-    /**
-     * Returns the view suffix being used.
-     * 
-     * @return string
-     */
-    public function getSuffix()
-    {
-        return $this->suffix;
     }
     
     /**
@@ -226,64 +156,27 @@ class Php extends View
     }
     
     /**
-     * Compiles and returns the full path from the available information.
+     * Adds a path with the given suffix.
      * 
-     * @return string
+     * @param string $path     The path to add.
+     * @param array  $suffixes The valid suffixes for the path.
+     * 
+     * @return Php
      */
-    public function getFullPath()
+    public function addPath($path, array $suffixes = array('php'))
     {
-        $path = $this->getPath() . DIRECTORY_SEPARATOR . $this->getScript();
-        if ($suffix = $this->getSuffix()) {
-            $path .= '.' . $suffix;
-        }
-        return $path;
-    }
-    
-    /**
-     * Sets the default path for views.
-     * 
-     * @param string $path The default path.
-     * 
-     * @return void
-     */
-    public static function setDefaultPath($path)
-    {
+        // the path must be a valid path
         $realpath = realpath($path);
         if (!$realpath) {
-            throw new Exception('The default view path "' . $path . '" does not exist.');
+            throw new Exception("Cannot add path: The path $realpath does not exist.");
         }
-        static::$defaultPath = $realpath;
-    }
-    
-    /**
-     * Returns the default path.
-     * 
-     * @return string
-     */
-    public static function getDefaultPath()
-    {
-        return static::$defaultPath;
-    }
-    
-    /**
-     * Sets the default suffix.
-     * 
-     * @param string $suffix The default suffix.
-     * 
-     * @return void
-     */
-    public static function setDefaultSuffix($suffix)
-    {
-        static::$defaultSuffix = $suffix;
-    }
-    
-    /**
-     * Returns the default suffix.
-     * 
-     * @return string
-     */
-    public static function getDefaultSuffix()
-    {
-        return static::$defaultSuffix;
+        
+        // the path needs suffixes to use
+        if (!$suffixes) {
+            throw new Exception("Cannot add path: No valid suffixes were applied to the path.");
+        }
+        
+        $this->paths[$realpath] = $suffixes;
+        return $this;
     }
 }
