@@ -84,6 +84,7 @@ class Http extends Request
      */
     public function __construct()
     {
+        $this->initDefaultUri();
         $this->initDefaultParams();
         $this->initDefaultMethod();
         $this->initDefaultHeaders();
@@ -277,6 +278,16 @@ class Http extends Request
     public function getIp()
     {
         return $this->ip;
+    }
+    
+    /**
+     * Initializes the default URI for the HTTP request.
+     * 
+     * @return \Europa\Request\Http
+     */
+    private function initDefaultUri()
+    {
+        return $this->setUri(Uri::detect());
     }
     
     /**
