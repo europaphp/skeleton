@@ -34,19 +34,10 @@ class Cli extends Request
      */
     public function __construct()
     {
+        $this->setMethod(static::METHOD);
         $this->parseCommands();
         $this->parseParams();
         $this->setController(str_replace(' ', '\\', $this->getCommand()));
-    }
-    
-    /**
-     * Returns the request method to call in the controller.
-     * 
-     * @return string
-     */
-    public function getMethod()
-    {
-        return static::METHOD;
     }
     
     /**

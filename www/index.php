@@ -9,6 +9,7 @@ use Europa\Uri;
 // can be overridden in bootstrap if need be
 error_reporting(E_ALL ^ E_STRICT);
 ini_set('display_errors', 'on');
+date_default_timezone_set('Australia/Sydney');
 
 // bootstrap the app
 require dirname(__FILE__) . '/../app/Bootstrapper.php';

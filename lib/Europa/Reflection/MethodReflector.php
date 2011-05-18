@@ -45,7 +45,7 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
                 $params[strtolower($name)] = $value;
             }
         }
-        
+
         // we check each parameter and set accordingly
         foreach ($this->getParameters() as $param) {
             $pos  = $param->getPosition();

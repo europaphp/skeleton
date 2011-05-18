@@ -40,6 +40,7 @@ abstract class Request
      */
     private $params = array('controller' => 'index');
     
+
     /**
      * Sets the specified request parameter.
      * 
@@ -183,6 +184,26 @@ abstract class Request
         return $this;
     }
     
+    /**
+     * Returns the parameters whose names match the regex. The delimitter is automated so you don't have to type it
+     * everytime you search. The default delmitter is a forward slash.
+     * 
+     * @param string $pattern    The pattern to use for searching.
+     * @param string $delimitter The delimitter to use for the pattern.
+     * 
+     * @return array
+     */
+    public function searchParams($pattern, $delimitter = '/', $flags = null)
+    {
+        $params  = array();
+        $pattern = $delimitter . $pattern . $delimitter . $flags;
+        foreach ($this->params as $name => $value) {
+            if (preg_match($pattern, $name)) {
+                $params[$name] = $value;
+            }
+        }
+        return $params;
+    }
     
     /**
      * Sets the appropriate method.
@@ -217,7 +238,7 @@ abstract class Request
      * @return \Europa\Controller
      */
     public function dispatch()
-    {
+    { 
         $controller = $this->formatController();
         if (!Loader::load($controller)) {
             throw new Exception('Could not load controller ' . $controller . '.', Exception::CONTROLLER_NOT_FOUND);
@@ -229,7 +250,7 @@ abstract class Request
                 'Class ' . get_class($controller)  . ' is not a valid controller instance. Controller classes must '
                 . 'derive from \Europa\Controller.'
             );
-        }
+        } 
         
         $controller->action();
         return $controller;
@@ -328,7 +349,6 @@ abstract class Request
     {
         return defined('STDIN');
     }
-    
     /**
      * Creates a new instance of the statically called request.
      * 
@@ -337,5 +357,18 @@ abstract class Request
     public static function create()
     {
         return new static;
+    }
+
+    /**
+     * Auto-detects the request type and returns the appropriate request instance.
+     * 
+     * @return \Europa\Request
+     */
+    public static function autoDetect()
+    {
+        if (static::isCli()) {
+            return new Cli;
+        }
+        return new Http;
     }
 }

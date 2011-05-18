@@ -32,11 +32,15 @@ class Directory extends Item implements \Countable, \Iterator
     {
         $realpath = realpath($path);
         if (!$path || !$realpath) {
-            throw new Directory\Exception(
-                'The path "' . $path . '" must be a valid directory.'
-            );
+            throw new Exception('The path "' . $path . '" must be a valid directory.');
         }
-        parent::__construct($realpath);
+
+        try {
+            parent::__construct($realpath);
+        } catch(\RuntimeException $e) {
+            throw new Exception("Could not open directory {$path} with message: {$e->getMessage()}.");
+        }
+
         $this->unflatten();
     }
     
@@ -126,16 +130,16 @@ class Directory extends Item implements \Countable, \Iterator
             $new  = $dest . $new;
             $base = dirname($new);
             if (!is_dir($base)) {
-                \Europa\Fs\Directory::create($base);
+                static::create($base);
             }
             if (!is_file($new) || $fileOverwrite) {
                 if (!@copy($old, $new)) {
-                    throw new \Europa\Fs\Directory\Exception(
+                    throw new Exception(
                         'File ' . $old . ' could not be copied to ' . $new . '.'
                     );
                 }
             } elseif (is_file($new) && !$fileOverwrite) {
-                throw new \Europa\Fs\Directory\Exception(
+                throw new Exception(
                     'File ' . $new . ' already exists.'
                 );
             }
@@ -171,9 +175,7 @@ class Directory extends Item implements \Countable, \Iterator
         $oldPath = $this->getPathname();
         $newPath = dirname($oldPath) . DIRECTORY_SEPARATOR . basename($newName);
         if (!@rename($oldPath, $newPath)) {
-            throw new Exception(
-                'Path ' . $oldPath . ' could not be renamed to ' . $newPath . '.'
-            );
+            throw new Exception("Path {$oldPath} could not be renamed to {$newPath}.");
         }
         return self::open($newPath);
     }
@@ -191,9 +193,7 @@ class Directory extends Item implements \Countable, \Iterator
         
         // then delete it
         if (!@rmdir($this->getPathname())) {
-            throw new Exception(
-                'Could not remove directory ' . $this->getPathname() . '.'
-            );
+            throw new Exception("Could not remove directory {$this->getPathname()}.");
         }
     }
     
@@ -461,9 +461,7 @@ class Directory extends Item implements \Countable, \Iterator
     public static function open($path)
     {
         if (!is_dir($path)) {
-            throw new Directory\Exception(
-                'Could not open directory ' . $path . '.'
-            );
+            throw new Exception("Could not open directory {$path}.");
         }
         return new self($path);
     }
@@ -480,14 +478,10 @@ class Directory extends Item implements \Countable, \Iterator
     public static function create($path, $mask = 0777)
     {
         if (is_dir($path)) {
-            throw new Directory\Exception(
-                'Directory ' . $path . ' already exists.'
-            );
+            throw new Exception("Directory {$path} already exists.");
         }
-        $old = umask(0); 
         mkdir($path, $mask, true);
         chmod($path, $mask);
-        umask($old);
         return self::open($path);
     }
     

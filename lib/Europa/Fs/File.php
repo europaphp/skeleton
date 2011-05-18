@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa\Fs;
-use Europa\File\Exception;
+use Europa\Fs\File\Exception;
 
 /**
  * A general object for manipulating single files.
@@ -211,9 +211,7 @@ class File extends Item
     public static function create($file, $mask = 0777)
     {
         if (is_file($file)) {
-            throw new File\Exception(
-                'File ' . $file . ' already exists.'
-            );
+            throw new Exception("The file {$file} already exists.");
         }
         file_put_contents($file, '');
         chmod($file, $mask);
