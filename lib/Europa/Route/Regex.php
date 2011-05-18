@@ -88,6 +88,7 @@ class Regex implements \Europa\Route
         
         // the first match is useless to us
         array_shift($matches);
+        $matches = array_filter($matches, 'trim');
         
         // map default and hardcoded values
         foreach ($this->map as $name => $value) {
