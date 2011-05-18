@@ -55,6 +55,38 @@ class Directory extends Item implements \Countable, \Iterator
     }
     
     /**
+     * Returns all directory paths.
+     * 
+     * @return array
+     */
+    public function getDirectories()
+    {
+        $dirs = array();
+        foreach ($this->getItems() as $item) {
+            if (is_dir($item)) {
+                $dirs[] = $item;
+            }
+        }
+        return $dirs;
+    }
+    
+    /**
+     * Returns all file paths.
+     * 
+     * @return array
+     */
+    public function getFiles()
+    {
+        $files = array();
+        foreach ($this->getItems() as $item) {
+            if (is_file($item)) {
+                $files[] = $item;
+            }
+        }
+        return $files;
+    }
+    
+    /**
      * Returns the raw items from the directory.
      * 
      * @return array
@@ -65,50 +97,39 @@ class Directory extends Item implements \Countable, \Iterator
     }
     
     /**
-     * Returns whether or not the current directory contains the specified file.
-     * 
-     * @param \Europa\Fs\File $file The file to check for.
-     * 
-     * @return bool
-     */
-    public function hasItem(Item $file)
-    {
-        $filetype = $file->getType();
-        $filepath = $file->getPathname();
-        foreach ($this as $item) {
-            if ($item instanceof Directory) {
-                return $item->hasItem($file);
-            }
-            
-            if ($filetype === $item->getType() && $filepath === $item->getPathname()) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    /**
      * Returns whether or not the specified directory exists in the current directory.
      * 
-     * @param \Europa\Fs\Directory $dir The directory to check for.
+     * @param string $dir The directory to check for.
      * 
      * @return bool
      */
-    public function hasDirectory(Directory $dir)
+    public function hasDirectory($dir)
     {
-        return $this->hasItem($dir);
+        return is_dir($this->getPathname() . DIRECTORY_SEPARATOR . $dir);
     }
     
     /**
      * Returns whether or not the specified file exists in the current directory.
      * 
-     * @param \Europa\Fs\File $dir The file to check for.
+     * @param string $file The file to check for.
      * 
      * @return bool
      */
-    public function hasFile(File $file)
+    public function hasFile($file)
     {
-        return $this->hasItem($file);
+        return is_file($this->getPathname() . DIRECTORY_SEPARATOR . $file);
+    }
+    
+    /**
+     * Returns whether or not the current directory contains the specified file.
+     * 
+     * @param string $item The item to check for.
+     * 
+     * @return bool
+     */
+    public function hasItem($item)
+    {
+        return $this->hasDirectory($item) || $this->hasFile($item);
     }
     
     /**
