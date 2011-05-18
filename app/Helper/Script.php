@@ -1,7 +1,7 @@
 <?php
 
 namespace Helper;
-use Europa\Uri;
+use Europa\Uri as UriObject;
 use Europa\View;
 
 /**
@@ -94,7 +94,7 @@ abstract class Script
                 $file = '/' . $this->path . $file;
             }
             
-            if ($root = Uri::detect()->getRoot()) {
+            if ($root = UriObject::detect()->getRoot()) {
                 $file = '/' . $root . $file;
             }
             

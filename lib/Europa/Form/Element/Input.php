@@ -1,5 +1,7 @@
 <?php
 
+namespace Europa\Form\Element;
+
 /**
  * A default form input.
  * 
@@ -8,33 +10,30 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-namespace Europa\Form\Element
+class Input extends \Europa\Form\Element
 {
-    class Input extends \Europa\Form\Element
+    /**
+     * Constructs and sets defaults.
+     * 
+     * @return \Europa\Form\Element\Input
+     */
+    public function __construct(array $attributes = array())
+    {    
+        $this->type = 'text';
+        parent::__construct($attributes);
+    }
+    
+    /**
+     * Renders the reset element.
+     * 
+     * @return string
+     */
+    public function __toString()
     {
-        /**
-         * Constructs and sets defaults.
-         * 
-         * @return \Europa\Form\Element\Input
-         */
-        public function __construct(array $attributes = array())
-        {
-            parent::__construct($attributes);
-            $this->type = 'text';
-        }
-        
-        /**
-         * Renders the reset element.
-         * 
-         * @return string
-         */
-        public function __toString()
-        {
-            // by default, it's a text field
-            $attr = $this->getAttributeString();
-            return '<input'
-                 . ($attr ? ' ' . $attr : '')
-                 . ' />';
-        }
+        // by default, it's a text field
+        $attr = $this->getAttributeString();
+        return '<input'
+             . ($attr ? ' ' . $attr : '')
+             . ' />';
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+namespace Europa\Form\Element;
+
 /**
  * A default form text field.
  * 
@@ -8,10 +10,7 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-namespace Europa\Form\Element
+class Text extends Input
 {
-    class Text extends Input
-    {
-        
-    }
+    
 }
