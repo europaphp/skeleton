@@ -101,7 +101,7 @@ class Router implements \Iterator, \Countable
      * 
      * @return Route
      */
-    public function getRoute($name)
+    public function getRoute($name = null)
     {
         // if no name is specified, return the matched route
         if (!$name) {
