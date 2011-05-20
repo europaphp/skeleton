@@ -130,11 +130,12 @@ class String implements \Countable
     public function toClass()
     {
         // normalize namespace separators
-        $this->string = str_replace(array(DIRECTORY_SEPARATOR, '/'), '\\', $this->string);
+        $this->string = str_replace(array(DIRECTORY_SEPARATOR, '/', '_'), '\\', $this->string);
         
         // split into class namespaces
         $parts     = explode('\\', $this->string);
         $partsTemp = array();
+        $partCount = count($parts);
         foreach ($parts as $part) {
             $part = trim($part);
             if (!$part) {
@@ -144,7 +145,9 @@ class String implements \Countable
             // only allow alpha-numeric characters
             $subParts     = preg_split('/[^a-zA-Z0-9]/', $part);
             $subPartsTemp = array();
+            $subPartCount = count($subParts);
             foreach ($subParts as $subPart) {
+                // make sure there is a part
                 $subPart = trim($subPart);
                 if (!$subPart) {
                     continue;
