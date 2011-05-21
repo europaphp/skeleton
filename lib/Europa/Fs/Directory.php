@@ -281,8 +281,12 @@ class Directory extends Item implements \Countable, \Iterator
     public function flatten()
     {
         foreach ($this->items as $index => $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+            
             if (is_dir($item)) {
-                $this->items = array_merge($this->items, static::open($item)->flatten()->getItems());
+                $this->items = array_merge($this->items, self::open($item)->flatten()->getItems());
                 unset($this->items[$index]);
             } else {
                 $this->items[] = $item;
@@ -428,7 +432,11 @@ class Directory extends Item implements \Countable, \Iterator
      */
     public function current()
     {
-        return current($this->items);
+        $current = current($this->items);
+        if (is_dir($current)) {
+            return self::open($current);
+        }
+        return File::open($current);
     }
     
     /**
@@ -468,7 +476,7 @@ class Directory extends Item implements \Countable, \Iterator
      */
     public function valid()
     {
-        return $this->current();
+        return current($this->items) ? true : false;
     }
     
     /**

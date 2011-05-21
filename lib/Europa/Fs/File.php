@@ -192,9 +192,7 @@ class File extends Item
     public static function open($file)
     {
         if (!is_file($file)) {
-            throw new File\Exception(
-                'Could not open file ' . $file . '.'
-            );
+            throw new File\Exception('Could not open file ' . $file . '.');
         }
         return new self($file);
     }
