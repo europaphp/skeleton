@@ -15,6 +15,18 @@ use Europa\Reflection\Exception;
  */
 class FilterTag extends DocTag
 {
+    /**
+     * The name of the filter. This is a class name.
+     * 
+     * @var string
+     */
+    private $name;
+    
+    /**
+     * The value of the filter. This is passed to the constructor.
+     */
+    private $value;
+    
 	/**
 	 * Returns the name of the tag.
 	 * 
@@ -32,7 +44,17 @@ class FilterTag extends DocTag
 	 */
 	public function getName()
 	{
-		return $this->tagString;
+		return $this->name;
+	}
+	
+	/**
+	 * Returns the value of the doc tag.
+	 * 
+	 * @return string
+	 */
+	public function getValue()
+	{
+	    return $this->value;
 	}
 
 	/**
@@ -46,7 +68,7 @@ class FilterTag extends DocTag
 	{
 		$reflector = new ClassReflector($this->getName());
 		if ($reflector->hasMethod('__construct')) {
-			return $reflector->newInstanceArgs($args);
+			return $reflector->newInstanceArgs(array($this->getValue()));
 		}
 		return $reflector->newInstance();
 	}
@@ -62,10 +84,19 @@ class FilterTag extends DocTag
 	{
         // use default parsing for generating the name and doc string
         parent::parse($tagString);
-
+        
         // a filter class must be specified
         if (!$this->tagString) {
             throw new Exception('A filter must be specified.');
+        }
+        
+        // tag string is split into two parts, filter name and the value to be passed to the constructor
+        $parts = explode(' ', $this->tagString);
+        
+        // assign name and if specified, value
+        $this->name = trim($parts[0]);
+        if (isset($parts[1])) {
+            $this->value = trim($parts[1]);
         }
 	}
 }

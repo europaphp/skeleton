@@ -34,7 +34,7 @@ Application setup has been exemplified in the bundled sample app bootstrapper: a
         }
     }
     
-Methods that are NOT declared as `public` in visibility are NOT called as part of the bootstrapping process. The method `boot` also has the reserved functionality of running each bootstrap method and therefore is defined as `final` and cannot be re-defined. In addition to `private` methods and `\Europa\Bootstrapper::boot()`, magic methods (anything beginning with two underscores) are not called.
+Methods that are NOT declared as `public` in visibility are NOT called as part of the bootstrapping process. The method `boot` also has the reserved functionality of running each bootstrap method and therefore is defined as `final` and cannot be re-defined. In addition to `private` and `protected` methods and `\Europa\Bootstrapper::boot()`, magic methods (anything beginning with two underscores) are not called.
 
 To boot up your application:
 
@@ -59,14 +59,10 @@ Specifying paths are as simple as a single method call.
     Loader::addPath('/path/to/my/controllers');
     Loader::addPath('/path/to/my/models');
 
-If we need to load files for anything other than php files, we can specify a second argument for the file type.
-
-    Loader::addPath('/path/to/my/views', 'phtml');
-
 Europa's load paths are handled manually which significantly increases speed rather than adding them to PHP's include paths. However, we can also tell the loader to add it to PHP's include paths which is especially useful when dropping in the Zend Framework or any other library that utilizes the built-in load paths.
 
-    Loader::addPath('/usr/bin/php', 'php', true);
-    Loader::addPath('/path/to/my/libraries', 'php', true);
+    Loader::addPath('/usr/bin/php', true);
+    Loader::addPath('/path/to/my/libraries', true);
 
 Since the loader searches paths in the order in which they were defined, the most frequently used paths should be specified first.
 
@@ -84,7 +80,7 @@ Or manually map classes:
 
     Loader::map('\MyNamespace\MyClass', '/path/to/MyNamespace/MyClass.php');
 
-The loader will first look for a class in the mapping and load the corresponding file if it is found. If not, it will go through the load paths and attempt to find it there. This is useful if need to specify a handful of mappings for the most commonly used classes and don't really care if the stragglers are searched for in the load paths. In all reality, this will be a micro-optimization for a lot of applications. For some, though, it could make all the difference.
+The loader will first look for a class in the mapping and load the corresponding file if it is found. If not, it will go through the load paths and attempt to find it there. This is useful if you need to specify a handful of mappings for the most commonly used classes and don't really care if the stragglers are searched for in the load paths. In all reality, this will be a micro-optimization for a lot of applications. For some, though, it could make all the difference.
 
 ### Autoloading
 
@@ -252,19 +248,20 @@ Just in case you have separate service locator configurations, you can manage in
 Requests
 --------
 
-Using a request can be as simple as instantiating the object and `echo`ing it.
+Using a request can be as simple as instantiating the object and `echo`ing the result of it's dispatch rendering.
 
     <?php
     
     use Europa\Request\Http;
     
-    echo new Http;
+    $http = new Http;
+    echo $http->dispatch()->render();
 
-This would, by default, route the request to an `\IndexController` if no controller is specified. A controller can be specified simply by using a `$_REQUEST` variable by the name of controller:
+This would, by default, route the request to an `\Controller\Index` if no controller is specified. A controller can be specified simply by using a `$_REQUEST` variable by the name of controller:
 
     http://derp/europa?controller=test
 
-This would route the request to the `\TestController`.
+This would route the request to the `\Controller\Test`.
 
 ### Custom Controller Parameter Name
 
@@ -284,68 +281,18 @@ If we don't like the parameter name "controller", all we need to do is set a dif
 If we don't like the naming convention of `[name]Controller`, then we set a different formatter:
 
     $request->setControllerFormatter(function(Http $request) {
-        return '\Controller' . String::create($request->getController())->toClass();
+        return String::create($request->getController())->toClass() . 'Controller;
     });
 
 ### Custom Controller Paths
 
-If you want to change the default path of `application/controllers`, all you have to do is change the load path:
+If you want to change the default path of `application`, all you have to do is change the load path:
 
     <?php
     
     Loader::addPath('/my/custom/controller/path');
 
-Since controller paths are autoloaded, you can specify more than one.
-
-Controllers
------------
-
-Controllers in Europa differ from controller implementations in other frameworks. Each controller is in essence a "single action" controller, but each controller has the ability to support different request methods as defined in the [HTTP 1.1 specification](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html).
-
-### Defining Your Controllers
-
-Below is an example of a controler that supports `GET` and `POST`.
-
-    <?php
-    
-    use Europa\Controller;
-    
-    class MyController extends Controller
-    {
-        public function get()
-        {
-            
-        }
-        
-        public function post()
-        {
-            
-        }
-    }
-
-So if you dispatch a request to the `MyController`, depending on the request method, `get()` or `post()` may be called. If a request methods that is specified doesn't exist in the controller, then a `\Europa\Controller\Exception` is thrown indication that the specified method is not supported.
-
-### Mapping Request Parameters to Action Parameters
-
-Request parameters can be auto-mapped to action parameters just by defining parameters in your action methods:
-
-    public function get($id)
-    {
-        
-    }
-
-In the above example, the `id` parameter is required and an exception will be thrown if it is not supplied. We can also specify optional parameters by supplying a default value:
-    
-    public function post($id = null)
-    {
-        if ($id) {
-            // update
-        } else {
-            // insert
-        }
-    }
-
-The `id` parameter is optional and therefore if it is not supplied in the request it will default to `null`. Since request parameters are mapped to action parameters by name, the order in which they are specified does not matter.
+Since controllers are autoloaded, you can specify more than one path to get them from making a modular system very easy to facilitate.
 
 Requests, Routers and Routes
 ----------------------------
@@ -419,18 +366,79 @@ This can be used in conjunction with the request to dispatch to a controller:
     ));
     
     $request = new Http;
-    echo $request->setParams($params);
+    echo $request->setParams($params)->dispatch()->render();
 
 ### Handling Rogue Requests
 
 We can also instantiate controllers manually, so if a request isn't matched, we can force an error controller:
 
     $request = new Http;
-    if ($params = $router->query(Http::uri())) {
-        echo $request->setParams($params);
+    if ($params = $router->query($request->getUri()->getRequest())) {
+        echo $request->setParams($params)->dispatch()->render();
     } else {
-        echo new \ErrorController($request);
+        $error = new \ErrorController($request);
+        echo $error->render();
     }
+
+Controllers
+-----------
+
+Controllers in Europa differ from controller implementations in other frameworks. Each controller is in essence a "single action" controller, but each controller has the ability to support different request methods as defined in the [HTTP 1.1 specification](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html).
+
+### Defining Your Controllers
+
+Below is an example of a controller that supports `GET`, `POST` and `DELETE`.
+
+    <?php
+
+    use Europa\Controller;
+
+    class MyController extends Controller
+    {
+        public function get()
+        {
+
+        }
+
+        public function post()
+        {
+
+        }
+
+        public function delete()
+        {
+
+        }
+    }
+
+So if you dispatch a request to the `MyController`, depending on the request method, `get()`, `post()` or `delete()` may be called. If a request methods that is specified doesn't exist in the controller, then a `\Europa\Controller\Exception` is thrown indication that the specified method is not supported.
+
+### Mapping Request Parameters to Action Parameters
+
+Request parameters can be auto-mapped to action parameters just by defining parameters in your action methods:
+
+    public function get($id)
+    {
+
+    }
+
+In the above example, the `id` parameter is required and an exception will be thrown if it is not supplied. We can also specify optional parameters by supplying a default value:
+
+    public function post($id = null)
+    {
+        if ($id) {
+            // update
+        } else {
+            // insert
+        }
+    }
+
+The `id` parameter is optional and therefore if it is not supplied in the request it will default to `null`. Since request parameters are mapped to action parameters by name, the order in which they are specified does not matter.
+
+Views
+-----
+
+By default, the application is already setup to use a PHP layout/view system.
 
 Validation
 ----------
