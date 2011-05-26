@@ -83,7 +83,7 @@ class Suite implements Validatable, \Iterator, \Countable
         $class = new $class;
         if (!$this->isValid()) {
             $class->fromTraversible($this->getMessages());
-            throw $class;
+            throw new $class(implode(', ', iterator_to_array($class)));
         }
         return $this;
     }
