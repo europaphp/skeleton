@@ -179,4 +179,14 @@ class Php extends View
         $this->paths[$realpath] = $suffixes;
         return $this;
     }
+    
+    /**
+     * Return the current paths
+     *
+     * @return Array
+     */
+    public function getPaths()
+    {
+        return $this->paths;
+    }
 }
