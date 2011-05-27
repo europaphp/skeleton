@@ -21,8 +21,8 @@ abstract class Base extends Controller
      */
     public function init()
     {
-        $layout = ServiceLocator::getInstance()->get('layout');
-        $layout->setScript('Controller/Default')->view->setScript(get_class($this));
-        $this->setView($layout);
+        $view = ServiceLocator::getInstance()->get('view');
+        $view->setScript(get_class($this));
+        $this->setView($view);
     }
 }

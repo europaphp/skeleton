@@ -161,8 +161,8 @@ abstract class Script
     private function getFilesFor(View $view)
     {
         $files = array($view->getScript());
-        foreach ($view->getDescendants() as $child) {
-            $files[] = $child->getScript();
+        if ($child = $view->getChildScript()) {
+            $files[] = $child;
         }
         return $files;
     }

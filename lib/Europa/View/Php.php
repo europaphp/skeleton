@@ -20,6 +20,20 @@ use Europa\View;
 class Php extends View
 {
     /**
+     * The children of the current view.
+     * 
+     * @var View
+     */
+    private $child;
+    
+    /**
+     * The parent associated to the current view.
+     * 
+     * @var View
+     */
+    private $parent;
+    
+    /**
      * The script path to look in.
      * 
      * @var array
@@ -39,6 +53,13 @@ class Php extends View
      * @var \Europa\ServiceLocator
      */
     private $serviceLocator;
+    
+    /**
+     * The views that have already extended a parent class.
+     * 
+     * @var array
+     */
+    private $extendStack = array();
     
     /**
      * Attempts to call the specified method on the specified locator if it exists.
@@ -110,9 +131,31 @@ class Php extends View
             foreach ($suffixes as $suffix) {
                 $file = $path . DIRECTORY_SEPARATOR . $this->getScript() . '.' . $suffix;
                 if (file_exists($file)) {
+                    // render the file
                     ob_start();
                     include $file;
-                    return ob_get_clean() . PHP_EOL;
+                    $out = ob_get_clean() . PHP_EOL;
+                    
+                    // if there is a parent, render up the stack
+                    if ($this->parentScript) {
+                        // set the script so the parent has access to what child has been rendered
+                        $this->childScript = $script;
+                        
+                        // then set the parent script to the current script so the current instance is shared
+                        $this->setScript($this->parentScript);
+                        
+                        // reset the parent script to avoid recursion
+                        $this->parentScript  = null;
+                        
+                        // set the rendered child so the parent has access to the rendered child
+                        $this->renderedChild = $out;
+                        
+                        // render and return the output of the parent
+                        return $this->render();
+                    }
+                    
+                    // return rendered file
+                    return $out;
                 }
             }
         }
@@ -177,6 +220,56 @@ class Php extends View
         }
         
         $this->paths[$realpath] = $suffixes;
+        return $this;
+    }
+    
+    /**
+     * Returns the child view that was set when using extend in the child view.
+     * 
+     * @return View
+     */
+    public function getChildScript()
+    {
+        return $this->childScript;
+    }
+    
+    /**
+     * Returns the rendered child script.
+     * 
+     * @return string
+     */
+    public function getRenderedChild()
+    {
+        return $this->renderedChild;
+    }
+    
+    /**
+     * Allows the extending of the specified view.
+     * 
+     * @param string $parent The parent view.
+     * 
+     * @return View
+     */
+    public function extend($parent)
+    {
+        // the child is the current script
+        $child = $this->getScript();
+        
+        // child views cannot extend themselves
+        if ($parent === $child) {
+            throw new Exception('Child view cannot extend itself.');
+        }
+        
+        // if the child has already extended a parent, don't do anything
+        if (in_array($child, $this->extendStack)) {
+            return $this;
+        }
+        
+        // the extend stack makes sure that extend doesn't trigger recursion
+        $this->extendStack[] = $child;
+        
+        // set the parent
+        $this->parentScript = $parent;
         return $this;
     }
 }

@@ -76,7 +76,6 @@ class Bootstrapper extends ParentBootstrapper
         $this->locator = ServiceLocator::getInstance();
         $this->locator->map('request', '\Europa\Request\Http');
         $this->locator->map('router', '\Europa\Router');
-        $this->locator->map('layout', '\Europa\View\Php');
         $this->locator->map('view', '\Europa\View\Php');
         $this->locator->map('helper', '\Europa\ServiceLocator');
     }
@@ -116,17 +115,5 @@ class Bootstrapper extends ParentBootstrapper
     {
         $this->locator->queueMethodFor('view', 'addPath', array($this->base . '/app/View'));
         $this->locator->queueMethodFor('view', 'setHelperLocator', array($this->locator->get('helper')));
-    }
-    
-    /**
-     * Configures the main layout instance. Uses both the pre-configured view and helper.
-     * 
-     * @return void
-     */
-    public function configureLayout()
-    {
-        $this->locator->queueMethodFor('layout', 'addPath', array($this->base . '/app/View'));
-        $this->locator->queueMethodFor('layout', '__set', array('view', $this->locator->get('view')));
-        $this->locator->queueMethodFor('layout', 'setHelperLocator', array($this->locator->get('helper')));
     }
 }

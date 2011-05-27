@@ -1,1 +1,0 @@
-<p><?php echo $this->lang->yeah; ?> <?php echo $this->html->link('index.php/log-out', 'log-out'); ?></p>
