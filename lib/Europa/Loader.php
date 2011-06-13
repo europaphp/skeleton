@@ -43,6 +43,13 @@ class Loader
     private static $map = array();
     
     /**
+     * Whether or not the loader has been registered yet.
+     * 
+     * @var bool
+     */
+    private static $isRegistered = false;
+    
+    /**
      * Maps the specified class to the specified file. Also takes an array of $class to
      * $file mappings as the first argument.
      * 
@@ -161,7 +168,10 @@ class Loader
      */
     public static function register()
     {
-        spl_autoload_register(array('\Europa\Loader', 'load'));
-        self::addPath(dirname(__FILE__) . '/../');
+        if (!self::$isRegistered) {
+            spl_autoload_register(array('\Europa\Loader', 'load'));
+            self::addPath(dirname(__FILE__) . '/../');
+            self::$isRegistered = true;
+        }
     }
 }
