@@ -150,8 +150,9 @@ class Directory extends Item implements \Countable, \Iterator
             $new  = substr($old, strlen($self));
             $new  = $dest . $new;
             $base = dirname($new);
-            if (!is_dir($base)) {
-                static::create($base);
+            if ($file instanceof Directory) {
+                static::create($new);
+                continue;
             }
             if (!is_file($new) || $fileOverwrite) {
                 if (!@copy($old, $new)) {
@@ -287,7 +288,6 @@ class Directory extends Item implements \Countable, \Iterator
             
             if (is_dir($item)) {
                 $this->items = array_merge($this->items, self::open($item)->flatten()->getItems());
-                unset($this->items[$index]);
             } else {
                 $this->items[] = $item;
             }
@@ -434,7 +434,7 @@ class Directory extends Item implements \Countable, \Iterator
     {
         $current = current($this->items);
         if (is_dir($current)) {
-            return self::open($current);
+            return static::open($current);
         }
         return File::open($current);
     }
@@ -480,8 +480,7 @@ class Directory extends Item implements \Countable, \Iterator
     }
     
     /**
-     * Opens the specified directory. An exception is thrown if the directory
-     * doesn't exist.
+     * Opens the specified directory. An exception is thrown if the directory doesn't exist.
      * 
      * @param string $path The path to the directory.
      * 
@@ -492,12 +491,12 @@ class Directory extends Item implements \Countable, \Iterator
         if (!is_dir($path)) {
             throw new Exception("Could not open directory {$path}.");
         }
-        return new self($path);
+        return new static($path);
     }
     
     /**
-     * Creates the specified directory using the specified mask. An exception is
-     * thrown if the directory already exists.
+     * Creates the specified directory using the specified mask. An exception is thrown if the directory already
+     * exists.
      * 
      * @param string $path The path to the directory.
      * @param int    $mask The octal mask of the directory.
@@ -509,14 +508,36 @@ class Directory extends Item implements \Countable, \Iterator
         if (is_dir($path)) {
             throw new Exception("Directory {$path} already exists.");
         }
-        mkdir($path, $mask, true);
-        chmod($path, $mask);
-        return self::open($path);
+        
+        if (!@mkdir($path, $mask, true)) {
+            throw new Exception("Could not create directory {$path}.");
+        }
+        
+        if (!@chmod($path, $mask)) {
+            throw new Exception("Could not set file permissions on {$path} to {$mask}.");
+        }
+        
+        return static::open($path);
     }
     
     /**
-     * Creates the specified directory. If the directory already exists, it is
-     * overwritten by the new directory.
+     * If the directory does not exist it is created and returned. Otherwise it is opened and returned.
+     * 
+     * @param string $path The path to the directory.
+     * @param int    $mask The octal mask of the directory.
+     * 
+     * @return \Europa\Fs\Directory
+     */
+    public static function createIfNotExists($path, $mask = 0777)
+    {
+        if (is_dir($path)) {
+            return static::open($path, $mask);
+        }
+        return static::create($path, $mask);
+    }
+    
+    /**
+     * Creates the specified directory. If the directory already exists, it is overwritten by the new directory.
      * 
      * @param string $path The path to the directory.
      * @param int    $mask The octal mask of the directory.
@@ -526,9 +547,9 @@ class Directory extends Item implements \Countable, \Iterator
     public static function overwrite($path, $mask = 0777)
     {
         if (is_dir($path)) {
-            $dir = new self($path);
+            $dir = new static($path);
             $dir->delete();
         }
-        return self::create($path, $mask);
+        return static::create($path, $mask);
     }
 }

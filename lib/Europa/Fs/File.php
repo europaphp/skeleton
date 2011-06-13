@@ -43,7 +43,7 @@ class File extends Item
     public function setContents($contents)
     {
         file_put_contents($this->getPathname(), $contents);
-        return self::open($this->getPathname());
+        return static::open($this->getPathname());
     }
     
     /**
@@ -91,14 +91,14 @@ class File extends Item
         // copy the file to the destination
         if ($fileOverwrite || !is_file($destination)) {
             if (!@copy($source, $destination)) {
-                throw new File\Exception(
+                throw new Exception(
                     'Could not copy file ' . $source . ' to ' . $destination . '.'
                 );
             }
         }
         
         // return the new file
-        return new self($destination);
+        return new static($destination);
     }
     
     /**
@@ -192,9 +192,9 @@ class File extends Item
     public static function open($file)
     {
         if (!is_file($file)) {
-            throw new File\Exception('Could not open file ' . $file . '.');
+            throw new Exception("Could not open file {$file}.");
         }
-        return new self($file);
+        return new static($file);
     }
     
     /**
@@ -213,7 +213,7 @@ class File extends Item
         }
         file_put_contents($file, '');
         chmod($file, $mask);
-        return self::open($file);
+        return static::open($file);
     }
     
     /**
@@ -227,8 +227,8 @@ class File extends Item
     public static function overwrite($file, $mask = 0777)
     {
         if (is_file($file)) {
-            self::open($file)->delete();
+            static::open($file)->delete();
         }
-        return self::create($file, $mask);
+        return static::create($file, $mask);
     }
 }

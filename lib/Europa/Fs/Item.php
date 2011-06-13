@@ -2,7 +2,15 @@
 
 namespace Europa\Fs;
 
-abstract class Item extends \SplFileObject
+/**
+ * Base class for shared functionality between files and directories.
+ * 
+ * @category Directory
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
+ */
+abstract class Item extends \SplFileInfo
 {
     
 }
