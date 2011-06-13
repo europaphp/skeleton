@@ -43,7 +43,7 @@ class Map extends Test
     public function setUp()
     {
         $this->validator = MapObject::create()
-            ->name->required()->addMessage(self::NAME_ERROR)
+            ->name->required()->string()->addMessage(self::NAME_ERROR)
             ->age->number()->numberRange(18, 25)->addMessage(self::AGE_ERROR);
     }
     
@@ -52,7 +52,7 @@ class Map extends Test
      * 
      * @return bool
      */
-    public function testValidation()
+    public function testForcingAgeError()
     {
         $data = array(
             'name' => 'Trey Shugart',
@@ -71,7 +71,30 @@ class Map extends Test
         
         $this->assert(
             end($this->validator->getMessages()) === self::AGE_ERROR,
-            'The error that was raised should have been the date-of-birth error.'
+            'The error that was raised should have been the age error.'
+        );
+    }
+    
+    public function testForcingNameError()
+    {
+        $data = array(
+            'name' => '',
+            'age'  => 25
+        );
+        
+        $this->assert(
+            !$this->validator->validate($data)->isValid(),
+            'Validation failing.'
+        );
+        
+        $this->assert(
+            count($this->validator->getMessages()) === 1,
+            'Only 1 validation error should have been raised.'
+        );
+        
+        $this->assert(
+            end($this->validator->getMessages()) === self::NAME_ERROR,
+            'The error that was raised should have been the name error.'
         );
     }
 }
