@@ -37,7 +37,8 @@ class Suite implements Validatable, \Iterator, \Countable
         'email'        => '\Europa\Validator\Rule\Email',
         'number'       => '\Europa\Validator\Rule\Number',
         'numberRange'  => '\Europa\Validator\Rule\NumberRange',
-        'required'     => '\Europa\Validator\Rule\Required'
+        'required'     => '\Europa\Validator\Rule\Required',
+        'string'       => '\Europa\Validator\Rule\String'
     );
     
     /**
