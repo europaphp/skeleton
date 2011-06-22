@@ -34,7 +34,7 @@ class Json extends View
     {
         // if no headers have been sent, make sure we send the correct mime type
         if (!headers_sent()) {
-            header('Content-Type: Application/JSON');
+            header('Content-Type: application/json');
         }
         
         $data = $this->formatParamsToJsonArray($this->getParams());
