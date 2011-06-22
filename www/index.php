@@ -13,7 +13,7 @@ date_default_timezone_set('Australia/Sydney');
 // bootstrap the app
 require dirname(__FILE__) . '/../app/Bootstrapper.php';
 $boot = new Bootstrapper;
-$boot->boot();
+$boot();
 
 // any exceptions will routed to the error controller
 $locator = ServiceLocator::getInstance();
@@ -21,9 +21,6 @@ $request = $locator->get('request');
 $router  = $locator->get('router');
 try {
     $params = $router->query($request->getUri()->getRequest());
-    if (!$params) {
-        throw new Exception('The required request parameters were not defined.');
-    }
     echo $request->setParams($params)->dispatch()->render();
 } catch (\Exception $e) {
     echo $request->setController('error')->dispatch()->render();
