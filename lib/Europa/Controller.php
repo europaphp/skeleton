@@ -6,7 +6,7 @@ use Europa\Request\Http;
 use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
 use Europa\Uri;
-use Europa\View;
+use Europa\View\ViewInterface;
 
 /**
  * The base controller for all controller classes.
@@ -52,6 +52,13 @@ abstract class Controller
      * @var \Europa\View
      */
     private $view;
+    
+    /**
+     * The result of the action.
+     * 
+     * @var array
+     */
+    private $actionResult = array();
 
     /**
      * Whether or not to apply filters to action.
@@ -81,7 +88,7 @@ abstract class Controller
     public function render()
     {
         $this->preRender();
-        $view = $this->view ? $this->view->render() : '';
+        $view = $this->view ? $this->view->render($this->actionResult) : '';
         $this->postRender();
         return $view;
     }
@@ -100,15 +107,12 @@ abstract class Controller
      * Sets the view to use. If a view is currently set, it's parameters
      * are copied to the new view.
      * 
-     * @param \Europa\View $view The view to use.
+     * @param \Europa\ViewInterface $view The view to use.
      * 
      * @return \Europa\Controller
      */
-    public function setView(View $view = null)
+    public function setView(ViewInterface $view = null)
     {
-        if ($this->view) {
-            $view->setParams($this->view->getParams());
-        }
         $this->view = $view;
         return $this;
     }
@@ -177,7 +181,7 @@ abstract class Controller
         $method = $this->request->getMethod();
         $this->applyFiltersTo($method);
         $this->preAction();
-        $this->applyParamsToView($this->executeMethod($method, $this->request->getParams()));
+        $this->setActionResult($this->executeMethod($method, $this->request->getParams()));
         $this->postAction();
     }
     
@@ -279,16 +283,16 @@ abstract class Controller
     }
     
     /**
-     * Applies the passed parameters to the view.
+     * Applies the action result to the controller.
      * 
-     * @param mixed $params The parameters to apply to the view, if any.
+     * @param mixed $actionResult The action result to set.
      * 
      * @return \Europa\Controller
      */
-    private function applyParamsToView($params)
+    private function setActionResult($actionResult)
     {
-        if (is_array($params) && $this->view) {
-            $this->view->setParams($params);
+        if (is_array($actionResult)) {
+            $this->actionResult = $actionResult;
         }
         return $this;
     }
