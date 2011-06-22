@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa\Fs\Directory;
-use Europa\Exception as BaseException;
+use Europa\Fs\Exception as BaseException;
 
 /**
  * The directory exception class.

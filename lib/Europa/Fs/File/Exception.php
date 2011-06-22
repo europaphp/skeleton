@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa\Fs\File;
-use Europa\Exception as BaseException;
+use Europa\Fs\Exception as BaseException;
 
 /**
  * File exceptions.

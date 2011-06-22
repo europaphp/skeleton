@@ -342,14 +342,13 @@ class Directory extends Item implements \Countable, \Iterator
      * 
      * @return \Europa\Fs\Directory
      */
-    public function sort()
+    public function sort($callback)
     {
-        sort($this->items);
-        foreach ($this->items as $item) {
-            if ($item instanceof Directory) {
-                $item->sort();
-            }
+        // only apply if it's callable
+        if (!is_callable($callback, true)) {
+            throw new Exception('The passed filter must be callable.');
         }
+        usort($this->items, $callback);
         return $this;
     }
     
