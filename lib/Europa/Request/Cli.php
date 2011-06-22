@@ -21,6 +21,13 @@ class Cli extends Request
     const METHOD = 'cli';
     
     /**
+     * The namespace token.
+     * 
+     * @var string
+     */
+    const T_NS = ' ';
+    
+    /**
      * Keeps track of the commands that were passed in the request.
      * 
      * @var array
@@ -37,20 +44,18 @@ class Cli extends Request
         $this->setMethod(static::METHOD);
         $this->parseCommands();
         $this->parseParams();
-        $this->setController(str_replace(' ', '\\', $this->getCommand()));
+        $this->setController(str_replace(static::T_NS, '\\', $this->getCommand()));
     }
     
     /**
      * Returns the string command that was passed to the console. The command is the part that occurs just before
      * the first argument and after the path to the script. This can contain spaces.
      * 
-     * @param string $imploder The string to implode the commands with.
-     * 
      * @return string
      */
-    public function getCommand($imploder = ' ')
+    public function getCommand()
     {
-        return implode($imploder, $this->getCommands());
+        return implode(static::T_NS, $this->getCommands());
     }
     
     /**
@@ -70,7 +75,7 @@ class Cli extends Request
      */
     private function parseCommands()
     {
-        $args = $_SERVER['argv'];
+        $args = (isset($_SERVER['argv'])) ? $_SERVER['argv'] : array();
         $cmds = array();
         
         array_shift($args);
@@ -91,7 +96,7 @@ class Cli extends Request
      */
     private function parseParams()
     {
-        $args = $_SERVER['argv'];
+        $args = (isset($_SERVER['argv'])) ? $_SERVER['argv'] : array();
         $skip = false;
         
         array_shift($args);

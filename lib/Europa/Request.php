@@ -16,8 +16,14 @@ use Europa\String;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class Request
+abstract class Request implements \Serializable
 {
+    /**
+     * The request unique id.
+     * 
+     * @var string
+     */
+    private $id;
     /**
      * The key used to get the controller from the request params.
      * 
@@ -90,6 +96,26 @@ abstract class Request
         return $this->removeParam($name);
     }
     
+    /**
+     * Serializes the request.
+     * 
+     * @return string
+     */
+    public function serialize()
+    {
+        return serialize($this->getParams());
+    }
+    /**
+     * Unserializes the request.
+     * 
+     * @param string $serialized The serialized string.
+     * 
+     * @return \Europa\Request
+     */
+    public function unserialize($serialized)
+    {
+        return $this->setParams(unserialize($serialized));
+    }
     /**
      * Sets the specified request parameter.
      * 
@@ -219,11 +245,7 @@ abstract class Request
     }
     
     /**
-     * Returns the request method from the server vars and formats it. Defaults to "get".
-     * It also allows the use of an "HTTP_X_HTTP_METHOD_OVERRIDE" header which can be
-     * used to override default request methods. Generally this is bad practice, but
-     * certain clients do no support certain methods in the HTTP specification such as
-     * Flash.
+     * Returns the request method for the request.
      *
      * @return string
      */
@@ -240,18 +262,13 @@ abstract class Request
     public function dispatch()
     { 
         $controller = $this->formatController();
-        if (!Loader::load($controller)) {
-            throw new Exception('Could not load controller ' . $controller . '.', Exception::CONTROLLER_NOT_FOUND);
-        }
-        
         $controller = new $controller($this);
         if (!$controller instanceof Controller) {
             throw new Exception(
                 'Class ' . get_class($controller)  . ' is not a valid controller instance. Controller classes must '
                 . 'derive from \Europa\Controller.'
             );
-        } 
-        
+        }
         $controller->action();
         return $controller;
     }
@@ -322,6 +339,19 @@ abstract class Request
     }
     
     /**
+     * Returns the unique request id of the current request. This is useful for debugging separate logs and probably
+     * many other things.
+     * 
+     * @return string
+     */
+    public function getId()
+    {
+        if (!$this->id) {
+            $this->id = md5(uniqid(rand(), true));
+        }
+        return $this->id;
+    }
+    /**
      * Sets the formatter that should be used to format the controller class.
      * 
      * @param mixed $callback The callback for formatting the controller.
@@ -349,6 +379,7 @@ abstract class Request
     {
         return defined('STDIN');
     }
+    
     /**
      * Creates a new instance of the statically called request.
      * 
