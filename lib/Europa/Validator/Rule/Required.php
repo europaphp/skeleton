@@ -22,7 +22,7 @@ class Required extends Validator
      */
     public function validate($value)
     {
-        if (empty($value) && $value !== 0 && $value !== '0') {
+        if (empty($value) && $value !== 0 && $value !== 0.0 && $value !== '0') {
             $this->fail();
         } else {
             $this->pass();
