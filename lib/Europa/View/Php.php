@@ -2,8 +2,8 @@
 
 namespace Europa\View;
 use Europa\Exception;
+use Europa\Fs\Locator;
 use Europa\ServiceLocator;
-use Europa\View;
 
 /**
  * Class for rendering a basic PHP view script.
@@ -17,14 +17,21 @@ use Europa\View;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Php extends View
+class Php implements ViewInterface
 {
     /**
-     * The children of the current view.
+     * The views that have already extended a parent class.
      * 
-     * @var View
+     * @var array
      */
-    private $child;
+    private $extendStack = array();
+    
+    /**
+     * The loader to use for view locating and loading.
+     * 
+     * @var \Europa\Fs\Locator
+     */
+    private $fsLocator;
     
     /**
      * The parent associated to the current view.
@@ -34,13 +41,6 @@ class Php extends View
     private $parent;
     
     /**
-     * The script path to look in.
-     * 
-     * @var array
-     */
-    private $paths;
-    
-    /**
      * The script to be rendered.
      * 
      * @var string
@@ -48,18 +48,23 @@ class Php extends View
     private $script;
     
     /**
-     * The service container used for helpers.
+     * The service locator to use for locating helpers.
      * 
-     * @var \Europa\ServiceLocator
+     * @var \Europa\Service\Locator
      */
     private $serviceLocator;
     
     /**
-     * The views that have already extended a parent class.
+     * Creates a new PHP view using the specified loader.
      * 
-     * @var array
+     * @param \Europa\Loader\FileLoader $loader The loader to use for view locating and loading.
+     * 
+     * @return \Europa\View\Php
      */
-    private $extendStack = array();
+    public function __construct(Locator $fsLocator)
+    {
+        $this->fsLocator = $fsLocator;
+    }
     
     /**
      * Attempts to call the specified method on the specified locator if it exists.
@@ -82,7 +87,7 @@ class Php extends View
             throw new Exception('Unable to create instance of helper "' . $name . '".');
         }
     }
-        
+    
     /**
      * Attempts to retrieve a parameter by name. If the parameter is not found, then it attempts
      * to use the service locator to find a helper. If nothing is found, it returns null.
@@ -93,83 +98,67 @@ class Php extends View
      */
     public function __get($name)
     {
-        if (parent::hasParam($name)) {
-            return parent::getParam($name);
+        if (isset($this->context[$name])) {
+            return $this->context[$name];
         }
-        
-        // if no service locator is set, just return null
         if (!$this->serviceLocator) {
             return null;
         }
-        
         try {
             return $this->serviceLocator->get($name, array($this));
         } catch (ServiceLocator\Exception $e) {
             
         }
-        
         return null;
     }
     
     /**
      * Parses the view file and returns the result.
      * 
-     * @todo Consider refactor for borderline cyclomatic complexity violation.
-     * 
      * @return string
      */
-    public function render()
+    public function render(array $context = array())
     {
-        $script = $this->getScript();
-        if (!$script) {
+        if (!$this->script) {
             throw new Exception('Could not render view: No script was defined to render.');
         }
         
-        if (!$this->paths) {
-            throw new Exception('Could not render view: There are no paths to load from.');
+        // render the script
+        if ($file = $this->fsLocator->locate($this->script)) {
+            $this->context = $context;
+            ob_start();
+            include $file;
+            $rendered = ob_get_clean();
+            
+            // if there is a parent, render up the stack
+            if ($this->parentScript) {
+                // set the script so the parent has access to what child has been rendered
+                $this->childScript = $this->script;
+
+                // then set the parent script to the current script so the current instance is shared
+                $this->script = $this->parentScript;
+
+                // reset the parent script to avoid recursion
+                $this->parentScript  = null;
+
+                // set the rendered child so the parent has access to the rendered child
+                $this->renderedChild = $rendered;
+
+                // render and return the output of the parent
+                return $this->render();
+            }
+            return $rendered;
         }
         
-        foreach ($this->paths as $path => $suffixes) {
-            foreach ($suffixes as $suffix) {
-                $file = $path . DIRECTORY_SEPARATOR . $this->getScript() . '.' . $suffix;
-                if (file_exists($file)) {
-                    // render the file
-                    ob_start();
-                    include $file;
-                    $out = ob_get_clean() . PHP_EOL;
-                    
-                    // if there is a parent, render up the stack
-                    if ($this->parentScript) {
-                        // set the script so the parent has access to what child has been rendered
-                        $this->childScript = $script;
-                        
-                        // then set the parent script to the current script so the current instance is shared
-                        $this->setScript($this->parentScript);
-                        
-                        // reset the parent script to avoid recursion
-                        $this->parentScript  = null;
-                        
-                        // set the rendered child so the parent has access to the rendered child
-                        $this->renderedChild = $out;
-                        
-                        // render and return the output of the parent
-                        return $this->render();
-                    }
-                    
-                    // return rendered file
-                    return $out;
-                }
-            }
-        }
-        throw new Exception("Could not locate the view {$this->getScript()}.");
+        throw new Exception("Could not render view because {$this->script} does not exist.");
     }
-
+    
     /**
-     * Sets the service locator to use for calling helpers.
+     * Sets the service locator to use for locating helpers.
      * 
-     * @param \Europa\ServiceLocator $serviceLocator The service locator to use for helpers.
+     * @param \Europa\ServiceLocator $serviceLocator The service locator for locating helpers.
      * 
-     * @return \Europa\View
+     * @return \Europa\View\Php
      */
     public function setHelperLocator(ServiceLocator $serviceLocator)
     {
@@ -182,7 +171,7 @@ class Php extends View
      * 
      * @param string $script The path to the script to be rendered relative to the view path, excluding the extension.
      * 
-     * @return View
+     * @return \Europa\View\Php
      */
     public function setScript($script)
     {
@@ -198,51 +187,6 @@ class Php extends View
     public function getScript()
     {
         return $this->script;
-    }
-    
-    /**
-     * Adds a path with the given suffix.
-     * 
-     * @param string $path     The path to add.
-     * @param array  $suffixes The valid suffixes for the path.
-     * 
-     * @return Php
-     */
-    public function addPath($path, array $suffixes = array('php'))
-    {
-        // the path must be a valid path
-        $realpath = realpath($path);
-        if (!$realpath) {
-            throw new Exception("Cannot add path: The path $realpath does not exist.");
-        }
-        
-        // the path needs suffixes to use
-        if (!$suffixes) {
-            throw new Exception("Cannot add path: No valid suffixes were applied to the path.");
-        }
-        
-        $this->paths[$realpath] = $suffixes;
-        return $this;
-    }
-    
-    /**
-     * Return the current paths
-     *
-     * @return Array
-     */
-    public function getPaths()
-    {
-        return $this->paths;
-    }
-    
-    /**
-     * Returns the child view that was set when using extend in the child view.
-     * 
-     * @return View
-     */
-    public function getChildScript()
-    {
-        return $this->childScript;
     }
     
     /**
@@ -265,7 +209,7 @@ class Php extends View
     public function extend($parent)
     {
         // the child is the current script
-        $child = $this->getScript();
+        $child = $this->script;
         
         // child views cannot extend themselves
         if ($parent === $child) {
