@@ -4,7 +4,7 @@ namespace Helper;
 use Europa\Request;
 use Europa\Request\Cli;
 use Europa\Request\Http;
-use Europa\View;
+use Europa\View\Php;
 
 /**
  * Creates and dispatches a request given the specified parameters.
@@ -33,7 +33,7 @@ class Dispatch
      * 
      * @return DispatchHelper
      */
-    public function __construct(View $view, $controller, array $params = array())
+    public function __construct(Php $view, $controller, array $params = array())
     {
         $request = Request::isCli() ? new Cli : new Http;
         $request->setParams($params);

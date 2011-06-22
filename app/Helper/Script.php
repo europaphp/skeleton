@@ -2,7 +2,7 @@
 
 namespace Helper;
 use Europa\Uri as UriObject;
-use Europa\View;
+use Europa\View\Php;
 
 /**
  * A base helper that auto-loads files.
@@ -66,11 +66,11 @@ abstract class Script
      * 
      * @return ScriptHelper
      */
-    public function __construct(View $view, $files = array())
+    public function __construct(Php $view, $files = array())
     {
         $this->files = (array) $files;
         if (!$this->files) {
-            $this->files = $this->getFilesFor($view);
+            $this->files = array($view->getScript());
         }
         $this->setPath(static::getDefaultPath());
         $this->setSuffix(static::getDefaultSuffix());
@@ -149,22 +149,6 @@ abstract class Script
     public function getSuffix()
     {
         return $this->suffix;
-    }
-    
-    /**
-     * Recursively gets the files for the specified view.
-     * 
-     * @param \Europa\View $view The view to get the files for.
-     * 
-     * @return array
-     */
-    private function getFilesFor(View $view)
-    {
-        $files = array($view->getScript());
-        if ($child = $view->getChildScript()) {
-            $files[] = $child;
-        }
-        return $files;
     }
     
     /**

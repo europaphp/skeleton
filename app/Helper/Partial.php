@@ -2,7 +2,7 @@
 
 namnespace Helper;
 use Europa\ServiceLocator;
-use Europa\View;
+use Europa\View\Php;
 
 /**
  * Creates and renders a partial representing the specified view file.
@@ -31,7 +31,7 @@ class Partial
      * 
      * @return DispatchHelper
      */
-    public function __construct(View $view, $script, array $params = array())
+    public function __construct(Php $view, $script, array $params = array())
     {
         $this->result = ServiceLocator::getInstance()->create('partialView');
         $this->result = $this>view->setScript($script)->setParams($params)->render();

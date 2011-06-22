@@ -1,7 +1,7 @@
 <?php
 
 namespace Helper;
-use Europa\View;
+use Europa\View\Php;
 
 /**
  * Designed to capture and save in-view data for displaying later in the view.
@@ -34,7 +34,7 @@ class Capture
      * 
      * @return \CaptureHelper
      */
-    public function __construct(View $view)
+    public function __construct(Php $view)
     {
         $this->view = $view;
     }

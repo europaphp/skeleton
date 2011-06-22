@@ -1,7 +1,7 @@
 <?php
 
 namespace Helper;
-use Europa\View;
+use Europa\View\Php;
 
 /**
  * Contains general HTML elements that can be automated for the view.
@@ -27,7 +27,7 @@ class Html
      * 
      * @return string
      */
-    public function __construct(View $view)
+    public function __construct(Php $view)
     {
         $this->view = $view;
     }

@@ -2,7 +2,7 @@
 
 namespace Helper;
 use Europa\Exception;
-use Europa\View;
+use Europa\View\Php;
 
 /**
  * A helper for parsing INI language files in the context of a given view.
@@ -42,7 +42,7 @@ class Lang
      * 
      * @return \LangHelper
      */
-    public function __construct(View $view, $fileOverride = null, $langOverride = null, $pathOverride = null)
+    public function __construct(Php $view, $fileOverride = null, $langOverride = null, $pathOverride = null)
     {
         // set a default path if one doesn't exist
         if (!self::$path) {
