@@ -2,6 +2,14 @@
 
 namespace Europa;
 
+/**
+ * Class for URI detection and manipulation.
+ * 
+ * @category Uri
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
+ */
 class Uri
 {
     /**
@@ -680,13 +688,12 @@ class Uri
      */
     public static function detectRoot()
     {
-        if (!isset($_SERVER['DOCUMENT_ROOT']) || !isset($_SERVER['SCRIPT_FILENAME'])) {
+        if (!isset($_SERVER['SCRIPT_FILENAME']) || !isset($_SERVER['SCRIPT_NAME'])) {
             return null;
         }
-        
-        $path = $_SERVER['DOCUMENT_ROOT'];
-        $file = dirname($_SERVER['SCRIPT_FILENAME']);
-        $root = substr($file, strlen($path));
+        $path = dirname($_SERVER['SCRIPT_FILENAME']);
+        $name = dirname($_SERVER['SCRIPT_NAME']);
+        $root = substr($path, -strlen($name));
         $root = trim($root, '/');
         return $root;
     }
@@ -698,12 +705,11 @@ class Uri
      */
     public static function detectRequest()
     {
-        if (!isset($_SERVER['REQUEST_URI'])) {
+        if (!isset($_SERVER['HTTP_X_REWRITE_URL']) || !isset($_SERVER['REQUEST_URI'])) {
             return null;
         }
         
-        // remove the root uri from the request uri to get the relative
-        // request uri for the framework
+        // remove the root uri from the request uri to get the relative request uri for the framework
         $requestUri = isset($_SERVER['HTTP_X_REWRITE_URL'])
             ? $_SERVER['HTTP_X_REWRITE_URL']
             : $_SERVER['REQUEST_URI'];
