@@ -4,11 +4,9 @@
 require_once dirname(__FILE__) . '/../lib/Europa/Bootstrapper.php';
 
 use Europa\Bootstrapper as ParentBootstrapper;
+use Europa\Di\Container;
 use Europa\Fs\Directory;
 use Europa\Fs\Loader;
-use Europa\Route\Regex;
-use Europa\ServiceLocator;
-use Europa\String;
 
 /**
  * Bootstraps the sample application.
@@ -21,25 +19,11 @@ use Europa\String;
 class Bootstrapper extends ParentBootstrapper
 {
     /**
-     * The application base path.
+     * The dependency injection container.
      * 
-     * @var string
+     * @var \Europa\Di\Container
      */
-    private $base;
-    
-    /**
-     * The main class loader.
-     * 
-     * @var \Europa\Loader\ClassLoader
-     */
-    private $loader;
-    
-    /**
-     * The main service locator instance.
-     * 
-     * @var \Europa\ServiceLocator
-     */
-    private $locator;
+    private $container;
     
     /**
      * Sets default options.
@@ -49,9 +33,9 @@ class Bootstrapper extends ParentBootstrapper
     public function __construct()
     {
         $this->setOptions(array(
-            'pluginPath' => dirname(__FILE__) . '/../plugins'
+            'basePath'   => realpath(dirname(__FILE__) . '/../'),
+            'pluginPath' => realpath(dirname(__FILE__) . '/../plugins')
         ));
-        $this->base = realpath(dirname(__FILE__) . '/../');
     }
     
     /**
@@ -59,86 +43,69 @@ class Bootstrapper extends ParentBootstrapper
      * 
      * @return void
      */
-    public function setUpLoaders()
+    public function setUpLibraryLoading()
     {
-        require $this->base . '/lib/Europa/Fs/Loader.php';
-        $this->loader = new Loader;
-        $this->loader->register();
+        require $this->basePath . '/lib/Europa/Fs/Loader.php';
+        $loader = new Loader;
+        $loader->register();
     }
     
     /**
-     * Sets up the default service locator instance and applies class mapping for the services that will be used in the
-     * application.
+     * Configures the dependency injection container.
      * 
      * @return void
      */
-    public function configureServiceLocator()
+    public function configureDiContainer()
     {
-        $this->locator = ServiceLocator::getInstance();
-        $this->locator->map('phpView', '\Europa\View\Php');
-        $this->locator->map('phpViewHelper', '\Europa\ServiceLocator');
-        $this->locator->map('phpViewLocator', '\Europa\Fs\Locator');
-        $this->locator->map('request', '\Europa\Request\Http');
-        $this->locator->map('router', '\Europa\Router');
-        $this->locator->map('loaderLocator', '\Europa\Fs\Locator');
-    }
-    
-    /**
-     * Sets the loader locator.
-     * 
-     * @return void
-     */
-    public function setUpLoaderLocator()
-    {
-        $this->locator->loaderLocator->addPath($this->base . '/app');
-        $this->loader->setLocator($this->locator->loaderLocator);
-    }
-    
-    /**
-     * Configures the router using the service locator.
-     * 
-     * @return void
-     */
-    public function configureRouter()
-    {
-        $this->locator->queueMethodFor('router', 'setRoute', array(
-            'default',
-            new Regex('(index\.php)?/?(?<controller>.+)?', null, array('controller' => 'index'))
+        $this->container = Container::get();
+        $this->container->map(array(
+            'defaultRoute'           => '\Europa\Router\Route\Regex',
+            'langLocator'            => '\Europa\Fs\Locator',
+            'loader'                 => '\Europa\Fs\Loader',
+            'loaderLocator'          => '\Europa\Fs\Locator',
+            'phpView'                => '\Europa\View\Php',
+            'phpViewHelperContainer' => '\Europa\Di\Container',
+            'phpViewLocator'         => '\Europa\Fs\Locator',
+            'request'                => '\Europa\Request\Http',
+            'router'                 => '\Europa\Router\Basic'
         ));
     }
     
     /**
-     * Configures how view helpers behave using the service locator. View helper behavior derives from a configured
-     * \Europa\ServiceLocator that is injected into a view instance.
+     * Configures the DI Container's dependencies.
      * 
      * @return void
      */
-    public function configureViewHelpers()
+    public function configureDiDependencies()
     {
-        $this->locator->queueMethodFor('phpViewHelper', 'setFormatter', array(function($service) {
-            return '\Helper' . String::create($service)->toClass();
-        }));
-    }
-    
-    /**
-     * Configures the view locator.
-     * 
-     * @return void
-     */
-    public function configureViewLocator()
-    {
-        $this->locator->queueMethodFor('phpViewLocator', 'addPath', array($this->base . '/app/View'));
-    }
-    
-    /**
-     * Configures the main view instance. Uses the pre-configured helper and view loader.
-     * 
-     * @return void
-     */
-    public function configureView()
-    {
-        $this->locator->setConfigFor('phpView', array($this->locator->phpViewLocator));
-        $this->locator->queueMethodFor('phpView', 'setHelperLocator', array($this->locator->phpViewHelper));
+        $this->container->defaultRoute
+            ->configure(array('(index\.php)?/?(?<controller>.+)?', null, array('controller' => 'index')));
+        $this->container->langLocator
+            ->queue('addPath', array($this->basePath . '/app/Lang', 'ini'));
+        $this->container->loader
+            ->queue('setLocator', array($this->container->loaderLocator));
+        $this->container->loaderLocator
+            ->queue('addPath', array($this->basePath . '/app'));
+        $this->container->phpView
+            ->configure(array($this->container->phpViewLocator))
+            ->queue('setHelperContainer', array($this->container->phpViewHelperContainer));
+        $this->container->phpViewHelperContainer
+            ->queue('setFormatter', array(function($name) {
+                $name = ucfirst($name);
+                return "\\Helper\\{$name}";
+            }));
+        $this->container->phpViewHelperContainer
+            ->queue('configure', array('css', array('css')))
+            ->queue('configure', array('js', array('js')))
+            ->queue('configure', array('lang', array(
+                $this->container->langLocator,
+                $this->container->phpView,
+                'en-us'
+            )));
+        $this->container->phpViewLocator
+            ->queue('addPath', array($this->basePath . '/app/View'));
+        $this->container->router
+            ->queue('setRoute', array($this->container->defaultRoute));
     }
     
     /**
@@ -149,10 +116,21 @@ class Bootstrapper extends ParentBootstrapper
     public function bootstrapPlugins()
     {
         foreach (Directory::open($this->pluginPath) as $item) {
-            $base = $item->getPathname() . DIRECTORY_SEPARATOR;
-            $this->locator->loaderLocator->addPath($base . 'app');
-            $this->locator->loaderLocator->addPath($base . 'lib');
-            $this->locator->phpViewLocator->addPath($base . '/app/View');
+            $moduleBasePath = $item->getPathname() . DIRECTORY_SEPARATOR;
+            $this->container->langLocator->queue('addPath', array($moduleBasePath . 'app/Lang'));
+            $this->container->loaderLocator->queue('addPath', array($moduleBasePath . 'app'));
+            $this->container->loaderLocator->queue('addPath', array($moduleBasePath . 'lib'));
+            $this->container->phpViewLocator->queue('addPath', array($moduleBasePath . 'app/View'));
         }
+    }
+    
+    /**
+     * This must be done last as it will auto-configure it's dependencies.
+     * 
+     * @return void
+     */
+    public function registerAutoloadingForEverythingElse()
+    {
+        $this->container->loader->get()->register();
     }
 }
