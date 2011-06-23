@@ -2,7 +2,7 @@
 
 namespace Controller;
 use Europa\Controller;
-use Europa\ServiceLocator;
+use Europa\Di\Container;
 
 /**
  * An example of controller abstraction that sets up a default view scheme.
@@ -21,7 +21,7 @@ abstract class Base extends Controller
      */
     public function init()
     {
-        $view = ServiceLocator::getInstance()->get('phpView');
+        $view = Container::get()->phpView->get();
         $view->setScript(get_class($this));
         $this->setView($view);
     }
