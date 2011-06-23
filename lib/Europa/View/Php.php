@@ -1,16 +1,16 @@
 <?php
 
 namespace Europa\View;
+use Europa\Di\Container;
+use Europa\Di\Exception as DiException;
 use Europa\Exception;
 use Europa\Fs\Locator;
-use Europa\ServiceLocator;
 
 /**
  * Class for rendering a basic PHP view script.
  * 
- * If parsing content from a file to render, this class can be overridden
- * to provide base functionality for view manipulation while the __toString
- * method is overridden to provide custom parsing.
+ * If parsing content from a file to render, this class can be overridden to provide base functionality for view
+ * manipulation while the __toString method is overridden to provide custom parsing.
  * 
  * @category Views
  * @package  Europa
@@ -31,7 +31,7 @@ class Php implements ViewInterface
      * 
      * @var \Europa\Fs\Locator
      */
-    private $fsLocator;
+    private $locator;
     
     /**
      * The parent associated to the current view.
@@ -50,9 +50,9 @@ class Php implements ViewInterface
     /**
      * The service locator to use for locating helpers.
      * 
-     * @var \Europa\Service\Locator
+     * @var Europa\Container\Container
      */
-    private $serviceLocator;
+    private $container;
     
     /**
      * Creates a new PHP view using the specified loader.
@@ -61,9 +61,9 @@ class Php implements ViewInterface
      * 
      * @return \Europa\View\Php
      */
-    public function __construct(Locator $fsLocator)
+    public function __construct(Locator $locator)
     {
-        $this->fsLocator = $fsLocator;
+        $this->locator = $locator;
     }
     
     /**
@@ -76,14 +76,13 @@ class Php implements ViewInterface
      */
     public function __call($name, array $args = array())
     {
-        if (!$this->serviceLocator) {
+        if (!$this->container) {
             throw new Exception('Unable to create helper "' . $name . '" because no helper locator was set.');
         }
         
         try {
-            array_unshift($args, $this);
-            return $this->serviceLocator->create($name, $args);
-        } catch (ServiceLocator\Exception $e) {
+            return $this->container->__get($name)->create($args);
+        } catch (DiException $e) {
             throw new Exception('Unable to create instance of helper "' . $name . '".');
         }
     }
@@ -101,12 +100,12 @@ class Php implements ViewInterface
         if (isset($this->context[$name])) {
             return $this->context[$name];
         }
-        if (!$this->serviceLocator) {
+        if (!$this->container) {
             return null;
         }
         try {
-            return $this->serviceLocator->get($name, array($this));
-        } catch (ServiceLocator\Exception $e) {
+            return $this->container->__get($name)->get();
+        } catch (DiException $e) {
             
         }
         return null;
@@ -124,7 +123,7 @@ class Php implements ViewInterface
         }
         
         // render the script
-        if ($file = $this->fsLocator->locate($this->script)) {
+        if ($file = $this->locator->locate($this->script)) {
             $this->context = $context;
             ob_start();
             include $file;
@@ -156,13 +155,13 @@ class Php implements ViewInterface
     /**
      * Sets the service locator to use for locating helpers.
      * 
-     * @param \Europa\ServiceLocator $serviceLocator The service locator for locating helpers.
+     * @param \Europa\dependency $dependency The service locator for locating helpers.
      * 
      * @return \Europa\View\Php
      */
-    public function setHelperLocator(ServiceLocator $serviceLocator)
+    public function setHelperContainer(Container $container)
     {
-        $this->serviceLocator = $serviceLocator;
+        $this->container = $container;
         return $this;
     }
     
