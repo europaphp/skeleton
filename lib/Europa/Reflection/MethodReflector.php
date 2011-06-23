@@ -36,7 +36,7 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
     {
         // resulting merged parameters will be stored here
         $merged = array();
-
+        
         // apply strict position parameters and case sensitivity
         foreach ($params as $name => $value) {
             if (is_numeric($name)) {
@@ -45,14 +45,15 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
                 $params[strtolower($name)] = $value;
             }
         }
-
+        
         // we check each parameter and set accordingly
         foreach ($this->getParameters() as $param) {
             $pos  = $param->getPosition();
-            $name = $caseSensitive ? $name : strtolower($param->getName());
-
+            $name = $caseSensitive ? $param->getName() : strtolower($param->getName());
             if (array_key_exists($name, $params)) {
                 $merged[$pos] = $params[$name];
+            } elseif (array_key_exists($pos, $params)) {
+                $merged[$pos] = $params[$pos];
             } elseif ($param->isOptional()) {
                 $merged[$pos] = $param->getDefaultValue();
             } elseif ($throw) {
@@ -61,7 +62,6 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
                 $meged[$pos] = null;
             }
         }
-        
         return $merged;
     }
 
