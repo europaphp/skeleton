@@ -108,7 +108,7 @@ First we set up the mapping for these:
     <?php
     
     use Europa\ServiceLocator;
-    use Europa\String;
+    use Europa\StringObject;
     use Europa\View\Php;
     
     class MyAppBootstrapper extends Bootstrapper
@@ -131,7 +131,7 @@ Once mapped, we configure the components. Since both the layout and the view req
     public function configureViewHelpers()
     {
         $this->locator->queueMethodFor('helper', 'setFormatter', array(function($service) {
-            return String::create($service)->toClass() . 'Helper';
+            return StringObject::create($service)->toClass() . 'Helper';
         }));
     }
 
@@ -170,7 +170,7 @@ There is also one other way to configure a service and that is to extend `\Europ
     <?php
     
     use Europa\ServiceLocator;
-    use Europa\String;
+    use Europa\StringObject;
     use Europa\View\Php;
     
     class MyLocator extends ServiceLocator
@@ -194,7 +194,7 @@ There is also one other way to configure a service and that is to extend `\Europ
         {
             $helper = new static;
             $helper->setFormatter(function($service) {
-                return String::create($service)->toClass() . 'Helper';
+                return StringObject::create($service)->toClass() . 'Helper';
             });
             return $helper;
         }
@@ -271,7 +271,7 @@ If we don't like the parameter name "controller", all we need to do is set a dif
     
     use Europa\Loader;
     use Europa\Request\Http;
-    use Europa\String;
+    use Europa\StringObject;
     
     $request = new Http;
     $request->setControllerKey('my-custom-controller-name');
@@ -281,7 +281,7 @@ If we don't like the parameter name "controller", all we need to do is set a dif
 If we don't like the naming convention of `[name]Controller`, then we set a different formatter:
 
     $request->setControllerFormatter(function(Http $request) {
-        return String::create($request->getController())->toClass() . 'Controller;
+        return StringObject::create($request->getController())->toClass() . 'Controller;
     });
 
 ### Custom Controller Paths

@@ -3,7 +3,7 @@
 namespace Test\View;
 use Europa\Unit\Test\Test;
 use Europa\ServiceLocator;
-use Europa\String;
+use Europa\StringObject;
 use Europa\View;
 use Europa\View\Php;
 
@@ -20,7 +20,7 @@ class Helper extends Test
         
         $this->view->setHelperLocator($this->locator);
         $this->locator->setFormatter(function($service) {
-            return '\Provider\View\Helper' . String::create($service)->toClass();
+            return '\Provider\View\Helper' . StringObject::create($service)->toClass();
         });
     }
     

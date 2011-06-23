@@ -3,7 +3,7 @@
 namespace Test;
 use Europa\Request\Http;
 use Europa\Router;
-use Europa\String;
+use Europa\StringObject;
 use Europa\Unit\Test\Test;
 use Provider\ServiceLocator\Locator;
 use Provider\ServiceLocator\TestService;
@@ -27,7 +27,7 @@ class ServiceLocator extends Test
         );
         $this->container->map('router', '\Europa\Router');
         $this->container->setFormatter(function($service) {
-            return '\Provider\ServiceLocator' . String::create($service)->toClass() . 'Service';
+            return '\Provider\ServiceLocator' . StringObject::create($service)->toClass() . 'Service';
         });
     }
     

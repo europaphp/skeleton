@@ -36,7 +36,7 @@ abstract class ElementList extends Base implements Renderable, Listable
             // automate field naming if a string is passed
             if (is_string($offset)) {
                 if (!$element->id) {
-                    $element->id = (string) \Europa\String::create($offset)->toProperty();
+                    $element->id = (string) \Europa\StringObject::create($offset)->toProperty();
                 }
                 if (!$element->name) {
                     $element->name = $offset;

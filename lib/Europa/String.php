@@ -38,7 +38,7 @@ class String implements \Countable
      *
      * @param string $string The string to manipulate.
      * 
-     * @return \Europa\String
+     * @return \Europa\StringObject
      */
     public function __construct($string = '')
     {
@@ -69,7 +69,7 @@ class String implements \Countable
     /**
      * Formats a string based on the replacements.
      * 
-     * @return \Europa\String
+     * @return \Europa\StringObject
      */
     public function format(array $replacements, $openChar = null, $closeChar = null)
     {
@@ -92,7 +92,7 @@ class String implements \Countable
      * @param mixed $search  The string(s) to search for.
      * @param mixed $replace The string(s) to replace with.
      * 
-     * @return \Europa\String
+     * @return \Europa\StringObject
      */
     public function replace($search, $replace)
     {
@@ -105,7 +105,7 @@ class String implements \Countable
      * 
      * @param string $separator The separator to separate camel words with. Defaults to empty space.
      * 
-     * @return \Europa\String
+     * @return \Europa\StringObject
      */
     public function splitUcWords($separator = '')
     {
@@ -125,7 +125,7 @@ class String implements \Countable
     /**
      * Formats the string into a valid class name according to convention.
      * 
-     * @return \Europa\String
+     * @return \Europa\StringObject
      */
     public function toClass()
     {
@@ -164,7 +164,7 @@ class String implements \Countable
     /**
      * Formats the string into a valid method name according to convention.
      * 
-     * @return \Europa\String
+     * @return \Europa\StringObject
      */
     public function toMethod()
     {
@@ -174,7 +174,7 @@ class String implements \Countable
     /**
      * Formats the string into a valid property name according to convention.
      * 
-     * @return \Europa\String
+     * @return \Europa\StringObject
      */
     public function toProperty()
     {
@@ -212,7 +212,7 @@ class String implements \Countable
      *
      * @param string $charList Same as the charlist in PHP's rtrim() function.
      * 
-     * @return \Europa\String
+     * @return \Europa\StringObject
      */
     public function rtrim($charList = null)
     {
@@ -223,7 +223,7 @@ class String implements \Countable
     /**
      * Makes the first letter lowercase.
      * 
-     * @return \Europa\String
+     * @return \Europa\StringObject
      */
     public function lcFirst()
     {
@@ -234,7 +234,7 @@ class String implements \Countable
     /**
      * Makes the first letter uppercase.
      * 
-     * @return \Europa\String
+     * @return \Europa\StringObject
      */
     public function ucFirst()
     {
@@ -245,7 +245,7 @@ class String implements \Countable
     /**
      * Lowercases each word in the string.
      * 
-     * @return \Europa\String
+     * @return \Europa\StringObject
      */
     public function lcWords()
     {
@@ -260,7 +260,7 @@ class String implements \Countable
     /**
      * Makes each word start with an uppercase character.
      * 
-     * @return \Europa\String
+     * @return \Europa\StringObject
      */
     public function ucWords()
     {
@@ -271,7 +271,7 @@ class String implements \Countable
     /**
      * Makes the string lowercase.
      * 
-     * @return \Europa\String
+     * @return \Europa\StringObject
      */
     public function toLowercase()
     {
@@ -282,7 +282,7 @@ class String implements \Countable
     /**
      * Makes the string uppercase.
      * 
-     * @return \Europa\String
+     * @return \Europa\StringObject
      */
     public function toUppercase()
     {
@@ -293,7 +293,7 @@ class String implements \Countable
     /**
      * Transforms the string into a url slug.
      * 
-     * @return \Europa\String
+     * @return \Europa\StringObject
      */
     public function slug($separator = '-')
     {
@@ -347,7 +347,7 @@ class String implements \Countable
     }
 
     /**
-     * Creates a new string. Same as calling new \Europa\String($string).
+     * Creates a new string. Same as calling new \Europa\StringObject($string).
      *
      * @param string $string The string the object should represent.
      * 

@@ -1,7 +1,7 @@
 <?php
 
 namespace Test;
-use Europa\String as StringObject;
+use Europa\StringObject as StringObject;
 use Europa\Unit\Test\Test;
 
 class String extends Test

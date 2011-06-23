@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa\View;
-use Europa\String;
+use Europa\StringObject;
 use Europa\View;
 
 /**
@@ -116,7 +116,7 @@ class Csv extends View
         } elseif (is_array($data)) {
             return $this->convertArrayToString($data);
         }
-        return String::create($data)->__toString();
+        return StringObject::create($data)->__toString();
     }
     
     /**

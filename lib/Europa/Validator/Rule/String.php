@@ -18,7 +18,7 @@ class String extends Validator
      * 
      * @param mixed $value The value to validate.
      * 
-     * @return \Europa\Validator\String
+     * @return \Europa\Validator\StringObject
      */
     public function validate($value)
     {

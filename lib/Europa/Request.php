@@ -6,7 +6,7 @@ use Europa\Loader;
 use Europa\Request\Cli;
 use Europa\Request\Exception;
 use Europa\Request\Http;
-use Europa\String;
+use Europa\StringObject;
 
 /**
  * The heart of EuropaPHP. This is where it all starts and ends.
@@ -335,7 +335,7 @@ abstract class Request implements \Serializable
         if ($this->controllerFormatter) {
             return call_user_func($this->controllerFormatter, $this);
         }
-        return 'Controller' . String::create($this->getController())->toClass();
+        return 'Controller' . StringObject::create($this->getController())->toClass();
     }
     
     /**
