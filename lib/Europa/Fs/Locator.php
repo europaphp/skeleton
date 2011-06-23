@@ -34,6 +34,46 @@ class Locator implements LocatorInterface
     private $map = array();
     
     /**
+     * Whether or not to throw an exception when adding a path if the path does not exist.
+     * 
+     * @var bool
+     */
+    private $throwWhenAdding = true;
+    
+    /**
+     * Whether or not to throw an exception when if the file is not found when locating.
+     * 
+     * @var bool
+     */
+    private $throwWhenLocating = false;
+    
+    /**
+     * Sets whether or not to throw an exception when if the file is not found when locating.
+     * 
+     * @param bool $switch Turns throwing on or off.
+     * 
+     * @return \Europa\Fs\Locator
+     */
+    public function throwWhenAdding($switch = true)
+    {
+        $this->throwWhenAdding = $switch ? true : false;
+        return $this;
+    }
+    
+    /**
+     * Sets whether or not to throw an exception when if the file is not found when locating.
+     * 
+     * @param bool $switch Turns throwing on or off.
+     * 
+     * @return \Europa\Fs\Locator
+     */
+    public function throwWhenLocating($switch = true)
+    {
+        $this->throwWhenLocating = $switch ? true : false;
+        return $this;
+    }
+    
+    /**
      * Maps the specified item to the specified file. Also takes an array of $class to
      * $file mappings as the first argument.
      * 
@@ -95,15 +135,19 @@ class Locator implements LocatorInterface
             }
         }
         
+        if ($this->throwWhenLocating) {
+            throw new Exception("Could not locate the file {$file}.");
+        }
+        
         return false;
     }
     
     /**
-     * Adds a path to the load paths. Uses realpath to determine path validity.
-     * If the path is unable to be resolve, an exception is thrown.
+     * Adds a path to the load paths. Uses realpath to determine path validity. If the path is unable to be resolve, an
+     * exception is thrown. If 
      * 
-     * @param string $path              The path to add to the list of load paths.
-     * @param bool   $addToIncludePaths Whether or not to add it to PHP's include paths.
+     * @param string $path   The path to add to the list of load paths.
+     * @param mixed  $suffix The suffix, or suffixes to use for this path.
      * 
      * @throws \Europa\Loader\Exception If the path does not exist.
      * 
@@ -112,6 +156,9 @@ class Locator implements LocatorInterface
     public function addPath($path, $suffix = self::DEFAULT_SUFFIX)
     {
         $realpath = $this->getRealpathAndThrowIfNotExists($path);
+        if (!$realpath) {
+            return $this;
+        }
 
         // ensure the path can contain multiple suffixes
         if (!isset($this->paths[$realpath])) {
@@ -132,7 +179,9 @@ class Locator implements LocatorInterface
     public function addIncludePath($path)
     {
         $realpath = $this->getRealpathAndThrowIfNotExists($path);
-        set_include_path(get_include_path() . PATH_SEPARATOR . $realpath);
+        if ($realpath) {
+            set_include_path(get_include_path() . PATH_SEPARATOR . $realpath);
+        }
         return $this;
     }
     
@@ -151,9 +200,12 @@ class Locator implements LocatorInterface
             return $realpath;
         }
         
-        // we require the exception files here since they may not be autoloadable yet
-        require_once realpath(dirname(__FILE__) . '/../Exception.php');
-        require_once realpath(dirname(__FILE__) . '/Exception.php');
-        throw new Exception("Path {$path} does not exist.");
+        if ($this->throwWhenAdding) {
+            require_once realpath(dirname(__FILE__) . '/../Exception.php');
+            require_once realpath(dirname(__FILE__) . '/Exception.php');
+            throw new Exception("Path {$path} does not exist.");
+        }
+        
+        return false;
     }
 }
