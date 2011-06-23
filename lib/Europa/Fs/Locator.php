@@ -34,13 +34,6 @@ class Locator implements LocatorInterface
     private $map = array();
     
     /**
-     * Whether or not the loader has been registered yet.
-     * 
-     * @var bool
-     */
-    private $isRegistered = false;
-    
-    /**
      * Maps the specified item to the specified file. Also takes an array of $class to
      * $file mappings as the first argument.
      * 
@@ -81,6 +74,7 @@ class Locator implements LocatorInterface
     public function locate($file)
     {
         // normalize
+        $file = str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $file);
         $file = trim($file, DIRECTORY_SEPARATOR);
         
         // if it exists in the map just return it
@@ -88,25 +82,13 @@ class Locator implements LocatorInterface
             return $this->map[$file];
         }
         
-        // check to see if the passed file exists
-        if (file_exists($file)) {
-            $this->map($file, $file);
-            return $file;
-        }
-        
         // search in paths
         foreach ($this->paths as $path => $suffixes) {
-            // see if the file exists without searching with suffixes
-            $fullpath = $path . DIRECTORY_SEPARATOR . $file;
-            if (file_exists($fullpath)) {
-                $this->map($file, $fullpath);
-                return $fullpath;
-            }
-            
             // if the file still isn't found, apply suffixes
             foreach ($suffixes as $suffix) {
                 $fullpath = $path . DIRECTORY_SEPARATOR . $file . '.' . $suffix;
-                if (file_exists($fullpath)) {
+                $fullpath = realpath($fullpath);
+                if ($fullpath) {
                     $this->map($file, $fullpath);
                     return $fullpath;
                 }
@@ -170,11 +152,8 @@ class Locator implements LocatorInterface
         }
         
         // we require the exception files here since they may not be autoloadable yet
+        require_once realpath(dirname(__FILE__) . '/../Exception.php');
         require_once realpath(dirname(__FILE__) . '/Exception.php');
-        require_once realpath(dirname(__FILE__) . '/Loader/Exception.php');
-        throw new Exception(
-            'Path ' . $path . ' does not exist.',
-            Exception::INVALID_PATH
-        );
+        throw new Exception("Path {$path} does not exist.");
     }
 }

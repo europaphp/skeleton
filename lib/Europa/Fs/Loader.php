@@ -33,25 +33,25 @@ class Loader
             return true;
         }
         
+        // normalize
         $file = str_replace('\\', DIRECTORY_SEPARATOR, $class);
+        $file = trim($file, DIRECTORY_SEPARATOR);
         
         // attempt loading of classes at same level as framework
         if ($fullpath = realpath(dirname(__FILE__) . '/../../' . $file . '.php')) {
-            require_once $fullpath;
-            return $this;
+            include $fullpath;
+            return true;
         }
         
         // attempt loading from other sources
         if ($this->locator) {
             if ($fullpath = $this->locator->locate($file)) {
-                require_once $fullpath;
-                return $this;
+                include $fullpath;
+                return true;
             }
         }
         
-        require_once realpath(dirname(__FILE__) . '/../Exception.php');
-        require_once realpath(dirname(__FILE__) . '/Exception.php');
-        throw new Exception("Unable to load class {$class}.");
+        return false;
     }
     
     /**
@@ -72,9 +72,9 @@ class Loader
      * 
      * @return \Europa\Fs\Loader
      */
-    public function register()
+    public function register($prepend = false)
     {
-        spl_autoload_register(array($this, 'load'));
+        spl_autoload_register(array($this, 'load'), true, $prepend);
         return $this;
     }
 }
