@@ -2,8 +2,7 @@
 
 define('START_TIME', microtime(true));
 
-use Europa\Request\Http;
-use Europa\ServiceLocator;
+use Europa\Di\Container;
 
 // can be overridden in bootstrap if need be
 error_reporting(E_ALL ^ E_STRICT);
@@ -16,9 +15,9 @@ $boot = new Bootstrapper;
 $boot();
 
 // any exceptions will routed to the error controller
-$locator = ServiceLocator::getInstance();
-$request = $locator->get('request');
-$router  = $locator->get('router');
+$container = Container::get();
+$request   = $container->request->get();
+$router    = $container->router->get();
 try {
     $params = $router->query($request->getUri()->getRequest());
     echo $request->setParams($params)->dispatch()->render();
