@@ -1,9 +1,7 @@
 <?php
 
 namespace Helper;
-use Europa\Request\Http;
 use Europa\Uri as UriClass;
-use Europa\View\Php;
 
 /**
  * A helper for formatting a passed in url.
@@ -31,7 +29,7 @@ class Uri
      * 
      * @return \Helper\Uri
      */
-    public function __construct(Php $view, $uri = null, array $params = array())
+    public function __construct($uri = null, array $params = array())
     {
         $current   = UriClass::detect();
         $this->uri = new UriClass($uri);

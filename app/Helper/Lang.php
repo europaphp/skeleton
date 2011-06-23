@@ -2,6 +2,7 @@
 
 namespace Helper;
 use Europa\Exception;
+use Europa\Fs\Locator;
 use Europa\View\Php;
 
 /**
@@ -19,54 +20,24 @@ class Lang
      * 
      * @var array
      */
-    private $ini = array();
+    private $cache = array();
     
-    /**
-     * The language to use.
-     * 
-     * @var string
-     */
-    private static $lang = 'en_US';
+    private $lang;
     
-    /**
-     * The base path to the language files.
-     * 
-     * @var string
-     */
-    private static $path;
+    private $locator;
+    
+    private $view;
     
     /**
      * Constructs the language helper and parses the required ini file.
      * 
-     * @param \Europa\View $view The view that called the helper.
-     * 
      * @return \LangHelper
      */
-    public function __construct(Php $view, $fileOverride = null, $langOverride = null, $pathOverride = null)
+    public function __construct(Locator $locator, Php $view, $lang)
     {
-        // set a default path if one doesn't exist
-        if (!self::$path) {
-            self::path(dirname(__FILE__) . '/../Lang');
-        }
-        
-        // allow view script language override
-        $file = $fileOverride ? $fileOverride : $view->getScript();
-        $lang = $langOverride ? $langOverride : self::$lang;
-        $path = $pathOverride ? $pathOverride : self::$path;
-        
-        // format the path to the ini file
-        $path = $path
-              . DIRECTORY_SEPARATOR
-              . $lang
-              . DIRECTORY_SEPARATOR
-              . $file
-              . '.ini';
-        $path = str_replace(array('//', '\\'), DIRECTORY_SEPARATOR, $path);
-        
-        // make sure the language fle exists
-        if (file_exists($path)) {
-            $this->ini = parse_ini_file($path);
-        }
+        $this->locator = $locator;
+        $this->view    = $view;
+        $this->lang    = $lang;
     }
     
     /**
@@ -102,22 +73,12 @@ class Lang
      */
     public function __get($name)
     {
-        if (isset($this->ini[$name])) {
-            return $this->ini[$name];
+        $this->reParseIfDifferentView();
+        $view = $this->view->getScript();
+        if (isset($this->cache[$view][$name])) {
+            return $this->cache[$view][$name];
         }
         return $name;
-    }
-    
-    /**
-     * Returns whether or not the specified language variable exists.
-     * 
-     * @param string $name The name of the language variable to check for.
-     * 
-     * @return bool
-     */
-    public function __isset($name)
-    {
-        return isset($this->ini[$name]);
     }
     
     /**
@@ -127,7 +88,12 @@ class Lang
      */
     public function toArray()
     {
-        return $this->ini;
+        $this->reParseIfDifferentView();
+        $view = $this->view->getScript();
+        if (isset($this->cache[$view][$name])) {
+            return $this->cache[$view][$name];
+        }
+        return array();
     }
     
     /**
@@ -141,29 +107,20 @@ class Lang
     }
     
     /**
-     * Sets the language to use.
+     * Re-parses the ini file if a different view is detected.
      * 
-     * @return void
+     * @return \Helper\Lang
      */
-    static public function set($language)
+    private function reParseIfDifferentView()
     {
-        self::$lang = $language;
-    }
-    
-    /**
-     * Sets the base path to the language files.
-     * 
-     * @param string $path The path to the language files.
-     * 
-     * @return mixed
-     */
-    static public function path($path = null)
-    {
-        $realpath = realpath($path);
-        if (!$realpath) {
-            $e = new Exception('The language file base path "' . $path . '" does not exist.');
-            $e->trigger();
+        $view = $this->view->getScript();
+        if (!isset($this->cache[$view])) {
+            if ($path = $this->locator->locate("{$this->lang}/{$view}")) {
+                $this->cache[$view] = parse_ini_file($path);
+            } else {
+                $this->cache[$view] = array();
+            }
         }
-        self::$path = $realpath;
+        return $this;
     }
 }

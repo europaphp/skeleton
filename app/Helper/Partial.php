@@ -15,35 +15,16 @@ use Europa\View\Php;
 class Partial
 {
     /**
-     * The string result of the dispatch call.
-     * 
-     * @var string
-     */
-    private $result;
-
-    /**
-     * Constructs a dispatch helper and passes in the required parameters. The request can be auto-detected
-     * if not specified, or overridden if specified.
-     * 
-     * @param \Europa\View $view   The view that called the helper.
-     * @param string       $script The path to the script to render.
-     * @param array        $params An array of parameters to pass off to the new view.
-     * 
-     * @return DispatchHelper
-     */
-    public function __construct(Php $view, $script, array $params = array())
-    {
-        $this->result = ServiceLocator::getInstance()->create('partialView');
-        $this->result = $this>view->setScript($script)->setParams($params)->render();
-    }
-
-    /**
      * Returns the dispatch result as a string.
+     * 
+     * @param string $script  The path to the script to render.
+     * @param array  $context An array of parameters to pass off to the new view.
      * 
      * @return string
      */
-    public function __toString()
+    public function render($script, array $context = array())
     {
-        return $this->result;
+        $view = Container::get()->create('phpView');
+        return $view->setScript($script)->render($context);
     }
 }

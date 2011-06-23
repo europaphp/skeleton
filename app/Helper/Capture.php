@@ -14,30 +14,11 @@ use Europa\View\Php;
 class Capture
 {
     /**
-     * The view that called the helper.
-     * 
-     * @var \Europa\View
-     */
-    private $view;
-    
-    /**
      * The captured data.
      * 
      * @var array
      */
     private $cache = array();
-    
-    /**
-     * Constructs the new capture helper and sets the view that called it.
-     * 
-     * @param \Europa\View $view The view that called the helper.
-     * 
-     * @return \CaptureHelper
-     */
-    public function __construct(Php $view)
-    {
-        $this->view = $view;
-    }
     
     /**
      * Starts capturing.
