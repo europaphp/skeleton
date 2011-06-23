@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <?php echo $this->css; ?>
-        <?php echo $this->js; ?>
+        <?php echo $this->css->render($this->getScript()); ?>
+        <?php echo $this->js->render($this->getScript()); ?>
         <title><?php echo $this->lang->title ?></title>
     </head>
     <body>
