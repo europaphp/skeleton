@@ -3,11 +3,10 @@
 namespace Europa;
 
 /**
- * A class used for application setup. Defined methods are called in
- * the order in which they are defined.
+ * A class used for application setup. Defined methods are called in the order in which they are defined.
  *
- * @category Bootstrapper
- * @package  Europa
+ * @category Bootstrapping
+ * @package  Bootstrapper
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
