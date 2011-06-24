@@ -57,8 +57,7 @@ class Bootstrapper extends ParentBootstrapper
      */
     public function configureDiContainer()
     {
-        $this->container = Container::get();
-        $this->container->map(array(
+        $this->container = Container::get()->register(array(
             'defaultRoute'           => '\Europa\Router\Route\Regex',
             'langLocator'            => '\Europa\Fs\Locator',
             'loader'                 => '\Europa\Fs\Loader',
@@ -78,34 +77,30 @@ class Bootstrapper extends ParentBootstrapper
      */
     public function configureDiDependencies()
     {
-        $this->container->defaultRoute
-            ->configure(array('(index\.php)?/?(?<controller>.+)?', null, array('controller' => 'index')));
+        $this->container->defaultRoute('(index\.php)?/?(?<controller>.+)?', null, array('controller' => 'index'));
         $this->container->langLocator
-            ->queue('addPath', array($this->basePath . '/app/Lang', 'ini'));
+            ->throwWhenAdding(false)
+            ->addPath($this->basePath . '/app/Lang', 'ini');
         $this->container->loader
-            ->queue('setLocator', array($this->container->loaderLocator));
+            ->setLocator($this->container->loaderLocator);
         $this->container->loaderLocator
-            ->queue('addPath', array($this->basePath . '/app'));
-        $this->container->phpView
-            ->configure(array($this->container->phpViewLocator))
-            ->queue('setHelperContainer', array($this->container->phpViewHelperContainer));
+            ->throwWhenAdding(false)
+            ->addPath($this->basePath . '/app');
+        $this->container->phpView($this->container->phpViewLocator)
+            ->setHelperContainer($this->container->phpViewHelperContainer);
         $this->container->phpViewHelperContainer
-            ->queue('setFormatter', array(function($name) {
+            ->setFormatter(function($name) {
                 $name = ucfirst($name);
                 return "\\Helper\\{$name}";
-            }));
-        $this->container->phpViewHelperContainer
-            ->queue('configure', array('css', array('css')))
-            ->queue('configure', array('js', array('js')))
-            ->queue('configure', array('lang', array(
-                $this->container->langLocator,
-                $this->container->phpView,
-                'en-us'
-            )));
+            })
+            ->css('css')
+            ->js('js')
+            ->lang($this->container->langLocator, $this->container->phpView, 'en-us');
         $this->container->phpViewLocator
-            ->queue('addPath', array($this->basePath . '/app/View'));
+            ->throwWhenAdding(false)
+            ->addPath($this->basePath . '/app/View');
         $this->container->router
-            ->queue('setRoute', array($this->container->defaultRoute));
+            ->setRoute($this->container->defaultRoute);
     }
     
     /**
@@ -117,10 +112,10 @@ class Bootstrapper extends ParentBootstrapper
     {
         foreach (Directory::open($this->pluginPath) as $item) {
             $moduleBasePath = $item->getPathname() . DIRECTORY_SEPARATOR;
-            $this->container->langLocator->queue('addPath', array($moduleBasePath . 'app/Lang'));
-            $this->container->loaderLocator->queue('addPath', array($moduleBasePath . 'app'));
-            $this->container->loaderLocator->queue('addPath', array($moduleBasePath . 'lib'));
-            $this->container->phpViewLocator->queue('addPath', array($moduleBasePath . 'app/View'));
+            $this->container->langLocator->addPath($moduleBasePath . 'app/Lang');
+            $this->container->loaderLocator->addPath($moduleBasePath . 'app');
+            $this->container->loaderLocator->addPath($moduleBasePath . 'lib');
+            $this->container->phpViewLocator->addPath($moduleBasePath . 'app/View');
         }
     }
     
