@@ -5,6 +5,7 @@ use Europa\Controller\Exception as ControllerException;
 use Europa\Request\Http;
 use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
+use Europa\Request\RequestAbstract;
 use Europa\Uri;
 use Europa\View\ViewInterface;
 
@@ -74,7 +75,7 @@ abstract class Controller
      * 
      * @return \Europa\Controller
      */
-    public function __construct(Request $request)
+    public function __construct(RequestAbstract $request)
     {
         $this->request = $request;
         $this->init();
