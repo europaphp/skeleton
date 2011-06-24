@@ -57,6 +57,71 @@ class Dependency
     }
     
     /**
+     * Sets a method to be called and the arguments for that method.
+     * 
+     * @param string $method The method to call.
+     * @param array  $args   The arguments to pass to the method.
+     * 
+     * @return \Europa\Di\Dependency
+     */
+    public function __call($method, array $args = array())
+    {
+        return $this->queue($method, $args);
+    }
+    
+    /**
+     * Configures the object. If the object is already exists, it is reset.
+     * 
+     * @param array $args The arguments to re-configure the instance with.
+     * 
+     * @return \Europa\Di\Dependency
+     */
+    public function configure(array $args)
+    {
+        $this->reset();
+        $this->args = $args;
+        return $this;
+    }
+    
+    /**
+     * Queues a method to be called after instantiation. If the object already exists, it is reset.
+     * 
+     * @param string $method The method to queue.
+     * @param array  $args   The arguments to pass to the method.
+     * 
+     * @return \Europa\Di\Dependency
+     */
+    public function queue($method, array $args = array())
+    {
+        $this->reset();
+        $this->queue[] = array($method, $args);
+        return $this;
+    }
+    
+    /**
+     * Sets an instance and makes sure that it is an instance that the dependency represents.
+     * 
+     * @param mixed $instance The instance to set.
+     * 
+     * @return \Europa\Di\Dependency
+     */
+    public function set($instance)
+    {
+        if (!is_object($instance)) {
+            $type = gettype($instance);
+            throw new Exception("Only object instances may be registered. Type {$type} given.");
+        }
+        
+        if (!$instance instanceof $this->class) {
+            $class = get_class($instance);
+            throw new Exception("The instance must be an instance of {$this->class}. Instance of {$class} given.");
+        }
+        
+        $this->instance = $instance;
+        return $this;
+    }
+    
+    /**
      * Returns the represented dependency instance. If it is has not been created yet, it is created then cached and
      * returned.
      * 
@@ -65,13 +130,14 @@ class Dependency
     public function get()
     {
         if (!$this->instance) {
-            $this->instance = $this->create();
+            $this->instance = $this->invokeClass();
+            $this->invokeQueue($this->instance);
         }
         return $this->instance;
     }
     
     /**
-     * Creates a new instance then returns it.
+     * Creates a new instance then returns it. Does not cache the instance.
      * 
      * @param array $args Any last minute constructor arguments.
      * 
@@ -85,29 +151,13 @@ class Dependency
     }
     
     /**
-     * Sets constructor arguments. If this is called after creation, it does not take effect until the next creation.
-     * 
-     * @param array $args The arguments to pass to the constructor.
+     * Destroys the current instance so it can be reconfigured the next time it is accessed.
      * 
      * @return \Europa\Di\Dependency
      */
-    public function configure(array $args)
+    public function reset()
     {
-        $this->args = $args;
-        return $this;
-    }
-    
-    /**
-     * Sets a method to be called and the arguments for that method.
-     * 
-     * @param string $method The method to call.
-     * @param array  $args   The arguments to pass to the method.
-     * 
-     * @return \Europa\Di\Dependency
-     */
-    public function queue($method, array $args = array())
-    {
-        $this->queue[] = array($method, $args);
+        $this->instance = null;
         return $this;
     }
     
@@ -126,7 +176,6 @@ class Dependency
             if ($instance->hasMethod('__construct') && $args) {
                 $args = $this->args;
                 $this->filterArgsForDependencies($args);
-                
                 $instance = $instance->newInstanceArgs($args);
             } else {
                 $instance = $instance->newInstance();
@@ -152,19 +201,13 @@ class Dependency
         foreach ($this->queue as $queue) {
             $method = $queue[0];
             $args   = $queue[1];
-            if ($args) {
-                $this->filterArgsForDependencies($args);
-                try {
-                    $reflect = new \ReflectionMethod($this->class, $method);
-                    $reflect->invokeArgs($instance, $args);
-                } catch (\Exception $e) {
-                    throw new Exception(
-                        "Could not call queued method {$method} for {$this->class} with message: {$e->getMessage()}.",
-                        $e->getCode()
-                    );
-                }
+            $this->filterArgsForDependencies($args);
+            if (method_exists($instance, $method)) {
+                call_user_func_array(array($instance, $method), $args);
+            } elseif (method_exists($instance, '__call')) {
+                call_user_func(array($instance, '__call'), $method, $args);
             } else {
-                $instance->$method();
+                throw new Exception("Method {$method} or __call does not exist for {$this->class}.");
             }
         }
         return $this;
