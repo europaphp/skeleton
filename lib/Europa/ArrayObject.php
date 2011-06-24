@@ -6,7 +6,7 @@ namespace Europa;
  * Extends ArrayObject so that you are allowed to access undefined indexes/properties
  * and it will return null instead of throwing a notice.
  * 
- * @category ArrayObject
+ * @category ValueObjects
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license

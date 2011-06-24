@@ -12,5 +12,10 @@ namespace Europa;
  */
 abstract class Form extends Form\ElementList
 {
+    /**
+     * Form attributes.
+     * 
+     * @var array
+     */
     protected $attributes = array('method' => 'post');
 }
