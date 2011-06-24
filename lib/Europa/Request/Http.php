@@ -1,7 +1,6 @@
 <?php
 
 namespace Europa\Request;
-use Europa\Request;
 use Europa\Uri;
 
 /**
@@ -12,7 +11,7 @@ use Europa\Uri;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Http extends Request
+class Http extends RequestAbstract
 {
     /**
      * The OPTIONS method.

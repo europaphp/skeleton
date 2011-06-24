@@ -1,7 +1,6 @@
 <?php
 
 namespace Europa\Request;
-use Europa\Request;
 
 /**
  * The request class for representing a CLI request.
@@ -11,7 +10,7 @@ use Europa\Request;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Cli extends Request
+class Cli extends RequestAbstract
 {
     /**
      * The cli request method.
