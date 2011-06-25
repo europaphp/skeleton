@@ -57,7 +57,7 @@ class Bootstrapper extends ParentBootstrapper
      */
     public function configureDiContainer()
     {
-        $this->container = Container::get()->register(array(
+        $this->container = Container::get()->map(array(
             'defaultRoute'           => '\Europa\Router\Route\Regex',
             'langLocator'            => '\Europa\Fs\Locator',
             'loader'                 => '\Europa\Fs\Loader',

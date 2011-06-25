@@ -122,20 +122,20 @@ class Container
     }
     
     /**
-     * Registers dependencies.
+     * Map a dependency name to a class.
      * 
      * @param string $map   An array of $map => $value or a dependency name for $value.
-     * @param string $value The value to map.
+     * @param string $class The class to map the dependency to.
      * 
      * @return \Europa\Di\Container
      */
-    public function register($map, $value = null)
+    public function map($map, $class = null)
     {
         if (!is_array($map)) {
-            $map = array($map, $value);
+            $map = array($map, $class);
         }
-        foreach ($map as $name => $value) {
-            $this->__set($name, $value);
+        foreach ($map as $name => $class) {
+            $this->__set($name, $class);
         }
         return $this;
     }
