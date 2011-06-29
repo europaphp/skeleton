@@ -1,5 +1,7 @@
 <?php
 
+namespace Europa\Event;
+
 /**
  * A basic interface for defining whether or not something is triggerable.
  * 
@@ -8,15 +10,12 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-namespace Europa\Event
+interface Triggerable
 {
-    interface Triggerable
-    {
-        /**
-         * Ensures the event manager knows what to do.
-         * 
-         * @return bool
-         */
-        public function trigger(array $data = array());
-    }
+    /**
+     * Ensures the event manager knows what to do.
+     * 
+     * @return bool
+     */
+    public function trigger(array $data = array());
 }
