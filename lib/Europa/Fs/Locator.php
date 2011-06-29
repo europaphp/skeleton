@@ -10,7 +10,7 @@ namespace Europa\Fs;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Locator implements LocatorInterface
+class Locator
 {
     /**
      * The default file suffix.
@@ -80,7 +80,7 @@ class Locator implements LocatorInterface
      * @param string $map  The class to map, or array of $class => $file mapping.
      * @param string $file The file to map to if the first argument is not an array.
      * 
-     * @return \Europa\Loader
+     * @return \Europa\ClassLoader
      */
     public function map($map, $file)
     {
@@ -149,9 +149,9 @@ class Locator implements LocatorInterface
      * @param string $path   The path to add to the list of load paths.
      * @param mixed  $suffix The suffix, or suffixes to use for this path.
      * 
-     * @throws \Europa\Loader\Exception If the path does not exist.
+     * @throws \Europa\ClassLoader\Exception If the path does not exist.
      * 
-     * @return \Europa\Loader
+     * @return \Europa\ClassLoader
      */
     public function addPath($path, $suffix = self::DEFAULT_SUFFIX)
     {
@@ -174,7 +174,7 @@ class Locator implements LocatorInterface
      * 
      * @param string $path The path to add to PHP's include paths.
      * 
-     * @return \Europa\Loader
+     * @return \Europa\ClassLoader
      */
     public function addIncludePath($path)
     {

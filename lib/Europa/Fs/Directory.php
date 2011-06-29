@@ -11,16 +11,8 @@ use Europa\Fs\Directory\Exception;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Directory extends Item implements \Countable, \Iterator
+class Directory extends Item implements \IteratorAggregate, \Countable
 {
-    /**
-     * Holds all the items. If the items were filtered, then this array will
-     * reflect that.
-     * 
-     * @var array
-     */
-    private $items = array();
-    
     /**
      * Opens the directory an constructs the parent info object.
      * 
@@ -40,8 +32,6 @@ class Directory extends Item implements \Countable, \Iterator
         } catch(\RuntimeException $e) {
             throw new Exception("Could not open directory {$path} with message: {$e->getMessage()}.");
         }
-
-        $this->unflatten();
     }
     
     /**
@@ -55,86 +45,29 @@ class Directory extends Item implements \Countable, \Iterator
     }
     
     /**
-     * Returns all directory paths.
+     * Returns the number of items in the current directory.
      * 
-     * @return array
+     * @return int
      */
-    public function getDirectories()
+    public function count()
     {
-        $dirs = array();
-        foreach ($this->getItems() as $item) {
-            if (is_dir($item)) {
-                $dirs[] = $item;
-            }
-        }
-        return $dirs;
+        return $this->getIterator()->count();
     }
     
     /**
-     * Returns all file paths.
+     * Returns a finder instance representing the current directory.
      * 
-     * @return array
+     * @return \Europa\Fs\Finder
      */
-    public function getFiles()
+    public function getIterator()
     {
-        $files = array();
-        foreach ($this->getItems() as $item) {
-            if (is_file($item)) {
-                $files[] = $item;
-            }
-        }
-        return $files;
+        $finder = new Finder;
+        $finder->in($this->getPathname());
+        return $finder;
     }
     
     /**
-     * Returns the raw items from the directory.
-     * 
-     * @return array
-     */
-    public function getItems()
-    {
-        return $this->items;
-    }
-    
-    /**
-     * Returns whether or not the specified directory exists in the current directory.
-     * 
-     * @param string $dir The directory to check for.
-     * 
-     * @return bool
-     */
-    public function hasDirectory($dir)
-    {
-        return is_dir($this->getPathname() . DIRECTORY_SEPARATOR . $dir);
-    }
-    
-    /**
-     * Returns whether or not the specified file exists in the current directory.
-     * 
-     * @param string $file The file to check for.
-     * 
-     * @return bool
-     */
-    public function hasFile($file)
-    {
-        return is_file($this->getPathname() . DIRECTORY_SEPARATOR . $file);
-    }
-    
-    /**
-     * Returns whether or not the current directory contains the specified file.
-     * 
-     * @param string $item The item to check for.
-     * 
-     * @return bool
-     */
-    public function hasItem($item)
-    {
-        return $this->hasDirectory($item) || $this->hasFile($item);
-    }
-    
-    /**
-     * Merges the current directory to the destination directory and leaves the
-     * current directory alone.
+     * Merges the current directory to the destination directory and leaves the current directory alone.
      * 
      * @param \Europa\Fs\Directory $destination   The destination directory.
      * @param bool                 $fileOverwrite Whether or not to overwrite destination files.
@@ -203,8 +136,8 @@ class Directory extends Item implements \Countable, \Iterator
     }
     
     /**
-     * Deletes the current directory and all of it's contents. Throws an exception
-     * if the directory couldn't be removed.
+     * Deletes the current directory and all of it's contents. Throws an exception if the directory couldn't be
+     * removed.
      * 
      * @return void
      */
@@ -226,42 +159,24 @@ class Directory extends Item implements \Countable, \Iterator
      */
     public function clear()
     {
-        foreach ($this as $item) {
+        foreach ($this->getIterator() as $item) {
             $item->delete();
         }
         return $this;
     }
     
     /**
-     * Returns the size taken up by the folder in bytes. If the structure is
-     * flattened, it will return the total size of all files recursively. If
-     * it is unflattened, then only the immediate children of the folder will
-     * be accounted for.
+     * Returns the size taken up by the folder in bytes.
      * 
      * @return int
      */
     public function size()
     {
         $size = 0;
-        foreach ($this as $item) {
-            if ($item->isDir()) {
-                continue;
-            }
+        foreach ($this->getIterator() as $item) {
             $size += $item->getSize();
         }
         return $size;
-    }
-    
-    /**
-     * Returns whether or not the current directory contains any items.
-     * 
-     * @param bool $all Whether or not to count recursively.
-     * 
-     * @return int
-     */
-    public function count($all = false)
-    {
-        return count($this->items);
     }
     
     /**
@@ -271,100 +186,7 @@ class Directory extends Item implements \Countable, \Iterator
      */
     public function isEmpty()
     {
-        return $this->count() === 0;
-    }
-    
-    /**
-     * Returns a flat recursive file listing of the current directory.
-     * 
-     * @return array
-     */
-    public function flatten()
-    {
-        foreach ($this->items as $index => $item) {
-            if ($item === '.' || $item === '..') {
-                continue;
-            }
-            
-            if (is_dir($item)) {
-                $this->items = array_merge($this->items, self::open($item)->flatten()->getItems());
-            } else {
-                $this->items[] = $item;
-            }
-        }
-        return $this;
-    }
-    
-    /**
-     * Refreshes the file/directory listing.
-     * 
-     * @return \Europa\Fs\Directory
-     */
-    public function unflatten()
-    {
-        $this->items = array();
-        foreach ($this->getIterator() as $item) {
-            if ($item->isDot()) {
-                continue;
-            }
-            $this->items[] = $item->getPathname();
-        }
-        return $this;
-    }
-    
-    /**
-     * Applies the filter to the current listing.
-     * 
-     * @param mixed $filter The callback filter to run against each item.
-     * @param array $data   Any custom data to pass to the callback.
-     * 
-     * @return \Europa\Fs\Directory
-     */
-    public function filter($filter, array $data = array())
-    {
-        // only apply if it's callable
-        if (!is_callable($filter, true)) {
-            throw new Exception('The passed filter must be callable.');
-        }
-        
-        // filter out each item
-        foreach ($this->items as $index => $item) {
-            if (call_user_func_array($filter, array_merge(array($item), $data)) === false) {
-                unset($this->items[$index]);
-            }
-        }
-        
-        return $this;
-    }
-    
-    /**
-     * Sorts the items.
-     * 
-     * @return \Europa\Fs\Directory
-     */
-    public function sort($callback)
-    {
-        // only apply if it's callable
-        if (!is_callable($callback, true)) {
-            throw new Exception('The passed filter must be callable.');
-        }
-        usort($this->items, $callback);
-        return $this;
-    }
-    
-    /**
-     * Searches for directories/files matching the pattern and returns them as a
-     * flat array.
-     * 
-     * @param string $regex The pattern to match.
-     * 
-     * @return array
-     */
-    public function search($regex)
-    {
-        return $this->filter(function($item, $regex) {
-            return preg_match($regex, $item) ? true : false;
-        }, array($regex));
+        return $this->getIterator()->count() === 0;
     }
     
     /**
@@ -377,7 +199,7 @@ class Directory extends Item implements \Countable, \Iterator
      */
     public function searchIn($regex)
     {
-        return $this->filter(function($item, $regex) {
+        return $this->getIterator()->filter(function($item, $regex) {
             return is_file($item) && File::open($item)->search($regex);
         }, array($regex));
     }
@@ -402,80 +224,6 @@ class Directory extends Item implements \Countable, \Iterator
             }
         }
         return $items;
-    }
-    
-    /**
-     * Gets the raw directory iterator for the directory.
-     * 
-     * @return DirectoryIterator
-     */
-    public function getIterator()
-    {
-        return new \DirectoryIterator($this->getPathname());
-    }
-    
-    /**
-     * Gets the raw recursive iterator to iterate over each file.
-     * 
-     * @return RecursiveIteratorIterator
-     */
-    public function getRecursiveIterator()
-    {
-        return new \RecursiveDirectoryIterator($this->getPathname());
-    }
-    
-    /**
-     * Returns the current item in the iteration.
-     * 
-     * @return \Europa\Fs\Directory|\Europa\Fs\File
-     */
-    public function current()
-    {
-        $current = current($this->items);
-        if (is_dir($current)) {
-            return static::open($current);
-        }
-        return File::open($current);
-    }
-    
-    /**
-     * Returns the current key in the iteration.
-     * 
-     * @return int
-     */
-    public function key()
-    {
-        return key($this->items);
-    }
-    
-    /**
-     * Moves to the next item in the iteration.
-     * 
-     * @return void
-     */
-    public function next()
-    {
-        next($this->items);
-    }
-    
-    /**
-     * Auto-refreshes the directory, applying any filters, etc.
-     * 
-     * @return void
-     */
-    public function rewind()
-    {
-        reset($this->items);
-    }
-    
-    /**
-     * Returns whether or not the iteration is still valid.
-     * 
-     * @return bool
-     */
-    public function valid()
-    {
-        return current($this->items) ? true : false;
     }
     
     /**
