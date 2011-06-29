@@ -663,7 +663,10 @@ class Uri
     public static function detectHost()
     {
         if (isset($_SERVER['HTTP_HOST'])) {
-            return $_SERVER['HTTP_HOST'];
+            $host = $_SERVER['HTTP_HOST'];
+            $host = explode(':', $host, 2);
+            $host = $host[0];
+            return $host;
         }
         return null;
     }

@@ -4,9 +4,9 @@
 require_once dirname(__FILE__) . '/../lib/Europa/Bootstrapper.php';
 
 use Europa\Bootstrapper as ParentBootstrapper;
+use Europa\ClassLoader;
 use Europa\Di\Container;
 use Europa\Fs\Directory;
-use Europa\Fs\Loader;
 
 /**
  * Bootstraps the sample application.
@@ -45,8 +45,8 @@ class Bootstrapper extends ParentBootstrapper
      */
     public function setUpLibraryLoading()
     {
-        require $this->basePath . '/lib/Europa/Fs/Loader.php';
-        $loader = new Loader;
+        require $this->basePath . '/lib/Europa/ClassLoader.php';
+        $loader = new ClassLoader;
         $loader->register();
     }
     
@@ -59,8 +59,9 @@ class Bootstrapper extends ParentBootstrapper
     {
         $this->container = Container::get()->map(array(
             'defaultRoute'           => '\Europa\Router\Route\Regex',
+            'finder'                 => '\Europa\Fs\Finder',
             'langLocator'            => '\Europa\Fs\Locator',
-            'loader'                 => '\Europa\Fs\Loader',
+            'loader'                 => '\Europa\ClassLoader',
             'loaderLocator'          => '\Europa\Fs\Locator',
             'phpView'                => '\Europa\View\Php',
             'phpViewHelperContainer' => '\Europa\Di\Container',
@@ -110,9 +111,12 @@ class Bootstrapper extends ParentBootstrapper
      */
     public function bootstrapPlugins()
     {
-        foreach (Directory::open($this->pluginPath) as $item) {
+        $finder = $this->container->finder->create();
+        $finder->in($this->pluginPath);
+        $finder->depth(0);
+        foreach ($finder as $item) {
             $moduleBasePath = $item->getPathname() . DIRECTORY_SEPARATOR;
-            $this->container->langLocator->addPath($moduleBasePath . 'app/Lang');
+            $this->container->langLocator->addPath($moduleBasePath . 'app/Lang', 'ini');
             $this->container->loaderLocator->addPath($moduleBasePath . 'app');
             $this->container->loaderLocator->addPath($moduleBasePath . 'lib');
             $this->container->phpViewLocator->addPath($moduleBasePath . 'app/View');

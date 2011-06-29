@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa\Request;
-use Europa\Controller;
+use Europa\Controller\ControllerAbstract;
 use Europa\Loader;
 use Europa\StringObject;
 
@@ -261,10 +261,10 @@ abstract class RequestAbstract implements \Serializable
     { 
         $controller = $this->formatController();
         $controller = new $controller($this);
-        if (!$controller instanceof Controller) {
+        if (!$controller instanceof ControllerAbstract) {
             throw new Exception(
                 'Class ' . get_class($controller)  . ' is not a valid controller instance. Controller classes must '
-                . 'derive from \Europa\Controller.'
+                . 'derive from \Europa\ControllerAbstract.'
             );
         }
         $controller->action();
