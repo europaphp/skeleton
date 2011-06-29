@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa;
+use Europa\Form\ElementList;
 
 /**
  * The main form class which is also an element list.
@@ -10,7 +11,7 @@ namespace Europa;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class Form extends Form\ElementList
+class Form extends ElementList
 {
     /**
      * Form attributes.

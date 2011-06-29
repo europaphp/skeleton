@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Form;
+use Europa\StringObject;
 
 /**
  * Represents a group of form elements.
@@ -10,7 +11,7 @@ namespace Europa\Form;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class ElementList extends Base implements Renderable, Listable
+abstract class ElementList extends FormAbstract implements Listable
 {
     /**
      * Contains the elements and element lists.
@@ -27,7 +28,7 @@ abstract class ElementList extends Base implements Renderable, Listable
      * 
      * @return \Europa\Form\Element\List
      */
-    public function addElement(Base $element, $offset = null)
+    public function addElement(FormAbstract $element, $offset = null)
     {
         // append if offset is null
         if (is_null($offset)) {
@@ -36,7 +37,7 @@ abstract class ElementList extends Base implements Renderable, Listable
             // automate field naming if a string is passed
             if (is_string($offset)) {
                 if (!$element->id) {
-                    $element->id = (string) \Europa\StringObject::create($offset)->toProperty();
+                    $element->id = StringObject::create($offset)->toProperty()->__toString();
                 }
                 if (!$element->name) {
                     $element->name = $offset;

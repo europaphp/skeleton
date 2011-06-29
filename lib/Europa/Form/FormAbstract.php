@@ -3,21 +3,21 @@
 namespace Europa\Form;
 
 /**
- * The base interface for all renderable form elements.
+ * The main form class which is also an element list.
  * 
  * @category Forms
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-interface Renderable
+abstract class FormAbstract implements Renderable, Validatable
 {
     /**
-     * Makes sure every renderable object can be rendered.
+     * The attributes set on the element.
      * 
-     * @return string
+     * @var array
      */
-    public function __toString();
+    protected $attributes = array();
     
     /**
      * Sets an attribute value.
@@ -27,7 +27,10 @@ interface Renderable
      * 
      * @return mixed
      */
-    public function __set($name, $value);
+    public function __set($name, $value)
+    {
+        return $this->setAttribute($name, $value);
+    }
     
     /**
      * Returns an attribute value.
@@ -36,7 +39,10 @@ interface Renderable
      * 
      * @return mixed
      */
-    public function __get($name);
+    public function __get($name)
+    {
+        return $this->getAttribute($name);
+    }
     
     /**
      * Returns whether or not an attribute exists.
@@ -45,7 +51,10 @@ interface Renderable
      * 
      * @return bool
      */
-    public function __isset($name);
+    public function __isset($name)
+    {
+        return $this->hasAttribute($name);
+    }
 
     /**
      * Removes an attribute.
@@ -54,7 +63,10 @@ interface Renderable
      * 
      * @return bool
      */
-    public function __unset($name);
+    public function __unset($name)
+    {
+        return $this->removeAttribute($name);
+    }
     
     /**
      * Sets an attribute value.
@@ -64,7 +76,11 @@ interface Renderable
      * 
      * @return mixed
      */
-    public function setAttribute($name, $value);
+    public function setAttribute($name, $value)
+    {
+        $this->attributes[$name] = $value;
+        return $this;
+    }
     
     /**
      * Returns an attribute value.
@@ -73,7 +89,13 @@ interface Renderable
      * 
      * @return mixed
      */
-    public function getAttribute($name);
+    public function getAttribute($name)
+    {
+        if (isset($this->attributes[$name])) {
+            return $this->attributes[$name];
+        }
+        return null;
+    }
     
     /**
      * Returns whether or not an attribute exists.
@@ -82,7 +104,10 @@ interface Renderable
      * 
      * @return bool
      */
-    public function hasAttribute($name);
+    public function hasAttribute($name)
+    {
+        return isset($this->attributes[$name]);
+    }
     
     /**
      * Removes an attribute.
@@ -91,26 +116,48 @@ interface Renderable
      * 
      * @return bool
      */
-    public function removeAttribute($name);
+    public function removeAttribute($name)
+    {
+        if (isset($this->attributes[$name])) {
+            unset($this->attributes[$name]);
+        }
+        return $this;
+    }
     
     /**
      * Sets an array of attributes all at once.
      * 
      * @return \Europa\Form\Element
      */
-    public function setAttributes(array $attributes = array());
+    public function setAttributes(array $attributes = array())
+    {
+        foreach ($attributes as $name => $value) {
+            $this->$name = $value;
+        }
+        return $this;
+    }
     
     /**
      * Returns the attributes.
      * 
      * @return \Europa\Form\Element
      */
-    public function getAttributes();
+    public function getAttributes()
+    {
+        return $this->attributes;
+    }
 
     /**
      * Formats the properties of the element as an xml attribute string.
      * 
      * @return string
      */
-    public function getAttributeString();
+    public function getAttributeString()
+    {
+        $attrs = array();
+        foreach ($this->getAttributes() as $k => $v) {
+            $attrs[] = $k . '="' . $v . '"';
+        }
+        return implode(' ', $attrs);
+    }
 }
