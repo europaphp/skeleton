@@ -252,24 +252,6 @@ abstract class RequestAbstract implements \Serializable
         return $this->method;
     }
 
-    /**
-     * Directly dispatches the request
-     * 
-     * @return \Europa\Controller
-     */
-    public function dispatch()
-    { 
-        $controller = $this->formatController();
-        $controller = new $controller($this);
-        if (!$controller instanceof ControllerAbstract) {
-            throw new Exception(
-                'Class ' . get_class($controller)  . ' is not a valid controller instance. Controller classes must '
-                . 'derive from \Europa\ControllerAbstract.'
-            );
-        }
-        $controller->action();
-        return $controller;
-    }
     
     /**
      * Sets the controller parameter.

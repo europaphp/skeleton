@@ -7,6 +7,8 @@ use Europa\Bootstrapper\BootstrapperAbstract;
 use Europa\ClassLoader;
 use Europa\Di\Container;
 use Europa\Fs\Directory;
+use Europa\Response\Response;
+use Europa\StringObject;
 
 /**
  * Bootstraps the sample application.
@@ -58,7 +60,9 @@ class Bootstrapper extends BootstrapperAbstract
     public function configureDiContainer()
     {
         $this->container = Container::get()->map(array(
+            'controllerContainer' => '\Europa\Di\Container',
             'defaultRoute'        => '\Europa\Router\Route\Regex',
+            'dispatcher'          => '\Europa\Dispatcher\Dispatcher',
             'finder'              => '\Europa\Fs\Finder',
             'langLocator'         => '\Europa\Fs\Locator',
             'loader'              => '\Europa\ClassLoader',
@@ -67,8 +71,22 @@ class Bootstrapper extends BootstrapperAbstract
             'viewHelperContainer' => '\Europa\Di\Container',
             'viewLocator'         => '\Europa\Fs\Locator',
             'request'             => '\Europa\Request\Http',
+            'response'            => '\Europa\Response\Response',
             'router'              => '\Europa\Router\Basic'
         ));
+    }
+    
+    /**
+     * Configures the dispatcher.
+     * 
+     * @return void
+     */
+    public function configureDispatcher()
+    {
+        $this->container->dispatcher(
+            $this->container->controllerContainer,
+            $this->container->viewContainer
+        );
     }
     
     /**
@@ -97,14 +115,29 @@ class Bootstrapper extends BootstrapperAbstract
     }
     
     /**
-     * Configures the php view, its helper locator and the helpers.
+     * Configures the router with routes.
+     * 
+     * @return void
+     */
+    public function configureRouter()
+    {
+        $this->container->router->setRoute('default', $this->container->defaultRoute);
+        $this->container->defaultRoute(
+            '(index\.php)?/?(?<controller>.+)?',
+            null,
+            array('controller' => 'index')
+        );
+    }
+    
+    /**
+     * Configures the PHP view specifically since it requires a locator and optional helper.
      * 
      * @return void
      */
     public function configureView()
     {
-        $this->container->view($this->container->viewLocator)
-            ->setHelperContainer($this->container->viewHelperContainer);
+        $this->container->view($this->container->viewLocator);
+        $this->container->view->setHelperContainer($this->container->viewHelperContainer);
     }
     
     /**
@@ -121,8 +154,7 @@ class Bootstrapper extends BootstrapperAbstract
             })
             ->css('css')
             ->js('js')
-            ->lang($this->container->langLocator, $this->container->view, 'en-us')
-            ->partial($ths->container->view);
+            ->lang($this->container->langLocator, $this->container->view, 'en-us');
     }
     
     /**
@@ -138,26 +170,11 @@ class Bootstrapper extends BootstrapperAbstract
     }
     
     /**
-     * Configures the router with routes.
-     * 
-     * @return void
-     */
-    public function configureRouter()
-    {
-        $this->container->router->setRoute($this->container->defaultRoute);
-        $this->container->defaultRoute(
-            '(index\.php)?/?(?<controller>.+)?',
-            null,
-            array('controller' => 'index')
-        );
-    }
-    
-    /**
      * Configures the sample plugin system.
      * 
      * @return void
      */
-    public function configurePlugins()
+    public function bootstrapPlubins()
     {
         $finder = $this->container->finder->create();
         $finder->in($this->pluginPath);
