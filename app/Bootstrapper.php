@@ -67,7 +67,10 @@ class Bootstrapper extends ParentBootstrapper
             'phpViewHelperContainer' => '\Europa\Di\Container',
             'phpViewLocator'         => '\Europa\Fs\Locator',
             'request'                => '\Europa\Request\Http',
-            'router'                 => '\Europa\Router\Basic'
+            'router'                 => '\Europa\Router\Basic',
+            'response'               => '\Europa\Response',
+            'dispatcher'             => '\Europa\Dispatcher'
+            
         ));
     }
     
