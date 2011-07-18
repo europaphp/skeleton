@@ -20,9 +20,11 @@ $request    = $container->request->get();
 $response   = $container->response->get();
 $router     = $container->router->get();
 $dispatcher = $container->dispatcher->get();
+
 try {
-    $request->setParams($params);//request self configures 
-    $dispatcher->dispatch($request, $response);//off to the dispatcher to start... dispatching
+    $request->setParams($router->query($request->getUri()->getRequest()));
+    $dispatcher->dispatch($request, $response);
 } catch (\Exception $e) {
-    echo $request->setController('error')->dispatch()->render();
+    die($e);
+    $dispatcher->setController('error')->dispatch();
 }
