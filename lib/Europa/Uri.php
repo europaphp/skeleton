@@ -708,7 +708,7 @@ class Uri
      */
     public static function detectRequest()
     {
-        if (!isset($_SERVER['HTTP_X_REWRITE_URL']) || !isset($_SERVER['REQUEST_URI'])) {
+        if (!isset($_SERVER['HTTP_X_REWRITE_URL']) && !isset($_SERVER['REQUEST_URI'])) {
             return null;
         }
         
