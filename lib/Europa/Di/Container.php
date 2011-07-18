@@ -76,9 +76,11 @@ class Container
             $dep = new Dependency($dep);
             $this->deps[$name] = $dep;
         }
+        
         if ($args) {
             $this->deps[$name]->configure($args);
         }
+        
         return $this->deps[$name];
     }
     
@@ -103,6 +105,7 @@ class Container
         } elseif (is_string($value)) {
             $this->map[$name] = $value;
         }
+        
         return $this;
     }
     
@@ -118,6 +121,7 @@ class Container
         if (isset($this->deps[$name])) {
             return $this->deps[$name];
         }
+        
         return $this->__call($name);
     }
     
@@ -134,9 +138,11 @@ class Container
         if (!is_array($map)) {
             $map = array($map, $class);
         }
+        
         foreach ($map as $name => $class) {
             $this->__set($name, $class);
         }
+        
         return $this;
     }
     
@@ -153,6 +159,7 @@ class Container
         if (!is_callable($formatter)) {
             throw new Exception("The specified formatter is not callable.");
         }
+        
         $this->formatter = $formatter;
         return $this;
     }
@@ -172,6 +179,7 @@ class Container
         } elseif ($this->formatter) {
             return call_user_func($this->formatter, $name);
         }
+        
         return $name;
     }
     
@@ -187,6 +195,7 @@ class Container
         if (!isset(static::$containers[$name])) {
             static::$containers[$name] = new static;
         }
+        
         return static::$containers[$name];
     }
 }

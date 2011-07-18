@@ -174,7 +174,6 @@ class Dependency
             $args     = array_merge_recursive($this->args, $args);
             $instance = new \ReflectionClass($this->class);
             if ($instance->hasMethod('__construct') && $args) {
-                $args = $this->args;
                 $this->filterArgsForDependencies($args);
                 $instance = $instance->newInstanceArgs($args);
             } else {
