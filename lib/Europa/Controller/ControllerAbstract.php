@@ -1,11 +1,10 @@
 <?php
 
 namespace Europa\Controller;
-use Europa\Request\Http;
 use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
-use Europa\Request\RequestAbstract;
-use Europa\Uri;
+use Europa\Request\RequestInterface;
+use Europa\Response\ResponseInterface;
 use Europa\View\ViewInterface;
 
 /**
@@ -30,42 +29,21 @@ use Europa\View\ViewInterface;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class ControllerAbstract
+abstract class ControllerAbstract implements ControllerInterface
 {
-    /**
-     * The default method to call if one matching the request method is not defined.
-     * 
-     * @var string
-     */
-    const CATCH_ALL = 'all';
-    
     /**
      * The request used to dispatch to this controller.
      * 
-     * @var \Europa\Request
+     * @var RequestInterface
      */
     private $request;
     
     /**
      * The response used to set headers for output
      *
-     * @var \Europa\Response
+     * @var ResponseInterface
      */
     private $response;
-    
-    /**
-     * The view rendering the page.
-     * 
-     * @var \Europa\View
-     */
-    private $view;
-    
-    /**
-     * The result of the action.
-     * 
-     * @var array
-     */
-    private $actionResult = array();
 
     /**
      * Whether or not to apply filters to action.
@@ -75,14 +53,30 @@ abstract class ControllerAbstract
     private $useFilters = false;
     
     /**
+     * The view being rendered.
+     * 
+     * @var ViewInterface
+     */
+    private $view;
+    
+    private $actionResult = array();
+    
+    /**
+     * Returns the method that the controller should call during actioning.
+     * 
+     * @return string
+     */
+    abstract public function getActionMethod();
+    
+    /**
      * Constructs a new controller using the specified request and response.
      *
-     * @param \Europa\Request  $request  The request to use.
-     * @param \Europa\Response $response The response to set headers on
+     * @param RequestInterface  $request  The request to use.
+     * @param ResponseInterface $response The response to set headers on
      *
      * @return \Europa\Controller
      */
-    public function __construct(Request $request, Response $response)
+    public function __construct(RequestInterface $request, ResponseInterface $response)
     {
         $this->request  = $request;
         $this->response = $response;
@@ -105,13 +99,23 @@ abstract class ControllerAbstract
     /**
      * Returns the request being used.
      * 
-     * @return \Europa\Request
+     * @return RequestInterface
      */
     public function getRequest()
     {
         return $this->request;
     }
-        
+    
+    /**
+     * Returns the request being used.
+     * 
+     * @return ResponseInterface
+     */
+    public function getResponse()
+    {
+        return $this->response;
+    }
+
     /**
      * Sets the view to use. If a view is currently set, it's parameters are copied to the new view.
      * 
@@ -134,35 +138,6 @@ abstract class ControllerAbstract
     {
         return $this->view;
     }
-    
-    /**
-     * Forwards the request to the specified controller.
-     * 
-     * @param string $to The controller to forward the request to.
-     * 
-     * @return \Europa\Controller\ControllerAbstract
-     */
-    public function forward($method, $controller = null, array $params = array())
-    {
-        $request = $this->getRequest()->setMethod($method);
-        if ($controller) {
-            $request->setController($controller);
-        }
-        return $request->setParams($params)->dispatch();
-    }
-    
-    /**
-     * Redirects the current request to the specified url.
-     * 
-     * @param string $to The url to redirect to.
-     * 
-     * @return void
-     */
-    public function redirect($to = null)
-    {
-        $to = new Uri($to);
-        $to->redirect();
-    }
 
     /**
      * Switches filters on or off.
@@ -181,16 +156,26 @@ abstract class ControllerAbstract
      * Makes sure the appropriate parameters are passed to init and the request method action.
      * 
      * @return void
-     * 
-     * @throws \Europa\Controller\Exception
      */
     public function action()
     {
-        $method = $this->request->getMethod();
+        // the method to execute
+        $method = $this->getActionMethod();
+        
+        // apply all detected filters to the specified method
         $this->applyFiltersTo($method);
+        
+        // pre-action hook
         $this->preAction();
-        $this->setActionResult($this->executeMethod($method, $this->request->getParams()));
-        $this->postAction();
+        
+        // the return value of the action is the view context
+        $result = $this->executeMethod($method, $this->request->getParams());
+        $this->setActionResult($result);
+        
+        // post-action hook
+        $this->postAction($context);
+        
+        return $context;
     }
     
     /**
@@ -204,7 +189,7 @@ abstract class ControllerAbstract
     }
     
     /**
-     * Initialization hook.
+     * Pre-action hook.
      * 
      * @return void
      */
@@ -214,7 +199,7 @@ abstract class ControllerAbstract
     }
     
     /**
-     * Initialization hook.
+     * Post-action hook.
      * 
      * @return void
      */
@@ -223,21 +208,11 @@ abstract class ControllerAbstract
         
     }
     
-    /**
-     * Initialization hook.
-     * 
-     * @return void
-     */
     public function preRender()
     {
         
     }
     
-    /**
-     * Initialization hook.
-     * 
-     * @return void
-     */
     public function postRender()
     {
         
@@ -260,10 +235,12 @@ abstract class ControllerAbstract
         $method        = new MethodReflector($this, $method);
         $classFilters  = $class->getDocBlock()->getTag('filter', true);
         $methodFilters = $method->getDocBlock()->getTag('filter', true);
+        
         foreach (array_merge($classFilters, $methodFilters) as $filter) {
             $filter = $filter->getInstance();
             $filter->filter($this);
         }
+        
         return $this;
     }
     
@@ -276,18 +253,18 @@ abstract class ControllerAbstract
      */
     private function executeMethod($method, array $params = array())
     {
-        // make sure the method exists or a catch-all is defined
-        if (!method_exists($this, $method)) {
-            if (!method_exists($this, static::CATCH_ALL)) {
-                throw new Exception(
-                    'The request method "' . $method . '" is not supported by "' . get_class($this) . '". Additionally'
-                    . ', a catch-all action "' . static::CATCH_ALL . '" was not specified.'
-                );
-            }
-            $method = static::CATCH_ALL;
+        // if the action method exists, then call it
+        if (method_exists($this, $method)) {
+            $reflector = new MethodReflector($this, $method);
+            return $reflector->invokeNamedArgs($this, $params);
         }
-        $reflector = new MethodReflector($this, $method);
-        return $reflector->invokeNamedArgs($this, $params);
+        
+        // attempt to catch with __call
+        if (method_exists($this, '__call')) {
+            return $this->__call($method, $params);
+        }
+        
+        throw new Exception("Method {$method} is not supported and was not trapped in __call.");
     }
     
     /**
