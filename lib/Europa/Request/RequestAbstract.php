@@ -1,9 +1,6 @@
 <?php
 
 namespace Europa\Request;
-use Europa\Controller\ControllerAbstract;
-use Europa\Loader;
-use Europa\StringObject;
 
 /**
  * The main request object.
@@ -13,7 +10,7 @@ use Europa\StringObject;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class RequestAbstract implements \Serializable
+abstract class RequestAbstract implements RequestInterface
 {
     /**
      * The request unique id.
@@ -23,27 +20,18 @@ abstract class RequestAbstract implements \Serializable
     private $id;
     
     /**
-     * The key used to get the controller from the request params.
+     * The request method.
      * 
      * @var string
      */
-    private $controllerKey = 'controller';
+    private $method;
     
     /**
-     * The callback to use for formatting the controller parameter.
-     * 
-     * @var mixed
-     */
-    private $controllerFormatter = null;
-    
-    /**
-     * The params parsed out of the route and cascaded through the
-     * super-globals. Contains the default controller to use.
+     * Request parameters.
      * 
      * @var array
      */
-    private $params = array('controller' => 'index');
-    
+    private $params = array();
 
     /**
      * Sets the specified request parameter.
@@ -103,6 +91,7 @@ abstract class RequestAbstract implements \Serializable
     {
         return serialize($this->getParams());
     }
+    
     /**
      * Unserializes the request.
      * 
@@ -114,6 +103,7 @@ abstract class RequestAbstract implements \Serializable
     {
         return $this->setParams(unserialize($serialized));
     }
+    
     /**
      * Sets the specified request parameter.
      * 
@@ -251,72 +241,6 @@ abstract class RequestAbstract implements \Serializable
     {
         return $this->method;
     }
-
-    
-    /**
-     * Sets the controller parameter.
-     * 
-     * @param string $controller The controller to set.
-     * 
-     * @return \Europa\Request
-     */
-    public function setController($controller)
-    {
-        return $this->__set($this->getControllerKey(), $controller);
-    }
-    
-    /**
-     * Returns the controller parameter. This is the value that is passed to the formatter.
-     * 
-     * @return string
-     */
-    public function getController()
-    {
-        return $this->__get($this->getControllerKey());
-    }
-    
-    /**
-     * Sets the controller key to use for retrieving it from the request.
-     * 
-     * @param string $key The key of the controller parameter.
-     * 
-     * @return \Europa\Request
-     */
-    public function setControllerKey($newKey)
-    {
-        // retrieve the current key and controller
-        $oldKey = $this->controllerKey;
-        $oldVal = $this->__get($oldKey);
-        
-        // set the new key
-        $this->controllerKey = $newKey;
-        
-        // auto-set the new controller parameter to the old value
-        return $this->__set($newKey, $oldVal);
-    }
-    
-    /**
-     * Retrieves the controller key.
-     * 
-     * @return string
-     */
-    public function getControllerKey()
-    {
-        return $this->controllerKey;
-    }
-    
-    /**
-     * Returns the formatted controller name that should be instantiated.
-     * 
-     * @return string
-     */
-    public function formatController()
-    {
-        if ($this->controllerFormatter) {
-            return call_user_func($this->controllerFormatter, $this);
-        }
-        return 'Controller' . StringObject::create($this->getController())->toClass();
-    }
     
     /**
      * Returns the unique request id of the current request. This is useful for debugging separate logs and probably
@@ -331,24 +255,6 @@ abstract class RequestAbstract implements \Serializable
         }
         return $this->id;
     }
-    /**
-     * Sets the formatter that should be used to format the controller class.
-     * 
-     * @param mixed $callback The callback for formatting the controller.
-     * 
-     * @return \Europa\Request
-     */
-    public function setControllerFormatter($callback)
-    {
-        if (!is_callable($callback, true)) {
-            throw new Exception(
-                'The specified controller formatter is not valid.',
-                Exception::INVALID_CONTROLLER_FORMATTER
-            );
-        }
-        $this->controllerFormatter = $callback;
-        return $this;
-    }
     
     /**
      * Returns whether or not the request is a CLI request or not.
@@ -358,28 +264,5 @@ abstract class RequestAbstract implements \Serializable
     public static function isCli()
     {
         return defined('STDIN');
-    }
-    
-    /**
-     * Creates a new instance of the statically called request.
-     * 
-     * @return \Europa\Request
-     */
-    public static function create()
-    {
-        return new static;
-    }
-
-    /**
-     * Auto-detects the request type and returns the appropriate request instance.
-     * 
-     * @return \Europa\Request
-     */
-    public static function autoDetect()
-    {
-        if (static::isCli()) {
-            return new Cli;
-        }
-        return new Http;
     }
 }

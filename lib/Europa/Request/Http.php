@@ -77,6 +77,20 @@ class Http extends RequestAbstract
     private $headers = array();
     
     /**
+     * The URI object.
+     * 
+     * @var Uri
+     */
+    private $uri;
+    
+    /**
+     * The ip address of the client request.
+     * 
+     * @var string
+     */
+    private $ip;
+    
+    /**
      * Sets any defaults that may need setting.
      * 
      * @return \Europa\Request\Http
