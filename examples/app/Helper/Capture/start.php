@@ -1,0 +1,1 @@
+<?php $this->capture->start(); ?>

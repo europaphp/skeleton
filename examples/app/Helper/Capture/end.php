@@ -1,0 +1,1 @@
+<?php $this->capture->end('captured-output'); ?>

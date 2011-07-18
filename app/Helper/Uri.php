@@ -7,7 +7,7 @@ use Europa\Uri as UriClass;
  * A helper for formatting a passed in url.
  * 
  * @category Helpers
- * @package  UriHelper
+ * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
@@ -16,18 +16,17 @@ class Uri
     /**
      * The uri instance.
      * 
-     * @var \Europa\Uri
+     * @var UriClass
      */
     private $uri;
     
     /**
      * Instantiates the url formatter and sets properties.
      * 
-     * @param Europa\View $view
-     * @param string      $uri
-     * @param array       $params
+     * @param string $uri    The URI to normalize.
+     * @param array  $params Parameters to apply to the URI.
      * 
-     * @return \Helper\Uri
+     * @return Uri
      */
     public function __construct($uri = null, array $params = array())
     {

@@ -10,21 +10,14 @@ namespace Europa\Event;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Callback implements Triggerable
+class Callback implements EventInterface
 {
     /**
      * The callable callback that will be triggered.
      * 
      * @var mixed
      */
-    protected $callback;
-    
-    /**
-     * Flags whether or not the current callback has been triggered.
-     * 
-     * @var bool
-     */
-    protected $triggered = false;
+    private $callback;
     
     /**
      * Constructs a new callback event.
@@ -36,10 +29,7 @@ class Callback implements Triggerable
     public function __construct($callback)
     {
         if (!is_callable($callback, true)) {
-            throw new Exception(
-                'Passed callback is not callable.',
-                Exception::INVALID_CALLBACK
-            );
+            throw new \InvalidArgumentException('Passed callback is not callable.');
         }
         $this->callback = $callback;
     }
@@ -53,20 +43,6 @@ class Callback implements Triggerable
      */
     public function trigger(array $data = array())
     {
-        // flag as triggered
-        $this->triggered = true;
-
-        // and return the return value of the callback passing in the event handler
         return call_user_func($this->callback, $data);
-    }
-
-    /**
-     * Returns whether or not the item was triggered.
-     * 
-     * @return bool
-     */
-    public function wasTriggered()
-    {
-        return $this->triggered;
     }
 }

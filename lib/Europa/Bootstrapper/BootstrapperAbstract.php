@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa;
+namespace Europa\Bootstrapper;
 
 /**
  * A class used for application setup. Defined methods are called in the order in which they are defined.
@@ -10,7 +10,7 @@ namespace Europa;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class Bootstrapper
+abstract class BootstrapperAbstract
 {
     /**
      * The default configuration options for all instances.

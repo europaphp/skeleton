@@ -17,7 +17,7 @@ use Europa\Fs\Locator;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Php implements ViewInterface
+class Php implements ViewScriptInterface
 {
     /**
      * The views that have already extended a parent class.
@@ -29,7 +29,7 @@ class Php implements ViewInterface
     /**
      * The loader to use for view locating and loading.
      * 
-     * @var \Europa\Fs\Locator
+     * @var Locator
      */
     private $locator;
     
@@ -48,9 +48,23 @@ class Php implements ViewInterface
     private $script;
     
     /**
+     * The parent script.
+     * 
+     * @var string
+     */
+    private $parentScript;
+    
+    /**
+     * The child script.
+     * 
+     * @var string
+     */
+    private $childScript;
+    
+    /**
      * The service locator to use for locating helpers.
      * 
-     * @var Europa\Container\Container
+     * @var Container
      */
     private $container;
     
@@ -59,7 +73,7 @@ class Php implements ViewInterface
      * 
      * @param \Europa\Loader\FileLoader $loader The loader to use for view locating and loading.
      * 
-     * @return \Europa\View\Php
+     * @return Php
      */
     public function __construct(Locator $locator)
     {
@@ -122,34 +136,41 @@ class Php implements ViewInterface
             throw new Exception('Could not render view: No script was defined to render.');
         }
         
-        // render the script
-        if ($file = $this->locator->locate($this->script)) {
-            $this->context = $context;
-            ob_start();
-            include $file;
-            $rendered = ob_get_clean();
-            
-            // if there is a parent, render up the stack
-            if ($this->parentScript) {
-                // set the script so the parent has access to what child has been rendered
-                $this->childScript = $this->script;
+        // set the context actually render the script by inclusion
+        $this->context = $context;
+        $rendered      = $this->execute();
+        
+        // if there is a parent, render up the stack
+        if ($this->parentScript) {
+            // set the script so the parent has access to what child has been rendered
+            $this->childScript = $this->script;
 
-                // then set the parent script to the current script so the current instance is shared
-                $this->script = $this->parentScript;
+            // then set the parent script to the current script so the current instance is shared
+            $this->script = $this->parentScript;
 
-                // reset the parent script to avoid recursion
-                $this->parentScript  = null;
+            // reset the parent script to avoid recursion
+            $this->parentScript  = null;
 
-                // set the rendered child so the parent has access to the rendered child
-                $this->renderedChild = $rendered;
+            // set the rendered child so the parent has access to the rendered child
+            $this->renderedChild = $rendered;
 
-                // render and return the output of the parent
-                return $this->render();
-            }
-            return $rendered;
+            // render and return the output of the parent
+            return $this->render($context);
         }
         
-        throw new Exception("Could not render view because {$this->script} does not exist.");
+        return $rendered;
+    }
+    
+    /**
+     * Executes the currently set script.
+     * 
+     * @return string
+     */
+    public function execute()
+    {    
+        ob_start();
+        include $this->getScriptPathname();
+        return ob_get_clean();
     }
     
     /**
@@ -157,7 +178,7 @@ class Php implements ViewInterface
      * 
      * @param \Europa\dependency $dependency The service locator for locating helpers.
      * 
-     * @return \Europa\View\Php
+     * @return Php
      */
     public function setHelperContainer(Container $container)
     {
@@ -170,7 +191,7 @@ class Php implements ViewInterface
      * 
      * @param string $script The path to the script to be rendered relative to the view path, excluding the extension.
      * 
-     * @return \Europa\View\Php
+     * @return Php
      */
     public function setScript($script)
     {
@@ -186,6 +207,41 @@ class Php implements ViewInterface
     public function getScript()
     {
         return $this->script;
+    }
+    
+    /**
+     * Returns the full path to the script.
+     * 
+     * @throws \Europa\View\Exception If the script could not be found.
+     * 
+     * @return string
+     */
+    public function getScriptPathname()
+    {
+        if ($file = $this->locator->locate($this->script)) {
+            return $file;
+        }
+        throw new Exception("Could not render view because {$this->script} does not exist.");
+    }
+    
+    /**
+     * Returns the parent script if one exists.
+     * 
+     * @return string
+     */
+    public function getParentScript()
+    {
+        return $this->parentScript;
+    }
+    
+    /**
+     * Returns the child script if one exists.
+     * 
+     * @return string
+     */
+    public function getChildScript()
+    {
+        return $this->childScript;
     }
     
     /**

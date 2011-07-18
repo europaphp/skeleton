@@ -10,7 +10,7 @@ namespace Europa\Event;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-interface Triggerable
+interface EventInterface
 {
     /**
      * Ensures the event manager knows what to do.

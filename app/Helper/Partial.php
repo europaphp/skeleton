@@ -1,19 +1,37 @@
 <?php
 
 namnespace Helper;
-use Europa\ServiceLocator;
-use Europa\View\Php;
+use Europa\View\ViewInterface;
 
 /**
  * Creates and renders a partial representing the specified view file.
  * 
- * @category ViewHelpers
+ * @category Helpers
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
 class Partial
 {
+    /**
+     * The view instance to use for rendering partials.
+     * 
+     * @var ViewInterface
+     */
+    private $view;
+    
+    /**
+     * Sets up the view helper.
+     * 
+     * @param ViewInterface $view The view file to use for rendering partials.
+     * 
+     * @return Partial
+     */
+    public function __construct(ViewInterface $view)
+    {
+        $this->view = $view;
+    }
+    
     /**
      * Returns the dispatch result as a string.
      * 
@@ -24,7 +42,14 @@ class Partial
      */
     public function render($script, array $context = array())
     {
-        $view = Container::get()->create('phpView');
-        return $view->setScript($script)->render($context);
+        // get the old script so we can re-set it and get the new script output
+        $old = $this->view->getScript();
+        $new = $this->view->setScript($script)->render($context);
+        
+        // re-set to old script
+        $this->view->setScript($old);
+        
+        // after reset, return the new script output
+        return $new;
     }
 }

@@ -3,13 +3,13 @@
 namespace Helper;
 use Europa\Exception;
 use Europa\Fs\Locator;
-use Europa\View\Php;
+use Europa\View\ViewScriptInterface;
 
 /**
  * A helper for parsing INI language files in the context of a given view.
  * 
  * @category Helpers
- * @package  LangHelper
+ * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
@@ -22,18 +22,37 @@ class Lang
      */
     private $cache = array();
     
+    /**
+     * The language to use.
+     * 
+     * @var string
+     */
     private $lang;
     
+    /**
+     * The locator to use for locating language files.
+     * 
+     * @var Locator
+     */
     private $locator;
     
+    /**
+     * The view to use for comparison.
+     * 
+     * @var ViewScriptInterface
+     */
     private $view;
     
     /**
      * Constructs the language helper and parses the required ini file.
      * 
-     * @return \LangHelper
+     * @param Locator             $locator The locator to locate the language files.
+     * @param ViewScriptInterface $view    The view instance for auto-detecting language files based on convention.
+     * @param string              $lang    The language to use.
+     * 
+     * @return Lang
      */
-    public function __construct(Locator $locator, Php $view, $lang)
+    public function __construct(Locator $locator, ViewScriptInterface $view, $lang)
     {
         $this->locator = $locator;
         $this->view    = $view;
@@ -41,9 +60,8 @@ class Lang
     }
     
     /**
-     * Allows a language variable to be called as a method. If the first
-     * argument is an array, then named parameters are replaced. If not, then
-     * vsprintf() is used to format the value.
+     * Allows a language variable to be called as a method. If the first argument is an array, then named parameters
+     * are replaced. If not, then vsprintf() is used to format the value.
      * 
      * Named parameters are prefixed using a colon (:) in the ini value.
      * 
@@ -66,8 +84,8 @@ class Lang
     }
     
     /**
-     * Returns the specified language variable without any formatting. If the
-     * variable isn't found, the name is passed through and returned.
+     * Returns the specified language variable without any formatting. If the variable isn't found, the name is passed
+     * through and returned.
      * 
      * @return string
      */
@@ -109,7 +127,7 @@ class Lang
     /**
      * Re-parses the ini file if a different view is detected.
      * 
-     * @return \Helper\Lang
+     * @return Lang
      */
     private function reParseIfDifferentView()
     {

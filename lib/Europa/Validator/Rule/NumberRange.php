@@ -18,14 +18,14 @@ class NumberRange extends Validator
      * 
      * @param float
      */
-    private $_min;
+    private $min;
     
     /**
      * The maximum value.
      * 
      * @param float
      */
-    private $_max;
+    private $max;
     
     /**
      * Sets the number range to validate.
@@ -33,12 +33,12 @@ class NumberRange extends Validator
      * @param mixed $min The minimum value.
      * @param mixed $max The maximum value.
      * 
-     * @return \Europa\Validator\NumberRange
+     * @return \Europa\Validator\Rule\NumberRange
      */
     public function __construct($min, $max)
     {
-        $this->_min = (float) $min;
-        $this->_max = (float) $max;
+        $this->min = (float) $min;
+        $this->max = (float) $max;
     }
     
     /**
@@ -46,7 +46,7 @@ class NumberRange extends Validator
      * 
      * @param mixed $value The value to validate.
      * 
-     * @return \Europa\Validator\NumberRange
+     * @return \Europa\Validator\Rule\NumberRange
      */
     public function validate($value)
     {
@@ -60,7 +60,7 @@ class NumberRange extends Validator
         }
         
         $value = (float) $value;
-        if ($value >= $this->_min && $value <= $this->_max) {
+        if ($value >= $this->min && $value <= $this->max) {
             $this->pass();
         } else {
             $this->fail();
