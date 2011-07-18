@@ -19,7 +19,7 @@ You're a software engineer/architect that needs a solid, scalable backbone to dr
 
 ### How
 
-For more information on 
+For more information on how to use Europa check out http://europaphp.org/documentation. If you would like to give back or have any suggestions, feel free to send us a message or log issues.
 
 License
 -------
