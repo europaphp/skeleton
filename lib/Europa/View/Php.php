@@ -128,6 +128,8 @@ class Php implements ViewScriptInterface
     /**
      * Parses the view file and returns the result.
      * 
+     * @param array $context The parameters to render with.
+     * 
      * @return string
      */
     public function render(array $context = array())
@@ -159,6 +161,27 @@ class Php implements ViewScriptInterface
         }
         
         return $rendered;
+    }
+    
+    /**
+     * Renders the specified script without affecting the current set script.
+     * 
+     * @param string $script  The script to render.
+     * @param array  $context The parameters to render with.
+     * 
+     * @return string
+     */
+    public function renderScript($script, array $context = array())
+    {
+        // get old script and set new script
+        $old = $this->getScript();
+        $this->setScript($script);
+        
+        // render and re-apply old script
+        $render = $this->render($context);
+        $this->setScript($old);
+        
+        return $render;
     }
     
     /**
