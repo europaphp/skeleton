@@ -59,6 +59,7 @@ class Bootstrapper extends BootstrapperAbstract
     {
         $this->container = Container::get()->map(array(
             'defaultRoute'        => '\Europa\Router\Route\Regex',
+            'dispatcher'          => '\Europa\Dispatcher'
             'finder'              => '\Europa\Fs\Finder',
             'langLocator'         => '\Europa\Fs\Locator',
             'loader'              => '\Europa\ClassLoader',
@@ -67,6 +68,7 @@ class Bootstrapper extends BootstrapperAbstract
             'viewHelperContainer' => '\Europa\Di\Container',
             'viewLocator'         => '\Europa\Fs\Locator',
             'request'             => '\Europa\Request\Http',
+            'response'            => '\Europa\Response',
             'router'              => '\Europa\Router\Basic'
         ));
     }

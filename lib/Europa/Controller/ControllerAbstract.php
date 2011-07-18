@@ -47,6 +47,13 @@ abstract class ControllerAbstract
     private $request;
     
     /**
+     * The response used to set headers for output
+     *
+     * @var \Europa\Response
+     */
+    private $response;
+    
+    /**
      * The view rendering the page.
      * 
      * @var \Europa\View
@@ -68,15 +75,17 @@ abstract class ControllerAbstract
     private $useFilters = false;
     
     /**
-     * Constructs a new controller using the specified request.
-     * 
-     * @param \Europa\Request $request The request to use.
-     * 
-     * @return \Europa\Controller\ControllerAbstract
+     * Constructs a new controller using the specified request and response.
+     *
+     * @param \Europa\Request  $request  The request to use.
+     * @param \Europa\Response $response The response to set headers on
+     *
+     * @return \Europa\Controller
      */
-    public function __construct(RequestAbstract $request)
+    public function __construct(Request $request, Response $response)
     {
-        $this->request = $request;
+        $this->request  = $request;
+        $this->response = $response;
         $this->init();
     }
     

@@ -15,12 +15,14 @@ $boot = new Bootstrapper;
 $boot();
 
 // any exceptions will routed to the error controller
-$container = Container::get();
-$request   = $container->request->get();
-$router    = $container->router->get();
+$container  = Container::get();
+$request    = $container->request->get();
+$response   = $container->response->get();
+$router     = $container->router->get();
+$dispatcher = $container->dispatcher->get();
 try {
-    $params = $router->query($request->getUri()->getRequest());
-    echo $request->setParams($params)->dispatch()->render();
+    $request->setParams($params);//request self configures 
+    $dispatcher->dispatch($request, $response);//off to the dispatcher to start... dispatching
 } catch (\Exception $e) {
     echo $request->setController('error')->dispatch()->render();
 }
