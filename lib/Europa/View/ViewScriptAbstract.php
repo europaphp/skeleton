@@ -31,11 +31,11 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
     private $locator;
     
     /**
-     * The parent associated to the current view.
+     * Sets the context.
      * 
-     * @var View
+     * @var array
      */
-    private $parent;
+    private $context = array();
     
     /**
      * The script to be rendered.
@@ -142,9 +142,17 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
             throw new Exception('Could not render view: No script was defined to render.');
         }
         
-        // set the context actually render the script by inclusion
-        $this->context = $context;
-        $rendered      = $this->execute();
+        // capture old context
+        $oldContext = $this->getContext();
+        
+        // set new context
+        $this->setContext($context);
+        
+        // execute the script
+        $rendered = $this->execute();
+        
+        // re-set the old context
+        $this->setContext($oldContext);
         
         // if there is a parent, render up the stack
         if ($this->parentScript) {
@@ -177,13 +185,23 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
      */
     public function renderScript($script, array $context = array())
     {
-        // get old script and set new script
-        $old = $this->getScript();
-        $this->setScript($script);
+        // capture old state
+        $oldScript = $this->getScript();
+        $oldParent = $this->getParentScript();
+        $oldChild  = $this->getChildScript();
         
-        // render and re-apply old script
+        // set new state
+        $this->setScript($script);
+        $this->setParentScript(null);
+        $this->setChildScript(null);
+        
+        // capture rendered script
         $render = $this->render($context);
-        $this->setScript($old);
+        
+        // reapply old state
+        $this->setScript($oldScript);
+        $this->setParentScript($oldParent);
+        $this->setChildScript($oldChild);
         
         return $render;
     }
@@ -191,9 +209,9 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
     /**
      * Sets the service locator to use for locating helpers.
      * 
-     * @param \Europa\dependency $dependency The service locator for locating helpers.
+     * @param Container $container The Di Container for locating helpers.
      * 
-     * @return Php
+     * @return ViewScriptAbstract
      */
     public function setHelperContainer(Container $container)
     {
@@ -202,15 +220,38 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
     }
     
     /**
+     * Sets the context.
+     * 
+     * @param array $context The context to set.
+     * 
+     * @return ViewScriptAbstract
+     */
+    public function setContext(array $context)
+    {
+        $this->context = $context;
+        return $this;
+    }
+    
+    /**
+     * Returns the current context.
+     * 
+     * @return array
+     */
+    public function getContext()
+    {
+        return $this->context;
+    }
+    
+    /**
      * Sets the script to be rendered.
      * 
      * @param string $script The path to the script to be rendered relative to the view path, excluding the extension.
      * 
-     * @return Php
+     * @return ViewAbstract
      */
     public function setScript($script)
     {
-        $this->script = str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $script);
+        $this->script = $this->formatScript($script);
         return $this;
     }
     
@@ -233,10 +274,20 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
      */
     public function getScriptPathname()
     {
-        if ($file = $this->locator->locate($this->script)) {
-            return $file;
-        }
-        throw new Exception("Could not render view because {$this->script} does not exist.");
+        return $this->locateScript($this->script);
+    }
+    
+    /**
+     * Sets the parent script.
+     * 
+     * @param string $script The parent script.
+     * 
+     * @return ViewAbstract
+     */
+    public function setParentScript($script)
+    {
+        $this->parentScript = $this->formatScript($script);
+        return $this;
     }
     
     /**
@@ -250,6 +301,29 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
     }
     
     /**
+     * Returns the full path to the parent script.
+     * 
+     * @return string
+     */
+    public function getParentScriptPathname()
+    {
+        return $this->locateScript($this->parentScript);
+    }
+    
+    /**
+     * Sets the child script.
+     * 
+     * @param string $script The child script.
+     * 
+     * @return ViewAbstract
+     */
+    public function setChildScript($script)
+    {
+        $this->childScript = $this->formatScript($script);
+        return $this;
+    }
+    
+    /**
      * Returns the child script if one exists.
      * 
      * @return string
@@ -257,6 +331,16 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
     public function getChildScript()
     {
         return $this->childScript;
+    }
+    
+    /**
+     * Returns the full path to the child script.
+     * 
+     * @return string
+     */
+    public function getChildScriptPathname()
+    {
+        return $this->locateScript($this->childScript);
     }
     
     /**
@@ -297,5 +381,34 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
         // set the parent
         $this->parentScript = $parent;
         return $this;
+    }
+    
+    /**
+     * Formats the specified script and returns it.
+     * 
+     * @param string $script The script to format.
+     * 
+     * @return string
+     */
+    private function formatScript($script)
+    {
+        return str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $script);
+    }
+    
+    /**
+     * Locates the specified script and returns it. If it is not found, and exception is thrown.
+     * 
+     * @throws Exception If the script is not found.
+     * 
+     * @param string $script The script to locate.
+     * 
+     * @return string
+     */
+    private function locateScript($script)
+    {
+        if ($file = $this->locator->locate($script)) {
+            return $file;
+        }
+        throw new Exception("Could not render view because {$script} does not exist.");
     }
 }

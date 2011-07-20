@@ -1,7 +1,6 @@
 <?php
 
 namespace Europa\Fs;
-use Europa\Fs\Directory\Exception;
 
 /**
  * A general object for manipulating directories and multiple files.

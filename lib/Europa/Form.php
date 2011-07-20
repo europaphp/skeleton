@@ -19,4 +19,17 @@ class Form extends ElementList
      * @var array
      */
     protected $attributes = array('method' => 'post');
+    
+    /**
+     * Converts the form to a string.
+     * 
+     * @return string
+     */
+    public function __toString()
+    {
+        $str  = '<form' . $this->getAttributeString() . '>';
+        $str .= parent::toString();
+        $str .= '</form>';
+        return $str;
+    }
 }

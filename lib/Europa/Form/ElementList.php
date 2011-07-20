@@ -21,6 +21,20 @@ abstract class ElementList extends FormAbstract implements Listable
     protected $elements = array();
     
     /**
+     * Converts the list to a string.
+     * 
+     * @return string
+     */
+    public function __toString()
+    {
+        $str = '';
+        foreach ($this->getElements() as $el) {
+            $str .= $el->__toString();
+        }
+        return $str;
+    }
+    
+    /**
      * Adds a valid renderable element onto the element list.
      * 
      * @param \Europa\Form\Base $element The element to add.

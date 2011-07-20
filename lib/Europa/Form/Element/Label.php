@@ -10,7 +10,7 @@ namespace Europa\Form\Element;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class Label extends \Europa\Form\Element
+class Label extends ElementAbstract
 {
     /**
      * Converts the label to a string.

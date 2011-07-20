@@ -5,6 +5,7 @@ use Europa\Controller\ControllerInterface;
 use Europa\Di\Container;
 use Europa\Request\RequestInterface;
 use Europa\Response\ResponseInterface;
+use Europa\Router\RequestRouterInterface;
 use Europa\StringObject;
 
 /**
@@ -18,8 +19,18 @@ use Europa\StringObject;
  */
 class Dispatcher implements DispatcherInterface
 {
+    /**
+     * The default controller key.
+     * 
+     * @var string
+     */
     const DEFAULT_CONTROLLER_KEY = 'controller';
     
+    /**
+     * The default controller formatter.
+     * 
+     * @var string
+     */
     const DEFAULT_CONTROLLER_FORMATTER = 'defaultControllerFormatter';
     
     /**
@@ -30,24 +41,32 @@ class Dispatcher implements DispatcherInterface
     private $controllerFormatter;
     
     /**
-     * Actions the appropriate controller and outputs the response.
+     * Actions the appropriate controller and outputs the response. If no router is specified, it attempts to dispatch
+     * using whatever parameters that are already available on the request.
      * 
-     * @param RequestInterface  $request  The request object to dispatch
-     * @param ResponseInterface $response The response object to output
+     * @param RequestInterface       $request  The request object to dispatch.
+     * @param ResponseInterface      $response The response object to output.
+     * @param RequestRouterInterface $router   The request router to use.
      * 
      * @return void
      */
-    public function dispatch(RequestInterface $request, ResponseInterface $response)
+    public function dispatch(RequestInterface $request, ResponseInterface $response, RequestRouterInterface $router = null)
     {
+        if ($router) {
+            $router->route($request);
+        }
+        
         $controller = $this->resolveController($request, $response);
+        $controller->action();
         $response->output($controller->render());
     }
     
     /**
      * Resolves the controller.
      * 
-     * @param RequestInterface  $request  The request object to dispatch
-     * @param ResponseInterface $response The response object to output
+     * @param RequestInterface       $request  The request object to dispatch
+     * @param ResponseInterface      $response The response object to output
+     * @param RequestRouterInterface $router   The response object to output
      * 
      * @return ControllerInterface
      */
@@ -67,6 +86,11 @@ class Dispatcher implements DispatcherInterface
         return $controller;
     }
     
+    /**
+     * Resolves what the dispatcher should use to format the controller.
+     * 
+     * @return mixed
+     */
     private function resolveControllerFormatter()
     {
         return $this->controllerFormatter
@@ -74,6 +98,14 @@ class Dispatcher implements DispatcherInterface
             : array($this, self::DEFAULT_CONTROLLER_FORMATTER);
     }
     
+    /**
+     * The default controller formatter.
+     * 
+     * @param RequestInterface  $request  The request object to dispatch
+     * @param ResponseInterface $response The response object to output
+     * 
+     * @return string
+     */
     private function defaultControllerFormatter(RequestInterface $request, ResponseInterface $response)
     {
         $controller = $request->getParam(self::DEFAULT_CONTROLLER_KEY);

@@ -96,7 +96,7 @@ class Finder implements \IteratorAggregate
      * 
      * @param string $pattern The pattern to match.
      * 
-     * @return \Europa\Fs\Finder
+     * @return Finder
      */
     public function is($pattern)
     {
@@ -109,7 +109,7 @@ class Finder implements \IteratorAggregate
      * 
      * @param string $pattern The pattern to match.
      * 
-     * @return \Europa\Fs\Finder
+     * @return Finder
      */
     public function not($pattern)
     {
@@ -118,11 +118,37 @@ class Finder implements \IteratorAggregate
     }
     
     /**
+     * Filters out all directories and leaves only files.
+     * 
+     * @return Finder
+     */
+    public function files()
+    {
+        $this->filter(function($item) {
+            return $item->current()->isFile();
+        });
+        return $this;
+    }
+    
+    /**
+     * Filters out all files and leaves only directories.
+     * 
+     * @return Finder
+     */
+    public function directories()
+    {
+        $this->filter(function($item) {
+            return $item->current()->isDir();
+        });
+        return $this;
+    }
+    
+    /**
      * Applies a custom filter to the listing.
      * 
      * @param \Closure $filter The custom filter.
      * 
-     * @return \Europa\Fs\Finder
+     * @return Finder
      */
     public function filter(\Closure $filter)
     {
@@ -133,12 +159,9 @@ class Finder implements \IteratorAggregate
     /**
      * Adds a path to search in.
      * 
-     * @param string $path   The path to add to the list of load paths.
-     * @param mixed  $suffix The suffix, or suffixes to use for this path.
+     * @param string $path The path to add to the list of search paths.
      * 
-     * @throws \Europa\Loader\Exception If the path does not exist.
-     * 
-     * @return \Europa\Loader
+     * @return Finder
      */
     public function in($path)
     {
@@ -148,6 +171,11 @@ class Finder implements \IteratorAggregate
         return $this;
     }
     
+    /**
+     * Only seeks to the specified hierarchical depth.
+     * 
+     * @return Finder
+     */
     public function depth($depth = null)
     {
         if (is_null($depth) || $depth < -1) {

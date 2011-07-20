@@ -3,7 +3,7 @@
 namespace Europa\Controller;
 
 /**
- * The base controller for all controller classes.
+ * Implements restful "single-action" controllers.
  * 
  * The following methods are supported with any number of user-defined parameters:
  *   - cli
@@ -26,7 +26,7 @@ namespace Europa\Controller;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class Rest extends ControllerAbstract
+abstract class RestController extends ControllerAbstract
 {
     /**
      * Returns the method to action.

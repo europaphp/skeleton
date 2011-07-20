@@ -2,7 +2,6 @@
 
 namespace Europa\View;
 use Europa\StringObject;
-use Europa\View;
 
 /**
  * A view class for rendering CSV data from bound parameters.
@@ -12,19 +11,19 @@ use Europa\View;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Csv extends View
+class Csv implements ViewInterface
 {
     /**
      * Renders the set parameters as a CSV string.
      * 
      * @return string
      */
-    public function render()
+    public function render(array $context = array())
     {
         $this->sendHeaders();
         ob_start();
         $handle = fopen('php://output', 'w');
-        foreach ($this->formatParamsToCsvArray() as $row) {
+        foreach ($this->formatParamsToCsvArray(context) as $row) {
             $this->writeToHandle($handle, $row);
         }
         return ob_get_clean();
@@ -59,20 +58,21 @@ class Csv extends View
     
     /**
      * Serializes the passed in parameters into an array.
-     *  
+     * 
+     * @param array $context The parameters to format.
+     * 
      * @return array
      */
-    private function formatParamsToCsvArray()
+    private function formatParamsToCsvArray(array $context)
     {
         $array  = array();
         $first  = true;
-        $params = $this->getParams();
         
         // add the headers
-        $array[] = $this->getHeaders($params);
+        $array[] = $this->getHeaders($context);
         
         // apply all rows
-        foreach ($params as $name => $item) {
+        foreach ($context as $name => $item) {
             $formatted = array();
             if (is_array($item) || is_object($item)) {
                 foreach ($item as $data) {

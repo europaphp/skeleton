@@ -173,9 +173,7 @@ abstract class ControllerAbstract implements ControllerInterface
         $this->setActionResult($result);
         
         // post-action hook
-        $this->postAction($context);
-        
-        return $context;
+        $this->postAction();
     }
     
     /**
@@ -276,9 +274,19 @@ abstract class ControllerAbstract implements ControllerInterface
      */
     private function setActionResult($actionResult)
     {
-        if (is_array($actionResult)) {
-            $this->actionResult = $actionResult;
+        // reset
+        $this->actionResult = array();
+        
+        // do nothing if it doesn't have a value
+        if (!$actionResult) {
+            return;
         }
-        return $this;
+        
+        // action result should be an arary
+        if (!is_array($actionResult)) {
+            throw new Exception("If a value is returned from your action, it must be an array.");
+        }
+        
+        $this->actionResult = $actionResult;
     }
 }

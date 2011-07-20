@@ -1,5 +1,7 @@
 <?php
 
+namespace Europa\Form\Element;
+
 /**
  * A default form reset button.
  * 
@@ -8,21 +10,17 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-namespace Europa\Form\Element
+class Clear extends Button
 {
-    class Clear extends Button
+    /**
+     * Constructs and sets defaults.
+     * 
+     * @return \Europa\Form\Element\Reset
+     */
+    public function __construct(array $attributes = array())
     {
-        /**
-         * Constructs and sets defaults.
-         * 
-         * @return \Europa\Form\Element\Reset
-         */
-        public function __construct(array $attributes = array())
-        {
-            parent::__construct($attributes);
-                $this->type  = 'reset';
-                $this->value = 'Clear';
-            }
-        }
+        parent::__construct($attributes);
+        $this->type  = 'reset';
+        $this->value = 'Clear';
     }
 }

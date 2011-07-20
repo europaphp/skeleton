@@ -3,6 +3,7 @@
 namespace Europa\Dispatcher;
 use Europa\Request\RequestInterface;
 use Europa\Response\ResponseInterface;
+use Europa\Router\RequestRouterInterface;
 
 /**
  * The most basic version of a dispatcher.
@@ -19,5 +20,5 @@ interface DispatcherInterface
      * 
      * @return void
      */
-    public function dispatch(RequestInterface $request, ResponseInterface $response);
+    public function dispatch(RequestInterface $request, ResponseInterface $response, RequestRouterInterface $router = null);
 }

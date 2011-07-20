@@ -3,8 +3,8 @@
 namespace Europa;
 
 /**
- * Extends ArrayObject so that you are allowed to access undefined indexes/properties
- * and it will return null instead of throwing a notice.
+ * Extends \ArrayObject so that you are allowed to access undefined indexes/properties and it will return null instead
+ * of throwing a notice.
  * 
  * @category ValueObjects
  * @package  Europa

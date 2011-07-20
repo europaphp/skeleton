@@ -1,5 +1,7 @@
 <?php
 
+namespace Europa\Form\Element;
+
 /**
  * A default form textarea input.
  * 
@@ -8,23 +10,20 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-namespace Europa\Form\Element
+class Textarea extends ElementAbstract
 {
-    class Textarea extends \Europa\Form\Element
+    /**
+     * Renders the textarea element.
+     * 
+     * @return string
+     */
+    public function __toString()
     {
-        /**
-         * Renders the textarea element.
-         * 
-         * @return string
-         */
-        public function __toString()
-        {
-            $attr = $this->getAttributeString();
-            return '<textarea'
-                 . ($attr ? ' ' . $attr : '')
-                 . '>'
-                 . $this->value
-                 . '</textarea>';
-        }
+        $attr = $this->getAttributeString();
+        return '<textarea'
+             . ($attr ? ' ' . $attr : '')
+             . '>'
+             . $this->value
+             . '</textarea>';
     }
 }

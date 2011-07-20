@@ -10,7 +10,7 @@ namespace Europa\Router\Route;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Regex implements RouteInterface
+class RegexRoute implements RouteInterface
 {
     /**
      * The expression used to match the route.

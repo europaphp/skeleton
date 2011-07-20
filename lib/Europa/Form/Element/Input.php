@@ -10,7 +10,7 @@ namespace Europa\Form\Element;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Input extends \Europa\Form\Element
+class Input extends ElementAbstract
 {
     /**
      * Constructs and sets defaults.

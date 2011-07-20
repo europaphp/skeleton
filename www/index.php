@@ -25,6 +25,6 @@ try {
     $request->setParams($router->query($request->getUri()->getRequest()));
     $dispatcher->dispatch($request, $response);
 } catch (\Exception $e) {
-    die($e);
-    $dispatcher->setController('error')->dispatch();
+    $request->setParam('controller', 'error');
+    $dispatcher->dispatch($request, $response);
 }

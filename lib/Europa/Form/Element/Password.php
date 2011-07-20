@@ -1,5 +1,7 @@
 <?php
 
+namespace Europa\Form\Element;
+
 /**
  * A default form password input.
  * 
@@ -8,19 +10,16 @@
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-namespace Europa\Form\Element
+class Password extends Input
 {
-    class Password extends Input
+    /**
+     * Constructs and sets defaults.
+     * 
+     * @return \Europa\Form\Element\Password
+     */
+    public function __construct(array $attributes = array())
     {
-        /**
-         * Constructs and sets defaults.
-         * 
-         * @return \Europa\Form\Element\Password
-         */
-        public function __construct(array $attributes = array())
-        {
-            parent::__construct($attributes);
-            $this->type = 'password';
-        }
+        parent::__construct($attributes);
+        $this->type = 'password';
     }
 }

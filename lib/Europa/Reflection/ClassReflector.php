@@ -35,12 +35,14 @@ class ClassReflector extends \ReflectionClass implements Reflectable
     /**
      * Returns an array of \Europa\Reflection\MethodReflector instances.
      * 
+     * @param string $filter An optional filter as specified in parent documentation.
+     * 
      * @return array
      */
-    public function getMethods()
+    public function getMethods($filter = -1)
     {
         $methods = array();
-        foreach (parent::getMethods() as $method) {
+        foreach (parent::getMethods($filter) as $method) {
             $methods[] = $this->getMethod($method->getName());
         }
         return $methods;

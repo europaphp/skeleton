@@ -1,7 +1,6 @@
 <?php
 
 namespace Europa\Fs;
-use Europa\Fs\File\Exception;
 
 /**
  * A general object for manipulating single files.
