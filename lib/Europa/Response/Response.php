@@ -14,6 +14,13 @@ namespace Europa\Response;
 class Response implements \IteratorAggregate, ResponseInterface
 {
     /**
+     * The HTTP protocol version
+     * 
+     * @var string
+     */
+    const HTTP_VERSION = 'HTTP/1.1';
+    
+    /**
      * The JSON content type.
      * 
      * @var string
@@ -54,6 +61,18 @@ class Response implements \IteratorAggregate, ResponseInterface
      * @var array
      */
     private $headers = array();
+    
+    /**
+     * The HTTP status.
+     * 
+     * @var array
+     */
+    private $codeMessages = array('200' => 'OK',
+                                  '404' => 'Not Found',
+                                  '403' => 'Forbidden',
+                                  '301' => 'Moved Permanently',
+                                  '500' => 'Internal Server Error',
+                                  '401' => 'Unauthorized');
     
     /**
      * Sets the specified request header.
@@ -102,6 +121,20 @@ class Response implements \IteratorAggregate, ResponseInterface
     public function getContentType()
     {
         return $this->getHeader(self::HEADER_CONTENT_TYPE);
+    }
+    
+    /**
+     * Sets the HTTP status
+     * 
+     * @param string $code
+     * @param string $message 
+     */
+    public function setStatus($code, $message = null)
+    {
+        if (!$message) {
+            $message = $this->codeMessages[$code];
+        }
+        $this->setHeader((string)$code, $message);
     }
     
     /**
@@ -172,9 +205,13 @@ class Response implements \IteratorAggregate, ResponseInterface
         foreach ($this->headers as $name => $value) {
             // ensure camel-cased attr converted to headers, e.g. contentType => content-type
             $name = StringObject::create($name)->splitUcWords('-');
-            header($name->__toString() . ': ' . $value);
+            if (array_key_exists($name, $this->codeMessages)) {
+                header(self::HTTP_VERSION . ' ' .$name . ' ' . $value);
+            } else {
+                header($name . ': ' . $value);
+            }
         }        
-        echo $content;     
+        echo $content;       
     }
     
     /**
