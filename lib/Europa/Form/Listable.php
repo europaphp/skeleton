@@ -3,7 +3,7 @@
 namespace Europa\Form;
 
 /**
- * Allows nested lists of elements.
+ * Defines a form element that is listable.
  * 
  * @category Forms
  * @package  Europa
@@ -20,20 +20,20 @@ interface Listable extends \ArrayAccess, \Iterator
     public function getElements();
     
     /**
-     * Takes an array of values and searches for a matching value for each
-     * element in the list. Recursively handles nested element lists.
+     * Takes an array of values and searches for a matching value for each element in the list. Recursively handles
+     * nested element lists.
      * 
-     * @param array $values An array of values to search in.
+     * @param mixed $values An object or array of values fill the element list with.
      * 
      * @return \Europa\Form\Listable
      */
     public function fill($values);
     
     /**
-     * Adds a valid renderable element onto the element list.
+     * Adds an element onto the element list.
      * 
-     * @param \Europa\Form\Base $element The element to add.
-     * @param mixed             $offset  The offset to set the element at.
+     * @param \Europa\Form\FormAbstract $element The element to add.
+     * @param mixed                     $offset  The offset to set the element at.
      * 
      * @return \Europa\Form\Listable
      */

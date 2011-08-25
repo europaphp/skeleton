@@ -20,8 +20,8 @@ class Json implements ViewInterface
      */    
     public function render(array $context = array())
     {
-        $data = $this->formatParamsToJsonArray($context);
-        return json_encode($data);
+        $context = $this->formatParamsToJsonArray($context);
+        return json_encode($context);
     }
     
     /**
@@ -29,7 +29,7 @@ class Json implements ViewInterface
      *  
      * @return array
      */
-    protected function formatParamsToJsonArray($data)
+    private function formatParamsToJsonArray($data)
     {
         $array = array();
         foreach ($data as $name => $item) {

@@ -3,7 +3,7 @@
 namespace Europa\Form\Element;
 
 /**
- * A default form password input.
+ * A default form password element.
  * 
  * @category Forms
  * @package  Europa

@@ -18,7 +18,7 @@ abstract class ElementList extends FormAbstract implements Listable
      * 
      * @var array
      */
-    protected $elements = array();
+    private $elements = array();
     
     /**
      * Converts the list to a string.

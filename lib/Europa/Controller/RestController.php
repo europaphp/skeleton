@@ -29,7 +29,8 @@ namespace Europa\Controller;
 abstract class RestController extends ControllerAbstract
 {
     /**
-     * Returns the method to action.
+     * Returns the method to action. By default this is the request method returned from the request instance that is
+     * is being used.
      * 
      * @return string
      */

@@ -23,6 +23,7 @@ class Submit extends Button
         if (!$this->label) {
             $this->label = 'Submit';
         }
+        
         $label = $this->label;
         unset($this->label);
         return '<button ' . $this->getAttributeString() . '>' . $label . '</button>';

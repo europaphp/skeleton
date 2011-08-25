@@ -6,7 +6,7 @@ use Europa\Fs\Locator;
 /**
  * Handles class loading.
  * 
- * @category Fs
+ * @category ClassLoading
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
@@ -21,8 +21,10 @@ class ClassLoader
     private $locator;
     
     /**
-     * Searches for a class and loads it if it is found. If the class is found, true is returned. Otherwise false is
-     * returned.
+     * Searches for a class, loads it if it is found and returns whether or not it was loaded.
+     * 
+     * The Europa install directory is searched first. If it is not found and a locator is defined, the locator is used
+     * to locate the class.
      * 
      * @param string $class The class to search for.
      * 
@@ -56,7 +58,7 @@ class ClassLoader
     }
     
     /**
-     * Sets the locator.
+     * Sets the locator. A locator is not required for class loading to work.
      * 
      * @param \Europa\Fs\Locator $locator The locator to use for locating class files.
      * 
@@ -70,6 +72,8 @@ class ClassLoader
     
     /**
      * Registers the auto-load handler and automatically registers the Europa install path to the load paths.
+     * 
+     * @param bool $prepend Whether or not to prepend the autoloader onto the stack.
      * 
      * @return \Europa\ClassLoader
      */

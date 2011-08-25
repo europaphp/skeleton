@@ -3,7 +3,6 @@
 namespace Europa\View;
 use Europa\Di\Container;
 use Europa\Di\Exception as DiException;
-use Europa\Exception;
 use Europa\Fs\Locator;
 
 /**

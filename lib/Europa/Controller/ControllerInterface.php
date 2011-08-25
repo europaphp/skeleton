@@ -3,7 +3,7 @@
 namespace Europa\Controller;
 
 /**
- * The most basic controller implementation. All it needs to do is specify an action method.
+ * Defines a basic implementation of controllers in Europa.
  *
  * @category Controller
  * @package  Europa

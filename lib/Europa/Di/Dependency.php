@@ -10,7 +10,7 @@ namespace Europa\Di;
  * overhead right up until the point it is required by another dependency.
  * 
  * @category DependencyInjection
- * @package  Europa\Di
+ * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */

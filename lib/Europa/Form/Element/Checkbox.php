@@ -3,7 +3,7 @@
 namespace Europa\Form\Element;
 
 /**
- * A generic radio button.
+ * A generic checkbox element.
  * 
  * @category Forms
  * @package  Europa

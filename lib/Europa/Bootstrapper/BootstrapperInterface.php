@@ -3,7 +3,7 @@
 namespace Europa\Bootstrapper;
 
 /**
- * The most basic implementation of a bootstrapper.
+ * Defines a bootstrapper implementation.
  *
  * @category Bootstrapping
  * @package  Bootstrapper
@@ -13,7 +13,7 @@ namespace Europa\Bootstrapper;
 interface BootstrapperInterface
 {
     /**
-     * Bootstraps the application
+     * Bootstraps the application.
      * 
      * @return void
      */

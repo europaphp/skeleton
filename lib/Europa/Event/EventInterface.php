@@ -15,6 +15,8 @@ interface EventInterface
     /**
      * Ensures the event manager knows what to do.
      * 
+     * @param array $data The event data passed at the time of triggering.
+     * 
      * @return bool
      */
     public function trigger(array $data = array());

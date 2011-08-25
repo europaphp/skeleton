@@ -19,7 +19,7 @@ abstract class ElementAbstract extends FormAbstract
      * 
      * @var array
      */
-    protected $validator;
+    private $validator;
     
     /**
      * Initializes the form element and sets any default attributes.

@@ -3,7 +3,7 @@
 namespace Europa\Fs;
 
 /**
- * A general object for manipulating single files.
+ * An object that represents a single file.
  * 
  * @category Directory
  * @package  Europa

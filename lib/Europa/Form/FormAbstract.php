@@ -17,7 +17,7 @@ abstract class FormAbstract implements Renderable, Validatable
      * 
      * @var array
      */
-    protected $attributes = array();
+    private $attributes = array();
     
     /**
      * Sets an attribute value.

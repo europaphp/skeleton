@@ -3,24 +3,26 @@
 namespace Europa\Bootstrapper;
 
 /**
- * Default implementation of the BootstrapperInterface.
+ * When invoked by a child class, it goes through each method in the order which they were defined and executes it.
+ * Options can also be used to add dynamics to the bootstrapping process.
  *
- * @category Bootstrapping
- * @package  Bootstrapper
+ * @category Application
+ * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
 abstract class BootstrapperAbstract implements BootstrapperInterface
 {
     /**
-     * The default configuration options for all instances.
+     * The configuration options for the current instance. To set defaults, define a __construct method in the child
+     * class and set the options from there.
      * 
      * @var array
      */
     private $options = array();
     
     /**
-     * Goes through each method in the extending class and calls them in the order in which they were defined.
+     * Iterates through each method in the extending class and calls them in the order in which they were defined.
      * 
      * @return void
      */
@@ -28,10 +30,9 @@ abstract class BootstrapperAbstract implements BootstrapperInterface
     {
         $class = new \ReflectionClass($this);
         foreach ($class->getMethods() as $method) {
-            if (!$this->isValidMethod($method)) {
-                continue;
+            if ($this->isValidMethod($method)) {
+                $method->invoke($this);
             }
-            $method->invoke($this);
         }
     }
     
@@ -41,7 +42,7 @@ abstract class BootstrapperAbstract implements BootstrapperInterface
      * @param string $name  The option name.
      * @param mixed  $value The option value.
      * 
-     * @return Bootstrapper
+     * @return \Europa\Bootstrapper\BootstrapperAbstract
      */
     final public function __set($name, $value)
     {
@@ -65,7 +66,7 @@ abstract class BootstrapperAbstract implements BootstrapperInterface
      * 
      * @param string $name The option name.
      * 
-     * @return Bootstrapper
+     * @return \Europa\Bootstrapper\BootstrapperAbstract
      */
     final public function __isset($name)
     {
@@ -77,7 +78,7 @@ abstract class BootstrapperAbstract implements BootstrapperInterface
      * 
      * @param string $name The option name.
      * 
-     * @return Bootstrapper
+     * @return \Europa\Bootstrapper\BootstrapperAbstract
      */
     final public function __unset($name)
     {
@@ -90,7 +91,7 @@ abstract class BootstrapperAbstract implements BootstrapperInterface
      * @param string $name  The option name.
      * @param mixed  $value The option value.
      * 
-     * @return Bootstrapper
+     * @return \Europa\Bootstrapper\BootstrapperAbstract
      */
     final public function setOption($name, $value)
     {
@@ -118,7 +119,7 @@ abstract class BootstrapperAbstract implements BootstrapperInterface
      * 
      * @param string $name The option name.
      * 
-     * @return Bootstrapper
+     * @return \Europa\Bootstrapper\BootstrapperAbstract
      */
     final public function hasOption($name)
     {
@@ -130,7 +131,7 @@ abstract class BootstrapperAbstract implements BootstrapperInterface
      * 
      * @param string $name The option name.
      * 
-     * @return Bootstrapper
+     * @return \Europa\Bootstrapper\BootstrapperAbstract
      */
     final public function removeOption($name)
     {
@@ -141,12 +142,11 @@ abstract class BootstrapperAbstract implements BootstrapperInterface
     }
     
     /**
-     * Sets the default configuration for the bootstrapper. Uses late static binding so that different objects can have
-     * separate default configurations.
+     * Sets multiple options at once. Passed options can be an object or an array.
      * 
-     * @param array $options The options to set for this type of object.
+     * @param mixed $options The options to set for this type of object.
      * 
-     * @return Bootstrapper
+     * @return \Europa\Bootstrapper\BootstrapperAbstract
      */
     final public function setOptions($options)
     {
@@ -159,7 +159,7 @@ abstract class BootstrapperAbstract implements BootstrapperInterface
     }
     
     /**
-     * Returns the default options.
+     * Returns all options.
      * 
      * @return array
      */
@@ -171,7 +171,7 @@ abstract class BootstrapperAbstract implements BootstrapperInterface
     /**
      * Removes all options.
      * 
-     * @return Bootstrapper
+     * @return \Europa\Bootstrapper\BootstrapperAbstract
      */
     final public function removeOptions()
     {

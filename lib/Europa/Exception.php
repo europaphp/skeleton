@@ -3,7 +3,7 @@
 namespace Europa;
 
 /**
- * Provides a general set of defaults for exception handling and output.
+ * Acts as the top-most parent of all exceptions thrown in Europa.
  * 
  * @category Exceptions
  * @package  Europa
@@ -13,8 +13,7 @@ namespace Europa;
 class Exception extends \Exception
 {
     /**
-     * Triggers an error using the exception information. Useful for triggering
-     * exceptions inside of __toString().
+     * Triggers an error using the exception information. Useful for triggering exceptions inside of __toString().
      * 
      * @return void
      */

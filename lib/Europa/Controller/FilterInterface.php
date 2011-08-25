@@ -3,7 +3,7 @@
 namespace Europa\Controller;
 
 /**
- * The most basic filter implementation allowed for controllers.
+ * Defines a basic filter implementation for controllers.
  *
  * @category Controller
  * @package  Europa
@@ -13,7 +13,8 @@ namespace Europa\Controller;
 interface FilterInterface
 {
     /**
-     * Filters the specified controller.
+     * Filters the specified controller. The method is responsible for taking over and doing any further routing if it
+     * is necessary.
      * 
      * @return void
      */

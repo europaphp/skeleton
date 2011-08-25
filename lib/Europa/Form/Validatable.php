@@ -3,7 +3,7 @@
 namespace Europa\Form;
 
 /**
- * Interface for form validation.
+ * Defines an element that can be validated.
  * 
  * @category Forms
  * @package  Europa

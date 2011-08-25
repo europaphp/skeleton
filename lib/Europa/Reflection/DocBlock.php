@@ -33,6 +33,7 @@ class DocBlock
         'link'       => '\Europa\Reflection\DocTag\LinkTag',
         'copyright'  => '\Europa\Reflection\DocTag\CopyrightTag',
         'since'      => '\Europa\Reflection\DocTag\SinceTag',
+        'var'        => '\Europa\Reflection\DocTag\VarTag',
         'version'    => '\Europa\Reflection\DocTag\VersionTag',
     );
 

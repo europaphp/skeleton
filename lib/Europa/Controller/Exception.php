@@ -4,8 +4,7 @@ namespace Europa\Controller;
 use Europa\Exception as BaseException;
 
 /**
- * An example of an abstract controller to act as a base class for all
- * controllers.
+ * Top level for all controller exceptions.
  * 
  * @category Controllers
  * @package  Europa

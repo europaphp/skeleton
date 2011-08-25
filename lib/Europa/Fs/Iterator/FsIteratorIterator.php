@@ -4,6 +4,14 @@ namespace Europa\Fs\Iterator;
 use Europa\Fs\Directory;
 use Europa\Fs\File;
 
+/**
+ * An iterator that represents a collection of \Europa\Fs\Directory and \Europa\Fs\File instances.
+ * 
+ * @category Fs
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
+ */
 class FsIteratorIterator extends \IteratorIterator
 {
     /**
@@ -27,7 +35,7 @@ class FsIteratorIterator extends \IteratorIterator
             $this->next();
         }
         
-        // mark the last one
+        // mark the last one so we can fix the PHP issue
         $this->last = parent::current()->getPathname();
         
         // directory object

@@ -3,10 +3,15 @@
 namespace Europa\Di;
 
 /**
- * Dependency injection container.
+ * The dependency injection container represents a collection of configured dependencies. Dependencies are instances
+ * of \Europa\Di\Dependency that represent an object instance. The container provides a fluent interface for
+ * accessing dependencies so that they can easily be configured.
+ * 
+ * Dependencies can have both a mapping, which maps a dependency name to a class name, or a formatter which will format
+ * the name into a class name. The map is first checked and if it is not found it uses a formatter if one is set.
  * 
  * @category DependencyInjection
- * @package  Europa\Di
+ * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
@@ -86,9 +91,9 @@ class Container
     
     /**
      * Detects the value of $value and handles it appropriately.
-     * - Instances of \Europa\Di\Dependency are registered on the container.
-     * - Other instances are created as a dependency then registered.
-     * - Strings are used as a class map for $name.
+     *   - Instances of \Europa\Di\Dependency are registered on the container.
+     *   - Other instances are created as a dependency then registered.
+     *   - Strings are used as a class map for $name.
      * 
      * @param string $name  The name of the dependency.
      * @param mixed  $value One of many allowed values.
@@ -128,7 +133,7 @@ class Container
     /**
      * Map a dependency name to a class.
      * 
-     * @param string $map   An array of $map => $value or a dependency name for $value.
+     * @param mixed  $map   An array of $map => $value or a dependency name for $class.
      * @param string $class The class to map the dependency to.
      * 
      * @return \Europa\Di\Container

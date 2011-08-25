@@ -4,7 +4,7 @@ namespace Europa\Fs;
 use Europa\Exception as Base;
 
 /**
- * Loader exception class.
+ * Fs exception class.
  * 
  * @category Exceptions
  * @package  Europa

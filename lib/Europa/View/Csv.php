@@ -16,6 +16,8 @@ class Csv implements ViewInterface
     /**
      * Renders the set parameters as a CSV string.
      * 
+     * @param array $context The parameters to render with.
+     * 
      * @return string
      */
     public function render(array $context = array())

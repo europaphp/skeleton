@@ -9,9 +9,9 @@ use Europa\Router\RequestRouterInterface;
 use Europa\StringObject;
 
 /**
- * Dispatches the request to the controller, takes the rendered content and passes to response to output
+ * Dispatches the request to the controller, takes the rendered content and passes to response to output.
  *
- * @category Controller
+ * @category Dispatcher
  * @package  Europa
  * @author   Paul Carvosso-White <paulcarvossowhite@gmail.com>
  * @author   Trey Shugart <treshugart@gmail.com>

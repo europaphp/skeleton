@@ -3,7 +3,7 @@
 namespace Europa\Form\Element;
 
 /**
- * A default form input.
+ * A default form input element.
  * 
  * @category Forms
  * @package  Europa

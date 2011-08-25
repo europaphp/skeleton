@@ -14,11 +14,11 @@ use Europa\Form\ElementList;
 class Form extends ElementList
 {
     /**
-     * Form attributes.
+     * The default method for sending the form.
      * 
-     * @var array
+     * @var string
      */
-    protected $attributes = array('method' => 'post');
+    const DEFAULT_METHOD = 'post';
     
     /**
      * Converts the form to a string.
@@ -27,6 +27,10 @@ class Form extends ElementList
      */
     public function __toString()
     {
+        if (!$this->hasAttribute('method')) {
+            $this->setAttribute('method', self::DEFAULT_METHOD);
+        }
+        
         $str  = '<form' . $this->getAttributeString() . '>';
         $str .= parent::toString();
         $str .= '</form>';

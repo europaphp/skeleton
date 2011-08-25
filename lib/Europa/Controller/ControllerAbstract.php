@@ -8,21 +8,7 @@ use Europa\Response\ResponseInterface;
 use Europa\View\ViewInterface;
 
 /**
- * The base controller for all controller classes.
- * 
- * The following methods are supported with any number of user-defined parameters:
- *   - cli
- *   - options
- *   - get
- *   - head
- *   - post
- *   - put
- *   - delete
- *   - trace
- *   - connect
- * 
- * Additionally, if an above request method is not found, the controller will look for a method called "all" to catch
- * all request that are made to the controller.
+ * A default implementation of the controller interface.
  * 
  * @category Controllers
  * @package  Europa
@@ -34,14 +20,14 @@ abstract class ControllerAbstract implements ControllerInterface
     /**
      * The request used to dispatch to this controller.
      * 
-     * @var RequestInterface
+     * @var \Europa\Request\RequestInterface
      */
     private $request;
     
     /**
      * The response used to set headers for output
      *
-     * @var ResponseInterface
+     * @var \Europa\Response\ResponseInterface
      */
     private $response;
 
@@ -55,10 +41,15 @@ abstract class ControllerAbstract implements ControllerInterface
     /**
      * The view being rendered.
      * 
-     * @var ViewInterface
+     * @var \Europa\View\ViewInterface
      */
     private $view;
     
+    /**
+     * The result returned from the action.
+     * 
+     * @var mixed
+     */
     private $actionResult = array();
     
     /**
@@ -71,10 +62,10 @@ abstract class ControllerAbstract implements ControllerInterface
     /**
      * Constructs a new controller using the specified request and response.
      *
-     * @param RequestInterface  $request  The request to use.
-     * @param ResponseInterface $response The response to set headers on
+     * @param \Europa\Request\RequestInterface   $request  The request to use.
+     * @param \Europa\Response\ResponseInterface $response The response to use.
      *
-     * @return \Europa\Controller
+     * @return \Europa\Controller\ControllerAbstract
      */
     public function __construct(RequestInterface $request, ResponseInterface $response)
     {
@@ -84,7 +75,8 @@ abstract class ControllerAbstract implements ControllerInterface
     }
     
     /**
-     * Renders the set view if it exists. If it does not exist, an empty string is returned.
+     * Renders the set view if it exists. If it does not exist, an empty string is returned. Even if no view is set,
+     * both preRender and postRender hooks are invoked.
      * 
      * @return string
      */
@@ -99,7 +91,7 @@ abstract class ControllerAbstract implements ControllerInterface
     /**
      * Returns the request being used.
      * 
-     * @return RequestInterface
+     * @return \Europa\Request\RequestInterface
      */
     public function getRequest()
     {
@@ -109,7 +101,7 @@ abstract class ControllerAbstract implements ControllerInterface
     /**
      * Returns the request being used.
      * 
-     * @return ResponseInterface
+     * @return \Europa\Response\ResponseInterface
      */
     public function getResponse()
     {
@@ -117,9 +109,9 @@ abstract class ControllerAbstract implements ControllerInterface
     }
 
     /**
-     * Sets the view to use. If a view is currently set, it's parameters are copied to the new view.
+     * Sets the view to use.
      * 
-     * @param \Europa\ViewInterface $view The view to use.
+     * @param \Europa\View\ViewInterface $view The view to use.
      * 
      * @return \Europa\Controller\ControllerAbstract
      */
@@ -132,7 +124,7 @@ abstract class ControllerAbstract implements ControllerInterface
     /**
      * Returns the view being used.
      * 
-     * @return \Europa\View
+     * @return \Europa\View\ViewInterface | null
      */
     public function getView()
     {
@@ -142,7 +134,7 @@ abstract class ControllerAbstract implements ControllerInterface
     /**
      * Switches filters on or off.
      * 
-     * @param bool $switch True of false for filter application.
+     * @param bool $switch Whether or not to enable filters.
      * 
      * @return \Europa\Controller\ControllerAbstract
      */
@@ -153,7 +145,8 @@ abstract class ControllerAbstract implements ControllerInterface
     }
     
     /**
-     * Makes sure the appropriate parameters are passed to init and the request method action.
+     * Executes the controller's action. Both preAction and postAction hooks are invoked. If filtering is enabled and
+     * any are applied to the action, they are applied before the preAction hook.
      * 
      * @return void
      */
@@ -206,11 +199,21 @@ abstract class ControllerAbstract implements ControllerInterface
         
     }
     
+    /**
+     * Pre-view-rendering hook.
+     * 
+     * @return void
+     */
     public function preRender()
     {
         
     }
     
+    /**
+     * Post-view-rendering hook.
+     * 
+     * @return void
+     */
     public function postRender()
     {
         
@@ -246,6 +249,7 @@ abstract class ControllerAbstract implements ControllerInterface
      * Executes the specified method.
      * 
      * @param string $method The method to execute.
+     * @param array  $params The parameters to pass to the method.
      * 
      * @return \Europa\Controller\ControllerAbstract
      */

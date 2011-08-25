@@ -3,8 +3,8 @@
 namespace Europa;
 
 /**
- * Extends \ArrayObject so that you are allowed to access undefined indexes/properties and it will return null instead
- * of throwing a notice.
+ * Similar to \ArrayObject. It adds array-like functionality, without the cruft of array functions as methods. Index
+ * access is also more lenient. If an undefined index is accessed, null is returned instead of triggering a notice.
  * 
  * @category ValueObjects
  * @package  Europa
@@ -21,7 +21,7 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
     private $data;
     
     /**
-     * Constructs a new object making sure values are passed through offsetSet.
+     * Constructs a new object and imports the passed values.
      * 
      * @param mixed $data Any data to initialize the array object with.
      * 
@@ -33,9 +33,9 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
     }
     
     /**
-     * Wraps offsetGet.
+     * Returns the specified value if it exists. Wraps offsetGet.
      * 
-     * @param string $name The name of the property to get.
+     * @param string $name The name of the value to get.
      * 
      * @return mixed
      */
@@ -45,9 +45,9 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
     }
     
     /**
-     * Wraps offsetSet.
+     * Sets the specified value and overwrites it if it exists. Wraps offsetSet.
      * 
-     * @param string $name  The name of the property to set.
+     * @param string $name The name of the value to set.
      * @param mixed  $value The value to set.
      * 
      * @return void
@@ -58,7 +58,7 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
     }
     
     /**
-     * Wraps offsetExists.
+     * Returns whether or not the specified value exists. Wraps offsetExists.
      * 
      * @param string $name The name of the property to check for.
      * 
@@ -70,7 +70,7 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
     }
     
     /**
-     * Wraps offsetUnset.
+     * Removes the specified value if it exists. Wraps offsetUnset.
      * 
      * @param string $name The name of the property to unset.
      * 
@@ -150,7 +150,7 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
     }
     
     /**
-     * Returns the value if it exists. If not, it returns null.
+     * Returns the specified value if it exists.
      * 
      * @param string $name The name of the value to get.
      * 
@@ -165,9 +165,10 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
     }
     
     /**
-     * Sets the specified value.
+     * Sets the specified value and overwrites it if it exists.
      * 
-     * @param string $name The name of the value to set.
+     * @param string $name  The name of the value to set.
+     * @param mixed  $value The value to set.
      * 
      * @return void
      */
@@ -200,7 +201,7 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
     }
     
     /**
-     * Unsets the specified value.
+     * Returns whether or not the specified value exists.
      * 
      * @param string $name The name of the value to unset.
      * 

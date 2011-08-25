@@ -3,7 +3,7 @@
 namespace Europa\Fs;
 
 /**
- * Handles file locating based on cascading custom paths.
+ * Handles the finding of files and directories.
  * 
  * @category Fs
  * @package  Europa
@@ -40,6 +40,11 @@ class Finder implements \IteratorAggregate
      */
     private $filters = array();
     
+    /**
+     * How many levels deep to search.
+     * 
+     * @var int
+     */
     private $depth = -1;
     
     /**
@@ -79,12 +84,26 @@ class Finder implements \IteratorAggregate
         return new Iterator\FsIteratorIterator($post);
     }
     
+    /**
+     * Prepends an traversable set of items to the finder listing.
+     * 
+     * @param mixed $prepend The item to prepend.
+     * 
+     * @return \Europa\Fs\Finder
+     */
     public function prepend($prepend)
     {
         $this->prepend[] = $prepend;
         return $this;
     }
     
+    /**
+     * Appends an traversable set of items to the finder listing.
+     * 
+     * @param mixed $append The item to append.
+     * 
+     * @return \Europa\Fs\Finder
+     */
     public function append($append)
     {
         $this->append[] = $append;
@@ -92,11 +111,11 @@ class Finder implements \IteratorAggregate
     }
     
     /**
-     * Includes files by their name.
+     * Includes items that match the specified pattern.
      * 
      * @param string $pattern The pattern to match.
      * 
-     * @return Finder
+     * @return \Europa\Fs\Finder
      */
     public function is($pattern)
     {
@@ -105,11 +124,11 @@ class Finder implements \IteratorAggregate
     }
     
     /**
-     * Excludes files by their name.
+     * Excludes files that match the specified pattern.
      * 
      * @param string $pattern The pattern to match.
      * 
-     * @return Finder
+     * @return \Europa\Fs\Finder
      */
     public function not($pattern)
     {
@@ -120,7 +139,7 @@ class Finder implements \IteratorAggregate
     /**
      * Filters out all directories and leaves only files.
      * 
-     * @return Finder
+     * @return \Europa\Fs\Finder
      */
     public function files()
     {
@@ -133,7 +152,7 @@ class Finder implements \IteratorAggregate
     /**
      * Filters out all files and leaves only directories.
      * 
-     * @return Finder
+     * @return \Europa\Fs\Finder
      */
     public function directories()
     {
@@ -148,7 +167,7 @@ class Finder implements \IteratorAggregate
      * 
      * @param \Closure $filter The custom filter.
      * 
-     * @return Finder
+     * @return \Europa\Fs\Finder
      */
     public function filter(\Closure $filter)
     {
@@ -161,7 +180,7 @@ class Finder implements \IteratorAggregate
      * 
      * @param string $path The path to add to the list of search paths.
      * 
-     * @return Finder
+     * @return \Europa\Fs\Finder
      */
     public function in($path)
     {
@@ -174,7 +193,7 @@ class Finder implements \IteratorAggregate
     /**
      * Only seeks to the specified hierarchical depth.
      * 
-     * @return Finder
+     * @return \Europa\Fs\Finder
      */
     public function depth($depth = null)
     {

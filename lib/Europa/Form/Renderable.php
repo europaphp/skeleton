@@ -3,7 +3,7 @@
 namespace Europa\Form;
 
 /**
- * The base interface for all renderable form elements.
+ * Defines an element that can be rendered.
  * 
  * @category Forms
  * @package  Europa

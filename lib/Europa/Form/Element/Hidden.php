@@ -3,7 +3,7 @@
 namespace Europa\Form\Element;
 
 /**
- * A hidden form input.
+ * A hidden form hidden element.
  * 
  * @category Forms
  * @package  Europa

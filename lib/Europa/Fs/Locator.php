@@ -74,8 +74,8 @@ class Locator
     }
     
     /**
-     * Maps the specified item to the specified file. Also takes an array of $class to
-     * $file mappings as the first argument.
+     * Maps the specified item to the specified file. Also takes an array of $class to $file mappings as the first
+     * argument.
      * 
      * @param string $map  The class to map, or array of $class => $file mapping.
      * @param string $file The file to map to if the first argument is not an array.

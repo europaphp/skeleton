@@ -3,7 +3,7 @@
 namespace Europa\Event;
 
 /**
- * An event class for managing multiple events and event stacks.
+ * An event dispatcher for managing multiple events and event stacks.
  * 
  * @category Events
  * @package  Europa

@@ -21,6 +21,24 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
     private $docString;
     
     /**
+     * Returns the visibility of the current method.
+     * 
+     * @return string
+     */
+    public function getVisibility()
+    {
+        if ($this->isPrivate()) {
+            return 'private';
+        }
+        
+        if ($this->isProtected()) {
+            return 'protected';
+        }
+        
+        return 'public';
+    }
+    
+    /**
      * Takes the passed named parameters and returns a merged array of the passed parameters and the method's default
      * parameters in the order in which they were defined. If a required parameter is not defined and $throw is true,
      * an exception is thrown indicating the parameter that was not defined. If $throw is false, the required parameter

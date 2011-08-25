@@ -17,14 +17,14 @@ class Select extends ElementAbstract
      * 
      * @var mixed
      */
-    private $_value = '';
+    private $value = '';
     
     /**
      * The options to apply to the select.
      * 
      * @var array
      */
-    private $_options = array();
+    private $options = array();
     
     /**
      * Constructs and sets defaults.
@@ -34,12 +34,12 @@ class Select extends ElementAbstract
     public function __construct(array $attributes = array())
     {
         if (isset($attributes['value'])) {
-            $this->_value = $attributes['value'];
+            $this->value = $attributes['value'];
             unset($attributes['value']);
         }
         
         if (isset($attributes['options'])) {
-            $this->_options = $attributes['options'];
+            $this->options = $attributes['options'];
             unset($attributes['options']);
         }
         
@@ -57,13 +57,15 @@ class Select extends ElementAbstract
         $html = '<select'
               . ($attr ? ' ' . $attr : '')
               . '>';
-        foreach ($this->_options as $label => $value) {
+        
+        foreach ($this->options as $label => $value) {
             $selected = '';
-            if ($this->_value == $value) {
+            if ($this->value == $value) {
                 $selected = ' selected="selected"';
             }
             $html .= '<option value="' . $value . '"' . $selected . '>' . $label . '</option>';
         }
+        
         $html .= '</select>';
         return $html;
     }
