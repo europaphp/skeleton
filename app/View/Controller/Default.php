@@ -8,7 +8,7 @@
     <body>
         <div id="body"><?php echo $this->getRenderedChild(); ?></div>
         <div id="footer">
-            <p><?php echo $this->lang->time(round(microtime(true) - START_TIME, 3)); ?></p>
+            <p><?php echo $this->lang->time(round(microtime(true) - EUROPA_START_TIME, 3)); ?></p>
         </div>
     </body>
 </html>

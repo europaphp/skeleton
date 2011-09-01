@@ -56,4 +56,14 @@ class Uri
     {
         return $this->uri->toString();
     }
+    
+    /**
+     * Returns the \Europa\Uri object that represents the helper URI.
+     * 
+     * @return \Europa\Uri
+     */
+    public function get()
+    {
+        return $this->uri;
+    }
 }

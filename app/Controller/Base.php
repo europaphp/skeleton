@@ -1,10 +1,10 @@
 <?php
 
 namespace Controller;
-use Europa\Controller\Rest;
+use Europa\Controller\RestController;
 use Europa\Di\Container;
 
-abstract class Base extends Rest
+abstract class Base extends RestController
 {
     public function init()
     {

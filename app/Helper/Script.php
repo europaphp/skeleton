@@ -1,6 +1,7 @@
 <?php
 
 namespace Helper;
+use Europa\View\ViewScriptInterface;
 
 /**
  * A base helper for rendering js and css script tags.
@@ -47,7 +48,7 @@ abstract class Script
      * 
      * @return string
      */
-    public function render($files)
+    public function render($files = array())
     {
         $str = '';
         foreach ((array) $files as $file) {

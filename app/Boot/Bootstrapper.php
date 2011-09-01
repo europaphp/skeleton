@@ -1,13 +1,14 @@
 <?php
 
-// autoloading isn't enabled yet, so required the bootstrapper
-require_once dirname(__FILE__) . '/../lib/Europa/Bootstrapper/BootstrapperAbstract.php';
+namespace Boot;
+
+require_once dirname(__FILE__) . '/../../lib/Europa/Bootstrapper/BootstrapperInterface.php';
+require_once dirname(__FILE__) . '/../../lib/Europa/Bootstrapper/BootstrapperAbstract.php';
 
 use Europa\Bootstrapper\BootstrapperAbstract;
 use Europa\ClassLoader;
 use Europa\Di\Container;
 use Europa\Fs\Directory;
-use Europa\Response\Response;
 use Europa\StringObject;
 
 /**
@@ -35,8 +36,7 @@ class Bootstrapper extends BootstrapperAbstract
     public function __construct()
     {
         $this->setOptions(array(
-            'basePath'   => realpath(dirname(__FILE__) . '/../'),
-            'pluginPath' => realpath(dirname(__FILE__) . '/../plugins')
+            'basePath' => realpath(dirname(__FILE__) . '/../../')
         ));
     }
     
@@ -60,8 +60,6 @@ class Bootstrapper extends BootstrapperAbstract
     public function configureDiContainer()
     {
         $this->container = Container::get()->map(array(
-            'controllerContainer' => '\Europa\Di\Container',
-            'defaultRoute'        => '\Europa\Router\Route\Regex',
             'dispatcher'          => '\Europa\Dispatcher\Dispatcher',
             'finder'              => '\Europa\Fs\Finder',
             'langLocator'         => '\Europa\Fs\Locator',
@@ -72,21 +70,10 @@ class Bootstrapper extends BootstrapperAbstract
             'viewLocator'         => '\Europa\Fs\Locator',
             'request'             => '\Europa\Request\Http',
             'response'            => '\Europa\Response\Response',
-            'router'              => '\Europa\Router\Basic'
+            'route'               => '\Europa\Router\Route\RegexRoute',
+            'router'              => '\Europa\Router\RequestRouter',
+            'routeResolver'       => '\Europa\Router\Resolver\RouteResolver'
         ));
-    }
-    
-    /**
-     * Configures the dispatcher.
-     * 
-     * @return void
-     */
-    public function configureDispatcher()
-    {
-        $this->container->dispatcher(
-            $this->container->controllerContainer,
-            $this->container->viewContainer
-        );
     }
     
     /**
@@ -121,12 +108,15 @@ class Bootstrapper extends BootstrapperAbstract
      */
     public function configureRouter()
     {
-        $this->container->router->setRoute('default', $this->container->defaultRoute);
-        $this->container->defaultRoute(
-            '(index\.php)?/?(?<controller>.+)?',
-            null,
-            array('controller' => 'index')
-        );
+        $this->container->router($this->container->routeResolver);
+    	$this->container->routeResolver->setRoute(
+    		'default',
+    		$this->container->route->create(array(
+    		    '^(?<controller>[^\?\.]+)?',
+    		    ':controller',
+    		    array('controller' => 'index')
+    		))
+    	);
     }
     
     /**
@@ -153,6 +143,7 @@ class Bootstrapper extends BootstrapperAbstract
                 return "\\Helper\\{$name}";
             })
             ->css('css')
+            ->html($this->container->view)
             ->js('js')
             ->lang($this->container->langLocator, $this->container->view, 'en-us');
     }
@@ -167,25 +158,6 @@ class Bootstrapper extends BootstrapperAbstract
         $this->container->viewLocator
             ->throwWhenAdding(false)
             ->addPath($this->basePath . '/app/View');
-    }
-    
-    /**
-     * Configures the sample plugin system.
-     * 
-     * @return void
-     */
-    public function bootstrapPlubins()
-    {
-        $finder = $this->container->finder->create();
-        $finder->in($this->pluginPath);
-        $finder->depth(0);
-        foreach ($finder as $item) {
-            $moduleBasePath = $item->getPathname() . DIRECTORY_SEPARATOR;
-            $this->container->langLocator->addPath($moduleBasePath . 'app/Lang', 'ini');
-            $this->container->loaderLocator->addPath($moduleBasePath . 'app');
-            $this->container->loaderLocator->addPath($moduleBasePath . 'lib');
-            $this->container->viewLocator->addPath($moduleBasePath . 'app/View');
-        }
     }
     
     /**
