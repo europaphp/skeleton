@@ -13,11 +13,25 @@ namespace Europa;
 class Uri
 {
     /**
+     * The initial value of the scheme part.
+     * 
+     * @var string
+     */
+    const DEFAULT_SCHEME = 'http';
+    
+    /**
+     * The initial value of the port part.
+     * 
+     * @var int
+     */
+    const DEFAULT_PORT = 80;
+    
+    /**
      * The scheme set on the URI.
      * 
      * @var string
      */
-    private $scheme;
+    private $scheme = self::DEFAULT_SCHEME;
     
     /**
      * The username set on the URI.
@@ -45,7 +59,7 @@ class Uri
      * 
      * @var int
      */
-    private $port;
+    private $port = self::DEFAULT_PORT;
     
     /**
      * The root URI.
@@ -133,7 +147,7 @@ class Uri
     }
     
     /**
-     * Returns whether or not the specified parmaeter exists.
+     * Returns whether or not the specified parameter exists.
      * 
      * @param string $name The parameter to check for.
      * 
@@ -186,7 +200,7 @@ class Uri
     }
     
     /**
-     * Returns whether or not the specified parmaeter exists.
+     * Returns whether or not the specified parameter exists.
      * 
      * @param string $name The parameter to check for.
      * 
@@ -280,7 +294,7 @@ class Uri
         if ($scheme = $this->getScheme()) {
             return $scheme . '://';
         }
-        return null;
+        return '';
     }
     
     /**
@@ -369,7 +383,7 @@ class Uri
             }
             return $this->getSchemePart() . $auth . $host . $this->getPortPart();
         }
-        return null;
+        return '';
     }
     
     /**
@@ -416,7 +430,7 @@ class Uri
             }
             return ':' . $port;
         }
-        return null;
+        return '';
     }
     
     /**
@@ -440,6 +454,16 @@ class Uri
     public function getRoot()
     {
         return $this->root;
+    }
+    
+    /**
+     * Returns the root part of the URI including the leading slash. If no root exists, then null is returned.
+     * 
+     * @return string
+     */
+    public function getRootPart()
+    {
+        return $this->root ? '/' . $this->root : '';
     }
     
     /**
@@ -468,21 +492,13 @@ class Uri
     }
     
     /**
-     * Returns the request part of the URI that includes the root and request. A leading forward slash is always
-     * returned.
+     * Returns the request part of the URI including the leading slash. If no request exists, then null is returned.
      * 
      * @return string
      */
     public function getRequestPart()
     {
-        $root    = $this->getRoot();
-        $request = $this->getRequest();
-        
-        if ($root && $request) {
-            $root .= '/';
-        }
-        
-        return '/' . $root . $request;
+        return $this->request ? '/' . $this->request : '';
     }
     
     /** 
@@ -520,7 +536,7 @@ class Uri
         if ($query = $this->getQuery()) {
             return '?' . $query;
         }
-        return null;
+        return '';
     }
     
     /**
@@ -556,7 +572,7 @@ class Uri
         if ($frag = $this->getFragment()) {
             return '#' . $frag;
         }
-        return null;
+        return '';
     }
     
     /**
@@ -566,16 +582,11 @@ class Uri
      */
     public function toString()
     {
-        $host    = $this->getHostPart();
-        $request = $this->getRequestPart();
-        $query   = $this->getQueryPart();
-        $frag    = $this->getFragmentPart();
-        
-        if ($host && $request === '/' && !$query && !$frag) {
-            $request = '';
-        }
-        
-        return $host . $request . $query . $frag;
+        return $this->getHostPart()
+             . $this->getRootPart()
+             . $this->getRequestPart()
+             . $this->getQueryPart()
+             . $this->getFragmentPart();
     }
     
     /**
@@ -691,12 +702,11 @@ class Uri
      */
     public static function detectRoot()
     {
-        if (!isset($_SERVER['SCRIPT_FILENAME']) || !isset($_SERVER['SCRIPT_NAME'])) {
+        if (!isset($_SERVER['SCRIPT_NAME'])) {
             return null;
         }
-        $path = dirname($_SERVER['SCRIPT_FILENAME']);
-        $name = dirname($_SERVER['SCRIPT_NAME']);
-        $root = substr($path, -strlen($name));
+        $root = $_SERVER['SCRIPT_NAME'];
+        $root = dirname($root);
         $root = trim($root, '/');
         return $root;
     }
