@@ -54,7 +54,7 @@ abstract class DocTag
     /**
      * Removes any new-line formatting including the asterisks.
      * 
-     * @parma string $tagString The tag string without the tag name.
+     * @param string $tagString The tag string without the tag name.
      * 
      * @return void
      */
