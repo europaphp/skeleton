@@ -76,9 +76,9 @@ class RequestRouter implements RequestRouterInterface
         // figure out the subject to match
         $subject = $this->subject;
         
-        // by default if no subject is specified, it uses the Europa request URI from the request's URI object
+        // by default if no subject is specified, it uses the default string representation of the request
         if (!$subject) {
-            $subject = $request->getUri()->getRequest();
+            $subject = $request->__toString();
         }
         
         // will either be an array or false
