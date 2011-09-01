@@ -105,6 +105,16 @@ class Http extends RequestAbstract
     }
     
     /**
+     * Converts the request to a string representation.
+     * 
+     * @return string
+     */
+    public function __toString()
+    {
+        return urldecode($this->uri->getRequest());
+    }
+    
+    /**
      * Sets a header.
      * 
      * @param string $name  The name of the header.

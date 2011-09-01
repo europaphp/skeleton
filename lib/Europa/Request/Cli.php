@@ -47,6 +47,16 @@ class Cli extends RequestAbstract
     }
     
     /**
+     * Converts the request to a string representation.
+     * 
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->getCommand();
+    }
+    
+    /**
      * Returns the string command that was passed to the console. The command is the part that occurs just before
      * the first argument and after the path to the script. This can contain spaces.
      * 
