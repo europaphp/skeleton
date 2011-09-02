@@ -31,7 +31,7 @@ abstract class RequestAbstract implements RequestInterface
      * 
      * @var array
      */
-    private $params = array();
+    private $params = array('controller' => 'index');
 
     /**
      * Sets the specified request parameter.
