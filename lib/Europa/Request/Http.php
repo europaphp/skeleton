@@ -111,7 +111,7 @@ class Http extends RequestAbstract
      */
     public function __toString()
     {
-        return urldecode($this->uri->getRequest());
+        return $this->uri->getRequest();
     }
     
     /**
