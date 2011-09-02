@@ -19,17 +19,7 @@ class File extends Item
      */
     public function __toString()
     {
-        echo $this->getContents();
-    }
-    
-    /**
-     * Retrieves the contents of the file.
-     * 
-     * @return string
-     */
-    public function getContents()
-    {
-        return file_get_contents($this->getPathname());
+        return $this->getContents();
     }
     
     /**
@@ -43,6 +33,16 @@ class File extends Item
     {
         file_put_contents($this->getPathname(), $contents);
         return static::open($this->getPathname());
+    }
+    
+    /**
+     * Retrieves the contents of the file.
+     * 
+     * @return string
+     */
+    public function getContents()
+    {
+        return file_get_contents($this->getPathname());
     }
     
     /**
@@ -197,8 +197,7 @@ class File extends Item
     }
     
     /**
-     * Creates the specified file. If the file already exists, an exception is
-     * thrown.
+     * Creates the specified file. If the file already exists, an exception is thrown.
      * 
      * @param string $file The file to create.
      * @param int    $mask The octal mask of the file.
@@ -207,9 +206,18 @@ class File extends Item
      */
     public static function create($file, $mask = 0777)
     {
+        // the file must not exist
         if (is_file($file)) {
             throw new Exception("The file {$file} already exists.");
         }
+        
+        // create the directory if it doesn't exist
+        $dir = dirname($file);
+        if (!is_dir($dir)) {
+            Directory::create($dir);
+        }
+        
+        // create the file in the directory
         file_put_contents($file, '');
         chmod($file, $mask);
         return static::open($file);

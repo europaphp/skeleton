@@ -19,8 +19,11 @@ try {
     $response   = $container->response->get();
     $router     = $container->router->get();
     $dispatcher = $container->dispatcher->get();
+    
+    $router->setSubject($request->getUri()->getQueryPart());
     $dispatcher->dispatch($request, $response, $router);
 } catch (\Exception $e) {
-    $request->setParam('controller', 'error/service-unavailable');
+    die($e);
+    $request->setParam('controller', 'error');
     $dispatcher->dispatch($request, $response);
 }

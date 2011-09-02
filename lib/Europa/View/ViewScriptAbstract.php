@@ -3,7 +3,7 @@
 namespace Europa\View;
 use Europa\Di\Container;
 use Europa\Di\Exception as DiException;
-use Europa\Fs\Locator;
+use Europa\Fs\Locator\LocatorInterface;
 
 /**
  * Provides an abstract implementation of a view script renderer.
@@ -25,7 +25,7 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
     /**
      * The loader to use for view locating and loading.
      * 
-     * @var Locator
+     * @var \Europa\Fs\Locator\LocatorInterface
      */
     private $locator;
     
@@ -74,11 +74,11 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
     /**
      * Creates a new PHP view using the specified loader.
      * 
-     * @param \Europa\Loader\FileLoader $loader The loader to use for view locating and loading.
+     * @param \Europa\Fs\Locator\LocatorInterface $locator The locator to use for view locating view files.
      * 
      * @return Php
      */
-    public function __construct(Locator $locator)
+    public function __construct(LocatorInterface $locator)
     {
         $this->locator = $locator;
     }

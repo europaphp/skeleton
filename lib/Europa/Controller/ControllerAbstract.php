@@ -255,7 +255,12 @@ abstract class ControllerAbstract implements ControllerInterface
      */
     private function executeMethod($method, array $params = array())
     {
-        // if the action method exists, then call it
+        // if the action method doesn't exist, try a catch-all
+        if (!method_exists($this, $method)) {
+            $method = 'all';
+        }
+        
+        // attempt to call the action
         if (method_exists($this, $method)) {
             $reflector = new MethodReflector($this, $method);
             return $reflector->invokeNamedArgs($this, $params);

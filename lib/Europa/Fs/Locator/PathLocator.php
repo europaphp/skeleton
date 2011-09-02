@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\Fs;
+namespace Europa\Fs\Locator;
 
 /**
  * Handles file locating based on cascading custom paths.
@@ -10,7 +10,7 @@ namespace Europa\Fs;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Locator
+class PathLocator implements LocatorInterface
 {
     /**
      * The default file suffix.
@@ -52,7 +52,7 @@ class Locator
      * 
      * @param bool $switch Turns throwing on or off.
      * 
-     * @return \Europa\Fs\Locator
+     * @return \Europa\Fs\Locator\PathLocator
      */
     public function throwWhenAdding($switch = true)
     {
@@ -65,7 +65,7 @@ class Locator
      * 
      * @param bool $switch Turns throwing on or off.
      * 
-     * @return \Europa\Fs\Locator
+     * @return \Europa\Fs\Locator\PathLocator
      */
     public function throwWhenLocating($switch = true)
     {

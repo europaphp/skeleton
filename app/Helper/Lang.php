@@ -2,7 +2,7 @@
 
 namespace Helper;
 use Europa\Exception;
-use Europa\Fs\Locator;
+use Europa\Fs\Locator\LocatorInterface;
 use Europa\View\ViewScriptInterface;
 
 /**
@@ -52,7 +52,7 @@ class Lang
      * 
      * @return Lang
      */
-    public function __construct(Locator $locator, ViewScriptInterface $view, $lang)
+    public function __construct(LocatorInterface $locator, ViewScriptInterface $view, $lang)
     {
         $this->locator = $locator;
         $this->view    = $view;

@@ -62,12 +62,12 @@ class Bootstrapper extends BootstrapperAbstract
         $this->container = Container::get()->map(array(
             'dispatcher'          => '\Europa\Dispatcher\Dispatcher',
             'finder'              => '\Europa\Fs\Finder',
-            'langLocator'         => '\Europa\Fs\Locator',
+            'langLocator'         => '\Europa\Fs\Locator\PathLocator',
             'loader'              => '\Europa\ClassLoader',
-            'loaderLocator'       => '\Europa\Fs\Locator',
+            'loaderLocator'       => '\Europa\Fs\Locator\PathLocator',
             'view'                => '\Europa\View\Php',
             'viewHelperContainer' => '\Europa\Di\Container',
-            'viewLocator'         => '\Europa\Fs\Locator',
+            'viewLocator'         => '\Europa\Fs\Locator\PathLocator',
             'request'             => '\Europa\Request\Http',
             'response'            => '\Europa\Response\Response',
             'route'               => '\Europa\Router\Route\RegexRoute',
@@ -109,14 +109,7 @@ class Bootstrapper extends BootstrapperAbstract
     public function configureRouter()
     {
         $this->container->router($this->container->routeResolver);
-    	$this->container->routeResolver->setRoute(
-    		'default',
-    		$this->container->route->create(array(
-    		    '^(?<controller>[^\?\.]+)?',
-    		    ':controller',
-    		    array('controller' => 'index')
-    		))
-    	);
+    	
     }
     
     /**

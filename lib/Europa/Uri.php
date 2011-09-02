@@ -510,7 +510,7 @@ class Uri
      */
     public function setQuery($query)
     {
-        parse_str(trim($query, '?'), $params);
+        parse_str(ltrim($query, '?'), $params);
         $this->setParams($params);
         return $this;
     }
@@ -522,7 +522,7 @@ class Uri
      */
     public function getQuery()
     {
-        return http_build_query($this->getParams());
+        return urldecode(http_build_query($this->getParams()));
     }
     
     /**

@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa;
-use Europa\Fs\Locator;
+use Europa\Fs\Locator\LocatorInterface;
 
 /**
  * Handles class loading.
@@ -16,7 +16,7 @@ class ClassLoader
     /**
      * The locator to use for locating class files.
      * 
-     * @var \Europa\Fs\Locator
+     * @var \Europa\Fs\Locator\LocatorInterface
      */
     private $locator;
     
@@ -60,11 +60,11 @@ class ClassLoader
     /**
      * Sets the locator. A locator is not required for class loading to work.
      * 
-     * @param \Europa\Fs\Locator $locator The locator to use for locating class files.
+     * @param \Europa\Fs\Locator\LocatorInterface $locator The locator to use for locating class files.
      * 
      * @return \Europa\ClassLoader
      */
-    public function setLocator(Locator $locator)
+    public function setLocator(LocatorInterface $locator)
     {
         $this->locator = $locator;
         return $this;
