@@ -94,12 +94,12 @@ class Cli extends RequestAbstract
             }
             $this->commands[] = $arg;
         }
+        
         return $this;
     }
     
     /**
-     * Parses out the cli request parameters - in unix style - and sets them on
-     * the request.
+     * Parses out the cli request parameters - in unix style - and sets them on the request.
      * 
      * @return \Europa\Request\Cli
      */
