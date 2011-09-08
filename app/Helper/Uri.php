@@ -54,7 +54,7 @@ class Uri
      */
     public function __toString()
     {
-        return $this->uri->toString();
+        return $this->uri->__toString();
     }
     
     /**

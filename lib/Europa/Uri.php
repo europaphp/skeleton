@@ -620,7 +620,7 @@ class Uri
      */
     public function redirect()
     {
-        header('Location: ' . $this->toString());
+        header('Location: ' . $this->__toString());
         exit;
     }
     
