@@ -1,8 +1,8 @@
 <?php
 
 namespace Test;
-use Europa\Unit\Test\Test;
 use Europa\Uri as UriObject;
+use Testes\Test;
 
 class Uri extends Test
 {

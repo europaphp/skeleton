@@ -5,7 +5,7 @@ use Europa\Fs\Directory;
 use Europa\Fs\Directory\Exception as DirectoryException;
 use Europa\Fs\File;
 use Europa\Fs\File\Exception as FileException;
-use Europa\Unit\Test\Test;
+use Testes\Test;
 
 class Fs extends Test
 {

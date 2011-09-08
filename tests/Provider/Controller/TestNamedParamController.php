@@ -1,9 +1,9 @@
 <?php
 
 namespace Provider\Controller;
-use Europa\Controller;
+use Europa\Controller\RestController;
 
-class TestNamedParamController extends Controller
+class TestNamedParamController extends RestController
 {
     public $id;
     

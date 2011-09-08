@@ -1,8 +1,8 @@
 <?php
 
 namespace Test\Validator;
-use Europa\Unit\Test\Test;
 use Europa\Validator\Suite as SuiteObject;
+use Testes\Test;
 
 /**
  * Tests for validating \Europa\Validator\Suite

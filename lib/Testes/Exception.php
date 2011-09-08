@@ -1,17 +1,16 @@
 <?php
 
-namespace Test;
-use Testes\Suite;
+namespace Testes;
 
 /**
- * Validation test suite.
+ * The base exception class.
  * 
- * @category Tests
- * @package  Europa
+ * @category UnitTesting
+ * @package  Testes
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2010 Trey Shugart http://europaphp.org/license
  */
-class Validator extends Suite
+class Exception extends \Exception
 {
     
 }

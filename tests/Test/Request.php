@@ -2,7 +2,7 @@
 
 namespace Test;
 use Europa\Request\Http;
-use Europa\Unit\Test\Test;
+use Testes\Test;
 
 class Request extends Test
 {
@@ -37,14 +37,6 @@ class Request extends Test
         $this->assert(
             $this->request->bulk1 === true,
             'Bulk setting not working.'
-        );
-    }
-    
-    public function testHttpControllerSetting()
-    {
-        $this->assert(
-            $this->request->getController() === 'customcontroller',
-            'Controller setting not working.'
         );
     }
     

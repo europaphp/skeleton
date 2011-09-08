@@ -1,8 +1,8 @@
 <?php
 
 namespace Test\View;
-use Europa\Unit\Test\Test;
 use Europa\View\Json as JsonView;
+use Testes\Test;
 
 class Json extends Test
 {

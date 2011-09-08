@@ -2,7 +2,7 @@
 
 namespace Test;
 use Europa\StringObject as StringObject;
-use Europa\Unit\Test\Test;
+use Testes\Test;
 
 class String extends Test
 {

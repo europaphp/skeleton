@@ -1,8 +1,8 @@
 <?php
 
 namespace Test;
-use Europa\Unit\Test\Test;
-use Europa\Loader as LoaderObject;
+use Europa\ClassLoader as LoaderObject;
+use Testes\Test;
 
 class Loader extends Test
 {

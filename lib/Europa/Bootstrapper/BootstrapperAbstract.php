@@ -3,8 +3,8 @@
 namespace Europa\Bootstrapper;
 
 /**
- * When invoked by a child class, it goes through each method in the order which they were defined and executes it.
- * Options can also be used to add dynamics to the bootstrapping process.
+ * When invoked by a child class, it executes each method in the order they were defined. Options can also be used to
+ * add dynamics to the bootstrapping process.
  *
  * @category Application
  * @package  Europa

@@ -1,7 +1,7 @@
 <?php
 
 namespace Test;
-use Europa\Unit\Test\Suite;
+use Testes\Suite;
 
 class Reflection extends Suite
 {

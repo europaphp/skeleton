@@ -1,10 +1,10 @@
 <?php
 
 namespace Test;
-use Europa\Unit\Test\Suite;
+use Testes\Suite;
 
 /**
- * Europa\RouteForm test suite.
+ * Form test suite.
  * 
  * @category Tests
  * @package  Europa

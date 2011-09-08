@@ -2,7 +2,7 @@
 
 namespace Test\Reflection;
 use Europa\Reflection\MethodReflector as MethodReflectorObject;
-use Europa\Unit\Test\Test;
+use Testes\Test;
 
 class MethodReflector extends Test
 {

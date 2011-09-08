@@ -1,11 +1,12 @@
 <?php
 
 namespace Test\View;
-use Europa\Unit\Test\Test;
-use Europa\ServiceLocator;
+use Europa\Di\Container;
+use Europa\Fs\Locator\PathLocator;
 use Europa\StringObject;
-use Europa\View;
 use Europa\View\Php;
+use Provider\View\Helper\Test as TestHelper;
+use Testes\Test;
 
 class Helper extends Test
 {
@@ -15,22 +16,21 @@ class Helper extends Test
     
     public function setUp()
     {
-        $this->view    = new Php;
-        $this->locator = new ServiceLocator;
-        
-        $this->view->setHelperLocator($this->locator);
-        $this->locator->setFormatter(function($service) {
-            return '\Provider\View\Helper' . StringObject::create($service)->toClass();
+        $this->view = new Php(new PathLocator);
+        $container  = new Container;
+        $this->view->setHelperContainer($container);
+        $container->setFormatter(function($dep) {
+            return '\Provider\View\Helper' . StringObject::create($dep)->toClass();
         });
     }
     
     public function testNewInstanceRetrieval()
     {
-        $this->assert($this->view->test()->test(), 'The service injector class was not found.');
+        $this->assert($this->view->create() instanceof TestHelper, 'The container dependency class was not found.');
     }
     
     public function testCachedInstanceRetrieval()
     {
-        $this->assert($this->view->test->test(), 'The service injector class was not found.');
+        $this->assert($this->view->get() instanceof TestHelper, 'The container dependency class was not found.');
     }
 }

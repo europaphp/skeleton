@@ -1,34 +1,19 @@
 <?php
 
-use Europa\Loader;
+use Europa\Di\Container;
+use Testes\Output\Cli;
 
 // all we need to do is include the bootstrap
-require dirname(__FILE__) . '/../app/Bootstrapper.php';
-$boot = new Bootstrapper;
-$boot->boot();
+require dirname(__FILE__) . '/../app/Boot/bootstrap.php';
 
-$loader = new Loader;
-$loader->addPath(dirname(__FILE__) . '/../tests');
-$loader->register();
+// add the tests path
+$locator = Container::get()->loaderLocator->get();
+$locator->addPath(dirname(__FILE__) . '/../tests');
 
+// run the tests
 $tests = new \Test;
 $tests->run();
 
-if ($assertions = $tests->assertions()) {
-    echo "Tests failed:\n";
-    foreach ($assertions as $assertion) {
-        echo '  '
-           , $assertion->getTestFile()
-           , '('
-           , $assertion->getTestLine()
-           , '): '
-           , $assertion->getMessage()
-           , ' In: '
-           , $assertion->getTestClass()
-           , '->'
-           , $assertion->getTestMethod()
-           , "\n";
-    }
-} else {
-    echo "Tests passed!\n";
-}
+// output the results in cli format
+$output = new Cli;
+echo $output->render($tests);

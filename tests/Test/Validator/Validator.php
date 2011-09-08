@@ -1,12 +1,12 @@
 <?php
 
 namespace Test\Validator;
-use Europa\Unit\Test\Test;
 use Europa\Validator\Rule\Required;
 use Europa\Validator\Rule\Number;
 use Europa\Validator\Rule\NumberRange;
 use Europa\Validator\Rule\Alpha;
 use Europa\Validator\Rule\AlphaNumeric;
+use Testes\Test;
 
 /**
  * Tests for validating Europa\RouteValidator.

@@ -1,8 +1,8 @@
 <?php
 
 namespace Test\Validator;
-use Europa\Unit\Test\Test;
 use Europa\Validator\Map as MapObject;
+use Testes\Test;
 
 /**
  * Tests for validating \Europa\Validator\Map

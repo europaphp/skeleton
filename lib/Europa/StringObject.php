@@ -10,7 +10,7 @@ namespace Europa;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class StringObject implements \Countable
+class StringObject implements \ArrayAccess, \Countable
 {
     /**
      * The opening character in a format replacement.
@@ -40,7 +40,7 @@ class StringObject implements \Countable
      * 
      * @return \Europa\StringObject
      */
-    public function __construct($string = '')
+    public function __construct($string)
     {
         if ($string === true) {
             $string = 'true';
@@ -68,6 +68,8 @@ class StringObject implements \Countable
     
     /**
      * Formats a string based on the replacements.
+     * 
+     * @param array $replacements An array of $match => $replacement, $key => $value pairs.
      * 
      * @return \Europa\StringObject
      */
@@ -103,11 +105,11 @@ class StringObject implements \Countable
     /**
      * Splits upper-case words using the specified separator.
      * 
-     * @param string $separator The separator to separate camel words with. Defaults to empty space.
+     * @param string $separator The separator to separate camel-cased words with. Defaults to a single space.
      * 
      * @return \Europa\StringObject
      */
-    public function splitUcWords($separator = '')
+    public function splitUcWords($separator = ' ')
     {
         $parts = array('');
         foreach (str_split($this->string) as $char) {
@@ -306,9 +308,8 @@ class StringObject implements \Countable
     }
     
     /**
-     * Takes a value and type casts it. Strings such as 'true' or 'false' 
-     * will be converted to a boolean value. Numeric strings will be converted
-     * to integers or floats and empty strings are converted to NULL values.
+     * Takes a value and type casts it. Strings such as 'true' or 'false' will be converted to a boolean value. Numeric
+     * strings will be converted to integers or floats and empty strings are converted to NULL values.
      *         
      * @param mixed $val The value to cast and return.
      * 
@@ -336,6 +337,39 @@ class StringObject implements \Countable
         return $val;
     }
     
+    public function offsetSet($offset, $value)
+    {
+        if (isset($this->string[$value])) {
+            $this->string[$value] = $value;
+        } else {
+            $cur = strlen($this->string) - 1;
+            for ($i = $cur; $i < $offset; $i++) {
+                $this->string[$len] = ' ';
+            }
+            $this->string[$offset] = $value;
+        }
+        return $this;
+    }
+    
+    public function offsetGet($offset)
+    {
+        if (isset($this->string[$offset])) {
+            return $this->string[$offset];
+        }
+        return null;
+    }
+    
+    public function offsetExists($offset)
+    {
+        return isset($this->string[$offset]);
+    }
+    
+    public function offsetUnset($offset)
+    {
+        unset($this->string[$offset]);
+        return $this;
+    }
+
     /**
      * Multi-byte safe. Calculates and returns number of characters in a string.
      * 
@@ -353,7 +387,7 @@ class StringObject implements \Countable
      * 
      * @return string
      */
-    public static function create($string = '')
+    public static function create($string)
     {
         return new self($string);
     }

@@ -1,16 +1,18 @@
 <?php
 
 namespace Test;
-use Europa\Unit\Test\Test;
 use Europa\Request\Http;
+use Europa\Response\Response;
 use Provider\Controller\TestNamedParamController;
+use Testes\Test;
 
 class Controller extends Test
 {
     public function testNamedParamMapping()
     {
         $request    = new Http;
-        $controller = new TestNamedParamController($request);
+        $response   = new Response;
+        $controller = new TestNamedParamController($request, $response);
         
         $request->id   = 1;
         $request->name = 'Trey';
