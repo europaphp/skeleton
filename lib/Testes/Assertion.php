@@ -84,7 +84,7 @@ class Assertion implements AssertionInterface
      */
     public function getTestFile()
     {
-        return $this->trace[2]['file'];
+        return $this->trace[1]['file'];
     }
     
     /**

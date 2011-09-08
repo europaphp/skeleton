@@ -34,7 +34,7 @@ class Uri extends Test
         $uri->setHost('localhost');
         $uri->setPort(80);
         $this->assert($uri->getHost() === 'localhost', 'The host was not set properly.');
-        $this->assert($uri->getHostPart() === 'localhost:80', 'The host part was not formatted properly.');
+        $this->assert($uri->getHostPart() === 'http://localhost', 'The host part was not formatted properly.');
         
         $uri->setScheme('https');
         $uri->setPort(443);
@@ -93,26 +93,26 @@ class Uri extends Test
         $uri = new UriObject;
         
         $uri->setScheme('http');
-        $this->assert($uri->toString() === '/', 'URI should only be a forward slash.');
+        $this->assert(!$uri->__toString(), 'The URI should be empty.');
         
         $uri->setHost('127.0.0.1');
         $uri->setUsername('user');
         $uri->setPassword('pass');
         $uri->setPort(80);
-        $this->assert($uri->toString() === 'http://user:pass@127.0.0.1', 'URI should contain correct scheme and host.');
+        $this->assert($uri->__toString() === 'http://user:pass@127.0.0.1', 'URI should contain correct scheme and host.');
         
         $uri->setPort(8080);
-        $this->assert($uri->toString() === 'http://user:pass@127.0.0.1:8080', 'URI should contain correct scheme, host and port.');
+        $this->assert($uri->__toString() === 'http://user:pass@127.0.0.1:8080', 'URI should contain correct scheme, host and port.');
         
         $uri->setRequest('my/request/uri/');
-        $this->assert($uri->toString() === 'http://user:pass@127.0.0.1:8080/my/request/uri', 'URI should contain correct scheme, host, port and request.');
+        $this->assert($uri->__toString() === 'http://user:pass@127.0.0.1:8080/my/request/uri', 'URI should contain correct scheme, host, port and request.');
         
         $uri->setQuery('?test1=0&test2=1');
         $uri->test3 = 2;
-        $this->assert($uri->toString() === 'http://user:pass@127.0.0.1:8080/my/request/uri?test1=0&test2=1&test3=2', 'URI should contain correct scheme, host, port, request and query.');
+        $this->assert($uri->__toString() === 'http://user:pass@127.0.0.1:8080/my/request/uri?test1=0&test2=1&test3=2', 'URI should contain correct scheme, host, port, request and query.');
         
         $uri->setFragment('grenade');
-        $this->assert($uri->toString() === 'http://user:pass@127.0.0.1:8080/my/request/uri?test1=0&test2=1&test3=2#grenade', 'URI should contain correct scheme, host, port, request, query and fragment.');
+        $this->assert($uri->__toString() === 'http://user:pass@127.0.0.1:8080/my/request/uri?test1=0&test2=1&test3=2#grenade', 'URI should contain correct scheme, host, port, request, query and fragment.');
     }
     
     public function testFromString()

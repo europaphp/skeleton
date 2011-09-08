@@ -5,7 +5,7 @@ use Europa\Di\Container;
 use Europa\Fs\Locator\PathLocator;
 use Europa\StringObject;
 use Europa\View\Php;
-use Provider\View\Helper\Test as TestHelper;
+use Provider\View\TestHelper;
 use Testes\Test;
 
 class Helper extends Test

@@ -112,13 +112,17 @@ class Uri
     }
     
     /**
-     * Aliases toString for magic string conversion.
+     * Converts the URI to a string.
      * 
      * @return string
      */
     public function __toString()
     {
-        return $this->toString();
+        return $this->getHostPart()
+             . $this->getRootPart()
+             . $this->getRequestPart()
+             . $this->getQueryPart()
+             . $this->getFragmentPart();
     }
     
     /**
@@ -573,20 +577,6 @@ class Uri
             return '#' . $frag;
         }
         return '';
-    }
-    
-    /**
-     * Returns the full URI that was used in the request.
-     * 
-     * @return string
-     */
-    public function toString()
-    {
-        return $this->getHostPart()
-             . $this->getRootPart()
-             . $this->getRequestPart()
-             . $this->getQueryPart()
-             . $this->getFragmentPart();
     }
     
     /**

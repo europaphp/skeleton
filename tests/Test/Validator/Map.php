@@ -15,18 +15,32 @@ use Testes\Test;
 class Map extends Test
 {
     /**
-     * The name error message.
+     * The error for when a name is not given.
      * 
      * @var string
      */
-    const NAME_ERROR = 'Please enter your name.';
+    const NAME_REQUIRED_ERROR = 'Please enter your name.';
     
     /**
-     * The name error message.
+     * The error for when a string is not given for a name.
      * 
      * @var string
      */
-    const AGE_ERROR = 'You must be between 18 and 25.';
+    const NAME_STRING_ERROR = '';
+    
+    /**
+     * The error for when a number is not given for an age.
+     * 
+     * @var string
+     */
+    const AGE_NUMBER_ERROR = 'Please enter a valid age.';
+    
+    /**
+     * The error for when an invalid range is given for an age.
+     * 
+     * @var string
+     */
+    const AGE_RANGE_ERROR = 'You must be between 18 and 25.';
     
     /**
      * The validator map doing the validation.
@@ -43,8 +57,8 @@ class Map extends Test
     public function setUp()
     {
         $this->validator = MapObject::create()
-            ->name->required()->string()->addMessage(self::NAME_ERROR)
-            ->age->number()->numberRange(18, 25)->addMessage(self::AGE_ERROR);
+            ->name->required()->addMessage(self::NAME_REQUIRED_ERROR)->string()->addMessage(self::NAME_STRING_ERROR)
+            ->age->number()->addMessage(self::AGE_NUMBER_ERROR)->numberRange(18, 25)->addMessage(self::AGE_RANGE_ERROR);
     }
     
     /**
@@ -70,8 +84,8 @@ class Map extends Test
         );
         
         $this->assert(
-            end($this->validator->getMessages()) === self::AGE_ERROR,
-            'The error that was raised should have been the age error.'
+            end($this->validator->getMessages()) === self::AGE_RANGE_ERROR,
+            'The error that was raised should have been the age range error.'
         );
     }
     
@@ -93,8 +107,8 @@ class Map extends Test
         );
         
         $this->assert(
-            end($this->validator->getMessages()) === self::NAME_ERROR,
-            'The error that was raised should have been the name error.'
+            end($this->validator->getMessages()) === self::NAME_REQUIRED_ERROR,
+            'The error that was raised should have been the name required error.'
         );
     }
 }
