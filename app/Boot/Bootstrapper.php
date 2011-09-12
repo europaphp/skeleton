@@ -109,7 +109,6 @@ class Bootstrapper extends BootstrapperAbstract
     public function configureRouter()
     {
         $this->container->router($this->container->routeResolver);
-    	
     }
     
     /**
