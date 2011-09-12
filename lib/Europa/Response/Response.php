@@ -39,7 +39,7 @@ class Response implements \IteratorAggregate, ResponseInterface
      *
      * @var string
      */
-    const CONTENT_TYPE_XML = 'xml';
+    const CONTENT_TYPE_XML = 'text/xml';
     
     /**
      * The content-type header name.
