@@ -10,6 +10,7 @@ use Kafe\Template;
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
+ * @see      https://github.com/treshugart/Kafe
  */
 class Kafe extends ViewScriptAbstract
 {
