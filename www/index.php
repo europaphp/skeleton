@@ -12,7 +12,7 @@ date_default_timezone_set('Australia/Sydney');
 // bootstrap the app
 require dirname(__FILE__) . '/../app/Boot/bootstrap.php';
 
-// any exceptions will routed to the error controller
+// any exceptions will be routed to the error controller
 try {
     $container  = Container::get();
     $request    = $container->request->get();
@@ -23,7 +23,6 @@ try {
     $router->setSubject($request->getUri()->getQueryPart());
     $dispatcher->dispatch($request, $response, $router);
 } catch (\Exception $e) {
-    die($e);
     $request->setParam('controller', 'error');
     $dispatcher->dispatch($request, $response);
 }
