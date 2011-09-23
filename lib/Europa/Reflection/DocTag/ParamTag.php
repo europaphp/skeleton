@@ -1,29 +1,43 @@
 <?php
 
 namespace Europa\Reflection\DocTag;
+use Europa\Reflection\DocTag;
 
 /**
-* This is the param tag object (@param)
+* Represents a docblock param tag.
+*
+* @category Reflection
+* @package  Europa
+* @author   Trey Shugart <treshugart@gmail.com>
+* @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
 */
-class ParamTag extends \Europa\Reflection\DocTag
+class ParamTag extends DocTag
 {
     /**
     * Type of the parameter
+    * 
+    * @var string
     */
     protected $type;
 
     /**
     * Name of the parameter
+    * 
+    * @var string
     */
     protected $name;
 
     /**
     * Description of the parameter
+    * 
+    * @var string
     */
     protected $description;
 
     /**
     * Return the tag object type
+    * 
+    * @return string
     */
     public function tag()
     {
@@ -32,6 +46,10 @@ class ParamTag extends \Europa\Reflection\DocTag
     
     /**
     * Set the type of the parameter
+    * 
+    * @param string $type Type of the parameter
+    * 
+    * @return \Europa\Reflection\DocTag\ParamTag
     */
     public function setType($type)
     {
@@ -41,6 +59,8 @@ class ParamTag extends \Europa\Reflection\DocTag
 
     /**
     * Return the type of the parameter
+    * 
+    * @return string
     */
     public function getType()
     {
@@ -49,6 +69,10 @@ class ParamTag extends \Europa\Reflection\DocTag
 
     /**
     * Set the name of the parameter
+    * 
+    * @param string $name Name of the parameter
+    * 
+    * @return \Europa\Reflection\DocTag\ParamTag
     */
     public function setName($name)
     {
@@ -58,6 +82,8 @@ class ParamTag extends \Europa\Reflection\DocTag
 
     /**
     * Return the name of the parameter
+    * 
+    * @return string
     */
     public function getName()
     {
@@ -66,6 +92,10 @@ class ParamTag extends \Europa\Reflection\DocTag
     
     /**
     * Set the description of the parameter
+    * 
+    * @param string $description description of the tag parameter
+    * 
+    * @return \Europa\Reflection\DocTag\ParamTag
     */
     public function setDescription($description)
     {
@@ -75,6 +105,8 @@ class ParamTag extends \Europa\Reflection\DocTag
 
     /**
     * Return the description of the parameter
+    * 
+    * @return string
     */
     public function getDescription()
     {
@@ -83,6 +115,10 @@ class ParamTag extends \Europa\Reflection\DocTag
 
     /**
     * Parse the DocTag and set its attributes
+    * 
+    * @param sring $tagString Param tag value
+    * 
+    * @return void
     */
     public function parse($tagString)
     {

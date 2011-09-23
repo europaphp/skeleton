@@ -1,19 +1,29 @@
 <?php
 
 namespace Europa\Reflection\DocTag;
+use Europa\Reflection\DocTag;
 
 /**
-* Author tag object
+* Represents a docblock author tag.
+*
+* @category Reflection
+* @package  Europa
+* @author   Trey Shugart <treshugart@gmail.com>
+* @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
 */
-class AuthorTag extends \Europa\Reflection\DocTag
+class AuthorTag extends DocTag
 {
     /**
     * Name of the author
+    * 
+    * @var string
     */
     protected $name;
     
     /**
     * Return the tag object type
+    * 
+    * @return string
     */
     public function tag()
     {
@@ -22,6 +32,10 @@ class AuthorTag extends \Europa\Reflection\DocTag
     
     /**
     * Set the name of the author
+    * 
+    * @param string $name Name of the author
+    * 
+    * @return void
     */
     public function setName($name)
     {
@@ -30,6 +44,8 @@ class AuthorTag extends \Europa\Reflection\DocTag
     
     /**
     * Return the name of the author
+    * 
+    * @return string
     */
     public function getName()
     {
@@ -38,6 +54,10 @@ class AuthorTag extends \Europa\Reflection\DocTag
     
     /**
     * Parse the author tag
+    * 
+    * @param string Author tag
+    * 
+    * @return void
     */
     public function parse($tagString)
     {

@@ -1,40 +1,95 @@
 <?php
 
 namespace Europa\Reflection\DocTag;
+use Europa\Reflection\DocTag;
 
-class ReturnTag extends \Europa\Reflection\DocTag
+/**
+* Represents a docblock return tag.
+*
+* @category Reflection
+* @package  Europa
+* @author   Trey Shugart <treshugart@gmail.com>
+* @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
+*/
+class ReturnTag extends DocTag
 {
+	/**
+     * List of possible return type
+     *
+     * @var array
+	 */
     private $types = array();
 
+    /**
+     * Description of the return value
+     * 
+     * @var string
+     */
     private $description;
 
+    /**
+     * Return the tag object type
+     * 
+     * @return string
+     */
     public function tag()
     {
         return 'return';
     }
 
+    /**
+     * Set the type of the return tag
+     * 
+     * @param array $types Type of the return tag
+     * 
+     * @return \Europa\Reflection\DocTag\ReturnTag;
+     */
     public function setTypes(array $types)
     {
         $this->types = $types;
         return $this;
     }
 
+    /**
+     * Get the type of the parameter
+     * 
+     * @return string
+     */
     public function getTypes()
     {
         return $this->types;
     }
 
+    /**
+     * Set the description of the parameter
+     * 
+     * @param string $description Description of the parameter
+     * 
+     * @return \Europa\Reflection\DocTag\ReturnTag;
+     */
     public function setDescription($description)
     {
         $this->description = $description;
         return $this;
     }
 
+    /**
+     * Return the description of the parameter
+     * 
+     * @return string
+     */
     public function getDescription()
     {
         return $this->description;
     }
 
+    /**
+     * Parse the tag
+     * 
+     * @param string $tabString Return tag
+     * 
+     * @return void
+     */
     public function parse($tagString)
     {
         // use default parsing for generating the name and doc string

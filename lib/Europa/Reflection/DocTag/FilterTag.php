@@ -24,6 +24,8 @@ class FilterTag extends DocTag
     
     /**
      * The value of the filter. This is passed to the constructor.
+     * 
+     * @var string
      */
     private $value;
     
