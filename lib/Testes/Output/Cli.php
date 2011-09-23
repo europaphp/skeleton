@@ -23,7 +23,7 @@ class Cli implements OutputInterface
      */
     public function render(TestInterface $test)
     {
-        $str .= $this->renderAssertions($test);
+        $str = $this->renderAssertions($test);
         $str .= PHP_EOL;
         $str .= PHP_EOL;
         $str .= $this->renderExceptions($test);
