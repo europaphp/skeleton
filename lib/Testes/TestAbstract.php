@@ -69,6 +69,13 @@ abstract class TestAbstract implements TestInterface
     private $peakMemory = 0;
     
     /**
+     * List of exceptions
+     * 
+     * @var array
+     */
+    public $exceptions = array();
+    
+    /**
      * Sets up the test.
      * 
      * @return void
