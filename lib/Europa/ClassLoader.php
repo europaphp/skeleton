@@ -37,7 +37,7 @@ class ClassLoader
         }
         
         // normalize
-        $file = str_replace('\\', DIRECTORY_SEPARATOR, $class);
+        $file = str_replace(array('\\', '_'), DIRECTORY_SEPARATOR, $class);
         $file = trim($file, DIRECTORY_SEPARATOR);
         
         // attempt loading of classes at same level as framework

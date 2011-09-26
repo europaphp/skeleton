@@ -144,7 +144,7 @@ class PathLocator implements LocatorInterface
     
     /**
      * Adds a path to the load paths. Uses realpath to determine path validity. If the path is unable to be resolve, an
-     * exception is thrown. If 
+     * exception is thrown if throwing is turned on.
      * 
      * @param string $path   The path to add to the list of load paths.
      * @param mixed  $suffix The suffix, or suffixes to use for this path.
