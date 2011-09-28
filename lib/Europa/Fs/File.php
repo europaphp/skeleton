@@ -180,6 +180,43 @@ class File extends Item
         file_put_contents($pathname, $contents);
         return $count;
     }
+
+    /**
+     * Returns the file name without extension.
+     * 
+     * @return string
+     */
+    public function getFilename()
+    {
+        return $this->getInfo('filename');
+    }
+
+    /**
+     * Extensions are only available in PHP 5.3.6. This is a workaround for that.
+     * 
+     * @return string
+     */
+    public function getExtension()
+    {
+        return $this->getInfo('extension');
+    }
+
+    /**
+     * Returns information about the particular file. If a key is specified, it returns only that information. If the
+     * information does not exist, it returns false.
+     */
+    public function getInfo($key = null)
+    {
+        $info = pathinfo($this->getRealpath());
+        if ($key) {
+            if (array_key_exists($key, $info)) {
+                return $info[$key];
+            } else {
+                throw new Exception('Information for "' . $this->getRealpath() . '" does not contain "' . $key . '".');
+            }
+        }
+        return $info;
+    }
     
     /**
      * Opens the specified file. If the file doesn't exist an exception is thrown.
