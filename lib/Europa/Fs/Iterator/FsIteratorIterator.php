@@ -20,6 +20,53 @@ class FsIteratorIterator extends \IteratorIterator
      * @var string
      */
     private $last;
+
+    /**
+     * The offset.
+     * 
+     * @var int
+     */
+    private $offset = 0;
+
+    /**
+     * The limit.
+     * 
+     * @var int
+     */
+    private $limit = -1;
+
+    /**
+     * The current number of items that have been returned.
+     * 
+     * @var int
+     */
+    private $count = 0;
+
+    /**
+     * Offsets the result set.
+     * 
+     * @param int $offset The offset to use.
+     * 
+     * @return \Europa\Fs\Iterator\FsIterator
+     */
+    public function setOffset($offset)
+    {
+        $this->offset = (int) $offset;
+        return $this;
+    }
+
+    /**
+     * Limits the result set.
+     * 
+     * @param int $limit The limit to use.
+     * 
+     * @return \Europa\Fs\Iterator\FsIterator
+     */
+    public function setLimit($limit)
+    {
+        $this->limit = (int) $limit;
+        return $this;
+    }
     
     /**
      * Returns specific directory/file instances. Fixes an issue with PHP's FilterIterator that causes the first item
@@ -37,6 +84,14 @@ class FsIteratorIterator extends \IteratorIterator
         
         // mark the last one so we can fix the PHP issue
         $this->last = parent::current()->getPathname();
+
+        // continue on until the offset is met
+        while ($this->key() < $this->offset) {
+            $this->next();
+        }
+
+        // keep track of the number of items
+        $this->count++;
         
         // directory object
         if (parent::current()->isDir()) {
@@ -45,5 +100,30 @@ class FsIteratorIterator extends \IteratorIterator
         
         // file object
         return new File(parent::current()->getPathname());
+    }
+
+    /**
+     * Overridden to reset the count.
+     * 
+     * @return void
+     */
+    public function rewind()
+    {
+        $this->count = 0;
+        return parent::rewind();
+    }
+
+    /**
+     * Overridden to allow the limiting of results.
+     * 
+     * @return bool
+     */
+    public function valid()
+    {
+        $valid = parent::valid();
+        if ($this->limit > -1) {
+            return $valid && $this->limit >= $this->count;
+        }
+        return $valid;
     }
 }

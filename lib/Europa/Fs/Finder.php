@@ -46,6 +46,20 @@ class Finder implements \IteratorAggregate
      * @var int
      */
     private $depth = -1;
+
+    /**
+     * Offsets the returned items.
+     * 
+     * @var int
+     */
+    private $offset = 0;
+
+    /**
+     * Limits the returned items.
+     * 
+     * @var int
+     */
+    private $limit = -1;
     
     /**
      * Iterators to prepend to the current finder listing before applying filters.
@@ -81,7 +95,12 @@ class Finder implements \IteratorAggregate
         foreach ($this->append as $append) {
             $post->append($this->normalizeTraversable($append));
         }
-        return new Iterator\FsIteratorIterator($post);
+        
+        $it = new Iterator\FsIteratorIterator($post);
+        $it->setOffset($this->offset);
+        $it->setLimit($this->limit);
+
+        return $it;
     }
     
     /**
@@ -201,6 +220,52 @@ class Finder implements \IteratorAggregate
             $depth = -1;
         }
         $this->depth = $depth;
+        return $this;
+    }
+
+    /**
+     * Offsets the result set.
+     * 
+     * @param int $offset The offset to use.
+     * 
+     * @return \Europa\Fs\Finder
+     */
+    public function offset($offset)
+    {
+        $this->offset = (int) $offset;
+        return $this;
+    }
+
+    /**
+     * Limits the result set.
+     * 
+     * @param int $limit The limit to use.
+     * 
+     * @return \Europa\Fs\Finder
+     */
+    public function limit($limit)
+    {
+        $this->limit = (int) $limit;
+        return $this;
+    }
+
+    /**
+     * Paginates the result set.
+     * 
+     * @param int $page  The page to use.
+     * @param int $limit The limit to use.
+     * 
+     * @return \Europa\Fs\Finder
+     */
+    public function page($page, $limit)
+    {
+        // ensure that the page is a valid value
+        $page = $page ? $page : 1;
+
+        // set limit and offse values from page and limit
+        $this->limit  = $limit;
+        $this->offset = ($page * $limit) - $limit;
+
         return $this;
     }
     
