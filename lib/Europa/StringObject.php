@@ -88,17 +88,30 @@ class StringObject implements \ArrayAccess, \Countable
     }
     
     /**
-     * Replaces the first replacement with the second replacement. Behaves
-     * exactly like str_replace() because, well, it uses it.
+     * Replaces the first replacement with the second replacement. Behaves exactly like str_replace().
      * 
-     * @param mixed $search  The string(s) to search for.
-     * @param mixed $replace The string(s) to replace with.
+     * @param mixed $search  The string to match.
+     * @param mixed $replace The replacement.
      * 
      * @return \Europa\StringObject
      */
     public function replace($search, $replace)
     {
         $this->string = str_replace($search, $replace, $this->string);
+        return $this;
+    }
+
+    /**
+     * Replaces the first replacement with the second replacement. Behaves exactly like preg_replace().
+     * 
+     * @param mixed $search  The regular expression to use for matching.
+     * @param mixed $replace The replacement.
+     * 
+     * @return \Europa\StringObject
+     */
+    public function replaceRegex($search, $replace)
+    {
+        $this->string = preg_replace($search, $replace, $this->string);
         return $this;
     }
     
