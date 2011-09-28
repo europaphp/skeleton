@@ -155,7 +155,7 @@ class PathLocator implements LocatorInterface
      */
     public function addPath($path, $suffix = self::DEFAULT_SUFFIX)
     {
-        $realpath = $this->getRealpathAndThrowIfNotExists($path);
+        $realpath = self::getRealpathAndThrowIfNotExists($path);
         if (!$realpath) {
             return $this;
         }
@@ -176,9 +176,9 @@ class PathLocator implements LocatorInterface
      * 
      * @return \Europa\ClassLoader
      */
-    public function addIncludePath($path)
+    public static function addIncludePath($path)
     {
-        $realpath = $this->getRealpathAndThrowIfNotExists($path);
+        $realpath = self::getRealpathAndThrowIfNotExists($path);
         if ($realpath) {
             set_include_path(get_include_path() . PATH_SEPARATOR . $realpath);
         }
@@ -194,7 +194,7 @@ class PathLocator implements LocatorInterface
      * 
      * @return string
      */
-    private function getRealpathAndThrowIfNotExists($path)
+    private static function getRealpathAndThrowIfNotExists($path)
     {
         if ($realpath = realpath($path)) {
             return $realpath;
