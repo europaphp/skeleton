@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Response;
+use Europa\StringObject;
 
 /**
  * Counterpart to request object, outputs headers and contents
