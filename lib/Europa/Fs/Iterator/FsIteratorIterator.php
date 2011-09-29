@@ -43,6 +43,13 @@ class FsIteratorIterator extends \IteratorIterator
     private $count = 0;
 
     /**
+     * The internal index.
+     * 
+     * @var int
+     */
+    private $index = 0;
+
+    /**
      * Offsets the result set.
      * 
      * @param int $offset The offset to use.
@@ -86,7 +93,7 @@ class FsIteratorIterator extends \IteratorIterator
         $this->last = parent::current()->getPathname();
 
         // continue on until the offset is met
-        while ($this->key() < $this->offset) {
+        while ($this->index < $this->offset) {
             $this->next();
         }
 
@@ -103,6 +110,17 @@ class FsIteratorIterator extends \IteratorIterator
     }
 
     /**
+     * Overridden to increment the internal index.
+     * 
+     * @return void
+     */
+    public function next()
+    {
+        ++$this->index;
+        return parent::next();
+    }
+
+    /**
      * Overridden to reset the count.
      * 
      * @return void
@@ -110,6 +128,7 @@ class FsIteratorIterator extends \IteratorIterator
     public function rewind()
     {
         $this->count = 0;
+        $this->index = 0;
         return parent::rewind();
     }
 
@@ -122,7 +141,7 @@ class FsIteratorIterator extends \IteratorIterator
     {
         $valid = parent::valid();
         if ($this->limit > -1) {
-            return $valid && $this->limit >= $this->count;
+            return $valid && $this->limit > $this->count;
         }
         return $valid;
     }
