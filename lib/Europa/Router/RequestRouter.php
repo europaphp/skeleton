@@ -17,9 +17,9 @@ class RequestRouter implements RequestRouterInterface
     /**
      * The router resolver to use for resolving routes.
      * 
-     * @var ResolverInterface
+     * @var array
      */
-    private $resolver;
+    private $resolvers = array();
     
     /**
      * The subject to match.
@@ -27,18 +27,6 @@ class RequestRouter implements RequestRouterInterface
      * @var string
      */
     private $subject;
-    
-    /**
-     * Sets up the router.
-     * 
-     * @param ResolverInterface $resolver The resolver to use for resolving routes for the request.
-     * 
-     * @return RequestRouter
-     */
-    public function __construct(ResolverInterface $resolver)
-    {
-        $this->resolver = $resolver;
-    }
     
     /**
      * Sets the subject.
@@ -64,12 +52,24 @@ class RequestRouter implements RequestRouterInterface
     }
     
     /**
+     * Adds a resolver to the router.
+     * 
+     * @param \Europa\Router\Resolver\ResolverInterface $resolver The resolver to add.
+     * 
+     * @return \Europa\Router\RequestRouter
+     */
+    public function addResolver(ResolverInterface $resolver)
+    {
+        $this->resolvers[] = $resolver;
+        return $this;
+    }
+    
+    /**
      * Routes the specified request. If a subject is specified it is used instead of the default Europa request URI.
      * 
-     * @param RequestInterface  $request  The request to route.
-     * @param ResolverInterface $resolver The resolver to use for matching.
+     * @param RequestInterface $request The request to route.
      * 
-     * @return void
+     * @return bool
      */
     public function route(RequestInterface $request)
     {
@@ -81,10 +81,17 @@ class RequestRouter implements RequestRouterInterface
             $subject = $request->__toString();
         }
         
-        // will either be an array or false
-        $params = $this->resolver->query($subject);
+        // uses the first successful resolver
+        foreach ($this->resolvers as $resolver) {
+            // will either be an array or false
+            $params = $resolver->query($subject);
+            if ($params !== false) {
+                // if the request receives anything but an array or object, it rejects the parameters
+                $request->setParams($params);
+                return true;
+            }
+        }
         
-        // if the request receives anything but an array or object, it rejects the parameters
-        $request->setParams($params);
+        return false;
     }
 }
