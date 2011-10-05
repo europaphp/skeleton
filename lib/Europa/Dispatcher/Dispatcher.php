@@ -62,6 +62,22 @@ class Dispatcher implements DispatcherInterface
     }
     
     /**
+     * Sets a controller formatter.
+     * 
+     * @param mixed $formatter The formatter to use.
+     * 
+     * @return \Europa\Dispatcher\Dispatcher
+     */
+    public function setControllerFormatter($formatter)
+    {
+        if (!is_callable($formatter)) {
+            throw new Exception('The specified controller formatter is not callable.');
+        }
+        $this->formatter = $formatter;
+        return $this;
+    }
+    
+    /**
      * Resolves the controller.
      * 
      * @param RequestInterface       $request  The request object to dispatch

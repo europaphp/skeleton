@@ -43,7 +43,6 @@ class Cli extends RequestAbstract
         $this->setMethod(static::METHOD);
         $this->parseCommands();
         $this->parseParams();
-        $this->setController(str_replace(static::T_NS, '\\', $this->getCommand()));
     }
     
     /**
