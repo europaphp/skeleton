@@ -5,7 +5,7 @@ use Europa\Controller\ControllerInterface;
 use Europa\Di\Container;
 use Europa\Request\RequestInterface;
 use Europa\Response\ResponseInterface;
-use Europa\Router\RequestRouterInterface;
+use Europa\Router\RouterInterface;
 use Europa\StringObject;
 
 /**
@@ -44,13 +44,13 @@ class Dispatcher implements DispatcherInterface
      * Actions the appropriate controller and outputs the response. If no router is specified, it attempts to dispatch
      * using whatever parameters that are already available on the request.
      * 
-     * @param RequestInterface       $request  The request object to dispatch.
-     * @param ResponseInterface      $response The response object to output.
-     * @param RequestRouterInterface $router   The request router to use.
+     * @param RequestInterface  $request  The request object to dispatch.
+     * @param ResponseInterface $response The response object to output.
+     * @param RouterInterface   $router   The request router to use.
      * 
      * @return void
      */
-    public function dispatch(RequestInterface $request, ResponseInterface $response, RequestRouterInterface $router = null)
+    public function dispatch(RequestInterface $request, ResponseInterface $response, RouterInterface $router = null)
     {
         if ($router) {
             $router->route($request);

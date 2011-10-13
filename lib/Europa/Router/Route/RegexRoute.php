@@ -20,9 +20,8 @@ class RegexRoute implements RouteInterface
     private $expression;
     
     /**
-     * Since it is very difficult to reverse engineer a regular expression
-     * a reverse engineering string is used to reverse engineer the route
-     * back into a URI. This allows for fluid links.
+     * Since it is very difficult to reverse engineer a regular expression a reverse engineering string is used to
+     * reverse engineer the route back into a URI. This allows for fluid links.
      * 
      * @var string
      */
@@ -68,8 +67,8 @@ class RegexRoute implements RouteInterface
     }
     
     /**
-     * Matches the passed subject to the route. Can be extended to provide a
-     * custom routing algorithm. Returns the matched parameters.
+     * Matches the passed subject to the route. Can be extended to provide a custom routing algorithm. Returns the
+     * matched parameters.
      * 
      * @param string $subject The URI to match against the current route definition.
      * 

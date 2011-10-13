@@ -70,6 +70,33 @@ class RouteResolver implements ResolverInterface
     }
     
     /**
+     * Returns if a route was set.
+     * 
+     * @param string $name The name of the route to check for.
+     * 
+     * @return bool
+     */
+    public function hasRoute($name)
+    {
+        return isset($this->routes[$name]);
+    }
+    
+    /**
+     * Removes a route.
+     * 
+     * @param string $name The name of the route to remove.
+     * 
+     * @return bool
+     */
+    public function removeRoute($name)
+    {
+        if (isset($this->routes[$name])) {
+            unset($this->routes[$name]);
+        }
+        return $this;
+    }
+    
+    /**
      * Returns all routes that were set.
      * 
      * @return array

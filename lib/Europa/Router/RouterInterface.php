@@ -11,12 +11,12 @@ use Europa\Request\RequestInterface;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-interface RequestRouterInterface
+interface RouterInterface
 {
     /**
      * Routes the specified route using the specified resolver.
      * 
-     * @param RequestInterface $request The request to route.
+     * @param \Europa\Request\RequestInterface $request The request to route.
      * 
      * @return void
      */

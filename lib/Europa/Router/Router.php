@@ -12,7 +12,7 @@ use Europa\Router\Resolver\ResolverInterface;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class RequestRouter implements RequestRouterInterface
+class Router implements RouterInterface
 {
     /**
      * The router resolver to use for resolving routes.

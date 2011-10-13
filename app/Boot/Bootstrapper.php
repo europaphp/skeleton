@@ -71,7 +71,7 @@ class Bootstrapper extends BootstrapperAbstract
             'request'             => '\Europa\Request\Http',
             'response'            => '\Europa\Response\Response',
             'route'               => '\Europa\Router\Route\RegexRoute',
-            'router'              => '\Europa\Router\RequestRouter',
+            'router'              => '\Europa\Router\Router',
             'routeResolver'       => '\Europa\Router\Resolver\RouteResolver'
         ));
     }

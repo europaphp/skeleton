@@ -13,10 +13,5 @@ use Europa\Exception as BaseException;
  */
 class Exception extends BaseException
 {
-    /**
-     * Thrown when no route is matched.
-     * 
-     * @var int
-     */
-    const NO_MATCH = 1;
+    
 }
