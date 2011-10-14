@@ -82,9 +82,20 @@ abstract class ControllerAbstract implements ControllerInterface
      */
     public function render()
     {
-        $this->preRender();
-        $view = $this->view ? $this->view->render($this->actionResult) : '';
-        $this->postRender();
+        // if a view is not rendered, it defaults to an empty string
+        $view = '';
+        
+        // only pre-render if a view is set
+        if ($this->view) {
+            $this->preRender();
+        }
+        
+        // the view could have been disabled in preRender so we should honor that
+        if ($this->view) {
+            $view = $this->view->render($this->actionResult);
+            $this->postRender();
+        }
+        
         return $view;
     }
     
