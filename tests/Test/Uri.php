@@ -1,7 +1,7 @@
 <?php
 
 namespace Test;
-use Europa\Uri as UriObject;
+use Europa\Request\Uri as UriObject;
 use Testes\Test;
 
 class Uri extends Test

@@ -94,13 +94,13 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
     public function __call($name, array $args = array())
     {
         if (!$this->container) {
-            throw new Exception('Unable to create helper "' . $name . '" because no helper locator was set.');
+            throw new \LogicException('Unable to create helper "' . $name . '" because no helper locator was set.');
         }
         
         try {
             return $this->container->__get($name)->create($args);
-        } catch (DiException $e) {
-            throw new Exception('Unable to create instance of helper "' . $name . '".');
+        } catch (\Exception $e) {
+            throw new \LogicException('Unable to create instance of helper "' . $name . '" with message: ' . $e->getMessage());
         }
     }
     
@@ -138,7 +138,7 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
     public function render(array $context = array())
     {
         if (!$this->script) {
-            throw new Exception('Could not render view: No script was defined to render.');
+            throw new \LogicException('Could not render view: No script was defined to render.');
         }
         
         // capture old context
@@ -366,7 +366,7 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
         
         // child views cannot extend themselves
         if ($parent === $child) {
-            throw new Exception('Child view cannot extend itself.');
+            throw new \LogicException('Child view cannot extend itself.');
         }
         
         // if the child has already extended a parent, don't do anything
@@ -408,6 +408,6 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
         if ($file = $this->locator->locate($script)) {
             return $file;
         }
-        throw new Exception("Could not render view because {$script} does not exist.");
+        throw new \LogicException("Could not render view because {$script} does not exist.");
     }
 }

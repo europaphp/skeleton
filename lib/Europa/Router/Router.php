@@ -132,7 +132,7 @@ class Router implements RouterInterface
     {
         // the route must exist
         if (!isset($this->routes[$name])) {
-            throw new Exception('The route "' . $name . '" does not exist.');
+            throw new \LogicException('The route "' . $name . '" does not exist.');
         }
         
         return $this->routes[$name];

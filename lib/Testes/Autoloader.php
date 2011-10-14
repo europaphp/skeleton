@@ -53,7 +53,7 @@ class Autoloader
         if ($path) {
             $temp = realpath($path);
             if (!$temp) {
-                throw new Exception('The test path "' . $path . '" is not valid.');
+                throw new \LogicException('The test path "' . $path . '" is not valid.');
             }
 
             // register the namespace and it's associated path

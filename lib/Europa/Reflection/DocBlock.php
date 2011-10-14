@@ -128,7 +128,7 @@ class DocBlock
 
         // check to see if it's valid
         if (!isset($this->map[$name])) {
-            throw new Exception('The tag "{$name}" is an invalid tag for the "{get_class($this)}" doc block.');
+            throw new \LogicException('The tag "{$name}" is an invalid tag for the "{get_class($this)}" doc block.');
         }
 
         // if the tag is already set, we create multiple of the same one
@@ -282,7 +282,7 @@ class DocBlock
         $name  = trim(strtolower($parts[0]));
 
         if (!isset($this->map[$name])) {
-            throw new Exception('Unknown doc tag "' . $name . '".');
+            throw new \LogicException('Unknown doc tag "' . $name . '".');
         }
 
         $class = $this->map[$name];

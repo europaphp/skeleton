@@ -281,7 +281,7 @@ abstract class ControllerAbstract implements ControllerInterface
             return $this->__call($method, $params);
         }
         
-        throw new Exception("Method {$method} is not supported and was not trapped in __call.");
+        throw new \LogicException("Method {$method} is not supported and was not trapped in __call.");
     }
     
     /**
@@ -303,7 +303,7 @@ abstract class ControllerAbstract implements ControllerInterface
         
         // action result should be an arary
         if (!is_array($actionResult)) {
-            throw new Exception("If a value is returned from your action, it must be an array.");
+            throw new \LogicException('If a value is returned from your action, it must be an array.');
         }
         
         $this->actionResult = $actionResult;

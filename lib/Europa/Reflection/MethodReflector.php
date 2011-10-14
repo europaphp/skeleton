@@ -75,7 +75,7 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
             } elseif ($param->isOptional()) {
                 $merged[$pos] = $param->getDefaultValue();
             } elseif ($throw) {
-                throw new Exception('The required parameter "' . $name . '" was not specified.');
+                throw new \LogicException('The required parameter "' . $name . '" was not specified.');
             } else {
                 $meged[$pos] = null;
             }

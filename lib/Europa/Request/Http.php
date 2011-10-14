@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa\Request;
-use Europa\Uri;
+use Europa\Request\Uri;
 
 /**
  * The request class representing an HTTP request.
@@ -264,7 +264,7 @@ class Http extends RequestAbstract
     /**
      * Sets the request URI.
      * 
-     * @param \Europa\Uri $uri The URI to set.
+     * @param \Europa\Request\Uri $uri The URI to set.
      * 
      * @return \Europa\Request\Http;
      */
@@ -277,7 +277,7 @@ class Http extends RequestAbstract
     /**
      * Returns the request URI.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function getUri()
     {

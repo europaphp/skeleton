@@ -109,12 +109,12 @@ class Dependency
     {
         if (!is_object($instance)) {
             $type = gettype($instance);
-            throw new Exception("Only object instances may be registered. Type {$type} given.");
+            throw new \InvalidArgumentException("Only object instances may be registered. Type {$type} given.");
         }
         
         if (!$instance instanceof $this->class) {
             $class = get_class($instance);
-            throw new Exception("The instance must be an instance of {$this->class}. Instance of {$class} given.");
+            throw new \InvalidArgumentException("The instance must be an instance of {$this->class}. Instance of {$class} given.");
         }
         
         $this->instance = $instance;
@@ -180,7 +180,7 @@ class Dependency
                 $instance = $instance->newInstance();
             }
         } catch (\Exception $e) {
-            throw new Exception(
+            throw new \LogicException(
                 "Could not invoke dependency class {$this->class} with message: {$e->getMessage()}.",
                 $e->getCode()
             );
@@ -206,7 +206,7 @@ class Dependency
             } elseif (method_exists($instance, '__call')) {
                 call_user_func(array($instance, '__call'), $method, $args);
             } else {
-                throw new Exception("Method {$method} or __call does not exist for {$this->class}.");
+                throw new \LogicException("Method {$method} or __call does not exist for {$this->class}.");
             }
         }
         return $this;

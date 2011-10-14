@@ -65,7 +65,7 @@ class File extends Item
     public function delete()
     {
         if (!@unlink($this->getPathname())) {
-            throw new Exception(
+            throw new \RuntimeException(
                 'Could not delete file ' . $this->getPathname() . '.'
             );
         }
@@ -90,7 +90,7 @@ class File extends Item
         // copy the file to the destination
         if ($fileOverwrite || !is_file($destination)) {
             if (!@copy($source, $destination)) {
-                throw new Exception(
+                throw new \RuntimeException(
                     'Could not copy file ' . $source . ' to ' . $destination . '.'
                 );
             }
@@ -126,7 +126,7 @@ class File extends Item
     {
         $oldPath = $this->getPathname();
         if (!@rename($oldPath, $newPath)) {
-            throw new Exception(
+            throw new \RuntimeException(
                 'Could not rename file from ' . $oldPath . ' to ' . $newPath . '.'
             );
         }
@@ -204,6 +204,10 @@ class File extends Item
     /**
      * Returns information about the particular file. If a key is specified, it returns only that information. If the
      * information does not exist, it returns false.
+     * 
+     * @param string $key The information to retrieve from the file.
+     * 
+     * @return mixed
      */
     public function getInfo($key = null)
     {
@@ -212,7 +216,7 @@ class File extends Item
             if (array_key_exists($key, $info)) {
                 return $info[$key];
             } else {
-                throw new Exception('Information for "' . $this->getRealpath() . '" does not contain "' . $key . '".');
+                throw new \LogicException('Information for "' . $this->getRealpath() . '" does not contain "' . $key . '".');
             }
         }
         return $info;
@@ -228,7 +232,7 @@ class File extends Item
     public static function open($file)
     {
         if (!is_file($file)) {
-            throw new Exception("Could not open file {$file}.");
+            throw new \RuntimeException("Could not open file {$file}.");
         }
         return new static($file);
     }
@@ -245,7 +249,7 @@ class File extends Item
     {
         // the file must not exist
         if (is_file($file)) {
-            throw new Exception("The file {$file} already exists.");
+            throw new \LogicException("The file {$file} already exists.");
         }
         
         // create the directory if it doesn't exist

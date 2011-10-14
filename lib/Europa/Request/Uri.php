@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa;
+namespace Europa\Request;
 
 /**
  * Class for URI detection and manipulation.
@@ -104,7 +104,7 @@ class Uri
      * 
      * @param string $uri A URI to parse and apply to the current URI.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function __construct($uri = null)
     {
@@ -131,7 +131,7 @@ class Uri
      * @param string $name  The name of the parameter to set.
      * @param mixed  $value The value of the parameter to set.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function __set($name, $value)
     {
@@ -167,7 +167,7 @@ class Uri
      * 
      * @param string $name The parameter to remove.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function __unset($name)
     {
@@ -180,7 +180,7 @@ class Uri
      * @param string $name  The name of the parameter to set.
      * @param mixed  $value The value of the parameter to set.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function setParam($name, $value)
     {
@@ -220,7 +220,7 @@ class Uri
      * 
      * @param string $name The parameter to remove.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function removeParam($name)
     {
@@ -235,7 +235,7 @@ class Uri
      * 
      * @param array $params The parameters to set.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function setParams(array $params)
     {
@@ -256,7 +256,7 @@ class Uri
     /**
      * Removes all set parameters.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function removeParams()
     {
@@ -269,7 +269,7 @@ class Uri
      * 
      * @param string $scheme The scheme to set.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function setScheme($scheme)
     {
@@ -306,7 +306,7 @@ class Uri
      * 
      * @param string $user The username to set.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function setUsername($user)
     {
@@ -329,7 +329,7 @@ class Uri
      * 
      * @param string $pass The password to set.
      *
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function setPassword($pass)
     {
@@ -352,7 +352,7 @@ class Uri
      * 
      * @param string $host The host to set.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function setHost($host)
     {
@@ -395,7 +395,7 @@ class Uri
      * 
      * @param mixed $port The port to set.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function setPort($port)
     {
@@ -442,7 +442,7 @@ class Uri
      * 
      * @param string $root The root of the URI.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function setRoot($root)
     {
@@ -477,7 +477,7 @@ class Uri
      * 
      * @param string $request The request to set.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function setRequest($request)
     {
@@ -510,7 +510,7 @@ class Uri
      * 
      * @param string $query The query to set.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function setQuery($query)
     {
@@ -548,7 +548,7 @@ class Uri
      * 
      * @param string $frag The fragment to set.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function setFragment($frag)
     {
@@ -584,7 +584,7 @@ class Uri
      * 
      * @param string $uri The URI to parse and apply to the current instance.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function fromString($uri)
     {
@@ -627,7 +627,7 @@ class Uri
     /**
      * Auto-detects and sets all available parts of the URI and returns an instance of it.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public static function detect()
     {

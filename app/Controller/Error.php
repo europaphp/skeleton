@@ -1,7 +1,7 @@
 <?php
 
 namespace Controller;
-use Europa\Uri;
+use Europa\Request\Uri;
 
 /**
  * A controller that will handle all errors.

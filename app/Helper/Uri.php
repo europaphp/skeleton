@@ -1,7 +1,7 @@
 <?php
 
 namespace Helper;
-use Europa\Uri as UriClass;
+use Europa\Request\Uri as UriClass;
 
 /**
  * A helper for formatting a passed in url.
@@ -58,9 +58,9 @@ class Uri
     }
     
     /**
-     * Returns the \Europa\Uri object that represents the helper URI.
+     * Returns the \Europa\Request\Uri object that represents the helper URI.
      * 
-     * @return \Europa\Uri
+     * @return \Europa\Request\Uri
      */
     public function get()
     {

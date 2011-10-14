@@ -3,7 +3,6 @@
 namespace Europa\Reflection\DocTag;
 use Europa\Reflection\ClassReflector;
 use Europa\Reflection\DocTag;
-use Europa\Reflection\Exception;
 
 /**
  * Represents a docblock filter tag.
@@ -89,7 +88,7 @@ class FilterTag extends DocTag
         
         // a filter class must be specified
         if (!$this->tagString) {
-            throw new Exception('A filter must be specified.');
+            throw new \LogicException('A filter must be specified.');
         }
         
         // tag string is split into two parts, filter name and the value to be passed to the constructor

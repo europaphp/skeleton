@@ -23,13 +23,13 @@ class Directory extends Item implements \IteratorAggregate, \Countable
     {
         $realpath = realpath($path);
         if (!$path || !$realpath) {
-            throw new Exception('The path "' . $path . '" must be a valid directory.');
+            throw new \LogicException('The path "' . $path . '" must be a valid directory.');
         }
 
         try {
             parent::__construct($realpath);
         } catch(\RuntimeException $e) {
-            throw new Exception("Could not open directory {$path} with message: {$e->getMessage()}.");
+            throw new \RuntimeException("Could not open directory {$path} with message: {$e->getMessage()}.");
         }
     }
     
@@ -88,12 +88,12 @@ class Directory extends Item implements \IteratorAggregate, \Countable
             }
             if (!is_file($new) || $fileOverwrite) {
                 if (!@copy($old, $new)) {
-                    throw new Exception(
+                    throw new \RuntimeException(
                         'File ' . $old . ' could not be copied to ' . $new . '.'
                     );
                 }
             } elseif (is_file($new) && !$fileOverwrite) {
-                throw new Exception(
+                throw new \RuntimeException(
                     'File ' . $new . ' already exists.'
                 );
             }
@@ -129,7 +129,7 @@ class Directory extends Item implements \IteratorAggregate, \Countable
         $oldPath = $this->getPathname();
         $newPath = dirname($oldPath) . DIRECTORY_SEPARATOR . basename($newName);
         if (!@rename($oldPath, $newPath)) {
-            throw new Exception("Path {$oldPath} could not be renamed to {$newPath}.");
+            throw new \RuntimeException("Path {$oldPath} could not be renamed to {$newPath}.");
         }
         return self::open($newPath);
     }
@@ -147,7 +147,7 @@ class Directory extends Item implements \IteratorAggregate, \Countable
         
         // then delete it
         if (!@rmdir($this->getPathname())) {
-            throw new Exception("Could not remove directory {$this->getPathname()}.");
+            throw new \RuntimeException("Could not remove directory {$this->getPathname()}.");
         }
     }
     
@@ -235,7 +235,7 @@ class Directory extends Item implements \IteratorAggregate, \Countable
     public static function open($path)
     {
         if (!is_dir($path)) {
-            throw new Exception("Could not open directory {$path}.");
+            throw new \RuntimeException("Could not open directory {$path}.");
         }
         return new static($path);
     }
@@ -252,15 +252,15 @@ class Directory extends Item implements \IteratorAggregate, \Countable
     public static function create($path, $mask = 0777)
     {
         if (is_dir($path)) {
-            throw new Exception("Directory {$path} already exists.");
+            throw new \RuntimeException("Directory {$path} already exists.");
         }
         
         if (!@mkdir($path, $mask, true)) {
-            throw new Exception("Could not create directory {$path}.");
+            throw new \RuntimeException("Could not create directory {$path}.");
         }
         
         if (!@chmod($path, $mask)) {
-            throw new Exception("Could not set file permissions on {$path} to {$mask}.");
+            throw new \RuntimeException("Could not set file permissions on {$path} to {$mask}.");
         }
         
         return static::open($path);

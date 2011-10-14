@@ -68,7 +68,7 @@ class ThrowsTag extends DocTag
     {
         $parts = explode(' ', $tagString, 2);
         if (!isset($parts[0])) {
-            throw new Exception('An exception class must be specified for a @throws tag.');
+            throw new \LogicException('An exception class must be specified for a @throws tag.');
         }
         
         $this->exception = $parts[0];

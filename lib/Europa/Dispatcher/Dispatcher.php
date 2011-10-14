@@ -121,7 +121,7 @@ class Dispatcher implements DispatcherInterface
         // make sure it's a valid instance
         if (!$controller instanceof ControllerInterface) {
             $controller = get_class($controller);
-            throw new Exception("Class {$controller} is not a valid controller instance. Controllers must implement Europa\Controller\ControllerInterface.");
+            throw new \LogicException("Class {$controller} is not a valid controller instance. Controllers must implement Europa\Controller\ControllerInterface.");
         }
         
         return $controller;
