@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa;
+namespace Europa\Fs;
 use Europa\Fs\Locator\LocatorInterface;
 
 /**
@@ -11,7 +11,7 @@ use Europa\Fs\Locator\LocatorInterface;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class ClassLoader
+class Loader
 {
     /**
      * The locator to use for locating class files.
@@ -28,7 +28,7 @@ class ClassLoader
      * 
      * @param string $class The class to search for.
      * 
-     * @return \Europa\ClassLoader
+     * @return \Europa\Fs\Loader
      */
     public function load($class)
     {
@@ -41,7 +41,7 @@ class ClassLoader
         $file = trim($file, DIRECTORY_SEPARATOR);
         
         // attempt loading of classes at same level as framework
-        if ($fullpath = realpath(dirname(__FILE__) . '/../' . $file . '.php')) {
+        if ($fullpath = realpath(dirname(__FILE__) . '/../../' . $file . '.php')) {
             include $fullpath;
             return true;
         }
@@ -62,7 +62,7 @@ class ClassLoader
      * 
      * @param \Europa\Fs\Locator\LocatorInterface $locator The locator to use for locating class files.
      * 
-     * @return \Europa\ClassLoader
+     * @return \Europa\Fs\Loader
      */
     public function setLocator(LocatorInterface $locator)
     {
@@ -75,7 +75,7 @@ class ClassLoader
      * 
      * @param bool $prepend Whether or not to prepend the autoloader onto the stack.
      * 
-     * @return \Europa\ClassLoader
+     * @return \Europa\Fs\Loader
      */
     public function register($prepend = false)
     {

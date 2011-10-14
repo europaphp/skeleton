@@ -10,7 +10,7 @@ namespace Europa\Request;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class RequestAbstract implements RequestInterface
+abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
 {
     /**
      * The request unique id.
@@ -199,18 +199,18 @@ abstract class RequestAbstract implements RequestInterface
     }
     
     /**
-     * Returns the parameters whose names match the regex. The delimitter is automated so you don't have to type it
-     * everytime you search. The default delmitter is a forward slash.
+     * Returns the parameters whose names match the regex. The delimiter is automated so you don't have to type it
+     * every time you search. The default delimiter is a forward slash.
      * 
-     * @param string $pattern    The pattern to use for searching.
-     * @param string $delimitter The delimitter to use for the pattern.
+     * @param string $pattern   The pattern to use for searching.
+     * @param string $delimiter The delimiter to use for the pattern.
      * 
      * @return array
      */
-    public function searchParams($pattern, $delimitter = '/', $flags = null)
+    public function searchParams($pattern, $delimiter = '/', $flags = null)
     {
         $params  = array();
-        $pattern = $delimitter . $pattern . $delimitter . $flags;
+        $pattern = $delimiter . $pattern . $delimiter . $flags;
         foreach ($this->params as $name => $value) {
             if (preg_match($pattern, $name)) {
                 $params[$name] = $value;
@@ -254,6 +254,16 @@ abstract class RequestAbstract implements RequestInterface
             $this->id = md5(uniqid(rand(), true));
         }
         return $this->id;
+    }
+    
+    /**
+     * Returns an iterator of the parameters.
+     * 
+     * @return \ArrayIterator
+     */
+    public function getIterator()
+    {
+        return new \ArrayIterator($this->params);
     }
     
     /**

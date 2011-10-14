@@ -1,7 +1,8 @@
 <?php
 
 namespace Europa\Response;
-use Europa\StringObject;
+use Europa\Filter\LowerCamelCaseFilter;
+use Europa\Filter\CamelCaseSplitFilter;
 
 /**
  * Counterpart to request object, outputs headers and contents
@@ -12,7 +13,7 @@ use Europa\StringObject;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Response implements \IteratorAggregate, ResponseInterface
+class Http implements \IteratorAggregate, ResponseInterface
 {
     /**
      * The JSON content type.
@@ -55,6 +56,31 @@ class Response implements \IteratorAggregate, ResponseInterface
      * @var array
      */
     private $headers = array();
+    
+    /**
+     * The lower camel case filter.
+     * 
+     * @var \Europa\Filter\LowerCamelCaseFilter
+     */
+    private $lccFilter;
+    
+    /**
+     * The camel case split filter.
+     * 
+     * @var \Europa\Filter\CamelCaseSplitFilter
+     */
+    private $ccSplitFilter;
+    
+    /**
+     * Sets up a new response object.
+     * 
+     * @return \Europa\Response\Response
+     */
+    public function __construct()
+    {
+        $this->lccFilter     = new LowerCamelCaseFilter;
+        $this->ccSplitFilter = new CamelCaseSplitFilter;
+    }
     
     /**
      * Sets the specified request header.
@@ -115,6 +141,9 @@ class Response implements \IteratorAggregate, ResponseInterface
      */
     public function setHeader($name, $value)
     {
+        // normalize the header name to lower camel case
+        $name = $this->lccFilter->filter($name);
+        
         $this->headers[$name] = $value;
         return $this;
     }
@@ -128,6 +157,9 @@ class Response implements \IteratorAggregate, ResponseInterface
      */
     public function getHeader($name)
     {
+        // normalize the header name to lower camel case
+        $name = $this->lccFilter->filter($name);
+        
         if (isset($this->headers[$name])) {
             return $this->headers[$name];
         }
@@ -172,14 +204,15 @@ class Response implements \IteratorAggregate, ResponseInterface
     {
         foreach ($this->headers as $name => $value) {
             // ensure camel-cased attr converted to headers, e.g. contentType => content-type
-            $name = StringObject::create($name)->splitUcWords('-');
-            header($name->__toString() . ': ' . $value);
+            $name = $this->ccSplitFilter->filter($name);
+            
+            header($name . ': ' . $value);
         }        
-        echo $content;     
+        echo $content;
     }
     
     /**
-     * Returns the iterator to use when iterating over the Reponse object.
+     * Returns the iterator to use when iterating over the Response object.
      * 
      * @return \ArrayIterator
      */

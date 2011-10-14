@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa\View;
-use Europa\StringObject;
+use Europa\Filter\ToStringFilter;
 
 /**
  * A view class for rendering CSV data from bound parameters.
@@ -118,7 +118,9 @@ class Csv implements ViewInterface
         } elseif (is_array($data)) {
             return $this->convertArrayToString($data);
         }
-        return StringObject::create($data)->__toString();
+        
+        $toStringFilter = new ToStringFilter;
+        return $toStringFilter->filter($data);
     }
     
     /**

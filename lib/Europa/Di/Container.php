@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Di;
+use Europa\Filter\FilterInterface;
 
 /**
  * The dependency injection container represents a collection of configured dependencies. Dependencies are instances
@@ -39,11 +40,11 @@ class Container
     private $deps = array();
     
     /**
-     * Formatter callback for formatting dependency names into class names.
+     * Filter used for name formatting.
      * 
-     * @var mixed
+     * @var \Europa\Filter\FilterInterface
      */
-    private $formatter;
+    private $filter;
     
     /**
      * Mapping of name => className for dependencies.
@@ -67,14 +68,44 @@ class Container
     private static $containers = array();
     
     /**
-     * Sets up a new dependency.
+     * Magic caller for configure().
+     * 
+     * @see \Europa\Di\Dependency::register()
+     */
+    public function __call($name, array $args = array())
+    {
+        return $this->configure($name, $args);
+    }
+    
+    /**
+     * Magic caller for register().
+     * 
+     * @see \Europa\Di\Dependency::register()
+     */
+    public function __set($name, $value)
+    {
+        return $this->register($name, $value);
+    }
+    
+    /**
+     * Magic caller for resolve().
+     * 
+     * @see \Europa\Di\Dependency::resolve()
+     */
+    public function __get($name)
+    {
+        return $this->resolve($name);
+    }
+    
+    /**
+     * Creates a dependency if it doesn't already exist and configures its constructor parameters and returns it.
      * 
      * @param string $name The name of the dependency.
      * @param array  $args The arguments for the dependency constructor.
      * 
      * @return \Europa\Di\Dependency
      */
-    public function __call($name, array $args = array())
+    public function configure($name, array $args = array())
     {
         if (!isset($this->deps[$name])) {
             $dep = $this->getClassNameFor($name);
@@ -93,14 +124,15 @@ class Container
      * Detects the value of $value and handles it appropriately.
      *   - Instances of \Europa\Di\Dependency are registered on the container.
      *   - Other instances are created as a dependency then registered.
-     *   - Strings are used as a class map for $name.
      * 
      * @param string $name  The name of the dependency.
      * @param mixed  $value One of many allowed values.
      * 
+     * @throws \InvalidArgumentException If anything but a dependency object or other object instance is passed.
+     * 
      * @return \Europa\Di\Container
      */
-    public function __set($name, $value)
+    public function register($name, $value)
     {
         if ($value instanceof Dependency) {
             $this->deps[$name] = $value;
@@ -109,19 +141,21 @@ class Container
             $this->deps[$name]->set($value);
         } elseif (is_string($value)) {
             $this->map[$name] = $value;
+        } else {
+            throw new \InvalidArgumentException('Passed value must either be a dependency object, another object instance or a string class name of the class to map.');
         }
         
         return $this;
     }
     
     /**
-     * Returns the specified dependency.
+     * If the dependency already exists, it is returned. If not, it is created and then returned.
      * 
      * @param string $name The dependency name.
      * 
      * @return \Europa\Di\Dependency
      */
-    public function __get($name)
+    public function resolve($name)
     {
         if (isset($this->deps[$name])) {
             return $this->deps[$name];
@@ -152,20 +186,15 @@ class Container
     }
     
     /**
-     * Sets a formatter to use. Maps take priority and the formatter is used if a map is not defined for a given
-     * dependency.
+     * Sets a filter to use for converting a dependency name into a class name.
      * 
-     * @param mixed $formatter A callable formatter for dependency names. The first parameter is the dependency name.
+     * @param \Europa\Filter\FilterInterface $filter The filter to use for name formatting.
      * 
-     * @return string
+     * @return \Europa\Di\Container
      */
-    public function setFormatter($formatter)
+    public function setFilter(FilterInterface $filter)
     {
-        if (!is_callable($formatter)) {
-            throw new Exception("The specified formatter is not callable.");
-        }
-        
-        $this->formatter = $formatter;
+        $this->filter = $filter;
         return $this;
     }
     
@@ -181,8 +210,8 @@ class Container
     {
         if (isset($this->map[$name])) {
             return $this->map[$name];
-        } elseif ($this->formatter) {
-            return call_user_func($this->formatter, $name);
+        } elseif ($this->filter) {
+            return $this->filter->filter($name);
         }
         
         return $name;

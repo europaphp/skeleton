@@ -6,10 +6,9 @@ require_once dirname(__FILE__) . '/../../lib/Europa/Bootstrapper/BootstrapperInt
 require_once dirname(__FILE__) . '/../../lib/Europa/Bootstrapper/BootstrapperAbstract.php';
 
 use Europa\Bootstrapper\BootstrapperAbstract;
-use Europa\ClassLoader;
+use Europa\Fs\Loader;
 use Europa\Di\Container;
 use Europa\Fs\Directory;
-use Europa\StringObject;
 
 /**
  * Bootstraps the sample application.
@@ -47,8 +46,8 @@ class Bootstrapper extends BootstrapperAbstract
      */
     public function setUpLibraryLoading()
     {
-        require $this->basePath . '/lib/Europa/ClassLoader.php';
-        $loader = new ClassLoader;
+        require $this->basePath . '/lib/Europa/Fs/Loader.php';
+        $loader = new Loader;
         $loader->register();
     }
     
@@ -60,20 +59,49 @@ class Bootstrapper extends BootstrapperAbstract
     public function configureDiContainer()
     {
         $this->container = Container::get()->map(array(
-            'dispatcher'          => '\Europa\Dispatcher\Dispatcher',
-            'finder'              => '\Europa\Fs\Finder',
-            'langLocator'         => '\Europa\Fs\Locator\PathLocator',
-            'loader'              => '\Europa\ClassLoader',
-            'loaderLocator'       => '\Europa\Fs\Locator\PathLocator',
-            'view'                => '\Europa\View\Php',
-            'viewHelperContainer' => '\Europa\Di\Container',
-            'viewLocator'         => '\Europa\Fs\Locator\PathLocator',
-            'request'             => '\Europa\Request\Http',
-            'response'            => '\Europa\Response\Response',
-            'route'               => '\Europa\Router\Route\RegexRoute',
-            'router'              => '\Europa\Router\Router',
-            'routeResolver'       => '\Europa\Router\Resolver\RouteResolver'
+            'controllerContainer'       => '\Europa\Di\Container',
+            'controllerContainerFilter' => '\Europa\Filter\ClassNameFilter',
+            'dispatcher'                => '\Europa\Dispatcher\Dispatcher',
+            'langLocator'               => '\Europa\Fs\Locator\PathLocator',
+            'loader'                    => '\Europa\Fs\Loader',
+            'loaderLocator'             => '\Europa\Fs\Locator\PathLocator',
+            'request'                   => '\Europa\Request\Http',
+            'response'                  => '\Europa\Response\Http',
+            'view'                      => '\Europa\View\Php',
+            'viewHelperContainer'       => '\Europa\Di\Container',
+            'viewHelperContainerFilter' => '\Europa\Filter\ClassNameFilter',
+            'viewLocator'               => '\Europa\Fs\Locator\PathLocator'
         ));
+    }
+    
+    /**
+     * Configures the controller container.
+     * 
+     * @return void
+     */
+    public function configureControllerContainer()
+    {
+        $this->container->controllerContainer->setFilter($this->container->controllerContainerFilter);
+    }
+    
+    /**
+     * Configures the controller name filter.
+     * 
+     * @return void
+     */
+    public function configureControllerContainerFilter()
+    {
+        $this->container->controllerContainerFilter(array('prefix' => 'Controller\\'));
+    }
+    
+    /**
+     * Configures the dispatcher to use the controller container.
+     * 
+     * @return void
+     */
+    public function configureDispatcher()
+    {
+        $this->container->dispatcher($this->container->controllerContainer);
     }
     
     /**
@@ -102,16 +130,6 @@ class Bootstrapper extends BootstrapperAbstract
     }
     
     /**
-     * Configures the router with routes.
-     * 
-     * @return void
-     */
-    public function configureRouter()
-    {
-        $this->container->router->addResolver($this->container->routeResolver);
-    }
-    
-    /**
      * Configures the PHP view specifically since it requires a locator and optional helper.
      * 
      * @return void
@@ -130,14 +148,21 @@ class Bootstrapper extends BootstrapperAbstract
     public function configureViewHelperContainer()
     {
         $this->container->viewHelperContainer
-            ->setFormatter(function($name) {
-                $name = ucfirst($name);
-                return "\\Helper\\{$name}";
-            })
+            ->setFilter($this->container->viewHelperContainerFilter)
             ->css('css')
             ->html($this->container->view)
             ->js('js')
             ->lang($this->container->langLocator, $this->container->view, 'en-us');
+    }
+    
+    /**
+     * Configures the filter that formats helper names for the view.
+     * 
+     * @return void
+     */
+    public function configureViewHelperContainerFilter()
+    {
+        $this->container->viewHelperContainerFilter(array('prefix' => 'Helper\\'));
     }
     
     /**

@@ -4,7 +4,7 @@ namespace Europa\Router;
 use Europa\Exception as BaseException;
 
 /**
- * The exception class for \Europa\Router.
+ * The exception class for the Router namespace.
  * 
  * @category Exceptions
  * @package  Europa

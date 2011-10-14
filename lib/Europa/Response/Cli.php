@@ -2,7 +2,7 @@
 
 namespace Europa\Response;
 
-interface ResponseInterface
+class Cli implements ResponseInterface
 {
     /**
      * Outputs the specified string.
@@ -11,5 +11,8 @@ interface ResponseInterface
      * 
      * @return string
      */
-    public function output($content);
+    public function output($content)
+    {
+        echo $content;
+    }
 }

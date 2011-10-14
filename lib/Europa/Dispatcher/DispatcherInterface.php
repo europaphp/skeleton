@@ -18,7 +18,10 @@ interface DispatcherInterface
     /**
      * Renders, sends all headers and outputs the result.
      * 
+     * @param RequestInterface  $request  The request object to dispatch.
+     * @param ResponseInterface $response The response object to output.
+     * 
      * @return void
      */
-    public function dispatch(RequestInterface $request, ResponseInterface $response, RouterInterface $router = null);
+    public function dispatch(RequestInterface $request, ResponseInterface $response);
 }
