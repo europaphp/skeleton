@@ -75,8 +75,7 @@ abstract class ControllerAbstract implements ControllerInterface
     }
     
     /**
-     * Renders the set view if it exists. If it does not exist, an empty string is returned. Even if no view is set,
-     * both preRender and postRender hooks are invoked.
+     * Renders a view while invoking pre and post render hooks.
      * 
      * @return string
      */
