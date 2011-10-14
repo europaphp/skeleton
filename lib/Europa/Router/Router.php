@@ -2,7 +2,6 @@
 
 namespace Europa\Router;
 use Europa\Request\RequestInterface;
-use Europa\Router\Resolver\ResolverInterface;
 
 /**
  * Default request router implementation.
