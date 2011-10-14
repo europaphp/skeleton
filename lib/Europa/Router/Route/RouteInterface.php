@@ -11,7 +11,7 @@ use Europa\Router\Resolver\ResolverInterface;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-interface RouteInterface extends ResolverInterface
+interface RouteInterface
 {
     /**
      * Makes a query against the route using the specified subject.

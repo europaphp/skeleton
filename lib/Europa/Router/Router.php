@@ -2,6 +2,7 @@
 
 namespace Europa\Router;
 use Europa\Request\RequestInterface;
+use Europa\Router\Route\RouteInterface;
 
 /**
  * Default request router implementation.
@@ -51,19 +52,6 @@ class Router implements RouterInterface
     }
     
     /**
-     * Adds a resolver to the router.
-     * 
-     * @param \Europa\Router\Resolver\ResolverInterface $resolver The resolver to add.
-     * 
-     * @return \Europa\Router\RequestRouter
-     */
-    public function addResolver(ResolverInterface $resolver)
-    {
-        $this->resolvers[] = $resolver;
-        return $this;
-    }
-    
-    /**
      * Routes the specified request. If a subject is specified it is used instead of the default Europa request URI.
      * 
      * @param \Europa\Request\RequestInterface $request The request to route.
@@ -81,7 +69,7 @@ class Router implements RouterInterface
         }
         
         // query the router and apply parameters on successful result
-        $params = $this->query();
+        $params = $this->query($subject);
         if ($params !== false) {
             $request->setParams($params);
         }
