@@ -18,9 +18,6 @@ namespace Europa\Controller;
  * 
  * A CLI request is allowed to specify "cli" as it's method. Otherwise, only HTTP methods are allowed.
  * 
- * Additionally, if an above request method is not found, the controller will look for a method called "all" to catch
- * all request that are made to the controller.
- * 
  * @category Controllers
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
