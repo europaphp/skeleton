@@ -2,6 +2,14 @@
 
 namespace Europa\Filter;
 
+/**
+ * Returns a class name from the specified value.
+ * 
+ * @category Filters
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
+ */
 class ClassNameFilter implements FilterInterface
 {
     /**
@@ -27,7 +35,7 @@ class ClassNameFilter implements FilterInterface
     }
     
     /**
-     * Filters the specified value.
+     * Filters the value and returns the filtered value.
      * 
      * @param mixed $value The value to filter.
      * 

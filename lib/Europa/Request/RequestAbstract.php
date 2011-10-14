@@ -34,12 +34,9 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
     private $params = array('controller' => 'index');
 
     /**
-     * Sets the specified request parameter.
+     * Magic alias for setParam().
      * 
-     * @param string $name  The name of the parameter.
-     * @param mixed  $value The value of the parameter.
-     * 
-     * @return mixed
+     * @see \Europa\Request\RequestAbstract::setParam()
      */
     public function __set($name, $value)
     {
@@ -47,11 +44,9 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
     }
     
     /**
-     * Returns the specified request parameter.
+     * Magic alias for getParam().
      * 
-     * @param string $name The name of the parameter.
-     * 
-     * @return mixed
+     * @see \Europa\Request\RequestAbstract::getParam()
      */
     public function __get($name)
     {
@@ -59,11 +54,9 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
     }
     
     /**
-     * Checks for the specified parameter.
+     * Magic alias for hasParam().
      * 
-     * @param string $name The parameter to check for.
-     * 
-     * @return \Europa\Request
+     * @see \Europa\Request\RequestAbstract::hasParam()
      */
     public function __isset($name)
     {
@@ -71,11 +64,9 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
     }
     
     /**
-     * Unsets the specified parameter.
+     * Magic alias for removeParam().
      * 
-     * @param string $name The parameter to unset.
-     * 
-     * @return \Europa\Request
+     * @see \Europa\Request\RequestAbstract::removeParam()
      */
     public function __unset($name)
     {
@@ -83,25 +74,26 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
     }
     
     /**
-     * Serializes the request.
+     * Sets the appropriate method.
      * 
-     * @return string
-     */
-    public function serialize()
-    {
-        return serialize($this->getParams());
-    }
-    
-    /**
-     * Unserializes the request.
-     * 
-     * @param string $serialized The serialized string.
+     * @param string $method The method to set.
      * 
      * @return \Europa\Request
      */
-    public function unserialize($serialized)
+    public function setMethod($method)
     {
-        return $this->setParams(unserialize($serialized));
+        $this->method = $method;
+        return $this;
+    }
+    
+    /**
+     * Returns the request method for the request.
+     *
+     * @return string
+     */
+    public function getMethod()
+    {
+        return $this->method;
     }
     
     /**
@@ -220,29 +212,6 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
     }
     
     /**
-     * Sets the appropriate method.
-     * 
-     * @param string $method The method to set.
-     * 
-     * @return \Europa\Request
-     */
-    public function setMethod($method)
-    {
-        $this->method = $method;
-        return $this;
-    }
-    
-    /**
-     * Returns the request method for the request.
-     *
-     * @return string
-     */
-    public function getMethod()
-    {
-        return $this->method;
-    }
-    
-    /**
      * Returns the unique request id of the current request. This is useful for debugging separate logs and probably
      * many other things.
      * 
@@ -264,6 +233,28 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
     public function getIterator()
     {
         return new \ArrayIterator($this->params);
+    }
+    
+    /**
+     * Serializes the request.
+     * 
+     * @return string
+     */
+    public function serialize()
+    {
+        return serialize($this->getParams());
+    }
+    
+    /**
+     * Unserializes the request.
+     * 
+     * @param string $serialized The serialized string.
+     * 
+     * @return \Europa\Request
+     */
+    public function unserialize($serialized)
+    {
+        return $this->setParams(unserialize($serialized));
     }
     
     /**

@@ -2,8 +2,23 @@
 
 namespace Europa\Filter;
 
+/**
+ * Splits the word by uppercase characters and returns them as an array. No other transformations are performed.
+ * 
+ * @category Filters
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
+ */
 class CamelCaseSplitFilter implements FilterInterface
 {
+    /**
+     * Filters the value and returns the filtered value.
+     * 
+     * @param mixed $value The value to filter.
+     * 
+     * @return mixed
+     */
     public function filter($value)
     {
         $parts = array('');
