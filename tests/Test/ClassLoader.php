@@ -1,7 +1,7 @@
 <?php
 
 namespace Test;
-use Europa\ClassLoader as ClassLoaderObject;
+use Europa\Fs\Loader as ClassLoaderObject;
 use Europa\Fs\Locator\PathLocator;
 use Testes\Test;
 

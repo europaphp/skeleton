@@ -1,8 +1,8 @@
 <?php
 
 namespace Test;
-use Europa\Request\Http;
-use Europa\Response\Response;
+use Europa\Request\Http as Request;
+use Europa\Response\Http as Response;
 use Provider\Controller\TestNamedParamController;
 use Testes\Test;
 
@@ -10,7 +10,7 @@ class Controller extends Test
 {
     public function testNamedParamMapping()
     {
-        $request    = new Http;
+        $request    = new Request;
         $response   = new Response;
         $controller = new TestNamedParamController($request, $response);
         

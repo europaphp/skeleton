@@ -2,8 +2,9 @@
 
 namespace Test\View;
 use Europa\Di\Container;
+use Europa\Filter\CallbackFilter;
+use Europa\Filter\ClassNameFilter;
 use Europa\Fs\Locator\PathLocator;
-use Europa\StringObject;
 use Europa\View\Php;
 use Provider\View\TestHelper;
 use Testes\Test;
@@ -18,10 +19,12 @@ class Helper extends Test
     {
         $this->view = new Php(new PathLocator);
         $container  = new Container;
+        
         $this->view->setHelperContainer($container);
-        $container->setFormatter(function($dep) {
-            return '\Provider\View' . StringObject::create($dep)->toClass() . 'Helper';
-        });
+        $container->setFilter(new CallbackFilter(function($dep) {
+            $classNameFilter = new ClassNameFilter;
+            return '\Provider\View' . $classNameFilter->filter($dep) . 'Helper';
+        }));
     }
     
     public function testNewInstanceRetrieval()
