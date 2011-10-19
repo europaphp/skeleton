@@ -7,14 +7,14 @@ namespace Europa\Controller;
  * 
  * The following methods are supported with any number of user-defined parameters:
  *   - cli
- *   - options
+ *   - connect
+ *   - delete
  *   - get
  *   - head
+ *   - options
  *   - post
  *   - put
- *   - delete
  *   - trace
- *   - connect
  * 
  * A CLI request is allowed to specify "cli" as it's method. Otherwise, only HTTP methods are allowed.
  * 
