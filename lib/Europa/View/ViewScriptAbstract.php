@@ -114,7 +114,7 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
      */
     public function __get($name)
     {
-        if (isset($this->context[$name])) {
+        if (array_key_exists($name, $this->context)) {
             return $this->context[$name];
         }
         if (!$this->container) {
