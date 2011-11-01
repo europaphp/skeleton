@@ -8,7 +8,6 @@ require_once dirname(__FILE__) . '/../../lib/Europa/Bootstrapper/BootstrapperAbs
 use Europa\Bootstrapper\BootstrapperAbstract;
 use Europa\Fs\Loader;
 use Europa\Di\Container;
-use Europa\Fs\Directory;
 
 /**
  * Bootstraps the sample application.
@@ -111,9 +110,7 @@ class Bootstrapper extends BootstrapperAbstract
      */
     public function configureLang()
     {
-        $this->container->langLocator
-            ->throwWhenAdding(false)
-            ->addPath($this->basePath . '/app/Lang', 'ini');
+        $this->container->langLocator->addPath($this->basePath . '/app/Lang', 'ini');
     }
     
     /**
@@ -124,9 +121,7 @@ class Bootstrapper extends BootstrapperAbstract
     public function configureLoader()
     {
         $this->container->loader->setLocator($this->container->loaderLocator);
-        $this->container->loaderLocator
-            ->throwWhenAdding(false)
-            ->addPath($this->basePath . '/app');
+        $this->container->loaderLocator->addPath($this->basePath . '/app');
     }
     
     /**
@@ -172,9 +167,7 @@ class Bootstrapper extends BootstrapperAbstract
      */
     public function configureViewLocator()
     {
-        $this->container->viewLocator
-            ->throwWhenAdding(false)
-            ->addPath($this->basePath . '/app/View');
+        $this->container->viewLocator->addPath($this->basePath . '/app/View');
     }
     
     /**
