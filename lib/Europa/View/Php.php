@@ -2,6 +2,7 @@
 
 namespace Europa\View;
 use Europa\Di\Container;
+use Europa\Fs\Locator\LocatorInterface;
 
 /**
  * Class for rendering a basic PHP view script.
@@ -50,6 +51,25 @@ class Php extends ViewScriptAbstract
 	 * @var Container
 	 */
 	private $container;
+	
+	/**
+	 * The loader to use for view locating and loading.
+	 * 
+	 * @var \Europa\Fs\Locator\LocatorInterface
+	 */
+	private $locator;
+	
+	/**
+     * Sets up a Php view renderer.
+     * 
+     * @param \Europa\Fs\Locator\LocatorInterface $locator The locator to use for view locating view files.
+     * 
+     * @return \Europa\View\ViewScriptAbstract
+     */
+    public function __construct(LocatorInterface $locator)
+    {
+    	$this->locator = $locator;
+    }
 	
 	/**
 	 * Attempts to call the specified method on the specified locator if it exists.
@@ -120,7 +140,7 @@ class Php extends ViewScriptAbstract
     	
     	// capture the output
     	ob_start();
-    	include $this->getLocator()->locate($script);
+    	include $this->locator->locate($script);
     	$rendered = ob_get_clean();
         
         // handle view extensions
