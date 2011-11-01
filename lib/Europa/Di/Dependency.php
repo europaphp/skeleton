@@ -137,6 +137,16 @@ class Dependency
     }
     
     /**
+     * Returns whether or not the current dependency exists.
+     * 
+     * @return bool
+     */
+    public function exists()
+    {
+    	return class_exists($this->class, true);
+    }
+    
+    /**
      * Creates a new instance then returns it. Does not cache the instance.
      * 
      * @param array $args Any last minute constructor arguments.
