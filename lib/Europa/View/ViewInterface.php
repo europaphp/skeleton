@@ -13,9 +13,9 @@ namespace Europa\View;
 interface ViewInterface
 {
     /**
-     * Renders the specified view using the specified context.
+     * Parses the view file and returns the result.
      * 
-     * @param array $context The context to render.
+     * @param array $context The parameters to render with.
      * 
      * @return string
      */
