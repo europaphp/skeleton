@@ -18,7 +18,7 @@ class Error extends Base
      * 
      * @return void
      */
-    public function all()
+    public function __call($name, array $args = array())
     {
         return array(
             'url' => Uri::detect()->getRequest(),
