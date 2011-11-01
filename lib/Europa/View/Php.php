@@ -2,7 +2,6 @@
 
 namespace Europa\View;
 use Europa\Di\Container;
-use Europa\Fs\Locator\LocatorInterface;
 
 /**
  * Class for rendering a basic PHP view script.
@@ -51,25 +50,6 @@ class Php extends ViewScriptAbstract
 	 * @var Container
 	 */
 	private $container;
-	
-	/**
-	 * The loader to use for view locating and loading.
-	 * 
-	 * @var \Europa\Fs\Locator\LocatorInterface
-	 */
-	private $locator;
-	
-	/**
-	 * Sets up a Php view renderer.
-	 * 
-	 * @param \Europa\Fs\Locator\LocatorInterface $locator The locator to use for view locating view files.
-	 * 
-	 * @return \Europa\View\ViewScriptAbstract
-	 */
-	public function __construct(LocatorInterface $locator)
-	{
-		$this->locator = $locator;
-	}
 	
 	/**
 	 * Attempts to call the specified method on the specified locator if it exists.
@@ -140,7 +120,7 @@ class Php extends ViewScriptAbstract
     	
     	// capture the output
     	ob_start();
-    	include $this->locateScript($script);
+    	include $this->getLocator()->locate($script);
     	$rendered = ob_get_clean();
         
         // handle view extensions
@@ -188,16 +168,6 @@ class Php extends ViewScriptAbstract
     }
     
     /**
-     * Returns the full path to the parent script.
-     * 
-     * @return string
-     */
-    public function getParentScriptPathname()
-    {
-        return $this->locateScript($this->parentScript);
-    }
-    
-    /**
      * Sets the child script.
      * 
      * @param string $script The child script.
@@ -218,16 +188,6 @@ class Php extends ViewScriptAbstract
     public function getChildScript()
     {
         return $this->childScript;
-    }
-    
-    /**
-     * Returns the full path to the child script.
-     * 
-     * @return string
-     */
-    public function getChildScriptPathname()
-    {
-        return $this->locateScript($this->childScript);
     }
     
     /**
@@ -281,22 +241,5 @@ class Php extends ViewScriptAbstract
     {
         $this->container = $container;
         return $this;
-    }
-    
-    /**
-     * Locates the specified script and returns it. If it is not found, and exception is thrown.
-     * 
-     * @throws Exception If the script is not found.
-     * 
-     * @param string $script The script to locate.
-     * 
-     * @return string
-     */
-    private function locateScript($script)
-    {
-    	if ($file = $this->locator->locate($script)) {
-    		return $file;
-    	}
-        throw new \LogicException("Could not render view because view {$script} does not exist.");
     }
 }
