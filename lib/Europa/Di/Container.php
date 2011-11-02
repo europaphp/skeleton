@@ -74,7 +74,7 @@ class Container
      */
     public function __call($name, array $args = array())
     {
-        return $this->resolve($name, $args);
+        return $this->resolve($name)->configure($args);
     }
     
     /**
@@ -97,26 +97,35 @@ class Container
         return $this->resolve($name);
     }
     
+    public function __isset($name)
+    {
+        return $this->isRegistered($name);
+    }
+    
+    public function __unset($naem)
+    {
+        return $this->unregister($name);
+    }
+    
+    public function configure($name, array $args = array())
+    {
+        $this->resolve($name)->configure($args);
+    }
+    
     /**
-     * Creates a dependency if it doesn't already exist and configures its constructor parameters and returns it.
+     * Creates a dependency if it doesn't already exist and returns it.
      * 
      * @param string $name The name of the dependency.
-     * @param array  $args The arguments for the dependency constructor.
      * 
      * @return \Europa\Di\Dependency
      */
-    public function resolve($name, array $args = array())
+    public function resolve($name)
     {
         if (!isset($this->deps[$name])) {
             $dep = $this->getClassNameFor($name);
             $dep = new Dependency($dep);
             $this->deps[$name] = $dep;
         }
-        
-        if ($args) {
-            $this->deps[$name]->configure($args);
-        }
-        
         return $this->deps[$name];
     }
     
@@ -192,6 +201,19 @@ class Container
             throw new \InvalidArgumentException('Passed value must either be a dependency object, another object instance or a string class name of the class to map.');
         }
         
+        return $this;
+    }
+    
+    public function isRegistered($name)
+    {
+        return isset($this->deps[$name]);
+    }
+    
+    public function unRegister($name)
+    {
+        if (!isset($this->deps[$name])) {
+            unset($this->deps[$name]);
+        }
         return $this;
     }
     
