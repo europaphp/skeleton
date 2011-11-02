@@ -20,6 +20,13 @@ use Europa\Di\Container;
 class Bootstrapper extends BootstrapperAbstract
 {
     /**
+     * The application base path.
+     * 
+     * @var string
+     */
+    private $basePath;
+    
+    /**
      * The dependency injection container.
      * 
      * @var \Europa\Di\Container
@@ -33,9 +40,7 @@ class Bootstrapper extends BootstrapperAbstract
      */
     public function __construct()
     {
-        $this->setOptions(array(
-            'basePath' => realpath(dirname(__FILE__) . '/../../')
-        ));
+        $this->basePath = realpath(dirname(__FILE__) . '/../../');
     }
     
     /**
