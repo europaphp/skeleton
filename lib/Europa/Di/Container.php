@@ -68,13 +68,13 @@ class Container
     private static $containers = array();
     
     /**
-     * Magic caller for configure().
+     * Magic caller for resolve($name, $args).
      * 
      * @see \Europa\Di\Dependency::register()
      */
     public function __call($name, array $args = array())
     {
-        return $this->configure($name, $args);
+        return $this->resolve($name, $args);
     }
     
     /**
@@ -88,7 +88,7 @@ class Container
     }
     
     /**
-     * Magic caller for resolve().
+     * Magic caller for resolve($name).
      * 
      * @see \Europa\Di\Dependency::resolve()
      */
@@ -105,7 +105,7 @@ class Container
      * 
      * @return \Europa\Di\Dependency
      */
-    public function configure($name, array $args = array())
+    public function resolve($name, array $args = array())
     {
         if (!isset($this->deps[$name])) {
             $dep = $this->getClassNameFor($name);
@@ -118,6 +118,53 @@ class Container
         }
         
         return $this->deps[$name];
+    }
+    
+    /**
+     * Returns a new instance of a configured dependency.
+     * 
+     * @param string $name The name of the dependency.
+     * @param array  $args The arguments to pass to the new instance.
+     * 
+     * @return mixed
+     */
+    public function createDependency($name, array $args = array())
+    {
+        return $this->resolve($name, $args)->create();
+    }
+    
+    /**
+     * Returns a configured instance of the specified dependency.
+     * 
+     * @param string $name The name of the dependency.
+     * @param array  $args The arguments to pass if creating a new instance.
+     * 
+     * @return mixed
+     */
+    public function getDependency($name, array $args = array())
+    {
+        return $this->resolve($name, $args)->get();
+    }
+    
+    /**
+     * Map a dependency name to a class.
+     * 
+     * @param mixed  $map   An array of $map => $value or a dependency name for $class.
+     * @param string $class The class to map the dependency to.
+     * 
+     * @return \Europa\Di\Container
+     */
+    public function map($map, $class = null)
+    {
+        if (!is_array($map)) {
+            $map = array($map, $class);
+        }
+        
+        foreach ($map as $name => $class) {
+            $this->register($name, $class);
+        }
+        
+        return $this;
     }
     
     /**
@@ -143,43 +190,6 @@ class Container
             $this->map[$name] = $value;
         } else {
             throw new \InvalidArgumentException('Passed value must either be a dependency object, another object instance or a string class name of the class to map.');
-        }
-        
-        return $this;
-    }
-    
-    /**
-     * If the dependency already exists, it is returned. If not, it is created and then returned.
-     * 
-     * @param string $name The dependency name.
-     * 
-     * @return \Europa\Di\Dependency
-     */
-    public function resolve($name)
-    {
-        if (isset($this->deps[$name])) {
-            return $this->deps[$name];
-        }
-        
-        return $this->__call($name);
-    }
-    
-    /**
-     * Map a dependency name to a class.
-     * 
-     * @param mixed  $map   An array of $map => $value or a dependency name for $class.
-     * @param string $class The class to map the dependency to.
-     * 
-     * @return \Europa\Di\Container
-     */
-    public function map($map, $class = null)
-    {
-        if (!is_array($map)) {
-            $map = array($map, $class);
-        }
-        
-        foreach ($map as $name => $class) {
-            $this->__set($name, $class);
         }
         
         return $this;
@@ -213,7 +223,6 @@ class Container
         } elseif ($this->filter) {
             return $this->filter->filter($name);
         }
-        
         return $name;
     }
     
@@ -229,7 +238,6 @@ class Container
         if (!isset(static::$containers[$name])) {
             static::$containers[$name] = new static;
         }
-        
         return static::$containers[$name];
     }
 }
