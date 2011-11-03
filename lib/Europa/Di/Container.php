@@ -70,6 +70,9 @@ class Container
     /**
      * Magic caller for resolve($name, $args).
      * 
+     * @param string $name  The name of the dependency.
+     * @param mixed  $value The dependency to register.
+     * 
      * @see \Europa\Di\Dependency::register()
      */
     public function __call($name, array $args = array())
@@ -97,19 +100,24 @@ class Container
         return $this->resolve($name);
     }
     
+    /**
+     * Magic caller for isRegistered($name).
+     * 
+     * @see \Europa\Di\Dependency::isRegistered()
+     */
     public function __isset($name)
     {
         return $this->isRegistered($name);
     }
     
+    /**
+     * Magic caller for unregister($name).
+     * 
+     * @see \Europa\Di\Dependency::unregister()
+     */
     public function __unset($naem)
     {
         return $this->unregister($name);
-    }
-    
-    public function configure($name, array $args = array())
-    {
-        $this->resolve($name)->configure($args);
     }
     
     /**
@@ -204,11 +212,25 @@ class Container
         return $this;
     }
     
+    /**
+     * Returns whether or not the specified dependency is registered.
+     * 
+     * @param string $name The dependency name.
+     * 
+     * @return bool
+     */
     public function isRegistered($name)
     {
         return isset($this->deps[$name]);
     }
     
+    /**
+     * Removes the specified dependency.
+     * 
+     * @param string $name The dependency name.
+     * 
+     * @return \Europa\Di\Container
+     */
     public function unRegister($name)
     {
         if (!isset($this->deps[$name])) {
