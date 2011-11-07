@@ -4,6 +4,7 @@ namespace Europa\Application\Configurator;
 use Europa\Application\ConfiguratorAbstract;
 use Europa\Application\Container;
 use Europa\Filter\ClassNameFilter;
+use Europa\Filter\MapFilter;
 use Europa\Fs\Locator\PathLocator;
 
 /**
@@ -50,13 +51,13 @@ class Basic extends ConfiguratorAbstract
      */
     public function map($container)
     {
-        $container->map(array(
+        $container->setFilter(new MapFilter(array(
             'dispatcher' => '\Europa\Dispatcher\Dispatcher',
             'loader'     => '\Europa\Fs\Loader',
             'request'    => '\Europa\Request\Http',
             'response'   => '\Europa\Response\Http',
             'view'       => '\Europa\View\Php',
-        ));
+        )));
     }
     
     /**
@@ -66,9 +67,9 @@ class Basic extends ConfiguratorAbstract
      */
     public function dispatcher($container)
     {
-        $controllers = new Container;
-        $controllers->setFilter(new ClassNameFilter(array('prefix' => 'Controller\\')));
-        $container->resolve('dispatcher')->configure(array($controllers));
+        $container->resolve('dispatcher')->queue('setControllerFilter', array(
+            new ClassNameFilter(array('prefix' => 'Controller\\'))
+        ));
     }
     
     /**
