@@ -1,8 +1,9 @@
 <?php
 
 namespace Europa\Dispatcher;
-use Europa\Application\Container;
 use Europa\Controller\ControllerInterface;
+use Europa\Filter\FilterInterface;
+use Europa\Filter\ClassNameFilter;
 use Europa\Request\RequestInterface;
 use Europa\Response\ResponseInterface;
 use Europa\Router\RouterInterface;
@@ -33,42 +34,27 @@ class Dispatcher implements DispatcherInterface
     private $key = self::DEFAULT_CONTROLLER_KEY;
     
     /**
-     * The controller dependency locator to use.
+     * The filter to use for the controller.
      * 
-     * @var \Europa\Application\Container
+     * @var \Europa\Filter\FilterInterface
      */
-    private $container;
+    private $filter;
     
     /**
      * A list of routers to use.
      * 
      * @var array
      */
-    private $routers = array();
+    private $router;
     
     /**
-     * Sets up the dispatcher.
-     * 
-     * @param \Europa\Application\Container $container The container to use for locating the controller.
+     * Initializes the dispatcher.
      * 
      * @return \Europa\Dispatcher\Dispatcher
      */
-    public function __construct(Container $container)
+    public function __construct()
     {
-        $this->container = $container;
-    }
-    
-    /**
-     * Adds a router to use. Routers should be added in order of priority.
-     * 
-     * @param \Europa\Router\RouterInterface $router The router to add.
-     * 
-     * @return \Europa\Dispatcher\Dispatcher
-     */
-    public function addRouter(RouterInterface $router)
-    {
-        $this->routers[] = $router;
-        return $this;
+        $this->setControllerFilter(new ClassNameFilter);
     }
     
     /**
@@ -85,6 +71,32 @@ class Dispatcher implements DispatcherInterface
     }
     
     /**
+     * Sets the filter to use.
+     * 
+     * @param \Europa\Filter\FilterInterface $filter The filter to use.
+     * 
+     * @return \Europa\Dispatcher\Dispatcher
+     */
+    public function setControllerFilter(FilterInterface $filter)
+    {
+        $this->controllerFilter = $filter;
+        return $this;
+    }
+    
+    /**
+     * Adds a router to use. Routers should be added in order of priority.
+     * 
+     * @param \Europa\Router\RouterInterface $router The router to add.
+     * 
+     * @return \Europa\Dispatcher\Dispatcher
+     */
+    public function setRouter(RouterInterface $router)
+    {
+        $this->router = $router;
+        return $this;
+    }
+    
+    /**
      * Actions the appropriate controller and outputs the response. If no router is specified, it attempts to dispatch
      * using whatever parameters that are already available on the request.
      * 
@@ -95,37 +107,31 @@ class Dispatcher implements DispatcherInterface
      */
     public function dispatch(RequestInterface $request, ResponseInterface $response)
     {
-        foreach ($this->routers as $router) {
-            if ($router->route($request)) {
-                break;
-            }
+        // any type of router can be applied
+        if ($this->router) {
+            $this->router->route($request);
         }
         
-        $controller = $this->resolveController($request, $response);
-        $controller->action();
-        $response->output($controller->render());
-    }
-    
-    /**
-     * Resolves the controller and returns an instance of it.
-     * 
-     * @param \Europa\Request\RequestInterface   $request  The request object to dispatch.
-     * @param \Europa\Response\ResponseInterface $response The response object to output.
-     * 
-     * @return \Europa\Controller\ControllerInterface
-     */
-    private function resolveController(RequestInterface $request, ResponseInterface $response)
-    {
-        // format and instantiate the new controller
+        // the controller parameter originates on the request
         $controller = $request->getParam($this->key);
-        $controller = $this->container->resolve($controller)->create(array($request, $response));
         
-        // make sure it's a valid instance
-        if (!$controller instanceof ControllerInterface) {
-            $controller = get_class($controller);
-            throw new \LogicException("Class {$controller} is not a valid controller instance. Controllers must implement Europa\Controller\ControllerInterface.");
+        // we don't require a controller filter as the router may have done the necessary steps
+        if ($this->controllerFilter) {
+            $controller = $this->controllerFilter->filter($controller);
         }
         
-        return $controller;
+        // if it doesn't implement the base interface we won't know how to use it
+        if (!is_subclass_of($controller, '\Europa\Controller\ControllerInterface')) {
+            throw new \InvalidArgumentException("Class {$controller} must implement \Europa\Controller\ControllerInterface.");
+        }
+        
+        // safe to assume it's a valid object now
+        $controller = new $controller($request, $response);
+        
+        // since it implements the interface, we know this is available
+        $controller->action();
+        
+        // output the result of the controller
+        $response->output($controller->render());
     }
 }
