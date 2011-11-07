@@ -72,6 +72,7 @@ class Router implements RouterInterface
         $params = $this->query($subject);
         if ($params !== false) {
             $request->setParams($params);
+            return true;
         }
         
         return false;
