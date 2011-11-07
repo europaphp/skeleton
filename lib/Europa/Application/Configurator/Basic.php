@@ -35,7 +35,7 @@ class Basic extends ConfiguratorAbstract
      * 
      * @param array $conf Configuration to granularize the default configuration.
      * 
-     * @return \Europa\Application\Configuration\Default
+     * @return \Europa\Application\Configurator\Basic
      */
     public function __construct(array $conf = array())
     {
