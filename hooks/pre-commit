@@ -1,5 +1,0 @@
-#!/usr/bin/env ruby
-
-Dir.glob(File.expand_path(File.dirname(__FILE__)) + '/pre-commit-*') do |cmd|
-    exec(cmd)
-end
