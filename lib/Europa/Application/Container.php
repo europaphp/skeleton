@@ -2,14 +2,12 @@
 
 namespace Europa\Application;
 use Europa\Filter\FilterInterface;
+use Europa\Filter\UpperCamelCaseFilter;
 
 /**
  * The dependency injection container represents a collection of configured dependencies. Dependencies are instances
  * of \Europa\Application\Dependency that represent an object instance. The container provides a fluent interface for
  * accessing dependencies so that they can easily be configured.
- * 
- * Dependencies can have both a mapping, which maps a dependency name to a class name, or a formatter which will format
- * the name into a class name. The map is first checked and if it is not found it uses a formatter if one is set.
  * 
  * @category DependencyInjection
  * @package  Europa
@@ -26,13 +24,6 @@ class Container
     const DEFAULT_INSTANCE_NAME = 'default';
     
     /**
-     * Preset configuration for dependencies.
-     * 
-     * @var array
-     */
-    private $config = array();
-    
-    /**
      * Cached dependency instances.
      * 
      * @var array
@@ -47,25 +38,21 @@ class Container
     private $filter;
     
     /**
-     * Mapping of name => className for dependencies.
-     * 
-     * @var array
-     */
-    private $map = array();
-    
-    /**
-     * Preset method queue for dependencies.
-     * 
-     * @var array
-     */
-    private $queue = array();
-    
-    /**
      * Container instances for static retrieval.
      * 
      * @var array
      */
     private static $containers = array();
+    
+    /**
+     * Sets up the container.
+     * 
+     * @return \Europa\Application\Container
+     */
+    public function __construct()
+    {
+        $this->setFilter(new UpperCamelCaseFilter);
+    }
     
     /**
      * Magic caller for resolve($name, $args).
@@ -164,51 +151,18 @@ class Container
     }
     
     /**
-     * Map a dependency name to a class.
-     * 
-     * @param mixed  $map   An array of $map => $value or a dependency name for $class.
-     * @param string $class The class to map the dependency to.
-     * 
-     * @return \Europa\Application\Container
-     */
-    public function map($map, $class = null)
-    {
-        if (!is_array($map)) {
-            $map = array($map, $class);
-        }
-        
-        foreach ($map as $name => $class) {
-            $this->register($name, $class);
-        }
-        
-        return $this;
-    }
-    
-    /**
      * Detects the value of $value and handles it appropriately.
      *   - Instances of \Europa\Application\Dependency are registered on the container.
      *   - Other instances are created as a dependency then registered.
      * 
-     * @param string $name  The name of the dependency.
-     * @param mixed  $value One of many allowed values.
-     * 
-     * @throws \InvalidArgumentException If anything but a dependency object or other object instance is passed.
+     * @param string      $name       The name of the dependency.
+     * @param Dependency  $dependency One of many allowed values.
      * 
      * @return \Europa\Application\Container
      */
-    public function register($name, $value)
+    public function register($name, Dependency $dependency)
     {
-        if ($value instanceof Dependency) {
-            $this->deps[$name] = $value;
-        } elseif (is_object($value)) {
-            $this->deps[$name] = new Dependency(get_class($value));
-            $this->deps[$name]->set($value);
-        } elseif (is_string($value)) {
-            $this->map[$name] = $value;
-        } else {
-            throw new \InvalidArgumentException('Passed value must either be a dependency object, another object instance or a string class name of the class to map.');
-        }
-        
+        $this->deps[$name] = $dependency;
         return $this;
     }
     
@@ -253,8 +207,7 @@ class Container
     }
     
     /**
-     * Returns the class name for the specified dependency. If no map or formatter is found, the name is simply
-     * returned.
+     * Returns the class name for the specified dependency.
      * 
      * @param string $name The name of the dependency to get the class name for.
      * 
@@ -262,12 +215,7 @@ class Container
      */
     private function getClassNameFor($name)
     {
-        if (isset($this->map[$name])) {
-            return $this->map[$name];
-        } elseif ($this->filter) {
-            return $this->filter->filter($name);
-        }
-        return $name;
+        return $this->filter->filter($name);
     }
     
     /**
