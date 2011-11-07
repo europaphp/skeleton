@@ -26,7 +26,7 @@ class FilterArray implements FilterInterface
      * 
      * @return \Europa\Filter\FilterArray
      */
-    public function addFilter(FilterInterface $filter)
+    public function add(FilterInterface $filter)
     {
         $this->filters[] = $filter;
         return $this;

@@ -4,7 +4,7 @@ namespace Europa\Router;
 use Europa\Request\RequestInterface;
 
 /**
- * Interface for defining request routers.
+ * Routes a request using multiple routers.
  * 
  * @category Router
  * @package  Europa
@@ -13,7 +13,25 @@ use Europa\Request\RequestInterface;
  */
 class RouterArray implements RouterInterface
 {
+    /**
+     * The array of routers to route with.
+     * 
+     * @var array
+     */
     private $routers = array();
+    
+    /**
+     * Adds a router to the array.
+     * 
+     * @param Europa\Router\RouterInterface $router The router to add.
+     * 
+     * @return \Europa\Router\RouterArray
+     */
+    public function add(RouterInterface $router)
+    {
+        $this->routers[] = $router;
+        return $this;
+    }
     
     /**
      * Routes the specified route using the specified resolver.
@@ -29,19 +47,6 @@ class RouterArray implements RouterInterface
                 continue;
             }
         }
-        return $this;
-    }
-    
-    /**
-     * Adds a router to the array.
-     * 
-     * @param Europa\Router\RouterInterface $router The router to add.
-     * 
-     * @return \Europa\Router\RouterArray
-     */
-    public function addRouter(RouterInterface $router)
-    {
-        $this->routers[] = $router;
         return $this;
     }
 }

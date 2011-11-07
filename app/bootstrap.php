@@ -4,6 +4,7 @@
 ini_set('display_errors', 'on');
 error_reporting(E_ALL | E_STRICT);
 
+use Europa\Application\Configurator\Basic;
 use Europa\Application\ConfiguratorArray;
 use Europa\Application\Container;
 use Europa\Fs\Loader;
@@ -14,10 +15,9 @@ $loader = new Loader;
 $loader->register();
 
 // uses default configuration, but you can also specify your own
-$configuration = new ConfiguratorArray(array(
-    '\Europa\Application\Configurator\Basic'
-));
-$configuration->configure(Container::get());
+$config = new ConfiguratorArray;
+$config->add(new Basic);
+$config->configure(Container::get());
 
 // kick off autoloading for everything else
 Container::get()->loader->get()->register();
