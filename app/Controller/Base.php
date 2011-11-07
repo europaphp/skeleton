@@ -1,8 +1,8 @@
 <?php
 
 namespace Controller;
+use Europa\Application\Container;
 use Europa\Controller\RestController;
-use Europa\Di\Container;
 
 abstract class Base extends RestController
 {

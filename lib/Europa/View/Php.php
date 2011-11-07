@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa\View;
-use Europa\Di\Container;
+use Europa\Application\Container;
 use Europa\Fs\Locator\LocatorInterface;
 
 /**

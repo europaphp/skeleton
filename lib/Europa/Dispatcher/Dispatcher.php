@@ -1,8 +1,8 @@
 <?php
 
 namespace Europa\Dispatcher;
+use Europa\Application\Container;
 use Europa\Controller\ControllerInterface;
-use Europa\Di\Container;
 use Europa\Request\RequestInterface;
 use Europa\Response\ResponseInterface;
 use Europa\Router\RouterInterface;
@@ -35,7 +35,7 @@ class Dispatcher implements DispatcherInterface
     /**
      * The controller dependency locator to use.
      * 
-     * @var \Europa\Di\Container
+     * @var \Europa\Application\Container
      */
     private $container;
     
@@ -48,6 +48,8 @@ class Dispatcher implements DispatcherInterface
     
     /**
      * Sets up the dispatcher.
+     * 
+     * @param \Europa\Application\Container $container The container to use for locating the controller.
      * 
      * @return \Europa\Dispatcher\Dispatcher
      */

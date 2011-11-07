@@ -1,11 +1,8 @@
 <?php
 
-ini_set('display_errors', 'on');
-error_reporting(E_ALL ^ E_STRICT);
-
 define('EUROPA_START_TIME', microtime(true));
 
-use Europa\Di\Container;
+use Europa\Application\Container;
 
 // bootstrap the app
 require dirname(__FILE__) . '/../app/bootstrap.php';

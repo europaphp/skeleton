@@ -23,4 +23,16 @@ class Cli implements ResponseInterface
     {
         echo $content;
     }
+    
+    /**
+     * Appends a line of content.
+     * 
+     * @param string $content The line of content.
+     * 
+     * @return void
+     */
+    public function append($content)
+    {
+        echo $content . PHP_EOL;
+    }
 }

@@ -1,7 +1,7 @@
 <?php
 
 namespace Test\View;
-use Europa\Di\Container;
+use Europa\Application\Container;
 use Europa\Filter\CallbackFilter;
 use Europa\Filter\ClassNameFilter;
 use Europa\Fs\Locator\PathLocator;

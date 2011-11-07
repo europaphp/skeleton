@@ -1,6 +1,6 @@
 <?php
 
-use Europa\Di\Container;
+use Europa\Application\Container;
 use Testes\Output\Cli as Output;
 use Test as Test;
 
