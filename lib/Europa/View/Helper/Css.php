@@ -1,6 +1,6 @@
 <?php
 
-namespace Helper;
+namespace Europa\View\Helper;
 
 /**
  * Helper for generating css link tags.

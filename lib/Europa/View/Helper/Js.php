@@ -1,6 +1,6 @@
 <?php
 
-namespace Helper;
+namespace Europa\View\Helper;
 
 /**
  * A helper for generating JavaScript script tags.

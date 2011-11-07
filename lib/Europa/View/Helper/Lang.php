@@ -1,6 +1,6 @@
 <?php
 
-namespace Helper;
+namespace Europa\View\Helper;
 use Europa\Fs\Locator\LocatorInterface;
 use Europa\View\ViewScriptInterface;
 
