@@ -1,11 +1,11 @@
 <?php
 
-namespace Europa\Di;
+namespace Europa\Application;
 
 /**
  * A container dependency that represents a given class. The class represented within is configurable by setting
  * constructor parameters and queuing methods to be called with parameters post-construction. If an instance of
- * \Europa\Di\Dependency is passed as a parameter to either the constructor or a method, the dependency is retrieved
+ * \Europa\Application\Dependency is passed as a parameter to either the constructor or a method, the dependency is retrieved
  * before it is passed to the constructor or method. By enabling this, it allows us to preserve object configuration
  * overhead right up until the point it is required by another dependency.
  * 
@@ -49,7 +49,7 @@ class Dependency
      * 
      * @param string $class The name of the class to represent.
      * 
-     * @return \Europa\Di\Dependency
+     * @return \Europa\Application\Dependency
      */
     public function __construct($class)
     {
@@ -62,7 +62,7 @@ class Dependency
      * @param string $method The method to call.
      * @param array  $args   The arguments to pass to the method.
      * 
-     * @return \Europa\Di\Dependency
+     * @return \Europa\Application\Dependency
      */
     public function __call($method, array $args = array())
     {
@@ -74,12 +74,12 @@ class Dependency
      * 
      * @param array $args The arguments to re-configure the instance with.
      * 
-     * @return \Europa\Di\Dependency
+     * @return \Europa\Application\Dependency
      */
     public function configure(array $args)
     {
-        $this->reset();
-        $this->args = $args;
+        $this->refresh();
+        $this->args = array_merge_recursive($this->args, $args);
         return $this;
     }
     
@@ -89,11 +89,11 @@ class Dependency
      * @param string $method The method to queue.
      * @param array  $args   The arguments to pass to the method.
      * 
-     * @return \Europa\Di\Dependency
+     * @return \Europa\Application\Dependency
      */
     public function queue($method, array $args = array())
     {
-        $this->reset();
+        $this->refresh();
         $this->queue[] = array($method, $args);
         return $this;
     }
@@ -103,7 +103,7 @@ class Dependency
      * 
      * @param mixed $instance The instance to set.
      * 
-     * @return \Europa\Di\Dependency
+     * @return \Europa\Application\Dependency
      */
     public function set($instance)
     {
@@ -161,11 +161,23 @@ class Dependency
     }
     
     /**
-     * Destroys the current instance so it can be reconfigured the next time it is accessed.
+     * Resets the instance.
      * 
-     * @return \Europa\Di\Dependency
+     * @return \Europa\Application\Container
      */
     public function reset()
+    {
+        $this->args  = array();
+        $this->queue = array();
+        return $this;
+    }
+    
+    /**
+     * Destroys the current instance so it can be reconfigured the next time it is accessed.
+     * 
+     * @return \Europa\Application\Dependency
+     */
+    public function refresh()
     {
         $this->instance = null;
         return $this;
@@ -203,7 +215,7 @@ class Dependency
      * 
      * @param mixed $instance The instance of dependency to call the queue on.
      * 
-     * @return \Europa\Di\Dependency
+     * @return \Europa\Application\Dependency
      */
     private function invokeQueue($instance)
     {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Europa\Di;
+namespace Europa\Application;
 
-interface ConfigurationInterface
+interface ConfiguratorInterface
 {
     public function configure(Container $container);
 }

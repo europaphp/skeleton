@@ -1,11 +1,11 @@
 <?php
 
-namespace Europa\Di;
+namespace Europa\Application;
 use Europa\Filter\FilterInterface;
 
 /**
  * The dependency injection container represents a collection of configured dependencies. Dependencies are instances
- * of \Europa\Di\Dependency that represent an object instance. The container provides a fluent interface for
+ * of \Europa\Application\Dependency that represent an object instance. The container provides a fluent interface for
  * accessing dependencies so that they can easily be configured.
  * 
  * Dependencies can have both a mapping, which maps a dependency name to a class name, or a formatter which will format
@@ -73,7 +73,7 @@ class Container
      * @param string $name  The name of the dependency.
      * @param mixed  $value The dependency to register.
      * 
-     * @see \Europa\Di\Dependency::register()
+     * @see \Europa\Application\Dependency::register()
      */
     public function __call($name, array $args = array())
     {
@@ -83,7 +83,7 @@ class Container
     /**
      * Magic caller for register().
      * 
-     * @see \Europa\Di\Dependency::register()
+     * @see \Europa\Application\Dependency::register()
      */
     public function __set($name, $value)
     {
@@ -93,7 +93,7 @@ class Container
     /**
      * Magic caller for resolve($name).
      * 
-     * @see \Europa\Di\Dependency::resolve()
+     * @see \Europa\Application\Dependency::resolve()
      */
     public function __get($name)
     {
@@ -103,7 +103,7 @@ class Container
     /**
      * Magic caller for isRegistered($name).
      * 
-     * @see \Europa\Di\Dependency::isRegistered()
+     * @see \Europa\Application\Dependency::isRegistered()
      */
     public function __isset($name)
     {
@@ -113,7 +113,7 @@ class Container
     /**
      * Magic caller for unregister($name).
      * 
-     * @see \Europa\Di\Dependency::unregister()
+     * @see \Europa\Application\Dependency::unregister()
      */
     public function __unset($naem)
     {
@@ -125,7 +125,7 @@ class Container
      * 
      * @param string $name The name of the dependency.
      * 
-     * @return \Europa\Di\Dependency
+     * @return \Europa\Application\Dependency
      */
     public function resolve($name)
     {
@@ -147,7 +147,7 @@ class Container
      */
     public function createDependency($name, array $args = array())
     {
-        return $this->resolve($name, $args)->create();
+        return $this->resolve($name)->configure($args)->create();
     }
     
     /**
@@ -160,7 +160,7 @@ class Container
      */
     public function getDependency($name, array $args = array())
     {
-        return $this->resolve($name, $args)->get();
+        return $this->resolve($name)->configure($args)->get();
     }
     
     /**
@@ -169,7 +169,7 @@ class Container
      * @param mixed  $map   An array of $map => $value or a dependency name for $class.
      * @param string $class The class to map the dependency to.
      * 
-     * @return \Europa\Di\Container
+     * @return \Europa\Application\Container
      */
     public function map($map, $class = null)
     {
@@ -186,7 +186,7 @@ class Container
     
     /**
      * Detects the value of $value and handles it appropriately.
-     *   - Instances of \Europa\Di\Dependency are registered on the container.
+     *   - Instances of \Europa\Application\Dependency are registered on the container.
      *   - Other instances are created as a dependency then registered.
      * 
      * @param string $name  The name of the dependency.
@@ -194,7 +194,7 @@ class Container
      * 
      * @throws \InvalidArgumentException If anything but a dependency object or other object instance is passed.
      * 
-     * @return \Europa\Di\Container
+     * @return \Europa\Application\Container
      */
     public function register($name, $value)
     {
@@ -229,7 +229,7 @@ class Container
      * 
      * @param string $name The dependency name.
      * 
-     * @return \Europa\Di\Container
+     * @return \Europa\Application\Container
      */
     public function unRegister($name)
     {
@@ -244,7 +244,7 @@ class Container
      * 
      * @param \Europa\Filter\FilterInterface $filter The filter to use for name formatting.
      * 
-     * @return \Europa\Di\Container
+     * @return \Europa\Application\Container
      */
     public function setFilter(FilterInterface $filter)
     {
@@ -275,7 +275,7 @@ class Container
      * 
      * @param string $name The instance name to get if using multiple instances.
      * 
-     * @return \Europa\Di\Container
+     * @return \Europa\Application\Container
      */
     public static function get($name = self::DEFAULT_INSTANCE_NAME)
     {

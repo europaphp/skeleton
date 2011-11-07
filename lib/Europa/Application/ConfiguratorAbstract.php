@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\Di;
+namespace Europa\Application;
 
 /**
  * When invoked by a child class, it executes each method in the order they were defined.
@@ -10,7 +10,7 @@ namespace Europa\Di;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class ConfigurationAbstract implements ConfigurationInterface
+abstract class ConfiguratorAbstract implements ConfiguratorInterface
 {
     /**
      * Iterates through each method in the extending class and calls them in the order in which they were defined.
