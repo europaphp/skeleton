@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="<?php echo $this->uri('css/' . $this->getScript() . '.css'); ?>">
+        <link rel="stylesheet" type="text/css" href="<?php echo $this->uri->format('css/' . $this->getScript() . '.css'); ?>">
         <title><?php echo $this->lang->title; ?></title>
     </head>
     <body>
