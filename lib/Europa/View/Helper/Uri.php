@@ -1,7 +1,8 @@
 <?php
 
 namespace Europa\View\Helper;
-use Europa\Request\Uri as UriClass;
+use Europa\Request;
+use Europa\Router\RouterInterface;
 
 /**
  * A helper for formatting a passed in url.
@@ -14,11 +15,23 @@ use Europa\Request\Uri as UriClass;
 class Uri
 {
     /**
-     * The uri instance.
+     * The router to use.
      * 
-     * @var UriClass
+     * @var \Europa\Router\RouterInterface
      */
-    private $uri;
+    private $router;
+    
+    /**
+     * Constructs the URI helper with the given router if specified.
+     * 
+     * @param \Europa\Router\RouterInterface $router The router to use.
+     * 
+     * @return \Europa\View\Helper\Uri
+     */
+    public function __construct(RouterInterface $router = null)
+    {
+        $this->router = $router;
+    }
     
     /**
      * Instantiates the url formatter and sets properties.
@@ -28,42 +41,36 @@ class Uri
      * 
      * @return Uri
      */
-    public function __construct($uri = null, array $params = array())
+    public function format($uri = null, array $params = array())
     {
-        $current   = UriClass::detect();
-        $this->uri = new UriClass($uri);
-        
-        // if the current request uri is the same as the specified one, then merge existing parameters
-        if ($current->getRequest() === $this->uri->getRequest()) {
-            $this->uri->setParams($current->getParams());
-        }
-        
-        // just in case params are being merged, we override with passed params
-        $this->uri->setParams($params);
-        
-        // if there is no host and it's not an absolute URI, we auto-detect the root
-        if (!$this->uri->getHost() && $uri[0] !== '/') {
-            $this->uri->setRoot($current->getRoot());
-        }
+        $current = Request\Uri::detect();
+        $current->fromString($uri);
+        $current->setParams($params);
+        return $current->__toString();
     }
     
     /**
-     * Formats the url and returns it.
+     * Generates a URI for the specified route if it exists.
+     * 
+     * @param string $name   The name of the route.
+     * @param array  $params The parameters to generate with.
+     * 
+     * @throws \LogicException If a router isn't specified.
+     * @throws \LogicException If an exception is caught while generating.
      * 
      * @return string
      */
-    public function __toString()
+    public function generate($name, array $params = array())
     {
-        return $this->uri->__toString();
-    }
-    
-    /**
-     * Returns the \Europa\Request\Uri object that represents the helper URI.
-     * 
-     * @return \Europa\Request\Uri
-     */
-    public function get()
-    {
-        return $this->uri;
+        if (!$this->router) {
+            $class = get_class($this);
+            throw new \LogicException("You must configure {$class} with a router if calling generate.");
+        }
+        
+        try {
+            return $this->router->reverse($name, $params);
+        } catch (\Exception $e) {
+            throw new \LogicException("Could not generate a URI for {$name} with message: $e->getMessage()");
+        }
     }
 }
