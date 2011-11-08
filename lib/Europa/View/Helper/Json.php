@@ -10,21 +10,21 @@ namespace Europa\View\Helper;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Js extends Script
+class Json
 {
     /**
      * The PHP view variables to register for JavaScript.
      * 
      * @var array
      */
-    private $register = array();
+    private $vars = array();
     
     /**
      * The namespace to register the variables under.
      * 
      * @var string
      */
-    private $registerNs = null;
+    private $ns = null;
     
     /**
      * Registers variables to be passed from the view to JavaScript.
@@ -32,44 +32,36 @@ class Js extends Script
      * @param array $vars The variables to pass to JavaScript.
      * @param array $ns   The namespace to use.
      * 
-     * @return \Helper\Js
+     * @return \Europa\View\Helper\Json
      */
-    public function register(array $vars, $ns = null)
+    public function __construct(array $vars, $ns = null)
     {
-        $this->register   = $vars;
-        $this->registerNs = $ns;
-        return $this;
+        $this->vars = $vars;
+        $this->ns   = $ns;
     }
     
     /**
-     * Compiles the specified file into a tag.
-     * 
-     * @param string $file The file to compile.
+     * Returns a JSON representation of the specified variables in the specified namespace.
      * 
      * @return string
      */
-    protected function compile($file)
+    public function __toString()
     {
-        $vars = '';
-        if ($this->register) {
-            $vars .= '<script type="text/javascript">' . PHP_EOL;
-            
-            $ns = 'window';
-            if ($this->registerNs) {
-                foreach (explode('.', $this->registerNs) as $subNs) {
-                    $ns   .= '[' . $subNs . ']';
-                    $vars .= $ns . ' = {};' . PHP_EOL;
-                }
-            }
-            
-            foreach ($this->register as $name => $value) {
-                $vars .= $ns . '[' . json_encode($name) . '] = ' . $this->toJson($value) . ';' . PHP_EOL;
-            }
-            
-            $vars .= '</script>' . PHP_EOL;
-        }
-        
-        return $vars . "<script type=\"text/javascript\" src=\"{$file}.js\"></script>";
+    	$js = '';
+    	$ns = 'window';
+    	
+    	if ($this->ns) {
+    	    foreach (explode('.', $this->ns) as $subNs) {
+    	        $ns .= '[' . $subNs . ']';
+    	        $js .= $ns . ' = {};' . PHP_EOL;
+    	    }
+    	}
+    	
+    	foreach ($this->vars as $name => $value) {
+    	    $js .= $ns . '[' . json_encode($name) . '] = ' . $this->toJson($value) . ';' . PHP_EOL;
+    	}
+    	
+    	return $js;
     }
     
     /**

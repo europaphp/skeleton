@@ -5,7 +5,7 @@ use Europa\Fs\Locator\LocatorInterface;
 use Europa\View\ViewScriptInterface;
 
 /**
- * A helper for parsing INI language files in the context of a given view.
+ * A helper for parsing INI language files in the context of a given file.
  * 
  * @category Helpers
  * @package  Europa
@@ -36,26 +36,23 @@ class Lang
     private $locator;
     
     /**
-     * The view to use for comparison.
+     * The view to use.
      * 
-     * @var ViewScriptInterface
+     * @var \Europa\View\ViewScriptInterface
      */
     private $view;
     
     /**
      * Constructs the language helper and parses the required ini file.
      * 
-     * @param Locator             $locator The locator to locate the language files.
-     * @param ViewScriptInterface $view    The view instance for auto-detecting language files based on convention.
-     * @param string              $lang    The language to use.
+     * @param Locator $locator The locator to locate the language files.
      * 
      * @return Lang
      */
-    public function __construct(LocatorInterface $locator, ViewScriptInterface $view, $lang)
+    public function __construct(ViewScriptInterface $view, LocatorInterface $locator)
     {
+    	$this->view    = $view;
         $this->locator = $locator;
-        $this->view    = $view;
-        $this->lang    = $lang;
     }
     
     /**
@@ -90,8 +87,8 @@ class Lang
      */
     public function __get($name)
     {
-        $this->reParseIfDifferentView();
-        $view = $this->view->getScript();
+    	$view = $this->view->getScript();
+        $this->reParseIfDifferentFile();
         if (isset($this->cache[$view][$name])) {
             return $this->cache[$view][$name];
         }
@@ -105,8 +102,8 @@ class Lang
      */
     public function toArray()
     {
-        $this->reParseIfDifferentView();
-        $view = $this->view->getScript();
+    	$view = $this->view->getScript();
+        $this->reParseIfDifferentFile();
         if (isset($this->cache[$view][$name])) {
             return $this->cache[$view][$name];
         }
@@ -124,15 +121,15 @@ class Lang
     }
     
     /**
-     * Re-parses the ini file if a different view is detected.
+     * Re-parses the ini file if a different file is detected.
      * 
      * @return Lang
      */
-    private function reParseIfDifferentView()
+    private function reParseIfDifferentFile()
     {
-        $view = $this->view->getScript();
+    	$view = $this->view->getScript();
         if (!isset($this->cache[$view])) {
-            if ($path = $this->locator->locate("{$this->lang}/{$view}")) {
+            if ($path = $this->locator->locate($view)) {
                 $this->cache[$view] = parse_ini_file($path);
             } else {
                 $this->cache[$view] = array();
