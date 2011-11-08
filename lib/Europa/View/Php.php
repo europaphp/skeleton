@@ -167,7 +167,7 @@ class Php implements ViewScriptInterface
     	extract($context);
     	include $this->locator->locate($this->script);
     	$rendered = ob_get_clean();
-        
+    	
         // handle view extensions
         if ($this->parentScript) {
             // set the script so the parent has access to what child has been rendered
@@ -181,7 +181,7 @@ class Php implements ViewScriptInterface
 
             // set the rendered child so the parent has access to the rendered child
             $this->child = $rendered;
-
+            
             // render and return the output of the parent
             return $this->render($context);
         }
