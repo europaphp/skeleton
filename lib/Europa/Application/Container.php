@@ -5,11 +5,11 @@ use Europa\Filter\FilterInterface;
 use Europa\Filter\UpperCamelCaseFilter;
 
 /**
- * The dependency injection container represents a collection of configured dependencies. Dependencies are instances
- * of \Europa\Application\Dependency that represent an object instance. The container provides a fluent interface for
+ * The service injection container represents a collection of configured dependencies. Dependencies are instances
+ * of \Europa\Application\Service that represent an object instance. The container provides a fluent interface for
  * accessing dependencies so that they can easily be configured.
  * 
- * @category DependencyInjection
+ * @category ServiceInjection
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
@@ -24,7 +24,7 @@ class Container
     const DEFAULT_INSTANCE_NAME = 'default';
     
     /**
-     * Cached dependency instances.
+     * Cached service instances.
      * 
      * @var array
      */
@@ -57,10 +57,10 @@ class Container
     /**
      * Magic caller for resolve($name, $args).
      * 
-     * @param string $name  The name of the dependency.
-     * @param mixed  $value The dependency to register.
+     * @param string $name  The name of the service.
+     * @param mixed  $value The service to register.
      * 
-     * @see \Europa\Application\Dependency::register()
+     * @see \Europa\Application\Service::register()
      */
     public function __call($name, array $args = array())
     {
@@ -70,7 +70,7 @@ class Container
     /**
      * Magic caller for register().
      * 
-     * @see \Europa\Application\Dependency::register()
+     * @see \Europa\Application\Service::register()
      */
     public function __set($name, $value)
     {
@@ -80,7 +80,7 @@ class Container
     /**
      * Magic caller for resolve($name).
      * 
-     * @see \Europa\Application\Dependency::resolve()
+     * @see \Europa\Application\Service::resolve()
      */
     public function __get($name)
     {
@@ -90,7 +90,7 @@ class Container
     /**
      * Magic caller for isRegistered($name).
      * 
-     * @see \Europa\Application\Dependency::isRegistered()
+     * @see \Europa\Application\Service::isRegistered()
      */
     public function __isset($name)
     {
@@ -100,7 +100,7 @@ class Container
     /**
      * Magic caller for unregister($name).
      * 
-     * @see \Europa\Application\Dependency::unregister()
+     * @see \Europa\Application\Service::unregister()
      */
     public function __unset($naem)
     {
@@ -108,68 +108,68 @@ class Container
     }
     
     /**
-     * Creates a dependency if it doesn't already exist and returns it.
+     * Creates a service if it doesn't already exist and returns it.
      * 
-     * @param string $name The name of the dependency.
+     * @param string $name The name of the service.
      * 
-     * @return \Europa\Application\Dependency
+     * @return \Europa\Application\Service
      */
     public function resolve($name)
     {
         if (!isset($this->deps[$name])) {
             $dep = $this->getClassNameFor($name);
-            $dep = new Dependency($dep);
+            $dep = new Service($dep);
             $this->deps[$name] = $dep;
         }
         return $this->deps[$name];
     }
     
     /**
-     * Returns a new instance of a configured dependency.
+     * Returns a new instance of a configured service.
      * 
-     * @param string $name The name of the dependency.
+     * @param string $name The name of the service.
      * @param array  $args The arguments to pass to the new instance.
      * 
      * @return mixed
      */
-    public function createDependency($name, array $args = array())
+    public function createService($name, array $args = array())
     {
         return $this->resolve($name)->configure($args)->create();
     }
     
     /**
-     * Returns a configured instance of the specified dependency.
+     * Returns a configured instance of the specified service.
      * 
-     * @param string $name The name of the dependency.
+     * @param string $name The name of the service.
      * @param array  $args The arguments to pass if creating a new instance.
      * 
      * @return mixed
      */
-    public function getDependency($name, array $args = array())
+    public function getService($name, array $args = array())
     {
         return $this->resolve($name)->configure($args)->get();
     }
     
     /**
      * Detects the value of $value and handles it appropriately.
-     *   - Instances of \Europa\Application\Dependency are registered on the container.
-     *   - Other instances are created as a dependency then registered.
+     *   - Instances of \Europa\Application\Service are registered on the container.
+     *   - Other instances are created as a service then registered.
      * 
-     * @param string      $name       The name of the dependency.
-     * @param Dependency  $dependency One of many allowed values.
+     * @param string      $name       The name of the service.
+     * @param Service  $service One of many allowed values.
      * 
      * @return \Europa\Application\Container
      */
-    public function register($name, Dependency $dependency)
+    public function register($name, Service $service)
     {
-        $this->deps[$name] = $dependency;
+        $this->deps[$name] = $service;
         return $this;
     }
     
     /**
-     * Returns whether or not the specified dependency is registered.
+     * Returns whether or not the specified service is registered.
      * 
-     * @param string $name The dependency name.
+     * @param string $name The service name.
      * 
      * @return bool
      */
@@ -179,9 +179,9 @@ class Container
     }
     
     /**
-     * Removes the specified dependency.
+     * Removes the specified service.
      * 
-     * @param string $name The dependency name.
+     * @param string $name The service name.
      * 
      * @return \Europa\Application\Container
      */
@@ -194,7 +194,7 @@ class Container
     }
     
     /**
-     * Sets a filter to use for converting a dependency name into a class name.
+     * Sets a filter to use for converting a service name into a class name.
      * 
      * @param \Europa\Filter\FilterInterface $filter The filter to use for name formatting.
      * 
@@ -207,9 +207,9 @@ class Container
     }
     
     /**
-     * Returns the class name for the specified dependency.
+     * Returns the class name for the specified service.
      * 
-     * @param string $name The name of the dependency to get the class name for.
+     * @param string $name The name of the service to get the class name for.
      * 
      * @return string
      */
@@ -219,17 +219,31 @@ class Container
     }
     
     /**
+     * Registers the container as an instance.
+     * 
+     * @param string $name      The instance name.
+     * @param self   $container The container to register.
+     * 
+     * @return void
+     */
+    public static function set($name, self $container)
+    {
+    	self::$containers[$name] = $container;
+    }
+    
+    /**
      * Returns an instance of a container.
      * 
      * @param string $name The instance name to get if using multiple instances.
      * 
      * @return \Europa\Application\Container
      */
-    public static function get($name = self::DEFAULT_INSTANCE_NAME)
+    public static function get($name = null)
     {
-        if (!isset(static::$containers[$name])) {
-            static::$containers[$name] = new static;
+    	$name = $name ? $name : self::DEFAULT_INSTANCE_NAME;
+        if (!isset(self::$containers[$name])) {
+            self::$containers[$name] = new static;
         }
-        return static::$containers[$name];
+        return self::$containers[$name];
     }
 }

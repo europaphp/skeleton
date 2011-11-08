@@ -3,18 +3,18 @@
 namespace Europa\Application;
 
 /**
- * A container dependency that represents a given class. The class represented within is configurable by setting
+ * A container service that represents a given class. The class represented within is configurable by setting
  * constructor parameters and queuing methods to be called with parameters post-construction. If an instance of
- * \Europa\Application\Dependency is passed as a parameter to either the constructor or a method, the dependency is retrieved
+ * \Europa\Application\Service is passed as a parameter to either the constructor or a method, the service is retrieved
  * before it is passed to the constructor or method. By enabling this, it allows us to preserve object configuration
- * overhead right up until the point it is required by another dependency.
+ * overhead right up until the point it is required by another service.
  * 
- * @category DependencyInjection
+ * @category ServiceInjection
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Dependency
+class Service
 {
     /**
      * The constructor arguments.
@@ -24,14 +24,14 @@ class Dependency
     private $args = array();
     
     /**
-     * The dependency class name.
+     * The service class name.
      * 
      * @var string
      */
     private $class;
     
     /**
-     * The dependency instance if it was already created.
+     * The service instance if it was already created.
      * 
      * @var mixed
      */
@@ -45,11 +45,11 @@ class Dependency
     private $queue = array();
     
     /**
-     * Constructs a new dependency representing the specified class.
+     * Constructs a new service representing the specified class.
      * 
      * @param string $class The name of the class to represent.
      * 
-     * @return \Europa\Application\Dependency
+     * @return \Europa\Application\Service
      */
     public function __construct($class)
     {
@@ -62,7 +62,7 @@ class Dependency
      * @param string $method The method to call.
      * @param array  $args   The arguments to pass to the method.
      * 
-     * @return \Europa\Application\Dependency
+     * @return \Europa\Application\Service
      */
     public function __call($method, array $args = array())
     {
@@ -74,7 +74,7 @@ class Dependency
      * 
      * @param array $args The arguments to re-configure the instance with.
      * 
-     * @return \Europa\Application\Dependency
+     * @return \Europa\Application\Service
      */
     public function configure(array $args)
     {
@@ -89,7 +89,7 @@ class Dependency
      * @param string $method The method to queue.
      * @param array  $args   The arguments to pass to the method.
      * 
-     * @return \Europa\Application\Dependency
+     * @return \Europa\Application\Service
      */
     public function queue($method, array $args = array())
     {
@@ -99,11 +99,11 @@ class Dependency
     }
     
     /**
-     * Sets an instance and makes sure that it is an instance that the dependency represents.
+     * Sets an instance and makes sure that it is an instance that the service represents.
      * 
      * @param mixed $instance The instance to set.
      * 
-     * @return \Europa\Application\Dependency
+     * @return \Europa\Application\Service
      */
     public function set($instance)
     {
@@ -122,7 +122,7 @@ class Dependency
     }
     
     /**
-     * Returns the represented dependency instance. If it is has not been created yet, it is created then cached and
+     * Returns the represented service instance. If it is has not been created yet, it is created then cached and
      * returned.
      * 
      * @return mixed
@@ -137,7 +137,7 @@ class Dependency
     }
     
     /**
-     * Returns whether or not the current dependency exists.
+     * Returns whether or not the current service exists.
      * 
      * @return bool
      */
@@ -175,7 +175,7 @@ class Dependency
     /**
      * Destroys the current instance so it can be reconfigured the next time it is accessed.
      * 
-     * @return \Europa\Application\Dependency
+     * @return \Europa\Application\Service
      */
     public function refresh()
     {
@@ -184,7 +184,7 @@ class Dependency
     }
     
     /**
-     * Invokes the represented dependency and returns it.
+     * Invokes the represented service and returns it.
      * 
      * @param array $args Any last minute constructor arguments.
      * 
@@ -203,7 +203,7 @@ class Dependency
             }
         } catch (\Exception $e) {
             throw new \RuntimeException(
-                "Could not invoke dependency class {$this->class} with message: {$e->getMessage()}.",
+                "Could not invoke service class {$this->class} with message: {$e->getMessage()}.",
                 $e->getCode()
             );
         }
@@ -213,9 +213,9 @@ class Dependency
     /**
      * Invokes the represented dependencies queue.
      * 
-     * @param mixed $instance The instance of dependency to call the queue on.
+     * @param mixed $instance The instance of service to call the queue on.
      * 
-     * @return \Europa\Application\Dependency
+     * @return \Europa\Application\Service
      */
     private function invokeQueue($instance)
     {
@@ -236,7 +236,7 @@ class Dependency
     
     /**
      * Filters arguments for a constructor or method and makes sure any top-level dependencies that were passed in
-     * are converted into the dependency instance that they represent.
+     * are converted into the service instance that they represent.
      * 
      * @param array &$args The arguments to filter.
      * 
@@ -245,7 +245,7 @@ class Dependency
     private function filterArgsForDependencies(array &$args)
     {
         foreach ($args as &$arg) {
-            if ($arg instanceof Dependency) {
+            if ($arg instanceof Service) {
                 $arg = $arg->get();
             }
         }

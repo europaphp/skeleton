@@ -1,7 +1,7 @@
 <?php
 
-namespace Europa\Application\Configurator;
-use Europa\Application\ConfiguratorAbstract;
+namespace Europa\Application\Configuration;
+use Europa\Application\ConfigurationInterface;
 use Europa\Application\Container;
 use Europa\Filter\ClassNameFilter;
 use Europa\Filter\MapFilter;
@@ -10,12 +10,12 @@ use Europa\Fs\Locator\PathLocator;
 /**
  * The default configuration.
  * 
- * @category Configurators
+ * @category Configurations
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Basic extends ConfiguratorAbstract
+class Basic implements ConfigurationInterface
 {
     /**
      * The application base path.
@@ -29,14 +29,22 @@ class Basic extends ConfiguratorAbstract
      * 
      * @var array
      */
-    private $conf = array();
+    private $conf = array(
+    	'controllerPrefix' => 'Controller\\',
+    	'controllerSuffix' => '',
+    	'helperPrefix'     => 'Europa\View\Helper\\',
+    	'helperSuffix'     => '',
+    	'langPaths'        => array('app/Lang/en-us' => 'ini'),
+    	'loadPaths'        => array('app' => 'php'),
+    	'viewPaths'        => array('app/View' => 'php'),
+    );
     
     /**
      * Sets default options.
      * 
      * @param array $conf Configuration to granularize the default configuration.
      * 
-     * @return \Europa\Application\Configurator\Basic
+     * @return \Europa\Application\Configuration\Basic
      */
     public function __construct(array $conf = array())
     {
@@ -45,11 +53,27 @@ class Basic extends ConfiguratorAbstract
     }
     
     /**
+     * Configures the specified container.
+     * 
+     * @param \Europa\Application\Container $container The container to configure.
+     * 
+     * @return void
+     */
+    public function configure(Container $container)
+    {
+    	$this->map($container);
+    	$this->dispatcher($container);
+    	$this->loader($container);
+    	$this->view($container);
+    	$this->helpers($container);
+    }
+    
+    /**
      * Configures the dependency injection container.
      * 
      * @return void
      */
-    public function map($container)
+    private function map($container)
     {
         $container->setFilter(new MapFilter(array(
             'dispatcher' => '\Europa\Dispatcher\Dispatcher',
@@ -65,10 +89,13 @@ class Basic extends ConfiguratorAbstract
      * 
      * @return void
      */
-    public function dispatcher($container)
+    private function dispatcher($container)
     {
         $container->resolve('dispatcher')->queue('setControllerFilter', array(
-            new ClassNameFilter(array('prefix' => 'Controller\\'))
+            new ClassNameFilter(array(
+            	'prefix' => $this->conf['controllerPrefix'],
+            	'suffix' => $this->conf['controllerSuffix']
+            ))
         ));
     }
     
@@ -77,10 +104,14 @@ class Basic extends ConfiguratorAbstract
      * 
      * @return void
      */
-    public function loader($container)
+    private function loader($container)
     {
         $locator = new PathLocator;
-        $locator->addPath($this->path . '/app');
+        
+        foreach ($this->conf['loadPaths'] as $path => $suffix) {
+            $locator->addPath($this->path . '/' . trim($path, '/\\'), $suffix);
+        }
+        
         $container->resolve('loader')->queue('setLocator', array($locator));
     }
     
@@ -89,10 +120,14 @@ class Basic extends ConfiguratorAbstract
      * 
      * @return void
      */
-    public function view($container)
+    private function view($container)
     {
         $locator = new PathLocator;
-        $locator->addPath($this->path . '/app/View');
+        
+        foreach ($this->conf['viewPaths'] as $path => $suffix) {
+            $locator->addPath($this->path . '/' . trim($path, '/\\'), $suffix);
+        }
+        
         $container->resolve('view')->configure(array($locator));
     }
     
@@ -101,17 +136,21 @@ class Basic extends ConfiguratorAbstract
      * 
      * @return void
      */
-    public function helpers($container)
+    private function helpers($container)
     {
         $locator = new PathLocator;
-        $locator->throwWhenAdding(false)->addPath($this->path . '/app/Lang', 'ini');
+        $locator->throwWhenAdding(false);
+        
+        foreach ($this->conf['langPaths'] as $path => $suffix) {
+	        $locator->addPath($this->path . '/' . trim($path, '/\\'), $suffix);
+	    }
         
         $helpers = new Container;
-        $helpers->setFilter(new ClassNameFilter(array('prefix' => '\Europa\View\Helper\\')));
-        $helpers->resolve('css')->configure(array('css'));
-        $helpers->resolve('html')->configure(array($container->resolve('view')));
-        $helpers->resolve('js')->configure(array('js'));
-        $helpers->resolve('lang')->configure(array($locator, $container->resolve('view'), 'en-us'));
+        $helpers->setFilter(new ClassNameFilter(array(
+        	'prefix' => $this->conf['helperPrefix'],
+        	'suffix' => $this->conf['helperSuffix']
+        )));
+        $helpers->resolve('lang')->configure(array($container->resolve('view'), $locator));
         
         $container->resolve('view')->queue('setHelperContainer', array($helpers));
     }

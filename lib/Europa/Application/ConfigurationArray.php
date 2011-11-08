@@ -2,11 +2,11 @@
 
 namespace Europa\Application;
 
-class ConfiguratorArray implements ConfiguratorInterface
+class ConfigurationArray implements ConfigurationInterface
 {
     private $configs = array();
     
-    public function add(ConfiguratorInterface $config)
+    public function add(ConfigurationInterface $config)
     {
         $this->configs[] = $config;
         return $this;
