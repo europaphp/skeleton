@@ -155,8 +155,8 @@ class Container
      *   - Instances of \Europa\Application\Service are registered on the container.
      *   - Other instances are created as a service then registered.
      * 
-     * @param string      $name       The name of the service.
-     * @param Service  $service One of many allowed values.
+     * @param string                      $name    The name of the service.
+     * @param \Europa\Application\Service $service One of many allowed values.
      * 
      * @return \Europa\Application\Container
      */
