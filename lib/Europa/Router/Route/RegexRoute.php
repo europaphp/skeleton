@@ -60,7 +60,7 @@ class RegexRoute implements RouteInterface
     public function reverse(array $params = array())
     {
         $parsed = $this->reverse;
-        foreach ($params as $name => $value) {
+        foreach (array_merge($this->map, $params) as $name => $value) {
             $parsed = str_replace(':' . $name, $value, $parsed);
         }
         return $parsed;
