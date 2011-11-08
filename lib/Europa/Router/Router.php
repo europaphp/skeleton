@@ -95,6 +95,21 @@ class Router implements RouterInterface
         }
         return false;
     }
+    
+    /**
+     * Reverse engineers the specified route.
+     * 
+     * @param string $name   The name of the route to reverse engineer.
+     * @param array  $params The parameters to use when reverse engineering the route.
+     * 
+     * @throws \LogicException If the route cannot be found.
+     * 
+     * @return string
+     */
+    public function reverse($name, array $params = array())
+    {
+    	return $this->getRoute($name)->reverse($params);
+    }
 
     /**
      * Sets a route.

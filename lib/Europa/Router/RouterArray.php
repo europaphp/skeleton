@@ -49,4 +49,24 @@ class RouterArray implements RouterInterface
         }
         return $this;
     }
+    
+    /**
+     * Reverse engineers the specified route.
+     * 
+     * @param string $name   The name of the route to reverse engineer.
+     * @param array  $params The parameters to use when reverse engineering the route.
+     * 
+     * @throws \LogicException If the route cannot be found.
+     * 
+     * @return string
+     */
+    public function reverse($name, array $params = array())
+    {
+    	foreach ($this->routers as $router) {
+    		if ($router->hasRoute($name)) {
+    			return $router->getRoute($name)->reverse($params);
+    		}
+    	}
+    	throw new \LogicException("Could not reverse engineer route {$name} because it could not be found.");
+    }
 }
