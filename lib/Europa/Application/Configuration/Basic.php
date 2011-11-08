@@ -36,7 +36,7 @@ class Basic implements ConfigurationInterface
     	'helperSuffix'     => '',
     	'langPaths'        => array('app/Lang/en-us' => 'ini'),
     	'loadPaths'        => array('app' => 'php'),
-    	'viewPaths'        => array('app/View' => 'php'),
+    	'viewPaths'        => array('app/View' => 'php')
     );
     
     /**
@@ -80,6 +80,7 @@ class Basic implements ConfigurationInterface
             'loader'     => '\Europa\Fs\Loader',
             'request'    => '\Europa\Request\Http',
             'response'   => '\Europa\Response\Http',
+            'router'     => '\Europa\Router\Router',
             'view'       => '\Europa\View\Php',
         )));
     }
@@ -91,12 +92,12 @@ class Basic implements ConfigurationInterface
      */
     private function dispatcher($container)
     {
-        $container->resolve('dispatcher')->queue('setControllerFilter', array(
-            new ClassNameFilter(array(
-            	'prefix' => $this->conf['controllerPrefix'],
-            	'suffix' => $this->conf['controllerSuffix']
-            ))
-        ));
+        $dispatcher = $container->resolve('dispatcher');
+        $dispatcher->queue('setRouter', array($container->resolve('router')));
+        $dispatcher->queue('setControllerFilter', array(new ClassNameFilter(array(
+            'prefix' => $this->conf['controllerPrefix'],
+            'suffix' => $this->conf['controllerSuffix']
+        ))));
     }
     
     /**
@@ -107,11 +108,9 @@ class Basic implements ConfigurationInterface
     private function loader($container)
     {
         $locator = new PathLocator;
-        
         foreach ($this->conf['loadPaths'] as $path => $suffix) {
             $locator->addPath($this->path . '/' . trim($path, '/\\'), $suffix);
         }
-        
         $container->resolve('loader')->queue('setLocator', array($locator));
     }
     
@@ -123,11 +122,9 @@ class Basic implements ConfigurationInterface
     private function view($container)
     {
         $locator = new PathLocator;
-        
         foreach ($this->conf['viewPaths'] as $path => $suffix) {
             $locator->addPath($this->path . '/' . trim($path, '/\\'), $suffix);
         }
-        
         $container->resolve('view')->configure(array($locator));
     }
     
@@ -151,6 +148,7 @@ class Basic implements ConfigurationInterface
         	'suffix' => $this->conf['helperSuffix']
         )));
         $helpers->resolve('lang')->configure(array($container->resolve('view'), $locator));
+        $helpers->resolve('uri')->configure(array($container->resolve('router')));
         
         $container->resolve('view')->queue('setHelperContainer', array($helpers));
     }
