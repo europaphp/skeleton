@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <?php echo $this->css->render($this->getScript()); ?>
-        <?php echo $this->js->render($this->getScript()); ?>
-        <title><?php echo $this->lang->title ?></title>
+        <link rel="stylesheet" type="text/css" href="<?php echo $this->uri('css/' . $this->getScript() . '.css'); ?>">
+        <title><?php echo $this->lang->title; ?></title>
     </head>
     <body>
-        <div id="body"><?php echo $this->getRenderedChild(); ?></div>
+        <div id="body"><?php echo $this->renderChild(); ?></div>
         <div id="footer">
             <p><?php echo $this->lang->time(round(microtime(true) - EUROPA_START_TIME, 3)); ?></p>
         </div>

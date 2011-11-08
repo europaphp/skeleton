@@ -692,7 +692,7 @@ class Uri
      */
     public static function detectRoot()
     {
-        if (!isset($_SERVER['SCRIPT_NAME'])) {
+    	if (!isset($_SERVER['SCRIPT_NAME'])) {
             return null;
         }
         $root = $_SERVER['SCRIPT_NAME'];

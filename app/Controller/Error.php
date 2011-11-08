@@ -18,10 +18,11 @@ class Error extends Base
      * 
      * @return void
      */
-    public function __call($name, array $args = array())
+    public function all()
     {
-        return array(
-            'url' => Uri::detect()->getRequest(),
+    	$uri = Uri::detect();
+    	return array(
+            'uri' => $uri->getRootPart() . $uri->getRequestPart() . $uri->getQueryPart(),
         );
     }
 }

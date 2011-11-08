@@ -10,9 +10,9 @@ require dirname(__FILE__) . '/../app/bootstrap.php';
 // any exceptions will be routed to the error controller
 try {
     $container  = Container::get();
-    $request    = $container->getDependency('request');
-    $response   = $container->getDependency('response');
-    $dispatcher = $container->getDependency('dispatcher');
+    $request    = $container->getService('request');
+    $response   = $container->getService('response');
+    $dispatcher = $container->getService('dispatcher');
     $dispatcher->dispatch($request, $response);
 } catch (\Exception $e) {
     $request->setParam('controller', 'error');
