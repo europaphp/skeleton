@@ -15,42 +15,28 @@ use Europa\Fs\Locator\LocatorInterface;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Php extends ViewScriptAbstract
+class Php implements ViewScriptInterface
 {
+	/**
+	 * The child script that was rendered, if any.
+	 * 
+	 * @var string
+	 */
+	private $child;
+	
+	/**
+	 * The container to use for helpers.
+	 * 
+	 * @var \Europa\Application\Container
+	 */
+	private $container;
+	
 	/**
 	 * The views that have already extended a parent class.
 	 * 
 	 * @var array
 	 */
 	private $extendStack = array();
-	
-	/**
-	 * Sets the context.
-	 * 
-	 * @var array
-	 */
-	private $context = array();
-	
-	/**
-	 * The parent script.
-	 * 
-	 * @var string
-	 */
-	private $parentScript;
-	
-	/**
-	 * The child script.
-	 * 
-	 * @var string
-	 */
-	private $childScript;
-	
-	/**
-	 * The service locator to use for locating helpers.
-	 * 
-	 * @var Container
-	 */
-	private $container;
 	
 	/**
 	 * The loader to use for view locating and loading.
@@ -60,67 +46,107 @@ class Php extends ViewScriptAbstract
 	private $locator;
 	
 	/**
+	 * The child script.
+	 * 
+	 * @var string
+	 */
+	private $childScript;
+	
+	/**
+	 * The parent script.
+	 * 
+	 * @var string
+	 */
+	private $parentScript;
+	
+	/**
+	 * The script to render.
+	 * 
+	 * @var string
+	 */
+	private $script;
+	
+	/**
      * Sets up a Php view renderer.
      * 
      * @param \Europa\Fs\Locator\LocatorInterface $locator The locator to use for view locating view files.
      * 
-     * @return \Europa\View\ViewScriptAbstract
+     * @return \Europa\View\Php
      */
     public function __construct(LocatorInterface $locator)
     {
     	$this->locator = $locator;
     }
-	
-	/**
-	 * Attempts to call the specified method on the specified locator if it exists.
-	 * 
-	 * @param string $name The specified service to locate and return.
-	 * @param array  $args The configuration for the service.
-	 * 
-	 * @return mixed
-	 */
-	public function __call($name, array $args = array())
-	{
-	    if (!$this->container) {
-	        throw new \LogicException('Unable to create helper "' . $name . '" because no helper locator was set.');
-	    }
-	    
-	    $helper = $this->container->resolve($name);
-	    if ($helper->exists()) {
-	        return $helper->create($args);
-	    } else {
-	        throw new \LogicException('Unable to create instance of helper "' . $name . '" with message: ' . $e->getMessage());
-	    }
-	}
-	
-	/**
-	 * Attempts to retrieve a parameter by name. If the parameter is not found, then it attempts
-	 * to use the service locator to find a helper. If nothing is found, it returns null.
-	 * 
-	 * @param string $name The name of the property to get or helper to load.
-	 * 
-	 * @return mixed
-	 */
-	public function __get($name)
-	{
-		// accessing normal parameters
-	    if (array_key_exists($name, $this->context)) {
-	        return $this->context[$name];
-	    }
-	    
-	    // a container is not required
-	    if (!$this->container) {
-	        return null;
-	    }
-	    
-	    // only return an instance of the helper if it exists
-	    $helper = $this->container->resolve($name);
-	    if ($helper->exists()) {
-	        return $helper->get();
-	    }
-	    
-	    return null;
-	}
+    
+    /**
+     * Calls a helper from the specified container.
+     * 
+     * @see \Europa\View\Php::setHelperContainer()
+     * 
+     * @param string $name The name of the helper to create.
+     * @param array  $args The arguments to configure it with.
+     * 
+     * @throws \LogicException If the container does not exist.
+     * 
+     * @return mixed
+     */
+    public function __call($name, array $args = array())
+    {
+    	if ($this->container) {
+    		return $this->container->resolve($name)->configure($args)->create();
+    	}
+    	throw new \LogicException('You must set a helper container using setHelperContainer before trying to call a helper.');
+    }
+    
+    /**
+     * Calls a helper from the specified container.
+     * 
+     * @see \Europa\View\Php::setHelperContainer()
+     * 
+     * @param string $name The name of the helper to create.
+     * 
+     * @throws \LogicException If the container does not exist.
+     * 
+     * @return mixed
+     */
+    public function __get($name)
+    {
+    	if ($this->container) {
+    		return $this->container->resolve($name)->get();
+    	}
+    	throw new \LogicException('You must set a helper container using setHelperContainer before trying to get a helper.');
+    }
+    
+    /**
+     * Normalizes and sets the script to render.
+     * 
+     * @return \Europa\View\Php
+     */
+    public function setScript($script)
+    {
+    	$this->script = str_replace('\\', '/', $script);
+    	return $this;
+    }
+    
+    /**
+     * Returns the set script.
+     * 
+     * @return string
+     */
+    public function getScript()
+    {
+    	return $this->script;
+    }
+    
+    /**
+     * Returns the child script.
+     * 
+     * @return string
+     */
+    public function getChildScript()
+    {
+    	return $this->childScript;
+    }
 	
     /**
      * Parses the view file and returns the result.
@@ -131,31 +157,30 @@ class Php extends ViewScriptAbstract
      */
     public function render(array $context = array())
     {
-    	$script = $this->getScript();
-    	
     	// script must be set
-    	if (!$script) {
+    	if (!$this->script) {
     		throw new \RuntimeException('A view script must be set prior to rendering.');
     	}
     	
     	// capture the output
     	ob_start();
-    	include $this->locator->locate($script);
+    	extract($context);
+    	include $this->locator->locate($this->script);
     	$rendered = ob_get_clean();
         
         // handle view extensions
         if ($this->parentScript) {
             // set the script so the parent has access to what child has been rendered
-            $this->childScript = $script;
+            $this->childScript = $this->script;
 
             // then set the parent script to the current script so the current instance is shared
-            $this->setScript($this->parentScript);
+            $this->script = $this->parentScript;
 
             // reset the parent script to avoid recursion
-            $this->parentScript  = null;
+            $this->parentScript = null;
 
             // set the rendered child so the parent has access to the rendered child
-            $this->renderedChild = $rendered;
+            $this->child = $rendered;
 
             // render and return the output of the parent
             return $this->render($context);
@@ -165,49 +190,34 @@ class Php extends ViewScriptAbstract
     }
     
     /**
-     * Sets the parent script.
+     * Renders the specified script without affecting the current set script.
      * 
-     * @param string $script The parent script.
-     * 
-     * @return ViewAbstract
-     */
-    public function setParentScript($script)
-    {
-        $this->parentScript = $this->formatScript($script);
-        return $this;
-    }
-    
-    /**
-     * Returns the parent script if one exists.
+     * @param string $script  The script to render.
+     * @param array  $context The parameters to render with.
      * 
      * @return string
      */
-    public function getParentScript()
+    public function renderScript($script, array $context = array())
     {
-        return $this->parentScript;
-    }
-    
-    /**
-     * Sets the child script.
-     * 
-     * @param string $script The child script.
-     * 
-     * @return ViewAbstract
-     */
-    public function setChildScript($script)
-    {
-        $this->childScript = $this->formatScript($script);
-        return $this;
-    }
-    
-    /**
-     * Returns the child script if one exists.
-     * 
-     * @return string
-     */
-    public function getChildScript()
-    {
-        return $this->childScript;
+        // capture old state
+        $oldScript = $this->script;
+        $oldParent = $this->parentScript;
+        $oldChild  = $this->childScript;
+        
+        // set new state
+        $this->script       = $script;
+        $this->parentScript = null;
+        $this->childScript  = null;
+        
+        // capture rendered script
+        $render = $this->render($context);
+        
+        // reapply old state
+        $this->script       = $oldScript;
+        $this->parentScript = $oldParent;
+        $this->childScript  = $oldChild;
+        
+        return $render;
     }
     
     /**
@@ -215,9 +225,9 @@ class Php extends ViewScriptAbstract
      * 
      * @return string
      */
-    public function getRenderedChild()
+    public function renderChild()
     {
-        return $this->renderedChild;
+        return $this->child;
     }
     
     /**
@@ -230,7 +240,7 @@ class Php extends ViewScriptAbstract
     public function extend($parent)
     {
         // the child is the current script
-        $child = $this->getScript();
+        $child = $this->script;
         
         // child views cannot extend themselves
         if ($parent === $child) {
@@ -251,15 +261,15 @@ class Php extends ViewScriptAbstract
     }
     
     /**
-     * Sets the service locator to use for locating helpers.
+     * Sets the service container used to locate helpers.
      * 
-     * @param Container $container The Di Container for locating helpers.
+     * @param \Europa\Application\Container $container The container to locate helpers with.
      * 
-     * @return ViewScriptAbstract
+     * @return \Europa\View\Php
      */
     public function setHelperContainer(Container $container)
     {
-        $this->container = $container;
-        return $this;
+    	$this->container = $container;
+    	return $this;
     }
 }
