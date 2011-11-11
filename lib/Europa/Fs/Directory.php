@@ -21,6 +21,7 @@ class Directory extends Item implements \IteratorAggregate, \Countable
      */
     public function __construct($path)
     {
+        $path     = (string) $path;
         $realpath = realpath($path);
         if (!$path || !$realpath) {
             throw new \LogicException('The path "' . $path . '" must be a valid directory.');
@@ -77,7 +78,7 @@ class Directory extends Item implements \IteratorAggregate, \Countable
     {
         $self = $this->getPathname();
         $dest = $destination->getPathname() . DIRECTORY_SEPARATOR . $this->getBasename();
-        foreach ($this->flatten() as $file) {
+        foreach ($this->getIterator() as $file) {
             $old  = $file->getPathname();
             $new  = substr($old, strlen($self));
             $new  = $dest . $new;
