@@ -120,9 +120,16 @@ class Dispatcher implements DispatcherInterface
             $controller = $this->controllerFilter->filter($controller);
         }
         
-        // if it doesn't implement the base interface we won't know how to use it
-        if (!is_subclass_of($controller, '\Europa\Controller\ControllerInterface')) {
-            throw new \InvalidArgumentException("Class {$controller} must implement \Europa\Controller\ControllerInterface.");
+        // attempt to reflect it
+        try {
+            $reflector = new \ReflectionClass($controller);
+        } catch (\ReflectionException $e) {
+            throw new \InvalidArgumentException("Controller {$controller} could not be located with message: {$e->getMessage()}");
+        }
+        
+        // make sure it's a valid instance
+        if (!$reflector->implementsInterface('\Europa\Controller\ControllerInterface')) {
+            throw new \InvalidArgumentException("Controller {$controller} must implement \Europa\Controller\ControllerInterface.");
         }
         
         // safe to assume it's a valid object now

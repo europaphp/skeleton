@@ -36,6 +36,7 @@ class Basic implements ConfigurationInterface
     	'helperSuffix'     => '',
     	'langPaths'        => array('app/Lang/en-us' => 'ini'),
     	'loadPaths'        => array('app' => 'php'),
+    	'path'             => '.',
     	'viewPaths'        => array('app/View' => 'php')
     );
     
@@ -49,7 +50,7 @@ class Basic implements ConfigurationInterface
     public function __construct(array $conf = array())
     {
         $this->conf = array_merge($this->conf, $conf);
-        $this->path = realpath(dirname(__FILE__) . '/../../../../');
+        $this->conf['path'] = realpath($this->conf['path']);
     }
     
     /**
@@ -109,7 +110,7 @@ class Basic implements ConfigurationInterface
     {
         $locator = new PathLocator;
         foreach ($this->conf['loadPaths'] as $path => $suffix) {
-            $locator->addPath($this->path . '/' . trim($path, '/\\'), $suffix);
+            $locator->addPath($this->conf['path'] . '/' . trim($path, '/\\'), $suffix);
         }
         $container->resolve('loader')->queue('setLocator', array($locator));
     }
@@ -123,7 +124,7 @@ class Basic implements ConfigurationInterface
     {
         $locator = new PathLocator;
         foreach ($this->conf['viewPaths'] as $path => $suffix) {
-            $locator->addPath($this->path . '/' . trim($path, '/\\'), $suffix);
+            $locator->addPath($this->conf['path'] . '/' . trim($path, '/\\'), $suffix);
         }
         $container->resolve('view')->configure(array($locator));
     }
@@ -139,7 +140,7 @@ class Basic implements ConfigurationInterface
         $locator->throwWhenAdding(false);
         
         foreach ($this->conf['langPaths'] as $path => $suffix) {
-	        $locator->addPath($this->path . '/' . trim($path, '/\\'), $suffix);
+	        $locator->addPath($this->conf['path'] . '/' . trim($path, '/\\'), $suffix);
 	    }
         
         $helpers = new Container;
