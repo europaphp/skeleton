@@ -6,6 +6,7 @@ use Europa\Application\Container;
 use Europa\Filter\ClassNameFilter;
 use Europa\Filter\MapFilter;
 use Europa\Fs\Locator\PathLocator;
+use Europa\Request\RequestAbstract;
 
 /**
  * The default configuration.
@@ -76,11 +77,12 @@ class Basic implements ConfigurationInterface
      */
     private function map($container)
     {
+        $interface = RequestAbstract::isCli() ? 'Cli' : 'Http';
         $container->setFilter(new MapFilter(array(
             'dispatcher' => '\Europa\Dispatcher\Dispatcher',
             'loader'     => '\Europa\Fs\Loader',
-            'request'    => '\Europa\Request\Http',
-            'response'   => '\Europa\Response\Http',
+            'request'    => '\Europa\Request\\' . $interface,
+            'response'   => '\Europa\Response\\' . $interface,
             'router'     => '\Europa\Router\Router',
             'view'       => '\Europa\View\Php',
         )));
