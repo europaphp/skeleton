@@ -44,6 +44,7 @@ class Uri
     public function format($uri = null, array $params = array())
     {
         $current = Request\Uri::detect();
+        $current->setHost(null);
         $current->fromString($uri);
         $current->setParams($params);
         return $current->__toString();
