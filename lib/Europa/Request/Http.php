@@ -304,6 +304,16 @@ class Http extends RequestAbstract
     }
     
     /**
+     * Returns whether or not an XMLHTTPRequest was made.
+     * 
+     * @return bool
+     */
+    public function isXmlHttp()
+    {
+        return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    }
+    
+    /**
      * Initializes the default URI for the HTTP request.
      * 
      * @return \Europa\Request\Http
