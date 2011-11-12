@@ -201,8 +201,6 @@ class PathLocator implements LocatorInterface
         }
         
         if ($this->throwWhenAdding) {
-            require_once realpath(dirname(__FILE__) . '/../Exception.php');
-            require_once realpath(dirname(__FILE__) . '/Exception.php');
             throw new \LogicException("Path {$path} does not exist.");
         }
         
