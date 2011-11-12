@@ -163,10 +163,14 @@ class Php implements ViewScriptInterface
     	}
     	
     	// capture the output
-    	ob_start();
-    	extract($context);
-    	include $this->locator->locate($this->script);
-    	$rendered = ob_get_clean();
+    	try {
+        	ob_start();
+        	extract($context);
+        	include $this->locator->locate($this->script);
+        	$rendered = ob_get_clean();
+        } catch (\Exception $e) {
+            throw new \LogicException("Unable to render view {$this->script} with message: {$e->getMessage()}");
+        }
     	
         // handle view extensions
         if ($this->parentScript) {
