@@ -31,13 +31,14 @@ class Basic implements ConfigurationInterface
      * @var array
      */
     private $conf = array(
+        'addIncludePaths'  => false,
     	'controllerPrefix' => 'Controller\\',
     	'controllerSuffix' => '',
     	'helperPrefix'     => 'Europa\View\Helper\\',
     	'helperSuffix'     => '',
     	'langPaths'        => array('app/Lang/en-us' => 'ini'),
     	'loadPaths'        => array('app' => 'php'),
-    	'path'             => '.',
+    	'path'             => '..',
     	'viewPaths'        => array('app/View' => 'php')
     );
     
@@ -112,7 +113,11 @@ class Basic implements ConfigurationInterface
     {
         $locator = new PathLocator;
         foreach ($this->conf['loadPaths'] as $path => $suffix) {
-            $locator->addPath($this->conf['path'] . '/' . trim($path, '/\\'), $suffix);
+            $path = $this->conf['path'] . '/' . trim($path, '/\\');
+            $locator->addPath($path, $suffix);
+            if ($this->conf['addIncludePaths']) {
+                $locator->addIncludePath($path);
+            }
         }
         $container->resolve('loader')->queue('setLocator', array($locator));
     }
@@ -125,6 +130,7 @@ class Basic implements ConfigurationInterface
     private function view($container)
     {
         $locator = new PathLocator;
+        $locator->throwWhenLocating(true);
         foreach ($this->conf['viewPaths'] as $path => $suffix) {
             $locator->addPath($this->conf['path'] . '/' . trim($path, '/\\'), $suffix);
         }
