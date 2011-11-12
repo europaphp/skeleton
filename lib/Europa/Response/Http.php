@@ -206,7 +206,8 @@ class Http implements \IteratorAggregate, ResponseInterface
             // ensure camel-cased attr converted to headers, e.g. contentType => content-type
             $name = $this->ccSplitFilter->filter($name);
             
-            header($name . ': ' . $value);
+            // the header name parts are simply joined together
+            header(implode('', $name) . ': ' . $value);
         }        
         echo $content;
     }
