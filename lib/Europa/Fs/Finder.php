@@ -268,6 +268,20 @@ class Finder implements \IteratorAggregate
 
         return $this;
     }
+
+    /**
+     * Returns an array of path names.
+     * 
+     * @return array
+     */
+    public function toArray()
+    {
+        $arr = array();
+        foreach ($this->getIterator() as $item) {
+            $arr[] = $item->getPathname();
+        }
+        return $arr;
+    }
     
     /**
      * Does the actual finding and matching for the specified directory.

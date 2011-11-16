@@ -31,8 +31,9 @@ class Cli implements ResponseInterface
      * 
      * @return void
      */
-    public function append($content)
+    public function append($content = '')
     {
         echo $content . PHP_EOL;
+        return $this;
     }
 }

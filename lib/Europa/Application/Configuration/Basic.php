@@ -37,9 +37,9 @@ class Basic implements ConfigurationInterface
     	'helperPrefix'     => 'Europa\View\Helper\\',
     	'helperSuffix'     => '',
     	'langPaths'        => array('app/Lang/en-us' => 'ini'),
-    	'loadPaths'        => array('app' => 'php'),
+    	'loadPaths'        => array('app'),
     	'path'             => '..',
-    	'viewPaths'        => array('app/View' => 'php')
+    	'viewPaths'        => array('app/View')
     );
     
     /**
@@ -111,15 +111,13 @@ class Basic implements ConfigurationInterface
      */
     private function loader($container)
     {
-        $locator = new PathLocator;
-        foreach ($this->conf['loadPaths'] as $path => $suffix) {
-            $path = $this->conf['path'] . '/' . trim($path, '/\\');
-            $locator->addPath($path, $suffix);
-            if ($this->conf['addIncludePaths']) {
-                $locator->addIncludePath($path);
-            }
-        }
+        $locator = new PathLocator($this->conf['path']);
+        $locator->addPaths($this->conf['loadPaths']);
         $container->resolve('loader')->queue('setLocator', array($locator));
+
+        if ($this->conf['addIncludePaths']) {
+            $locator->addIncludePaths($this->conf['loadPaths']);
+        }
     }
     
     /**
@@ -129,11 +127,9 @@ class Basic implements ConfigurationInterface
      */
     private function view($container)
     {
-        $locator = new PathLocator;
+        $locator = new PathLocator($this->conf['path']);
         $locator->throwWhenLocating(true);
-        foreach ($this->conf['viewPaths'] as $path => $suffix) {
-            $locator->addPath($this->conf['path'] . '/' . trim($path, '/\\'), $suffix);
-        }
+        $locator->addPaths($this->conf['viewPaths']);
         $container->resolve('view')->configure(array($locator));
     }
     
@@ -144,12 +140,9 @@ class Basic implements ConfigurationInterface
      */
     private function helpers($container)
     {
-        $locator = new PathLocator;
+        $locator = new PathLocator($this->conf['path']);
         $locator->throwWhenAdding(false);
-        
-        foreach ($this->conf['langPaths'] as $path => $suffix) {
-	        $locator->addPath($this->conf['path'] . '/' . trim($path, '/\\'), $suffix);
-	    }
+        $locator->addPaths($this->conf['langPaths']);
         
         $helpers = new Container;
         $helpers->setFilter(new ClassNameFilter(array(

@@ -18,6 +18,13 @@ class PathLocator implements LocatorInterface
      * @var string
      */
     const DEFAULT_SUFFIX = 'php';
+
+    /**
+     * The base path to make all paths relative to. If not supplied, it is not used.
+     * 
+     * @var string
+     */
+    private $base;
     
     /**
      * Contains all load paths that Europa\RouteLoader will use when searching for a file.
@@ -46,6 +53,24 @@ class PathLocator implements LocatorInterface
      * @var bool
      */
     private $throwWhenLocating = false;
+
+    /**
+     * Constructs a locator and sets the base path.
+     * 
+     * @param string $base The base path to set.
+     * 
+     * @return \Europa\Fs\Locator\PathLocator
+     */
+    public function __construct($base = null)
+    {
+        if ($base) {
+            $real = realpath($base);
+            if (!$real) {
+                throw new \InvalidArgumentException("The base path {$base} does not exist.");
+            }
+            $this->base = $real;
+        }
+    }
     
     /**
      * Sets whether or not to throw an exception when if the file is not found when locating.
@@ -80,7 +105,7 @@ class PathLocator implements LocatorInterface
      * @param string $map  The class to map, or array of $class => $file mapping.
      * @param string $file The file to map to if the first argument is not an array.
      * 
-     * @return \Europa\ClassLoader
+     * @return \Europa\Fs\Locator\PathLocator
      */
     public function map($map, $file)
     {
@@ -149,13 +174,17 @@ class PathLocator implements LocatorInterface
      * @param string $path   The path to add to the list of load paths.
      * @param mixed  $suffix The suffix, or suffixes to use for this path.
      * 
-     * @throws \Europa\ClassLoader\Exception If the path does not exist.
-     * 
-     * @return \Europa\ClassLoader
+     * @return \Europa\Fs\Locator\PathLocator
      */
     public function addPath($path, $suffix = self::DEFAULT_SUFFIX)
     {
+        // normalize the path relative to the base
+        $path = $this->normalizePath($path);
+
+        // make sure it exists if set
         $realpath = $this->getRealpathAndThrowIfNotExists($path);
+
+        // if exceptions aren't being thrown then just stop here
         if (!$realpath) {
             return $this;
         }
@@ -165,7 +194,29 @@ class PathLocator implements LocatorInterface
             $this->paths[$realpath] = array();
         }
         
+        // add it ensuring that no duplicates are added
         $this->paths[$realpath] = array_merge($this->paths[$realpath], (array) $suffix);
+        
+        return $this;
+    }
+
+    /**
+     * Adds multiple paths. If specifying a suffix, the path is the key and suffix is the value. Otherwise the path can
+     * be supplied as the value.
+     * 
+     * @param array $paths The paths to add.
+     * 
+     * @return \Europa\Fs\Locator\PathLocator
+     */
+    public function addPaths(array $paths)
+    {
+        foreach ($paths as $path => $suffix) {
+            if (is_numeric($path)) {
+                $path   = $suffix;
+                $suffix = self::DEFAULT_SUFFIX;
+            }
+            $this->addPath($path, $suffix);
+        }
         return $this;
     }
     
@@ -174,15 +225,46 @@ class PathLocator implements LocatorInterface
      * 
      * @param string $path The path to add to PHP's include paths.
      * 
-     * @return \Europa\ClassLoader
+     * @return \Europa\Fs\Locator\PathLocator
      */
     public function addIncludePath($path)
     {
+        $path     = $this->normalizePath($path);
         $realpath = $this->getRealpathAndThrowIfNotExists($path);
         if ($realpath) {
             set_include_path(get_include_path() . PATH_SEPARATOR . $realpath);
         }
         return $this;
+    }
+
+    /**
+     * Adds an array of paths to PHP include paths.
+     * 
+     * @param array $paths The paths to add to PHP's include paths.
+     * 
+     * @return \Europa\Fs\Locator\PathLocator
+     */
+    public function addIncludePaths(array $paths)
+    {
+        foreach ($paths as $path => $suffix) {
+            if (is_numeric($path)) {
+                $path = $suffix;
+            }
+            $this->addIncludePath($path);
+        }
+        return $this;
+    }
+
+    /**
+     * Normalizes the specified path using the base path if it was specified.
+     * 
+     * @param string $path The path to normalize.
+     * 
+     * @return string
+     */
+    private function normalizePath($path)
+    {
+        return $this->base ? $this->base . DIRECTORY_SEPARATOR . $path : $path;
     }
     
     /**
@@ -192,7 +274,7 @@ class PathLocator implements LocatorInterface
      * 
      * @param string $path The path to check and return the real path to.
      * 
-     * @return string
+     * @return bool|string
      */
     private function getRealpathAndThrowIfNotExists($path)
     {
