@@ -9,7 +9,7 @@ use Europa\Application\Container;
 use Europa\Fs\Loader;
 
 // makes everything easier to register library loading here
-require_once '../lib/Europa/Fs/Loader.php';
+require_once dirname(__FILE__) . '/../lib/Europa/Fs/Loader.php';
 $loader = new Loader;
 $loader->register();
 
