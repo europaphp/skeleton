@@ -10,7 +10,7 @@ use Test as Test;
 $base = dirname(__FILE__) . '/../';
 
 // make sure we include application configuration
-require $base . 'app/Boot/bootstrap.php';
+require $base . 'app/bootstrap.php';
 
 // add the tests path
 $locator = new PathLocator;
@@ -22,10 +22,20 @@ $loader = new Loader;
 $loader->setLocator($locator);
 $loader->register();
 
+// start covering tests
+$coverage = new \Testes\Coverage\Coverage;
+$coverage->start();
+
 // run the tests
 $tests = new Test;
 $tests->run();
 
+$coverage = $coverage->stop();
+
 // output the results in cli format
 $output = new Output;
 echo $output->render($tests);
+
+$analyzer = new \Testes\Coverage\Analyzer($coverage);
+$analyzer->addDirectory(dirname(__FILE__) . '/../lib/Europa');
+echo 'Coverage: ' . $analyzer->getPercentage() . '%' . PHP_EOL . PHP_EOL;

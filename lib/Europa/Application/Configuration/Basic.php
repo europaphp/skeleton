@@ -38,7 +38,6 @@ class Basic implements ConfigurationInterface
     	'helperSuffix'     => '',
     	'langPaths'        => array('app/Lang/en-us' => 'ini'),
     	'loadPaths'        => array('app'),
-    	'path'             => '..',
     	'viewPaths'        => array('app/View')
     );
     
@@ -51,7 +50,13 @@ class Basic implements ConfigurationInterface
      */
     public function __construct(array $conf = array())
     {
+        // set default path
+        $this->conf['path'] = dirname(__FILE__) . '/../../../../';
+
+        // apply configuration
         $this->conf = array_merge($this->conf, $conf);
+
+        // get the translated path
         $this->conf['path'] = realpath($this->conf['path']);
     }
     
