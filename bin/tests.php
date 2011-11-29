@@ -3,8 +3,10 @@
 use Europa\Application\Container;
 use Europa\Fs\Loader;
 use Europa\Fs\Locator\PathLocator;
-use Testes\Output\Cli as Output;
-use Test as Test;
+use Testes\Coverage\Analyzer;
+use Testes\Coverage\Coverage;
+use Testes\Output\Cli;
+use Test;
 
 // base path for install
 $base = dirname(__FILE__) . '/../';
@@ -23,7 +25,7 @@ $loader->setLocator($locator);
 $loader->register();
 
 // start covering tests
-$coverage = new \Testes\Coverage\Coverage;
+$coverage = new Coverage;
 $coverage->start();
 
 // run the tests
@@ -33,9 +35,17 @@ $tests->run();
 $coverage = $coverage->stop();
 
 // output the results in cli format
-$output = new Output;
+$output = new Cli;
 echo $output->render($tests);
 
-$analyzer = new \Testes\Coverage\Analyzer($coverage);
+// analyze and output code coverage
+$analyzer = new Analyzer($coverage);
 $analyzer->addDirectory(dirname(__FILE__) . '/../lib/Europa');
-echo 'Coverage: ' . $analyzer->getPercentage() . '%' . PHP_EOL . PHP_EOL;
+echo 'Coverage: '
+    . $analyzer->getPercentage()
+    . '% of lines across '
+    . count($analyzer->getTestedFiles())
+    . ' of '
+    . (count($analyzer->getTestedFiles()) + count($analyzer->getUntestedFiles()))
+    . ' files.'
+    . PHP_EOL . PHP_EOL;
