@@ -1,25 +1,24 @@
-Introduction
+EuropaPHP
+=========
+
+EuropaPHP is an extremely fast, flexible and lightweight <del>M</del>VC Framework designed for PHP 5.3+.
+
+Why Another PHP Framework?
+--------------------------
+
+EuropaPHP is the manifestation of the shortcomings of other PHP frameworks with a strong focus on scalability, standards, the view/controller relationship and dependency injection. It is specifically designed to be paired with your favorite libraries and it will seamlessly integrate with anything.
+
+Installation
 ------------
 
-### What
+Extract it anywhere you want as long as you can view the `www/index.php` in a browser. The `index.php` file can be located anywhere as long as you update the `require` statement in it.
 
-EuropaPHP is an extremely fast, flexible and lightweight MVC Framework designed for PHP 5.3+.
+So How Do You Use it?
+---------------------
 
-### Where
+All documentation is located in the `docs` directory and organized in directories by category or component. To add to the documentation, simply fork, document and submit a pull request. 
 
-http://europaphp.org
-
-### When
-
-EuropaPHP has been evolving since circa 2007. It took a few different forms until about 2009 when it made it's original release here on Github. It was then set in stone that Europa is to be small, flexible and fast.
-
-### Why
-
-You're a software engineer/architect that needs a solid, scalable backbone to drive your MVC layer that follows widely accepted standards. You also want the flexibility to drop in the Zend Framework (or any other library for that matter) as they are a perfect pair for each other.
-
-### How
-
-For more information on how to use Europa check out http://europaphp.org/documentation. If you would like to give back or have any suggestions, feel free to send us a message or log issues.
+For the API documentation see http://europaphp.org/documentation/api. To update the code documentation, simply fork, edit or add doc block comments and sumbit a pull request.
 
 License
 -------
