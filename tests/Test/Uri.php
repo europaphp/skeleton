@@ -2,7 +2,7 @@
 
 namespace Test;
 use Europa\Request\Uri as UriObject;
-use Testes\Test;
+use Testes\Test\Test;
 
 class Uri extends Test
 {
@@ -126,5 +126,16 @@ class Uri extends Test
         $this->assert($uri->getRequest() === 'documentation', 'Request was not parsed properly.');
         $this->assert($uri->getQuery() === 'component=Uri', 'Query was not parsed properly.');
         $this->assert($uri->getFragment() === 'properties', 'Fragment was not parsed properly.');
+    }
+
+    public function suffix()
+    {
+        $uri = new UriObject('http://test.com/test.php');
+        $this->assert($uri->getSuffix() === 'php', 'The suffix should be "php".');
+        
+        $uri->setSuffix('html');
+
+        $this->assert($uri->getSuffix() === 'html', 'The suffix should have been changed to "html".');
+        $this->assert($uri->getSuffixPart() === '.html', 'The suffix should contain a leading dot.');
     }
 }

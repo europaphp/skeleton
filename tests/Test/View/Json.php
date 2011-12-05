@@ -2,7 +2,7 @@
 
 namespace Test\View;
 use Europa\View\Json as JsonView;
-use Testes\Test;
+use Testes\Test\Test;
 
 class Json extends Test
 {

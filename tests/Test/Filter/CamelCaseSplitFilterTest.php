@@ -2,7 +2,7 @@
 
 namespace Test\Filter;
 use Europa\Filter\CamelCaseSplitFilter;
-use Testes\Test;
+use Testes\Test\Test;
 
 class CamelCaseSplitFilterTest extends Test
 {

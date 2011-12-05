@@ -2,7 +2,7 @@
 
 namespace Test;
 use Europa\Request\Http;
-use Testes\Test;
+use Testes\Test\Test;
 
 class Request extends Test
 {

@@ -1,7 +1,7 @@
 <?php
 
 namespace Test;
-use Testes\Suite;
+use Testes\Test\Suite;
 
 class View extends Suite
 {

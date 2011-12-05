@@ -1,7 +1,7 @@
 <?php
 
 namespace Test\Event;
-use Testes\Test;
+use Testes\Test\Test;
 use Europa\Event\Data;
 use Europa\Event\DataInterface;
 use Europa\Event\Dispatcher;

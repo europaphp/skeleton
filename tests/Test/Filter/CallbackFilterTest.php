@@ -2,7 +2,7 @@
 
 namespace Test\Filter;
 use Europa\Filter\CallbackFilter;
-use Testes\Test;
+use Testes\Test\Test;
 
 class CallbackFilterTest extends Test
 {

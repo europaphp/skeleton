@@ -4,8 +4,8 @@
 ini_set('display_errors', 'on');
 error_reporting(E_ALL | E_STRICT);
 
-use Europa\Application\Configuration\Basic;
-use Europa\Application\Container;
+use Europa\Di\Configuration\Basic;
+use Europa\Di\Container;
 use Europa\Fs\Loader;
 
 // makes everything easier to register library loading here

@@ -2,7 +2,7 @@
 
 define('EUROPA_START_TIME', microtime(true));
 
-use Europa\Application\Container;
+use Europa\Di\Container;
 
 // bootstrap the app
 require dirname(__FILE__) . '/../app/bootstrap.php';

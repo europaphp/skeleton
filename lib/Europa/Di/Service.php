@@ -1,11 +1,11 @@
 <?php
 
-namespace Europa\Application;
+namespace Europa\Di;
 
 /**
  * A container service that represents a given class. The class represented within is configurable by setting
  * constructor parameters and queuing methods to be called with parameters post-construction. If an instance of
- * \Europa\Application\Service is passed as a parameter to either the constructor or a method, the service is retrieved
+ * \Europa\Di\Service is passed as a parameter to either the constructor or a method, the service is retrieved
  * before it is passed to the constructor or method. By enabling this, it allows us to preserve object configuration
  * overhead right up until the point it is required by another service.
  * 
@@ -49,7 +49,7 @@ class Service
      * 
      * @param string $class The name of the class to represent.
      * 
-     * @return \Europa\Application\Service
+     * @return \Europa\Di\Service
      */
     public function __construct($class)
     {
@@ -62,7 +62,7 @@ class Service
      * @param string $method The method to call.
      * @param array  $args   The arguments to pass to the method.
      * 
-     * @return \Europa\Application\Service
+     * @return \Europa\Di\Service
      */
     public function __call($method, array $args = array())
     {
@@ -74,7 +74,7 @@ class Service
      * 
      * @param array $args The arguments to re-configure the instance with.
      * 
-     * @return \Europa\Application\Service
+     * @return \Europa\Di\Service
      */
     public function configure(array $args)
     {
@@ -89,7 +89,7 @@ class Service
      * @param string $method The method to queue.
      * @param array  $args   The arguments to pass to the method.
      * 
-     * @return \Europa\Application\Service
+     * @return \Europa\Di\Service
      */
     public function queue($method, array $args = array())
     {
@@ -103,7 +103,7 @@ class Service
      * 
      * @param mixed $instance The instance to set.
      * 
-     * @return \Europa\Application\Service
+     * @return \Europa\Di\Service
      */
     public function set($instance)
     {
@@ -163,7 +163,7 @@ class Service
     /**
      * Resets the instance.
      * 
-     * @return \Europa\Application\Container
+     * @return \Europa\Di\Container
      */
     public function reset()
     {
@@ -175,7 +175,7 @@ class Service
     /**
      * Destroys the current instance so it can be reconfigured the next time it is accessed.
      * 
-     * @return \Europa\Application\Service
+     * @return \Europa\Di\Service
      */
     public function refresh()
     {
@@ -215,7 +215,7 @@ class Service
      * 
      * @param mixed $instance The instance of service to call the queue on.
      * 
-     * @return \Europa\Application\Service
+     * @return \Europa\Di\Service
      */
     private function invokeQueue($instance)
     {

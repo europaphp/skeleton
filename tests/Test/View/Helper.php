@@ -1,13 +1,13 @@
 <?php
 
 namespace Test\View;
-use Europa\Application\Container;
+use Europa\Di\Container;
 use Europa\Filter\CallbackFilter;
 use Europa\Filter\ClassNameFilter;
 use Europa\Fs\Locator\PathLocator;
 use Europa\View\Php;
 use Provider\View\TestHelper;
-use Testes\Test;
+use Testes\Test\Test;
 
 class Helper extends Test
 {

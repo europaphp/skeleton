@@ -2,6 +2,7 @@
 
 namespace Europa\Dispatcher;
 use Europa\Controller\ControllerInterface;
+use Europa\Dispatcher\Negotiator\NegotiatorInterface;
 use Europa\Filter\FilterInterface;
 use Europa\Filter\ClassNameFilter;
 use Europa\Request\RequestInterface;

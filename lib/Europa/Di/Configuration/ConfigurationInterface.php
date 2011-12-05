@@ -1,13 +1,14 @@
 <?php
 
-namespace Europa\Application;
+namespace Europa\Di\Configuration;
+use Europa\Di\Container;
 
 interface ConfigurationInterface
 {
 	/**
 	 * Configures the specified container.
 	 * 
-	 * @param \Europa\Application\Container $container The container to configure.
+	 * @param \Europa\Di\Container $container The container to configure.
 	 * 
 	 * @return void
 	 */

@@ -1,8 +1,7 @@
 <?php
 
-namespace Europa\Application\Configuration;
-use Europa\Application\ConfigurationInterface;
-use Europa\Application\Container;
+namespace Europa\Di\Configuration;
+use Europa\Di\Container;
 use Europa\Filter\ClassNameFilter;
 use Europa\Filter\MapFilter;
 use Europa\Fs\Locator\PathLocator;
@@ -46,7 +45,7 @@ class Basic implements ConfigurationInterface
      * 
      * @param array $conf Configuration to granularize the default configuration.
      * 
-     * @return \Europa\Application\Configuration\Basic
+     * @return \Europa\Di\Configuration\Basic
      */
     public function __construct(array $conf = array())
     {
@@ -63,7 +62,7 @@ class Basic implements ConfigurationInterface
     /**
      * Configures the specified container.
      * 
-     * @param \Europa\Application\Container $container The container to configure.
+     * @param \Europa\Di\Container $container The container to configure.
      * 
      * @return void
      */

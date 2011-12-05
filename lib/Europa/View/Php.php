@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa\View;
-use Europa\Application\Container;
+use Europa\Di\Container;
 use Europa\Fs\Locator\LocatorInterface;
 
 /**
@@ -27,7 +27,7 @@ class Php implements ViewScriptInterface
 	/**
 	 * The container to use for helpers.
 	 * 
-	 * @var \Europa\Application\Container
+	 * @var \Europa\Di\Container
 	 */
 	private $container;
 	
@@ -267,7 +267,7 @@ class Php implements ViewScriptInterface
     /**
      * Sets the service container used to locate helpers.
      * 
-     * @param \Europa\Application\Container $container The container to locate helpers with.
+     * @param \Europa\Di\Container $container The container to locate helpers with.
      * 
      * @return \Europa\View\Php
      */

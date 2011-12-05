@@ -1,12 +1,12 @@
 <?php
 
-namespace Europa\Application;
+namespace Europa\Di;
 use Europa\Filter\FilterInterface;
 use Europa\Filter\UpperCamelCaseFilter;
 
 /**
  * The service injection container represents a collection of configured dependencies. Dependencies are instances
- * of \Europa\Application\Service that represent an object instance. The container provides a fluent interface for
+ * of \Europa\Di\Service that represent an object instance. The container provides a fluent interface for
  * accessing dependencies so that they can easily be configured.
  * 
  * @category ServiceInjection
@@ -47,7 +47,7 @@ class Container
     /**
      * Sets up the container.
      * 
-     * @return \Europa\Application\Container
+     * @return \Europa\Di\Container
      */
     public function __construct()
     {
@@ -60,7 +60,7 @@ class Container
      * @param string $name  The name of the service.
      * @param mixed  $value The service to register.
      * 
-     * @see \Europa\Application\Service::register()
+     * @see \Europa\Di\Service::register()
      */
     public function __call($name, array $args = array())
     {
@@ -70,7 +70,7 @@ class Container
     /**
      * Magic caller for register().
      * 
-     * @see \Europa\Application\Service::register()
+     * @see \Europa\Di\Service::register()
      */
     public function __set($name, $value)
     {
@@ -80,7 +80,7 @@ class Container
     /**
      * Magic caller for resolve($name).
      * 
-     * @see \Europa\Application\Service::resolve()
+     * @see \Europa\Di\Service::resolve()
      */
     public function __get($name)
     {
@@ -90,7 +90,7 @@ class Container
     /**
      * Magic caller for isRegistered($name).
      * 
-     * @see \Europa\Application\Service::isRegistered()
+     * @see \Europa\Di\Service::isRegistered()
      */
     public function __isset($name)
     {
@@ -100,7 +100,7 @@ class Container
     /**
      * Magic caller for unregister($name).
      * 
-     * @see \Europa\Application\Service::unregister()
+     * @see \Europa\Di\Service::unregister()
      */
     public function __unset($naem)
     {
@@ -112,7 +112,7 @@ class Container
      * 
      * @param string $name The name of the service.
      * 
-     * @return \Europa\Application\Service
+     * @return \Europa\Di\Service
      */
     public function resolve($name)
     {
@@ -152,13 +152,13 @@ class Container
     
     /**
      * Detects the value of $value and handles it appropriately.
-     *   - Instances of \Europa\Application\Service are registered on the container.
+     *   - Instances of \Europa\Di\Service are registered on the container.
      *   - Other instances are created as a service then registered.
      * 
      * @param string                      $name    The name of the service.
-     * @param \Europa\Application\Service $service One of many allowed values.
+     * @param \Europa\Di\Service $service One of many allowed values.
      * 
-     * @return \Europa\Application\Container
+     * @return \Europa\Di\Container
      */
     public function register($name, Service $service)
     {
@@ -183,7 +183,7 @@ class Container
      * 
      * @param string $name The service name.
      * 
-     * @return \Europa\Application\Container
+     * @return \Europa\Di\Container
      */
     public function unRegister($name)
     {
@@ -198,7 +198,7 @@ class Container
      * 
      * @param \Europa\Filter\FilterInterface $filter The filter to use for name formatting.
      * 
-     * @return \Europa\Application\Container
+     * @return \Europa\Di\Container
      */
     public function setFilter(FilterInterface $filter)
     {
@@ -236,7 +236,7 @@ class Container
      * 
      * @param string $name The instance name to get if using multiple instances.
      * 
-     * @return \Europa\Application\Container
+     * @return \Europa\Di\Container
      */
     public static function get($name = null)
     {

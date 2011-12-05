@@ -1,11 +1,11 @@
 <?php
 
-use Europa\Application\Container;
+use Europa\Di\Container;
 use Europa\Fs\Loader;
 use Europa\Fs\Locator\PathLocator;
 use Testes\Coverage\Analyzer;
 use Testes\Coverage\Coverage;
-use Testes\Output\Cli;
+use Testes\Renderer\Cli;
 use Test;
 
 // base path for install

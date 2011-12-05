@@ -74,6 +74,13 @@ class Uri
      * @var string
      */
     private $request;
+
+    /**
+     * The suffix associated to the request URI.
+     * 
+     * @var string
+     */
+    private $suffix;
     
     /**
      * The parameters set on the URI.
@@ -119,10 +126,11 @@ class Uri
     public function __toString()
     {
         return $this->getHostPart()
-             . $this->getRootPart()
-             . $this->getRequestPart()
-             . $this->getQueryPart()
-             . $this->getFragmentPart();
+            . $this->getRootPart()
+            . $this->getRequestPart()
+            . $this->getSuffixPart()
+            . $this->getQueryPart()
+            . $this->getFragmentPart();
     }
     
     /**
@@ -504,6 +512,39 @@ class Uri
     {
         return $this->request ? '/' . $this->request : '';
     }
+
+    /**
+     * Sets the suffix of the request.
+     * 
+     * @param string $suffix The suffix to set.
+     * 
+     * @return \Europa\Request\Uri
+     */
+    public function setSuffix($suffix)
+    {
+        $this->suffix = $suffix;
+        return $this;
+    }
+
+    /**
+     * Returns the suffix.
+     * 
+     * @return string
+     */
+    public function getSuffix()
+    {
+        return $this->suffix;
+    }
+
+    /**
+     * Returns the suffix part including the leading dot if it exists and nothing if it does not.
+     * 
+     * @return string
+     */
+    public function getSuffixPart()
+    {
+        return $this->suffix ? '.' . $this->suffix : '';
+    }
     
     /** 
      * Sets the query for the URI. The query string is parsed and parameters set.
@@ -637,6 +678,7 @@ class Uri
         $uri->setPort(static::detectPort());
         $uri->setRoot(static::detectRoot());
         $uri->setRequest(static::detectRequest());
+        $uri->setSuffix(static::detectSuffix());
         $uri->setQuery(static::detectQuery());
         return $uri;
     }
@@ -708,14 +750,8 @@ class Uri
      */
     public static function detectRequest()
     {
-        if (!isset($_SERVER['HTTP_X_REWRITE_URL']) && !isset($_SERVER['REQUEST_URI'])) {
-            return null;
-        }
-        
         // remove the root uri from the request uri to get the relative request uri for the framework
-        $requestUri = isset($_SERVER['HTTP_X_REWRITE_URL'])
-            ? $_SERVER['HTTP_X_REWRITE_URL']
-            : $_SERVER['REQUEST_URI'];
+        $requestUri = self::getServerRequestUri();
         
         // remove the query string
         $requestUri = explode('?', $requestUri);
@@ -725,7 +761,24 @@ class Uri
         $requestUri = trim($requestUri, '/');
         $requestUri = substr($requestUri, strlen(static::detectRoot()));
         $requestUri = trim($requestUri, '/');
+
+        // take off the suffix
+        $requestUri = explode('.', $requestUri);
+        $requestUri = $requestUri[0];
+
         return $requestUri;
+    }
+
+    /**
+     * Detects the suffix from the request URI.
+     * 
+     * @return string
+     */
+    public static function detectSuffix()
+    {
+        $requestUri = self::getServerRequestUri();
+        $requestUri = explode('.', $requestUri);
+        return isset($requestUri[1]) ? $requestUri[1] : null;
     }
     
     /**
@@ -739,5 +792,21 @@ class Uri
             return $_SERVER['QUERY_STRING'];
         }
         return null;
+    }
+
+    /**
+     * Returns the correct request URI detected on the server.
+     * 
+     * @return string
+     */
+    public static function getServerRequestUri()
+    {
+        if (!isset($_SERVER['HTTP_X_REWRITE_URL']) && !isset($_SERVER['REQUEST_URI'])) {
+            return null;
+        }
+        
+        return isset($_SERVER['HTTP_X_REWRITE_URL'])
+            ? $_SERVER['HTTP_X_REWRITE_URL']
+            : $_SERVER['REQUEST_URI'];
     }
 }

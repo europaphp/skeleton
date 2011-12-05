@@ -1,7 +1,7 @@
 <?php
 
 namespace Test\Event;
-use Testes\Test;
+use Testes\Test\Test;
 
 class DataTest extends Test
 {

@@ -3,7 +3,7 @@
 namespace Test;
 use Europa\Fs\Loader as ClassLoaderObject;
 use Europa\Fs\Locator\PathLocator;
-use Testes\Test;
+use Testes\Test\Test;
 
 class ClassLoader extends Test
 {

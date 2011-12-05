@@ -1,6 +1,7 @@
 <?php
 
-namespace Europa\Application;
+namespace Europa\Di\Configuration;
+use Europa\Di\Container;
 
 class ConfigurationArray implements ConfigurationInterface
 {

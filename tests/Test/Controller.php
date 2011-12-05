@@ -4,7 +4,7 @@ namespace Test;
 use Europa\Request\Http as Request;
 use Europa\Response\Http as Response;
 use Provider\Controller\TestNamedParamController;
-use Testes\Test;
+use Testes\Test\Test;
 
 class Controller extends Test
 {
