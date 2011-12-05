@@ -2,7 +2,7 @@
 
 use Europa\Di\Container;
 use Europa\Fs\Loader;
-use Europa\Fs\Locator\PathLocator;
+use Europa\Fs\Locator\Locator;
 use Testes\Coverage\Analyzer;
 use Testes\Coverage\Coverage;
 use Testes\Renderer\Cli;
@@ -15,7 +15,7 @@ $base = dirname(__FILE__) . '/../';
 require $base . 'app/bootstrap.php';
 
 // add the tests path
-$locator = new PathLocator;
+$locator = new Locator;
 $locator->addPath($base . 'vendor/Testes/lib');
 $locator->addPath($base . 'tests');
 

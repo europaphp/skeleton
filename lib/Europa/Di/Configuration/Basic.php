@@ -4,7 +4,7 @@ namespace Europa\Di\Configuration;
 use Europa\Di\Container;
 use Europa\Filter\ClassNameFilter;
 use Europa\Filter\MapFilter;
-use Europa\Fs\Locator\PathLocator;
+use Europa\Fs\Locator\Locator;
 use Europa\Request\RequestAbstract;
 
 /**
@@ -115,7 +115,7 @@ class Basic implements ConfigurationInterface
      */
     private function loader($container)
     {
-        $locator = new PathLocator($this->conf['path']);
+        $locator = new Locator($this->conf['path']);
         $locator->addPaths($this->conf['loadPaths']);
         $container->resolve('loader')->queue('setLocator', array($locator));
 
@@ -131,7 +131,7 @@ class Basic implements ConfigurationInterface
      */
     private function view($container)
     {
-        $locator = new PathLocator($this->conf['path']);
+        $locator = new Locator($this->conf['path']);
         $locator->throwWhenLocating(true);
         $locator->addPaths($this->conf['viewPaths']);
         $container->resolve('view')->configure(array($locator));
@@ -144,7 +144,7 @@ class Basic implements ConfigurationInterface
      */
     private function helpers($container)
     {
-        $locator = new PathLocator($this->conf['path']);
+        $locator = new Locator($this->conf['path']);
         $locator->throwWhenAdding(false);
         $locator->addPaths($this->conf['langPaths']);
         

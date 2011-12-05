@@ -10,7 +10,7 @@ namespace Europa\Fs\Locator;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class CascadingLocator implements LocatorInterface
+class LocatorArray implements LocatorInterface
 {
     /**
      * The locators applied to the cascading locator.
@@ -24,9 +24,9 @@ class CascadingLocator implements LocatorInterface
      * 
      * @param \Europa\Fs\Locator\LocatorInterface $locator The locator to append.
      * 
-     * @return \Europa\Fs\Locator\CascadingLocator
+     * @return \Europa\Fs\Locator\LocatorArray
      */
-    public function addLocator(LocatorInterface $locator)
+    public function add(LocatorInterface $locator)
     {
         $this->locators[] = $locator;
         return $this;

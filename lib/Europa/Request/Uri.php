@@ -522,7 +522,20 @@ class Uri
      */
     public function setSuffix($suffix)
     {
-        $this->suffix = $suffix;
+        // allow a suffix to be unset by passing a false value
+        $suffix = $suffix ? '.' . $suffix : '';
+        
+        // add to the request if there is no suffix or replace the existing one if there is
+        if (strpos($this->request, '.') === false) {
+            $this->request = $this->request . $suffix;
+        } else {
+            $prefix = explode('.', $this->request, 2);
+            $prefix = $prefix[0];
+            
+            // replace the current suffix
+            $this->request = $prefix . $suffix;
+        }
+        
         return $this;
     }
 
@@ -533,7 +546,12 @@ class Uri
      */
     public function getSuffix()
     {
-        return $this->suffix;
+        $suffix = null;
+        if (strpos($this->request, '.')) {
+            $suffix = explode('.', $this->request);
+            $suffix = end($suffix);
+        }
+        return $suffix;
     }
 
     /**
@@ -543,7 +561,7 @@ class Uri
      */
     public function getSuffixPart()
     {
-        return $this->suffix ? '.' . $this->suffix : '';
+        return $suffix = $this->getSuffix() ? '.' . $suffix : '';
     }
     
     /** 
@@ -678,7 +696,6 @@ class Uri
         $uri->setPort(static::detectPort());
         $uri->setRoot(static::detectRoot());
         $uri->setRequest(static::detectRequest());
-        $uri->setSuffix(static::detectSuffix());
         $uri->setQuery(static::detectQuery());
         return $uri;
     }
@@ -769,18 +786,6 @@ class Uri
         return $requestUri;
     }
 
-    /**
-     * Detects the suffix from the request URI.
-     * 
-     * @return string
-     */
-    public static function detectSuffix()
-    {
-        $requestUri = self::getServerRequestUri();
-        $requestUri = explode('.', $requestUri);
-        return isset($requestUri[1]) ? $requestUri[1] : null;
-    }
-    
     /**
      * Auto-detects the query if it is available.
      * 
