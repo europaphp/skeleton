@@ -4,7 +4,7 @@
 ini_set('display_errors', 'on');
 error_reporting(E_ALL | E_STRICT);
 
-use Europa\Di\Configuration\Basic;
+use Europa\Di\Configuration\Standard;
 use Europa\Di\Container;
 use Europa\Fs\Loader;
 
@@ -14,7 +14,7 @@ $loader = new Loader;
 $loader->register();
 
 // uses default configuration, but you can also specify your own
-$config = new Basic;
+$config = new Standard;
 $config->configure(Container::get());
 
 // kick off autoloading for everything else

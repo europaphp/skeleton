@@ -15,7 +15,7 @@ use Europa\Request\RequestAbstract;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Basic implements ConfigurationInterface
+class Standard implements ConfigurationInterface
 {
     /**
      * The application base path.
@@ -45,7 +45,7 @@ class Basic implements ConfigurationInterface
      * 
      * @param array $conf Configuration to granularize the default configuration.
      * 
-     * @return \Europa\Di\Configuration\Basic
+     * @return \Europa\Di\Configuration\Standard
      */
     public function __construct(array $conf = array())
     {
