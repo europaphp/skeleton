@@ -779,10 +779,6 @@ class Uri
         $requestUri = substr($requestUri, strlen(static::detectRoot()));
         $requestUri = trim($requestUri, '/');
 
-        // take off the suffix
-        $requestUri = explode('.', $requestUri);
-        $requestUri = $requestUri[0];
-
         return $requestUri;
     }
 
