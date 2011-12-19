@@ -561,7 +561,8 @@ class Uri
      */
     public function getSuffixPart()
     {
-        return $suffix = $this->getSuffix() ? '.' . $suffix : '';
+        $suffix = $this->getSuffix();
+        return $suffix ? '.' . $suffix : '';
     }
     
     /** 
