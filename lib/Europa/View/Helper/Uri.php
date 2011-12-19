@@ -49,6 +49,25 @@ class Uri
         $current->setParams($params);
         return $current->__toString();
     }
+
+    /**
+     * Returns whether the specified URI is the current URI.
+     * 
+     * @param string $uri    The URI to check.
+     * @param array  $params Any params to use during the check.
+     * 
+     * @return bool
+     */
+    public function is($uri, array $params = array())
+    {
+        $current = Request\Uri::detect();
+        if ($this->router && $this->router->hasRoute($uri)) {
+            $compare = $this->generate($uri, $params);
+        } else {
+            $compare = Request\Uri::detect()->fromString($uri)->setParams($params);
+        }
+        return $current->__toString() === $compare->__toString();
+    }
     
     /**
      * Generates a URI for the specified route if it exists.
@@ -71,7 +90,7 @@ class Uri
         try {
             return $this->router->reverse($name, $params);
         } catch (\Exception $e) {
-            throw new \LogicException("Could not generate a URI for {$name} with message: $e->getMessage()");
+            throw new \LogicException("Could not generate a URI for {$name} with message: {$e->getMessage()}");
         }
     }
 }
