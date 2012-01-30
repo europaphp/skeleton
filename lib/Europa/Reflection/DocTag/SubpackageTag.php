@@ -13,7 +13,7 @@ use Europa\Reflection\DocTag;
 */
 class SubpackageTag extends DocTag
 {
-	/**
+    /**
      * Return the tag object type
      * 
      * @return string

@@ -28,61 +28,61 @@ class FilterTag extends DocTag
      */
     private $value;
     
-	/**
-	 * Returns the name of the tag.
-	 * 
-	 * @return string
-	 */
-	public function tag()
-	{
-		return 'filter';
-	}
+    /**
+     * Returns the name of the tag.
+     * 
+     * @return string
+     */
+    public function tag()
+    {
+        return 'filter';
+    }
 
-	/**
-	 * Returns the class name of the filter.
-	 * 
-	 * @return string
-	 */
-	public function getName()
-	{
-		return $this->name;
-	}
-	
-	/**
-	 * Returns the value of the doc tag.
-	 * 
-	 * @return string
-	 */
-	public function getValue()
-	{
-	    return $this->value;
-	}
+    /**
+     * Returns the class name of the filter.
+     * 
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+    
+    /**
+     * Returns the value of the doc tag.
+     * 
+     * @return string
+     */
+    public function getValue()
+    {
+        return $this->value;
+    }
 
-	/**
-	 * Returns an instance of the filter.
-	 * 
-	 * @param array $args The arguments, if any, to pass to the filter's constructor.
-	 * 
-	 * @return \Europa\Controller\FilterInterface
-	 */
-	public function getInstance(array $args = array())
-	{
-		$reflector = new ClassReflector($this->getName());
-		if ($reflector->hasMethod('__construct')) {
-			return $reflector->newInstanceArgs(array($this->getValue()));
-		}
-		return $reflector->newInstance();
-	}
+    /**
+     * Returns an instance of the filter.
+     * 
+     * @param array $args The arguments, if any, to pass to the filter's constructor.
+     * 
+     * @return \Europa\Controller\FilterInterface
+     */
+    public function getInstance(array $args = array())
+    {
+        $reflector = new ClassReflector($this->getName());
+        if ($reflector->hasMethod('__construct')) {
+            return $reflector->newInstanceArgs(array($this->getValue()));
+        }
+        return $reflector->newInstance();
+    }
 
-	/**
-	 * Overridden to provide doc string validation.
-	 * 
-	 * @param string $tagString The tag string to parse.
-	 * 
-	 * @return void
-	 */
-	public function parse($tagString)
-	{
+    /**
+     * Overridden to provide doc string validation.
+     * 
+     * @param string $tagString The tag string to parse.
+     * 
+     * @return void
+     */
+    public function parse($tagString)
+    {
         // use default parsing for generating the name and doc string
         parent::parse($tagString);
         
@@ -99,5 +99,5 @@ class FilterTag extends DocTag
         if (isset($parts[1])) {
             $this->value = trim($parts[1]);
         }
-	}
+    }
 }

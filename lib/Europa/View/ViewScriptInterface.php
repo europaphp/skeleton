@@ -12,13 +12,13 @@ namespace Europa\View;
  */
 interface ViewScriptInterface extends ViewInterface
 {
-	/**
-	 * Sets the script to be rendered.
-	 * 
-	 * @param string $script The script to render.
-	 * 
-	 * @return \Europa\View\ViewScriptAbstract
-	 */
+    /**
+     * Sets the script to be rendered.
+     * 
+     * @param string $script The script to render.
+     * 
+     * @return \Europa\View\ViewScriptAbstract
+     */
     public function setScript($script);
     
     public function getScript();

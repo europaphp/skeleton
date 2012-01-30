@@ -5,5 +5,5 @@ use Europa\Request\Http;
 
 interface HttpNegotiatorInterface
 {
-	public function negotiate(Http $request);
+    public function negotiate(Http $request);
 }

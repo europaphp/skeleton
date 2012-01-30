@@ -31,11 +31,11 @@ class Standard implements ConfigurationInterface
      */
     private $conf = array(
         'addIncludePaths'  => false,
-    	'controllerPrefix' => 'Controller\\',
-    	'controllerSuffix' => '',
-    	'langPaths'        => array('app/Lang/en-us' => 'ini'),
-    	'loadPaths'        => array('app'),
-    	'viewPaths'        => array('app/View')
+        'controllerPrefix' => 'Controller\\',
+        'controllerSuffix' => '',
+        'langPaths'        => array('app/Lang/en-us' => 'ini'),
+        'loadPaths'        => array('app'),
+        'viewPaths'        => array('app/View')
     );
     
     /**
@@ -66,11 +66,11 @@ class Standard implements ConfigurationInterface
      */
     public function configure(Container $container)
     {
-    	$this->map($container);
-    	$this->dispatcher($container);
-    	$this->loader($container);
-    	$this->view($container);
-    	$this->helpers($container);
+        $this->map($container);
+        $this->dispatcher($container);
+        $this->loader($container);
+        $this->view($container);
+        $this->helpers($container);
     }
     
     /**
@@ -82,9 +82,9 @@ class Standard implements ConfigurationInterface
     {
         $interface = RequestAbstract::isCli() ? 'Cli' : 'Http';
         $container->addFilter(new MapFilter(array(
-			'controllers' => '\Europa\Di\Container',
+            'controllers' => '\Europa\Di\Container',
             'dispatcher'  => '\Europa\Dispatcher\Dispatcher',
-			'helpers'     => '\Europa\Di\Container',
+            'helpers'     => '\Europa\Di\Container',
             'loader'      => '\Europa\Fs\Loader',
             'request'     => '\Europa\Request\\' . $interface,
             'response'    => '\Europa\Response\\' . $interface,
@@ -144,21 +144,21 @@ class Standard implements ConfigurationInterface
      */
     private function helpers($container)
     {
-		// the locator for the lang helper
+        // the locator for the lang helper
         $locator = new Locator($this->conf['path']);
         $locator->throwWhenAdding(false);
         $locator->addPaths($this->conf['langPaths']);
         
-		// the default helper setup
+        // the default helper setup
         $helpers = $container->getService('helpers');
         $helpers->addFilter(new ClassNameFilter(array('prefix' => '\Europa\View\Helper\\')));
-		$helpers->addFilter(new ClassNameFilter(array('prefix' => '\Helper\\')));
-		
-		// default helper configuration
+        $helpers->addFilter(new ClassNameFilter(array('prefix' => '\Helper\\')));
+        
+        // default helper configuration
         $helpers->resolve('lang')->configure(array($container->resolve('view'), $locator));
         $helpers->resolve('uri')->configure(array($container->resolve('router')));
         
-		// add the helper container array to the view
+        // add the helper container array to the view
         $container->resolve('view')->queue('setHelperContainer', array($helpers));
     }
 }

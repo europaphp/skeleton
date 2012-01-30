@@ -108,7 +108,7 @@ class Router implements RouterInterface
      */
     public function reverse($name, array $params = array())
     {
-    	return $this->getRoute($name)->reverse($params);
+        return $this->getRoute($name)->reverse($params);
     }
 
     /**

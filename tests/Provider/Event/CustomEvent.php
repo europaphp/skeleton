@@ -6,8 +6,8 @@ use Europa\Event\EventInterface;
 
 class CustomEvent implements \Europa\Event\EventInterface
 {
-	public function trigger(DataInterface $data)
-	{
-		$data->triggered = true;
-	}
+    public function trigger(DataInterface $data)
+    {
+        $data->triggered = true;
+    }
 }

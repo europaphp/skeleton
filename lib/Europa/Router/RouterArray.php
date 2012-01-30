@@ -62,11 +62,11 @@ class RouterArray implements RouterInterface
      */
     public function reverse($name, array $params = array())
     {
-    	foreach ($this->routers as $router) {
-    		if ($router->hasRoute($name)) {
-    			return $router->getRoute($name)->reverse($params);
-    		}
-    	}
-    	throw new \LogicException("Could not reverse engineer route {$name} because it could not be found.");
+        foreach ($this->routers as $router) {
+            if ($router->hasRoute($name)) {
+                return $router->getRoute($name)->reverse($params);
+            }
+        }
+        throw new \LogicException("Could not reverse engineer route {$name} because it could not be found.");
     }
 }

@@ -13,11 +13,11 @@ use Europa\Reflection\DocTag;
 */
 class ReturnTag extends DocTag
 {
-	/**
+    /**
      * List of possible return type
      *
      * @var array
-	 */
+     */
     private $types = array();
 
     /**

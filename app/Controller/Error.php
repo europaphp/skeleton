@@ -20,8 +20,8 @@ class Error extends Base
      */
     public function all()
     {
-    	$uri = Uri::detect();
-    	return array(
+        $uri = Uri::detect();
+        return array(
             'uri' => $uri->getRootPart() . $uri->getRequestPart() . $uri->getQueryPart(),
         );
     }

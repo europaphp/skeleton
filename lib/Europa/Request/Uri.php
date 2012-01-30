@@ -488,20 +488,20 @@ class Uri
      */
     public function setRequest($request)
     {
-		// normalize
+        // normalize
         $request = trim($request, '/');
-		
-		// take off the suffix if it exists and set it
-		if (strpos($request, '.') !== false) {
-			$parts = explode('.', $request);
-			$this->setSuffix(array_pop($parts));
-			$request = implode('/', $parts);
-		}
-		
-		// apply the new request
-		$this->request = $request;
-		
-		return $this;
+        
+        // take off the suffix if it exists and set it
+        if (strpos($request, '.') !== false) {
+            $parts = explode('.', $request);
+            $this->setSuffix(array_pop($parts));
+            $request = implode('/', $parts);
+        }
+        
+        // apply the new request
+        $this->request = $request;
+        
+        return $this;
     }
 
     /**
@@ -534,7 +534,7 @@ class Uri
     public function setSuffix($suffix)
     {
         $this->suffix = $suffix;
-		return $this;
+        return $this;
     }
 
     /**
@@ -544,7 +544,7 @@ class Uri
      */
     public function getSuffix()
     {
-		return $this->suffix;
+        return $this->suffix;
     }
 
     /**
@@ -744,7 +744,7 @@ class Uri
      */
     public static function detectRoot()
     {
-    	if (!isset($_SERVER['SCRIPT_NAME'])) {
+        if (!isset($_SERVER['SCRIPT_NAME'])) {
             return null;
         }
         $root = $_SERVER['SCRIPT_NAME'];
@@ -762,7 +762,7 @@ class Uri
     {
         // remove the root uri from the request uri to get the relative request uri for the framework
         $requestUri = self::getServerRequestUri();
-		$requestUri = parse_url($requestUri, PHP_URL_PATH);
+        $requestUri = parse_url($requestUri, PHP_URL_PATH);
         
         // remove the query string
         $requestUri = explode('?', $requestUri);
@@ -772,8 +772,8 @@ class Uri
         $requestUri = trim($requestUri, '/');
         $requestUri = substr($requestUri, strlen(static::detectRoot()));
         $requestUri = trim($requestUri, '/');
-		
-		return $requestUri;
+        
+        return $requestUri;
     }
 
     /**

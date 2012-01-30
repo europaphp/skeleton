@@ -4,8 +4,8 @@ namespace Helper;
 
 class Test
 {
-	public function test()
-	{
-		return 'Testing...';
-	}
+    public function test()
+    {
+        return 'Testing...';
+    }
 }

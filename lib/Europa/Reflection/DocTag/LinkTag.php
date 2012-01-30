@@ -13,11 +13,11 @@ use Europa\Reflection\DocTag;
 */
 class LinkTag extends DocTag
 {
-	/**
-	* Returns the name of the tag.
-	*
-	* @return string
-	*/
+    /**
+    * Returns the name of the tag.
+    *
+    * @return string
+    */
     public function tag()
     {
         return 'link';

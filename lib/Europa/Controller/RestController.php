@@ -26,13 +26,13 @@ namespace Europa\Controller;
  */
 abstract class RestController extends ControllerAbstract
 {
-	/**
-	 * The method that catches all requests.
-	 * 
-	 * @var string
-	 */
-	const ALL = 'all';
-	
+    /**
+     * The method that catches all requests.
+     * 
+     * @var string
+     */
+    const ALL = 'all';
+    
     /**
      * Returns the method to action. By default this is the request method returned from the request instance that is
      * is being used.
@@ -43,7 +43,7 @@ abstract class RestController extends ControllerAbstract
     {
         $method = $this->getRequest()->getMethod();
         if (!method_exists($this, $method)) {
-        	$method = self::ALL;
+            $method = self::ALL;
         }
         return $method;
     }

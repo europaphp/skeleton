@@ -9,91 +9,91 @@ use Europa\Event\CallbackEvent;
 
 class DispatcherTest extends Test
 {
-	public function single()
-	{
-		$dispatcher = new Dispatcher;
+    public function single()
+    {
+        $dispatcher = new Dispatcher;
 
-		$dispatcher->bind('test', new CallbackEvent(function(DataInterface $data) {
-			$data->one = true;
-		}));
+        $dispatcher->bind('test', new CallbackEvent(function(DataInterface $data) {
+            $data->one = true;
+        }));
 
-		$data = new Data;
-		$dispatcher->trigger('test', $data);
+        $data = new Data;
+        $dispatcher->trigger('test', $data);
 
-		$this->assert($data->one, 'The dispatcher did not trigger the custom event.');
-	}
+        $this->assert($data->one, 'The dispatcher did not trigger the custom event.');
+    }
 
-	public function double()
-	{
-		$dispatcher = new Dispatcher;
+    public function double()
+    {
+        $dispatcher = new Dispatcher;
 
-		$dispatcher->bind('test', new CallbackEvent(function(DataInterface $data) {
-			$data->one = true;
-		}));
+        $dispatcher->bind('test', new CallbackEvent(function(DataInterface $data) {
+            $data->one = true;
+        }));
 
-		$dispatcher->bind('test', new CallbackEvent(function(DataInterface $data) {
-			$data->two = true;
-		}));
+        $dispatcher->bind('test', new CallbackEvent(function(DataInterface $data) {
+            $data->two = true;
+        }));
 
-		$data = new Data;
-		$dispatcher->trigger('test', $data);
-		
-		$this->assert($data->one && $data->two, 'The dispatcher did not trigger both events.');
-	}
+        $data = new Data;
+        $dispatcher->trigger('test', $data);
+        
+        $this->assert($data->one && $data->two, 'The dispatcher did not trigger both events.');
+    }
 
-	public function namespaced()
-	{
-		$dispatcher = new Dispatcher;
+    public function namespaced()
+    {
+        $dispatcher = new Dispatcher;
 
-		$dispatcher->bind('test.one', new CallbackEvent(function(DataInterface $data) {
-			$data->one = true;
-		}));
+        $dispatcher->bind('test.one', new CallbackEvent(function(DataInterface $data) {
+            $data->one = true;
+        }));
 
-		$dispatcher->bind('test.two', new CallbackEvent(function(DataInterface $data) {
-			$data->two = true;
-		}));
+        $dispatcher->bind('test.two', new CallbackEvent(function(DataInterface $data) {
+            $data->two = true;
+        }));
 
-		$data = new Data;
-		$dispatcher->trigger('test', $data);
+        $data = new Data;
+        $dispatcher->trigger('test', $data);
 
-		$this->assert($data->one && $data->two, 'The dispatcher did not trigger both separately namespaced events.');
-	}
+        $this->assert($data->one && $data->two, 'The dispatcher did not trigger both separately namespaced events.');
+    }
 
-	public function unbindSingleNamespaced()
-	{
-		$dispatcher = new Dispatcher;
+    public function unbindSingleNamespaced()
+    {
+        $dispatcher = new Dispatcher;
 
-		$dispatcher->bind('test.one', new CallbackEvent(function(DataInterface $data) {
-			$data->one = true;
-		}));
+        $dispatcher->bind('test.one', new CallbackEvent(function(DataInterface $data) {
+            $data->one = true;
+        }));
 
-		$dispatcher->bind('test.two', new CallbackEvent(function(DataInterface $data) {
-			$data->two = true;
-		}));
+        $dispatcher->bind('test.two', new CallbackEvent(function(DataInterface $data) {
+            $data->two = true;
+        }));
 
-		$data = new Data;
-		$dispatcher->unbind('test.two');
-		$dispatcher->trigger('test', $data);
+        $data = new Data;
+        $dispatcher->unbind('test.two');
+        $dispatcher->trigger('test', $data);
 
-		$this->assert($data->one && !$data->two, 'The dispatcher did not unbind the second event.');
-	}
+        $this->assert($data->one && !$data->two, 'The dispatcher did not unbind the second event.');
+    }
 
-	public function unbindNamespacedUsingUnnamespacedName()
-	{
-		$dispatcher = new Dispatcher;
+    public function unbindNamespacedUsingUnnamespacedName()
+    {
+        $dispatcher = new Dispatcher;
 
-		$dispatcher->bind('test.one', new CallbackEvent(function(DataInterface $data) {
-			$data->one = true;
-		}));
+        $dispatcher->bind('test.one', new CallbackEvent(function(DataInterface $data) {
+            $data->one = true;
+        }));
 
-		$dispatcher->bind('test.two', new CallbackEvent(function(DataInterface $data) {
-			$data->two = true;
-		}));
+        $dispatcher->bind('test.two', new CallbackEvent(function(DataInterface $data) {
+            $data->two = true;
+        }));
 
-		$data = new Data;
-		$dispatcher->unbind('test');
-		$dispatcher->trigger('test', $data);
+        $data = new Data;
+        $dispatcher->unbind('test');
+        $dispatcher->trigger('test', $data);
 
-		$this->assert(!$data->one && !$data->two, 'The dispatcher did not unbind both events.');
-	}
+        $this->assert(!$data->one && !$data->two, 'The dispatcher did not unbind both events.');
+    }
 }

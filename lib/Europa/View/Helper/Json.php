@@ -47,21 +47,21 @@ class Json
      */
     public function __toString()
     {
-    	$js = '';
-    	$ns = 'window';
-    	
-    	if ($this->ns) {
-    	    foreach (explode('.', $this->ns) as $subNs) {
-    	        $ns .= '[' . $subNs . ']';
-    	        $js .= $ns . ' = {};' . PHP_EOL;
-    	    }
-    	}
-    	
-    	foreach ($this->vars as $name => $value) {
-    	    $js .= $ns . '[' . json_encode($name) . '] = ' . $this->toJson($value) . ';' . PHP_EOL;
-    	}
-    	
-    	return $js;
+        $js = '';
+        $ns = 'window';
+        
+        if ($this->ns) {
+            foreach (explode('.', $this->ns) as $subNs) {
+                $ns .= '[' . $subNs . ']';
+                $js .= $ns . ' = {};' . PHP_EOL;
+            }
+        }
+        
+        foreach ($this->vars as $name => $value) {
+            $js .= $ns . '[' . json_encode($name) . '] = ' . $this->toJson($value) . ';' . PHP_EOL;
+        }
+        
+        return $js;
     }
     
     /**
@@ -73,7 +73,7 @@ class Json
      */
     private function toJson($any)
     {
-    	return json_encode($this->makeJsonEncodable($any));
+        return json_encode($this->makeJsonEncodable($any));
     }
 
     /**
@@ -86,14 +86,14 @@ class Json
      */
     private function makeJsonEncodable($any)
     {
-    	if (is_array($any) || is_object($any)) {
-    	    $arr = array();
-    		foreach ($any as $i => $v) {
-    		    $arr[$i] = $this->makeJsonEncodable($v);
-    		}
-    		$any = $arr;
-    	}
-    	
-    	return $any;
+        if (is_array($any) || is_object($any)) {
+            $arr = array();
+            foreach ($any as $i => $v) {
+                $arr[$i] = $this->makeJsonEncodable($v);
+            }
+            $any = $arr;
+        }
+        
+        return $any;
     }
 }

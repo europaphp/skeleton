@@ -13,11 +13,11 @@ use Europa\Reflection\DocTag;
 */
 class LicenseTag extends DocTag
 {
-	/**
-	* Returns the type of the tag.
-	*
-	* @return string
-	*/
+    /**
+    * Returns the type of the tag.
+    *
+    * @return string
+    */
     public function tag()
     {
         return 'license';

@@ -205,13 +205,13 @@ class Container
      */
     private function resolveClassFromName($name)
     {
-		foreach ($this->filters as $filter) {
-			$class = $filter->filter($name);
-			if (class_exists($class, true)) {
-				return $class;
-			}
-		}
-		throw new \RuntimeException('The class name for the service "' . $name . '" could not be resolved.');
+        foreach ($this->filters as $filter) {
+            $class = $filter->filter($name);
+            if (class_exists($class, true)) {
+                return $class;
+            }
+        }
+        throw new \RuntimeException('The class name for the service "' . $name . '" could not be resolved.');
     }
     
     /**
@@ -224,7 +224,7 @@ class Container
      */
     public static function set($name, ContainerInterface $container)
     {
-    	self::$containers[$name] = $container;
+        self::$containers[$name] = $container;
     }
     
     /**
@@ -236,7 +236,7 @@ class Container
      */
     public static function get($name = null)
     {
-    	$name = $name ? $name : self::DEFAULT_INSTANCE_NAME;
+        $name = $name ? $name : self::DEFAULT_INSTANCE_NAME;
         if (!isset(self::$containers[$name])) {
             self::$containers[$name] = new static;
         }

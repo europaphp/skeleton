@@ -13,11 +13,11 @@ use Europa\Reflection\DocTag;
 */
 class VarTag extends DocTag
 {
-	/**
-	* Return the tag object type
-	*
-	* @return string
-	*/
+    /**
+    * Return the tag object type
+    *
+    * @return string
+    */
     public function tag()
     {
         return 'var';

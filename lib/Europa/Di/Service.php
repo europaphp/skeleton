@@ -143,7 +143,7 @@ class Service
      */
     public function exists()
     {
-    	return class_exists($this->class, true);
+        return class_exists($this->class, true);
     }
     
     /**

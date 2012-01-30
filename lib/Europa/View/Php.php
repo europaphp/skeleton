@@ -17,56 +17,56 @@ use Europa\Fs\Locator\LocatorInterface;
  */
 class Php implements ViewScriptInterface
 {
-	/**
-	 * The child script that was rendered, if any.
-	 * 
-	 * @var string
-	 */
-	private $child;
-	
-	/**
-	 * The container to use for helpers.
-	 * 
-	 * @var \Europa\Di\Container
-	 */
-	private $container;
-	
-	/**
-	 * The views that have already extended a parent class.
-	 * 
-	 * @var array
-	 */
-	private $extendStack = array();
-	
-	/**
-	 * The loader to use for view locating and loading.
-	 * 
-	 * @var \Europa\Fs\Locator\LocatorInterface
-	 */
-	private $locator;
-	
-	/**
-	 * The child script.
-	 * 
-	 * @var string
-	 */
-	private $childScript;
-	
-	/**
-	 * The parent script.
-	 * 
-	 * @var string
-	 */
-	private $parentScript;
-	
-	/**
-	 * The script to render.
-	 * 
-	 * @var string
-	 */
-	private $script;
-	
-	/**
+    /**
+     * The child script that was rendered, if any.
+     * 
+     * @var string
+     */
+    private $child;
+    
+    /**
+     * The container to use for helpers.
+     * 
+     * @var \Europa\Di\Container
+     */
+    private $container;
+    
+    /**
+     * The views that have already extended a parent class.
+     * 
+     * @var array
+     */
+    private $extendStack = array();
+    
+    /**
+     * The loader to use for view locating and loading.
+     * 
+     * @var \Europa\Fs\Locator\LocatorInterface
+     */
+    private $locator;
+    
+    /**
+     * The child script.
+     * 
+     * @var string
+     */
+    private $childScript;
+    
+    /**
+     * The parent script.
+     * 
+     * @var string
+     */
+    private $parentScript;
+    
+    /**
+     * The script to render.
+     * 
+     * @var string
+     */
+    private $script;
+    
+    /**
      * Sets up a Php view renderer.
      * 
      * @param \Europa\Fs\Locator\LocatorInterface $locator The locator to use for view locating view files.
@@ -75,7 +75,7 @@ class Php implements ViewScriptInterface
      */
     public function __construct(LocatorInterface $locator)
     {
-    	$this->locator = $locator;
+        $this->locator = $locator;
     }
     
     /**
@@ -92,10 +92,10 @@ class Php implements ViewScriptInterface
      */
     public function __call($name, array $args = array())
     {
-    	if ($this->container) {
-    		return $this->container->resolve($name)->configure($args)->create();
-    	}
-    	throw new \LogicException('You must set a helper container using setHelperContainer before trying to call a helper.');
+        if ($this->container) {
+            return $this->container->resolve($name)->configure($args)->create();
+        }
+        throw new \LogicException('You must set a helper container using setHelperContainer before trying to call a helper.');
     }
     
     /**
@@ -111,10 +111,10 @@ class Php implements ViewScriptInterface
      */
     public function __get($name)
     {
-    	if ($this->container) {
-    		return $this->container->resolve($name)->get();
-    	}
-    	throw new \LogicException('You must set a helper container using setHelperContainer before trying to get a helper.');
+        if ($this->container) {
+            return $this->container->resolve($name)->get();
+        }
+        throw new \LogicException('You must set a helper container using setHelperContainer before trying to get a helper.');
     }
     
     /**
@@ -124,8 +124,8 @@ class Php implements ViewScriptInterface
      */
     public function setScript($script)
     {
-    	$this->script = str_replace('\\', '/', $script);
-    	return $this;
+        $this->script = str_replace('\\', '/', $script);
+        return $this;
     }
     
     /**
@@ -135,18 +135,18 @@ class Php implements ViewScriptInterface
      */
     public function getScript()
     {
-    	return $this->script;
+        return $this->script;
     }
-	
-	/**
-	 * Returns the parent script.
-	 * 
-	 * @return string
-	 */
-	public function getParentScript()
-	{
-		return $this->parentScript;
-	}
+    
+    /**
+     * Returns the parent script.
+     * 
+     * @return string
+     */
+    public function getParentScript()
+    {
+        return $this->parentScript;
+    }
     
     /**
      * Returns the child script.
@@ -155,9 +155,9 @@ class Php implements ViewScriptInterface
      */
     public function getChildScript()
     {
-    	return $this->childScript;
+        return $this->childScript;
     }
-	
+    
     /**
      * Parses the view file and returns the result.
      * 
@@ -167,21 +167,21 @@ class Php implements ViewScriptInterface
      */
     public function render(array $context = array())
     {
-    	// script must be set
-    	if (!$this->script) {
-    		throw new \RuntimeException('A view script must be set prior to rendering.');
-    	}
-    	
-    	// capture the output
-    	try {
-        	ob_start();
-        	extract($context);
-        	include $this->locator->locate($this->script);
-        	$rendered = ob_get_clean();
+        // script must be set
+        if (!$this->script) {
+            throw new \RuntimeException('A view script must be set prior to rendering.');
+        }
+        
+        // capture the output
+        try {
+            ob_start();
+            extract($context);
+            include $this->locator->locate($this->script);
+            $rendered = ob_get_clean();
         } catch (\Exception $e) {
             throw new \LogicException("Unable to render view {$this->script} with message: {$e->getMessage()}");
         }
-    	
+        
         // handle view extensions
         if ($this->parentScript) {
             // set the script so the parent has access to what child has been rendered
@@ -283,7 +283,7 @@ class Php implements ViewScriptInterface
      */
     public function setHelperContainer(Container $container)
     {
-    	$this->container = $container;
-    	return $this;
+        $this->container = $container;
+        return $this;
     }
 }

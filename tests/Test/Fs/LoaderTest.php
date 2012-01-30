@@ -42,9 +42,9 @@ class LoaderTest extends Test
     
     public function testLoadOldStyleNamespacedClass()
     {
-    	$this->assert(
-    		$this->loader->load('Provider_Fs_TestClass'),
-    		'Unable to load old style namespaced class.'
-    	);
+        $this->assert(
+            $this->loader->load('Provider_Fs_TestClass'),
+            'Unable to load old style namespaced class.'
+        );
     }
 }

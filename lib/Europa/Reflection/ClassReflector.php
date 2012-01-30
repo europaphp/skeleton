@@ -75,26 +75,26 @@ class ClassReflector extends \ReflectionClass implements Reflectable
 
         // check to see if it's here first
         if ($docString = parent::getDocComment()) {
-        	$this->docString = $docString;
-        	return $docString;
+            $this->docString = $docString;
+            return $docString;
         }
 
         // go through each parent class
         $class = $this->getParentClass();
         while ($class) {
-        	if ($docString = $class->getDocComment()) {
-        		$this->docString = $docString;
-        		break;
-        	}
-        	$class = $class->getParentClass();
+            if ($docString = $class->getDocComment()) {
+                $this->docString = $docString;
+                break;
+            }
+            $class = $class->getParentClass();
         }
 
         // then go through each interface
         foreach ($this->getInterfaces() as $iFace) {
-        	if ($docString = $iFace->getDocComment()) {
-        		$this->docString = $docString;
-        		break;
-        	}
+            if ($docString = $iFace->getDocComment()) {
+                $this->docString = $docString;
+                break;
+            }
         }
         
         return $this->docString;

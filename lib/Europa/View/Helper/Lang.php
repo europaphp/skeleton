@@ -51,7 +51,7 @@ class Lang
      */
     public function __construct(ViewScriptInterface $view, LocatorInterface $locator)
     {
-    	$this->view    = $view;
+        $this->view    = $view;
         $this->locator = $locator;
     }
     
@@ -87,7 +87,7 @@ class Lang
      */
     public function __get($name)
     {
-    	$view = $this->view->getScript();
+        $view = $this->view->getScript();
         $this->reParseIfDifferentFile();
         if (isset($this->cache[$view][$name])) {
             return $this->cache[$view][$name];
@@ -102,7 +102,7 @@ class Lang
      */
     public function toArray()
     {
-    	$view = $this->view->getScript();
+        $view = $this->view->getScript();
         $this->reParseIfDifferentFile();
         if (isset($this->cache[$view][$name])) {
             return $this->cache[$view][$name];
@@ -127,7 +127,7 @@ class Lang
      */
     private function reParseIfDifferentFile()
     {
-    	$view = $this->view->getScript();
+        $view = $this->view->getScript();
         if (!isset($this->cache[$view])) {
             if ($path = $this->locator->locate($view)) {
                 $this->cache[$view] = parse_ini_file($path);
