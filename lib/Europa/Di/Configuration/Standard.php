@@ -33,8 +33,6 @@ class Standard implements ConfigurationInterface
         'addIncludePaths'  => false,
     	'controllerPrefix' => 'Controller\\',
     	'controllerSuffix' => '',
-    	'helperPrefix'     => 'Europa\View\Helper\\',
-    	'helperSuffix'     => '',
     	'langPaths'        => array('app/Lang/en-us' => 'ini'),
     	'loadPaths'        => array('app'),
     	'viewPaths'        => array('app/View')
@@ -83,13 +81,15 @@ class Standard implements ConfigurationInterface
     private function map($container)
     {
         $interface = RequestAbstract::isCli() ? 'Cli' : 'Http';
-        $container->setFilter(new MapFilter(array(
-            'dispatcher' => '\Europa\Dispatcher\Dispatcher',
-            'loader'     => '\Europa\Fs\Loader',
-            'request'    => '\Europa\Request\\' . $interface,
-            'response'   => '\Europa\Response\\' . $interface,
-            'router'     => '\Europa\Router\Router',
-            'view'       => '\Europa\View\Php',
+        $container->addFilter(new MapFilter(array(
+			'controllers' => '\Europa\Di\Container',
+            'dispatcher'  => '\Europa\Dispatcher\Dispatcher',
+			'helpers'     => '\Europa\Di\Container',
+            'loader'      => '\Europa\Fs\Loader',
+            'request'     => '\Europa\Request\\' . $interface,
+            'response'    => '\Europa\Response\\' . $interface,
+            'router'      => '\Europa\Router\Router',
+            'view'        => '\Europa\View\Php',
         )));
     }
     
@@ -144,18 +144,21 @@ class Standard implements ConfigurationInterface
      */
     private function helpers($container)
     {
+		// the locator for the lang helper
         $locator = new Locator($this->conf['path']);
         $locator->throwWhenAdding(false);
         $locator->addPaths($this->conf['langPaths']);
         
-        $helpers = new Container;
-        $helpers->setFilter(new ClassNameFilter(array(
-        	'prefix' => $this->conf['helperPrefix'],
-        	'suffix' => $this->conf['helperSuffix']
-        )));
+		// the default helper setup
+        $helpers = $container->getService('helpers');
+        $helpers->addFilter(new ClassNameFilter(array('prefix' => '\Europa\View\Helper\\')));
+		$helpers->addFilter(new ClassNameFilter(array('prefix' => '\Helper\\')));
+		
+		// default helper configuration
         $helpers->resolve('lang')->configure(array($container->resolve('view'), $locator));
         $helpers->resolve('uri')->configure(array($container->resolve('router')));
         
+		// add the helper container array to the view
         $container->resolve('view')->queue('setHelperContainer', array($helpers));
     }
 }

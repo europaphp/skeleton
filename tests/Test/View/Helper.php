@@ -21,7 +21,7 @@ class Helper extends Test
         $container  = new Container;
         
         $this->view->setHelperContainer($container);
-        $container->setFilter(new CallbackFilter(function($dep) {
+        $container->addFilter(new CallbackFilter(function($dep) {
             $classNameFilter = new ClassNameFilter;
             return '\Provider\View' . $classNameFilter->filter($dep) . 'Helper';
         }));

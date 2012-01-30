@@ -128,7 +128,6 @@ class Uri
         return $this->getHostPart()
             . $this->getRootPart()
             . $this->getRequestPart()
-            . $this->getSuffixPart()
             . $this->getQueryPart()
             . $this->getFragmentPart();
     }
@@ -489,8 +488,20 @@ class Uri
      */
     public function setRequest($request)
     {
-        $this->request = trim($request, '/');
-        return $this;
+		// normalize
+        $request = trim($request, '/');
+		
+		// take off the suffix if it exists and set it
+		if (strpos($request, '.') !== false) {
+			$parts = explode('.', $request);
+			$this->setSuffix(array_pop($parts));
+			$request = implode('/', $parts);
+		}
+		
+		// apply the new request
+		$this->request = $request;
+		
+		return $this;
     }
 
     /**
@@ -500,7 +511,7 @@ class Uri
      */
     public function getRequest()
     {
-        return $this->request;
+        return $this->request ? $this->request . $this->getSuffixPart() : '';
     }
     
     /**
@@ -510,7 +521,7 @@ class Uri
      */
     public function getRequestPart()
     {
-        return $this->request ? '/' . $this->request : '';
+        return $this->request ? '/' . $this->getRequest() : '';
     }
 
     /**
@@ -522,21 +533,8 @@ class Uri
      */
     public function setSuffix($suffix)
     {
-        // allow a suffix to be unset by passing a false value
-        $suffix = $suffix ? '.' . $suffix : '';
-        
-        // add to the request if there is no suffix or replace the existing one if there is
-        if (strpos($this->request, '.') === false) {
-            $this->request = $this->request . $suffix;
-        } else {
-            $prefix = explode('.', $this->request, 2);
-            $prefix = $prefix[0];
-            
-            // replace the current suffix
-            $this->request = $prefix . $suffix;
-        }
-        
-        return $this;
+        $this->suffix = $suffix;
+		return $this;
     }
 
     /**
@@ -546,12 +544,7 @@ class Uri
      */
     public function getSuffix()
     {
-        $suffix = null;
-        if (strpos($this->request, '.')) {
-            $suffix = explode('.', $this->request);
-            $suffix = end($suffix);
-        }
-        return $suffix;
+		return $this->suffix;
     }
 
     /**
@@ -561,8 +554,7 @@ class Uri
      */
     public function getSuffixPart()
     {
-        $suffix = $this->getSuffix();
-        return $suffix ? '.' . $suffix : '';
+        return $this->suffix ? '.' . $this->suffix : '';
     }
     
     /** 
@@ -770,6 +762,7 @@ class Uri
     {
         // remove the root uri from the request uri to get the relative request uri for the framework
         $requestUri = self::getServerRequestUri();
+		$requestUri = parse_url($requestUri, PHP_URL_PATH);
         
         // remove the query string
         $requestUri = explode('?', $requestUri);
@@ -779,8 +772,8 @@ class Uri
         $requestUri = trim($requestUri, '/');
         $requestUri = substr($requestUri, strlen(static::detectRoot()));
         $requestUri = trim($requestUri, '/');
-
-        return $requestUri;
+		
+		return $requestUri;
     }
 
     /**

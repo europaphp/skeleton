@@ -32,6 +32,24 @@ class Uri
     {
         $this->router = $router;
     }
+	
+	/**
+	 * @see \Europa\View\Helper\Uri::current()
+	 */
+	public function __toString()
+	{
+		return $this->current();
+	}
+	
+	/**
+	 * Returns the current URI.
+	 * 
+	 * @return string
+	 */
+	public function current()
+	{
+		return Request\Uri::detect()->__toString();
+	}
     
     /**
      * Instantiates the url formatter and sets properties.

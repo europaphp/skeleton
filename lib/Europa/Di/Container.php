@@ -35,7 +35,7 @@ class Container
      * 
      * @var \Europa\Filter\FilterInterface
      */
-    private $filter;
+    private $filters = array();
     
     /**
      * Container instances for static retrieval.
@@ -43,16 +43,6 @@ class Container
      * @var array
      */
     private static $containers = array();
-    
-    /**
-     * Sets up the container.
-     * 
-     * @return \Europa\Di\Container
-     */
-    public function __construct()
-    {
-        $this->setFilter(new UpperCamelCaseFilter);
-    }
     
     /**
      * Magic caller for resolve($name, $args).
@@ -102,7 +92,7 @@ class Container
      * 
      * @see \Europa\Di\Service::unregister()
      */
-    public function __unset($naem)
+    public function __unset($name)
     {
         return $this->unregister($name);
     }
@@ -117,7 +107,7 @@ class Container
     public function resolve($name)
     {
         if (!isset($this->deps[$name])) {
-            $dep = $this->getClassNameFor($name);
+            $dep = $this->resolveClassFromName($name);
             $dep = new Service($dep);
             $this->deps[$name] = $dep;
         }
@@ -200,9 +190,9 @@ class Container
      * 
      * @return \Europa\Di\Container
      */
-    public function setFilter(FilterInterface $filter)
+    public function addFilter(FilterInterface $filter)
     {
-        $this->filter = $filter;
+        $this->filters[] = $filter;
         return $this;
     }
     
@@ -213,9 +203,15 @@ class Container
      * 
      * @return string
      */
-    private function getClassNameFor($name)
+    private function resolveClassFromName($name)
     {
-        return $this->filter->filter($name);
+		foreach ($this->filters as $filter) {
+			$class = $filter->filter($name);
+			if (class_exists($class, true)) {
+				return $class;
+			}
+		}
+		throw new \RuntimeException('The class name for the service "' . $name . '" could not be resolved.');
     }
     
     /**
@@ -226,7 +222,7 @@ class Container
      * 
      * @return void
      */
-    public static function set($name, self $container)
+    public static function set($name, ContainerInterface $container)
     {
     	self::$containers[$name] = $container;
     }

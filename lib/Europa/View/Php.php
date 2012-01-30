@@ -137,6 +137,16 @@ class Php implements ViewScriptInterface
     {
     	return $this->script;
     }
+	
+	/**
+	 * Returns the parent script.
+	 * 
+	 * @return string
+	 */
+	public function getParentScript()
+	{
+		return $this->parentScript;
+	}
     
     /**
      * Returns the child script.
