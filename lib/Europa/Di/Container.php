@@ -118,26 +118,24 @@ class Container
      * Returns a new instance of a configured service.
      * 
      * @param string $name The name of the service.
-     * @param array  $args The arguments to pass to the new instance.
      * 
      * @return mixed
      */
-    public function createService($name, array $args = array())
+    public function createService($name)
     {
-        return $this->resolve($name)->configure($args)->create();
+        return $this->resolve($name)->create();
     }
     
     /**
      * Returns a configured instance of the specified service.
      * 
      * @param string $name The name of the service.
-     * @param array  $args The arguments to pass if creating a new instance.
      * 
      * @return mixed
      */
-    public function getService($name, array $args = array())
+    public function getService($name)
     {
-        return $this->resolve($name)->configure($args)->get();
+        return $this->resolve($name)->get();
     }
     
     /**
