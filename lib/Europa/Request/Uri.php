@@ -493,9 +493,9 @@ class Uri
         
         // take off the suffix if it exists and set it
         if (strpos($request, '.') !== false) {
-            $parts = explode('.', $request);
+            $parts = explode('.', $request, 2);
             $this->setSuffix(array_pop($parts));
-            $request = implode('/', $parts);
+            $request = $parts[0];
         }
         
         // apply the new request
