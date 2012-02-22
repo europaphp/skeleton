@@ -30,7 +30,7 @@ class Standard implements ConfigurationInterface
      * @var array
      */
     private $conf = array(
-        'addIncludePaths'  => false,
+        'addIncludePaths'  => true,
         'controllerPrefix' => 'Controller\\',
         'controllerSuffix' => '',
         'langPaths'        => array('app/Lang/en-us' => 'ini'),
