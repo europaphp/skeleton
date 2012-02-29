@@ -92,7 +92,7 @@ class FilterTag extends DocTag
         }
         
         // tag string is split into two parts, filter name and the value to be passed to the constructor
-        $parts = explode(' ', $this->tagString);
+        $parts = explode(' ', $this->tagString, 2);
         
         // assign name and if specified, value
         $this->name = trim($parts[0]);
