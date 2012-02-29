@@ -29,6 +29,13 @@ class FilterTag extends DocTag
     private $value;
     
     /**
+     * Whether or not the specified filter has a value.
+     * 
+     * @var bool
+     */
+    private $hasValue = false;
+    
+    /**
      * Returns the name of the tag.
      * 
      * @return string
@@ -68,7 +75,7 @@ class FilterTag extends DocTag
     public function getInstance(array $args = array())
     {
         $reflector = new ClassReflector($this->getName());
-        if ($reflector->hasMethod('__construct')) {
+        if ($this->hasValue && $reflector->hasMethod('__construct')) {
             return $reflector->newInstanceArgs(array($this->getValue()));
         }
         return $reflector->newInstance();
@@ -92,12 +99,15 @@ class FilterTag extends DocTag
         }
         
         // tag string is split into two parts, filter name and the value to be passed to the constructor
-        $parts = explode(' ', $this->tagString, 2);
+        $parts = explode(' ', $this->tagString);
         
         // assign name and if specified, value
         $this->name = trim($parts[0]);
+        
+        // if a value is set, flag it as set and set it
         if (isset($parts[1])) {
-            $this->value = trim($parts[1]);
+            $this->value    = trim($parts[1]);
+            $this->hasValue = true;
         }
     }
 }
