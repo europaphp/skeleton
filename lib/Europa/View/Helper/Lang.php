@@ -89,10 +89,16 @@ class Lang
     public function __get($name)
     {
         $script = $this->view->getScript();
-        $this->parseForIfNotCached($script);
+        
+        // ensure everything is parsed
+        $this->parse();
+        
+        // try and load from the parsed cache
         if (isset($this->cache[$script][$name])) {
             return $this->cache[$script][$name];
         }
+        
+        // if it is not found, just return the langvar name
         return $name;
     }
     
@@ -103,23 +109,17 @@ class Lang
      */
     public function toArray()
     {
-        $array  = array();
         $script = $this->view->getScript();
-        $parent = $this->view->getParentScript();
         
         // ensure everything is parsed
         $this->parse();
         
-        // add the child script
+        // add the script
         if (isset($this->cache[$script])) {
-            $array = $this->cache[$script];
+            return $this->cache[$script];
         }
         
-        // add the parent script
-        if (isset($this->cache[$parent])) {
-            $array = array_merge($array, $this->cache[$parent]);
-        }
-        
+        // enesure an array is returned
         return array();
     }
     
@@ -173,6 +173,5 @@ class Lang
     private function parse()
     {
         $this->parseForIfNotCached($this->view->getScript());
-        $this->parseForIfNotCached($this->view->getParentScript());
     }
 }
