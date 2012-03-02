@@ -31,21 +31,22 @@ class Lang
     /**
      * The locator to use for locating language files.
      * 
-     * @var Locator
+     * @var LocatorInterface
      */
     private $locator;
     
     /**
      * The view to use.
      * 
-     * @var \Europa\View\ViewScriptInterface
+     * @var ViewScriptInterface
      */
     private $view;
     
     /**
      * Constructs the language helper and parses the required ini file.
      * 
-     * @param Locator $locator The locator to locate the language files.
+     * @param ViewScriptInterface $view    The view to use.
+     * @param LocatorInterface    $locator Locator for lang files.
      * 
      * @return Lang
      */
@@ -87,10 +88,10 @@ class Lang
      */
     public function __get($name)
     {
-        $view = $this->view->getScript();
-        $this->reParseIfDifferentFile();
-        if (isset($this->cache[$view][$name])) {
-            return $this->cache[$view][$name];
+        $script = $this->view->getScript();
+        $this->parseForIfNotCached($script);
+        if (isset($this->cache[$script][$name])) {
+            return $this->cache[$script][$name];
         }
         return $name;
     }
@@ -102,11 +103,23 @@ class Lang
      */
     public function toArray()
     {
-        $view = $this->view->getScript();
-        $this->reParseIfDifferentFile();
-        if (isset($this->cache[$view][$name])) {
-            return $this->cache[$view][$name];
+        $array  = array();
+        $script = $this->view->getScript();
+        $parent = $this->view->getParentScript();
+        
+        // ensure everything is parsed
+        $this->parse();
+        
+        // add the child script
+        if (isset($this->cache[$script])) {
+            $array = $this->cache[$script];
         }
+        
+        // add the parent script
+        if (isset($this->cache[$parent])) {
+            $array = array_merge($array, $this->cache[$parent]);
+        }
+        
         return array();
     }
     
@@ -125,16 +138,41 @@ class Lang
      * 
      * @return Lang
      */
-    private function reParseIfDifferentFile()
+    private function parseForIfNotCached($script)
     {
-        $view = $this->view->getScript();
-        if (!isset($this->cache[$view])) {
-            if ($path = $this->locator->locate($view)) {
-                $this->cache[$view] = parse_ini_file($path);
-            } else {
-                $this->cache[$view] = array();
-            }
+        if (!isset($this->cache[$script])) {
+            $this->parseFor($script);
         }
-        return $this;
+    }
+    
+    /**
+     * Parses the specified script.
+     * 
+     * @param string $script The script to parse.
+     * 
+     * @return void
+     */
+    private function parseFor($script)
+    {
+        if (!$script) {
+            return;
+        }
+        
+        if ($path = $this->locator->locate($script)) {
+            $this->cache[$script] = parse_ini_file($path);
+        } else {
+            $this->cache[$script] = array();
+        }
+    }
+    
+    /**
+     * Will parse the current view file, and it's parent.
+     * 
+     * @return void
+     */
+    private function parse()
+    {
+        $this->parseForIfNotCached($this->view->getScript());
+        $this->parseForIfNotCached($this->view->getParentScript());
     }
 }
