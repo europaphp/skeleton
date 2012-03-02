@@ -21,5 +21,10 @@ interface ViewScriptInterface extends ViewInterface
      */
     public function setScript($script);
     
+    /**
+     * Returns the current script.
+     * 
+     * @return string
+     */
     public function getScript();
 }
