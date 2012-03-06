@@ -18,8 +18,9 @@ class ClassNameFilter implements FilterInterface
      * @var array
      */
     private $config = array(
-        'prefix' => '',
-        'suffix' => ''
+        'prefix'   => '',
+        'suffix'   => '',
+        'nsTokens' => array(DIRECTORY_SEPARATOR, '/', '_', ' ')
     );
     
     /**
@@ -53,7 +54,7 @@ class ClassNameFilter implements FilterInterface
         $value = trim($value, '\\');
         
         // normalize namespace separators
-        $value = str_replace(array(DIRECTORY_SEPARATOR, '/', '_'), '\\', $value);
+        $value = str_replace($this->config['nsTokens'], '\\', $value);
         
         // split into class namespaces and format each namespace part into upper camel case
         $parts = explode('\\', $value);
