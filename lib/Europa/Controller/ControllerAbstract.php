@@ -177,6 +177,57 @@ abstract class ControllerAbstract implements ControllerInterface
         
         // post-action hook
         $this->postAction();
+        
+        // chainable
+        return $this;
+    }
+    
+    /**
+     * Applies the action result to the controller.
+     * 
+     * @param mixed $actionResult The action result to set.
+     * 
+     * @return \Europa\Controller\ControllerAbstract
+     */
+    public function setActionResult($actionResult)
+    {
+        // reset
+        $this->actionResult = array();
+        
+        // do nothing if it doesn't have a value
+        if (!$actionResult) {
+            return;
+        }
+        
+        // action result should be an arary
+        if (!is_array($actionResult)) {
+            throw new \LogicException('If a value is returned from your action, it must be an array.');
+        }
+        
+        $this->actionResult = $actionResult;
+    }
+    
+    /**
+     * Returns the action result.
+     * 
+     * @return mixed
+     */
+    public function getActionResult()
+    {
+        return $this->actionResult;
+    }
+    
+    /**
+     * Forwards to the specified controller using the same request and response.
+     * 
+     * @param string $to The controller to forward to.
+     * 
+     * @return mixed
+     */
+    public function forward($to)
+    {
+        $to = new $to($this->getRequest(), $this->getResponse());
+        return $to->action();
     }
     
     /**
@@ -277,30 +328,5 @@ abstract class ControllerAbstract implements ControllerInterface
         }
         
         throw new \LogicException("Method {$method} is not supported and was not trapped in __call.");
-    }
-    
-    /**
-     * Applies the action result to the controller.
-     * 
-     * @param mixed $actionResult The action result to set.
-     * 
-     * @return \Europa\Controller\ControllerAbstract
-     */
-    private function setActionResult($actionResult)
-    {
-        // reset
-        $this->actionResult = array();
-        
-        // do nothing if it doesn't have a value
-        if (!$actionResult) {
-            return;
-        }
-        
-        // action result should be an arary
-        if (!is_array($actionResult)) {
-            throw new \LogicException('If a value is returned from your action, it must be an array.');
-        }
-        
-        $this->actionResult = $actionResult;
     }
 }
