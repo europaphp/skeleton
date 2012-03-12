@@ -47,13 +47,15 @@ class Service
     /**
      * Constructs a new service representing the specified class.
      * 
-     * @param string $class The name of the class to represent.
+     * @param string $class  The name of the class to represent.
+     * @param array  $config The constructor params, if any.
      * 
      * @return \Europa\Di\Service
      */
-    public function __construct($class)
+    public function __construct($class, array $config = array())
     {
         $this->class = $class;
+        $this->args  = $config;
     }
     
     /**
@@ -79,7 +81,7 @@ class Service
     public function configure(array $args)
     {
         $this->refresh();
-        $this->args = array_merge_recursive($this->args, $args);
+        $this->args = $args;
         return $this;
     }
     
