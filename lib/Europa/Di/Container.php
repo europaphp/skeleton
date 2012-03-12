@@ -3,6 +3,7 @@
 namespace Europa\Di;
 use Europa\Filter\FilterInterface;
 use Europa\Filter\UpperCamelCaseFilter;
+use RuntimeException;
 
 /**
  * The service injection container represents a collection of configured dependencies. Dependencies are instances
@@ -43,6 +44,13 @@ class Container
      * @var array
      */
     private static $containers = array();
+    
+    /**
+     * The default instance name to use.
+     * 
+     * @var string
+     */
+    private static $defaultName = self::DEFAULT_INSTANCE_NAME;
     
     /**
      * Magic caller for resolve($name, $args).
@@ -146,7 +154,7 @@ class Container
      * @param string                      $name    The name of the service.
      * @param \Europa\Di\Service $service One of many allowed values.
      * 
-     * @return \Europa\Di\Container
+     * @return Container
      */
     public function register($name, Service $service)
     {
@@ -171,7 +179,7 @@ class Container
      * 
      * @param string $name The service name.
      * 
-     * @return \Europa\Di\Container
+     * @return Container
      */
     public function unRegister($name)
     {
@@ -186,7 +194,7 @@ class Container
      * 
      * @param \Europa\Filter\FilterInterface $filter The filter to use for name formatting.
      * 
-     * @return \Europa\Di\Container
+     * @return Container
      */
     public function addFilter(FilterInterface $filter)
     {
@@ -215,12 +223,12 @@ class Container
     /**
      * Registers the container as an instance.
      * 
-     * @param string $name      The instance name.
-     * @param self   $container The container to register.
+     * @param string    $name      The instance name.
+     * @param Container $container The container to register.
      * 
      * @return void
      */
-    public static function set($name, ContainerInterface $container)
+    public static function set($name, Container $container)
     {
         self::$containers[$name] = $container;
     }
@@ -230,14 +238,75 @@ class Container
      * 
      * @param string $name The instance name to get if using multiple instances.
      * 
-     * @return \Europa\Di\Container
+     * @return Container
      */
     public static function get($name = null)
     {
-        $name = $name ? $name : self::DEFAULT_INSTANCE_NAME;
-        if (!isset(self::$containers[$name])) {
+        $name = $name ? $name : self::$defaultName;
+        if (!self::has($name)) {
             self::$containers[$name] = new static;
         }
         return self::$containers[$name];
+    }
+    
+    /**
+     * Returns whether or not a container by the specified name exists.
+     * 
+     * @param string $name The container name.
+     * 
+     * @return bool
+     */
+    public static function has($name)
+    {
+        return isset(self::$containers[$name]);
+    }
+    
+    /**
+     * Removes the container of the specified name.
+     * 
+     * @param string $name The container name.
+     * 
+     * @return void
+     */
+    public static function remove($name)
+    {
+        if (!self::has($name)) {
+            throw new RuntimeException('The container "' . $name . '" does not exist.');
+        }
+        unset(self::$containers[$name]);
+    }
+    
+    /**
+     * Renames the specified container.
+     * 
+     * @param string $from The old name.
+     * @param string $to   The new name.
+     * 
+     * @return void
+     */
+    public static function rename($from, $to)
+    {
+        if (!self::has($from)) {
+            throw new RuntimeException('Cannot move container "' . $from . '" to "' . $to . '" because "' . $from . '" does not exist.');
+        }
+        
+        if (self::has($to)) {
+            throw new RuntimeException('Cannot move container "' . $from . '" to "' . $to . '" because "' . $to . '" already exists.');
+        }
+        
+        self::set($to, self::get($from));
+        self::remove($from);
+    }
+    
+    /**
+     * Sets the default instance name to use.
+     * 
+     * @param string $name The name to use.
+     * 
+     * @return void
+     */
+    public static function setDefaultName($name)
+    {
+        self::$defaultName = $name;
     }
 }
