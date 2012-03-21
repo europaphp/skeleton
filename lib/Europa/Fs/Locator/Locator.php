@@ -59,7 +59,7 @@ class Locator implements LocatorInterface
      * 
      * @param string $base The base path to set.
      * 
-     * @return \Europa\Fs\Locator\Locator
+     * @return Locator
      */
     public function __construct($base = null)
     {
@@ -77,7 +77,7 @@ class Locator implements LocatorInterface
      * 
      * @param bool $switch Turns throwing on or off.
      * 
-     * @return \Europa\Fs\Locator\Locator
+     * @return Locator
      */
     public function throwWhenAdding($switch = true)
     {
@@ -90,7 +90,7 @@ class Locator implements LocatorInterface
      * 
      * @param bool $switch Turns throwing on or off.
      * 
-     * @return \Europa\Fs\Locator\Locator
+     * @return Locator
      */
     public function throwWhenLocating($switch = true)
     {
@@ -105,7 +105,7 @@ class Locator implements LocatorInterface
      * @param string $map  The class to map, or array of $class => $file mapping.
      * @param string $file The file to map to if the first argument is not an array.
      * 
-     * @return \Europa\Fs\Locator\Locator
+     * @return Locator
      */
     public function map($map, $file)
     {
@@ -134,7 +134,7 @@ class Locator implements LocatorInterface
      * 
      * @param string $class The class to search for.
      * 
-     * @return bool|string
+     * @return bool | string
      */
     public function locate($file)
     {
@@ -174,7 +174,7 @@ class Locator implements LocatorInterface
      * @param string $path   The path to add to the list of load paths.
      * @param mixed  $suffix The suffix, or suffixes to use for this path.
      * 
-     * @return \Europa\Fs\Locator\Locator
+     * @return Locator
      */
     public function addPath($path, $suffix = self::DEFAULT_SUFFIX)
     {
@@ -206,7 +206,7 @@ class Locator implements LocatorInterface
      * 
      * @param array $paths The paths to add.
      * 
-     * @return \Europa\Fs\Locator\Locator
+     * @return Locator
      */
     public function addPaths(array $paths)
     {
@@ -225,7 +225,7 @@ class Locator implements LocatorInterface
      * 
      * @param string $path The path to add to PHP's include paths.
      * 
-     * @return \Europa\Fs\Locator\Locator
+     * @return Locator
      */
     public function addIncludePath($path)
     {
@@ -242,7 +242,7 @@ class Locator implements LocatorInterface
      * 
      * @param array $paths The paths to add to PHP's include paths.
      * 
-     * @return \Europa\Fs\Locator\Locator
+     * @return Locator
      */
     public function addIncludePaths(array $paths)
     {
@@ -274,7 +274,7 @@ class Locator implements LocatorInterface
      * 
      * @param string $path The path to check and return the real path to.
      * 
-     * @return bool|string
+     * @return bool | string
      */
     private function getRealpathAndThrowIfNotExists($path)
     {
