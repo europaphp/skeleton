@@ -53,56 +53,53 @@ class Container
     private static $defaultName = self::DEFAULT_INSTANCE_NAME;
     
     /**
-     * Magic caller for resolve($name, $args).
+     * Returns a new instance for the specified service.
      * 
-     * @param string $name  The name of the service.
-     * @param mixed  $value The service to register.
+     * @param string $name The name of the service.
+     * @param array  $args The arguments, if any, to configure the service with.
      * 
-     * @see \Europa\Di\Service::register()
+     * @return mixed
      */
     public function __call($name, array $args = array())
     {
-        return $this->resolve($name)->configure($args);
+        return $this->createService($name, $args);
     }
     
     /**
-     * Magic caller for register().
+     * Returns an existing instance for the specified service.
      * 
-     * @see \Europa\Di\Service::register()
-     */
-    public function __set($name, $value)
-    {
-        return $this->register($name, $value);
-    }
-    
-    /**
-     * Magic caller for resolve($name).
+     * @param string $name The name of the service.
      * 
-     * @see \Europa\Di\Service::resolve()
+     * @return mixed
      */
     public function __get($name)
     {
-        return $this->resolve($name);
+        return $this->getService($name);
     }
     
     /**
-     * Magic caller for isRegistered($name).
+     * Returns a new instance for the specified service.
      * 
-     * @see \Europa\Di\Service::isRegistered()
+     * @param string $name The name of the service.
+     * @param array  $args The arguments, if any, to configure the service with.
+     * 
+     * @return mixed
      */
-    public function __isset($name)
+    public function createService($name, array $args = array())
     {
-        return $this->isRegistered($name);
+        return $this->resolve($name)->create($args);
     }
     
     /**
-     * Magic caller for unregister($name).
+     * Returns an existing instance for the specified service.
      * 
-     * @see \Europa\Di\Service::unregister()
+     * @param string $name The name of the service.
+     * 
+     * @return mixed
      */
-    public function __unset($name)
+    public function getService($name)
     {
-        return $this->unregister($name);
+        return $this->resolve($name)->get();
     }
     
     /**
@@ -120,30 +117,6 @@ class Container
             $this->deps[$name] = $dep;
         }
         return $this->deps[$name];
-    }
-    
-    /**
-     * Returns a new instance of a configured service.
-     * 
-     * @param string $name The name of the service.
-     * 
-     * @return mixed
-     */
-    public function createService($name)
-    {
-        return $this->resolve($name)->create();
-    }
-    
-    /**
-     * Returns a configured instance of the specified service.
-     * 
-     * @param string $name The name of the service.
-     * 
-     * @return mixed
-     */
-    public function getService($name)
-    {
-        return $this->resolve($name)->get();
     }
     
     /**
@@ -217,7 +190,7 @@ class Container
                 return $class;
             }
         }
-        throw new \RuntimeException('The class name for the service "' . $name . '" could not be resolved.');
+        throw new RuntimeException('The class name for the service "' . $name . '" could not be resolved.');
     }
     
     /**

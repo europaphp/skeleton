@@ -15,7 +15,7 @@ use Europa\Request\RequestAbstract;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Standard implements ConfigurationInterface
+class Standard extends ConfigurationAbstract
 {
     /**
      * The application base path.
@@ -33,9 +33,9 @@ class Standard implements ConfigurationInterface
         'addIncludePaths'  => true,
         'controllerPrefix' => 'Controller\\',
         'controllerSuffix' => '',
-        'langPaths'        => array('app/Lang/en-us' => 'ini'),
-        'loadPaths'        => array('app'),
-        'viewPaths'        => array('app/View')
+        'langPaths'        => array('app/langs/en-us' => 'ini'),
+        'loadPaths'        => array('app/classes'),
+        'viewPaths'        => array('app/views')
     );
     
     /**
@@ -43,7 +43,7 @@ class Standard implements ConfigurationInterface
      * 
      * @param array $conf Configuration to granularize the default configuration.
      * 
-     * @return \Europa\Di\Configuration\Standard
+     * @return Standard
      */
     public function __construct(array $conf = array())
     {
@@ -58,36 +58,19 @@ class Standard implements ConfigurationInterface
     }
     
     /**
-     * Configures the specified container.
-     * 
-     * @param \Europa\Di\Container $container The container to configure.
-     * 
-     * @return void
-     */
-    public function configure(Container $container)
-    {
-        $this->map($container);
-        $this->dispatcher($container);
-        $this->loader($container);
-        $this->view($container);
-        $this->helpers($container);
-    }
-    
-    /**
      * Configures the dependency injection container.
      * 
+     * @param Container $container The container to configure.
+     * 
      * @return void
      */
-    private function map($container)
+    public function map(Container $container)
     {
-        $interface = RequestAbstract::isCli() ? 'Cli' : 'Http';
         $container->addFilter(new MapFilter(array(
             'controllers' => '\Europa\Di\Container',
             'dispatcher'  => '\Europa\Dispatcher\Dispatcher',
             'helpers'     => '\Europa\Di\Container',
             'loader'      => '\Europa\Fs\Loader',
-            'request'     => '\Europa\Request\\' . $interface,
-            'response'    => '\Europa\Response\\' . $interface,
             'router'      => '\Europa\Router\Router',
             'view'        => '\Europa\View\Php',
         )));
@@ -96,9 +79,11 @@ class Standard implements ConfigurationInterface
     /**
      * Configures the dispatcher to use the controller container.
      * 
+     * @param Container $container The container to configure.
+     * 
      * @return void
      */
-    private function dispatcher($container)
+    public function dispatcher(Container $container)
     {
         $dispatcher = $container->resolve('dispatcher');
         $dispatcher->queue('setRouter', array($container->resolve('router')));
@@ -111,9 +96,11 @@ class Standard implements ConfigurationInterface
     /**
      * Configures the class loader and the locator for the class files.
      * 
+     * @param Container $container The container to configure.
+     * 
      * @return void
      */
-    private function loader($container)
+    public function loader(Container $container)
     {
         $locator = new Locator($this->conf['path']);
         $locator->addPaths($this->conf['loadPaths']);
@@ -127,9 +114,11 @@ class Standard implements ConfigurationInterface
     /**
      * Configures the PHP view specifically since it requires a locator and optional helper.
      * 
+     * @param Container $container The container to configure.
+     * 
      * @return void
      */
-    private function view($container)
+    public function view(Container $container)
     {
         $locator = new Locator($this->conf['path']);
         $locator->throwWhenLocating(true);
@@ -140,9 +129,11 @@ class Standard implements ConfigurationInterface
     /**
      * Configures helpers.
      * 
+     * @param Container $container The container to configure.
+     * 
      * @return void
      */
-    private function helpers($container)
+    public function helpers(Container $container)
     {
         // the locator for the lang helper
         $locator = new Locator($this->conf['path']);
