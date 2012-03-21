@@ -16,7 +16,7 @@ class Loader
     /**
      * The locator to use for locating class files.
      * 
-     * @var \Europa\Fs\Locator\LocatorInterface
+     * @var LocatorInterface
      */
     private $locator;
     
@@ -28,7 +28,7 @@ class Loader
      * 
      * @param string $class The class to search for.
      * 
-     * @return \Europa\Fs\Loader
+     * @return Loader
      */
     public function load($class)
     {
@@ -60,9 +60,9 @@ class Loader
     /**
      * Sets the locator. A locator is not required for class loading to work.
      * 
-     * @param \Europa\Fs\Locator\LocatorInterface $locator The locator to use for locating class files.
+     * @param LocatorInterface $locator The locator to use for locating class files.
      * 
-     * @return \Europa\Fs\Loader
+     * @return Loader
      */
     public function setLocator(LocatorInterface $locator)
     {
@@ -75,7 +75,7 @@ class Loader
      * 
      * @param bool $prepend Whether or not to prepend the autoloader onto the stack.
      * 
-     * @return \Europa\Fs\Loader
+     * @return Loader
      */
     public function register($prepend = false)
     {
