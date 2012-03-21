@@ -1,9 +1,6 @@
 <?php
 
 namespace Europa\Dispatcher;
-use Europa\Request\RequestInterface;
-use Europa\Response\ResponseInterface;
-use Europa\Router\RouterInterface;
 
 /**
  * Represents a basic implementation of a dispatcher.
@@ -16,12 +13,9 @@ use Europa\Router\RouterInterface;
 interface DispatcherInterface
 {
     /**
-     * Renders, sends all headers and outputs the result.
-     * 
-     * @param RequestInterface  $request  The request object to dispatch.
-     * @param ResponseInterface $response The response object to output.
+     * Encompasses the whole dispatching process. Instantiates the controller, actions it and outputs the rendered view.
      * 
      * @return void
      */
-    public function dispatch(RequestInterface $request, ResponseInterface $response);
+    public function dispatch();
 }

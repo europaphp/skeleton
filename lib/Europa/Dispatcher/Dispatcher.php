@@ -5,9 +5,17 @@ use Europa\Controller\ControllerInterface;
 use Europa\Dispatcher\Negotiator\NegotiatorInterface;
 use Europa\Filter\FilterInterface;
 use Europa\Filter\ClassNameFilter;
+use Europa\Request\Cli as CliRequest;
+use Europa\Request\Http as HttpRequest;
+use Europa\Request\RequestAbstract;
 use Europa\Request\RequestInterface;
+use Europa\Response\Cli as CliResponse;
+use Europa\Response\Http as HttpResponse;
 use Europa\Response\ResponseInterface;
 use Europa\Router\RouterInterface;
+use InvalidArgumentException;
+use ReflectionClass;
+use ReflectionException;
 
 /**
  * Dispatches the request to the controller, takes the rendered content and passes to response to output.
@@ -37,7 +45,7 @@ class Dispatcher implements DispatcherInterface
     /**
      * The filter to use for the controller.
      * 
-     * @var \Europa\Filter\FilterInterface
+     * @var FilterInterface
      */
     private $controllerFilter;
     
@@ -65,10 +73,14 @@ class Dispatcher implements DispatcherInterface
     /**
      * Initializes the dispatcher.
      * 
-     * @return \Europa\Dispatcher\Dispatcher
+     * @return Dispatcher
      */
     public function __construct()
     {
+        $isCli = RequestAbstract::isCli();
+        
+        $this->setRequest($isCli ? new CliRequest : new HttpRequest);
+        $this->setResponse($isCli ? new CliResponse : new HttpResponse);
         $this->setControllerFilter(new ClassNameFilter);
     }
     
@@ -77,7 +89,7 @@ class Dispatcher implements DispatcherInterface
      * 
      * @param string $key The name of the parameter in the request that contains the name of the controller.
      * 
-     * @return \Europa\Dispatcher\Dispatcher
+     * @return Dispatcher
      */
     public function setControllerKey($key)
     {
@@ -86,21 +98,11 @@ class Dispatcher implements DispatcherInterface
     }
     
     /**
-     * Returns the controller key.
-     * 
-     * @return string
-     */
-    public function getControllerKey()
-    {
-        return $this->controllerKey;
-    }
-    
-    /**
      * Sets the filter to use.
      * 
-     * @param \Europa\Filter\FilterInterface $filter The filter to use.
+     * @param FilterInterface $filter The filter to use.
      * 
-     * @return \Europa\Dispatcher\Dispatcher
+     * @return Dispatcher
      */
     public function setControllerFilter(FilterInterface $filter)
     {
@@ -109,42 +111,57 @@ class Dispatcher implements DispatcherInterface
     }
     
     /**
-     * Returns the controller filter.
+     * Sets the request to use.
      * 
-     * @return \Europa\Filter\FilterInterface
-     */
-    public function getControllerFilter()
-    {
-        return $this->controllerFilter;
-    }
-    
-    /**
-     * Returns whether or not a controller filter is present.
+     * @param RequestInterface $request The request to use.
      * 
-     * @return bool
+     * @return Dispatcher
      */
-    public function hasControllerFilter()
+    public function setRequest(RequestInterface $request)
     {
-        return $this->controllerFilter instanceof FilterInterface;
-    }
-    
-    /**
-     * Removes the controller filter.
-     * 
-     * @return \Europa\Dispatcher\Dispatcher
-     */
-    public function removeControllerFilter()
-    {
-        $this->controllerFilter = null;
+        $this->request = $request;
         return $this;
+    }
+    
+    /**
+     * Returns the request.
+     * 
+     * @return RequestInterface
+     */
+    public function getRequest()
+    {
+        return $this->request;
+    }
+    
+    /**
+     * Sets the response to use.
+     * 
+     * @param ResponseInterface $response The response to use.
+     * 
+     * @return Dispatcher
+     */
+    public function setResponse(ResponseInterface $response)
+    {
+        $this->response = $response;
+        return $this;
+    }
+    
+    /**
+     * Returns the response.
+     * 
+     * @return ResponseInterface
+     */
+    public function getResponse()
+    {
+        return $this->response;
     }
     
     /**
      * Adds a router to use. Routers should be added in order of priority.
      * 
-     * @param \Europa\Router\RouterInterface $router The router to add.
+     * @param RouterInterface $router The router to add.
      * 
-     * @return \Europa\Dispatcher\Dispatcher
+     * @return Dispatcher
      */
     public function setRouter(RouterInterface $router)
     {
@@ -153,40 +170,9 @@ class Dispatcher implements DispatcherInterface
     }
     
     /**
-     * Returns the router set on the dispatcher.
-     * 
-     * @return \Europa\Router\Router
-     */
-    public function getRouter()
-    {
-        return $this->router;
-    }
-    
-    /**
-     * Returns whether or not the instance has a router.
-     * 
-     * @return bool
-     */
-    public function hasRouter()
-    {
-        return $this->router instanceof RouterInterface;
-    }
-    
-    /**
-     * Removes the router.
-     * 
-     * @return \Europa\Dispatcher\Dispatcher
-     */
-    public function removeRouter()
-    {
-        $this->router = null;
-        return $this;
-    }
-    
-    /**
      * Enables the filter if it has been disabled.
      * 
-     * @return \Europa\Dispatcher\Dispatcher
+     * @return Dispatcher
      */
     public function enableFilter()
     {
@@ -197,7 +183,7 @@ class Dispatcher implements DispatcherInterface
     /**
      * Disables the filter.
      * 
-     * @return \Europa\Dispatcher\Dispatcher
+     * @return Dispatcher
      */
     public function disableFilter()
     {
@@ -208,7 +194,7 @@ class Dispatcher implements DispatcherInterface
     /**
      * Enables the router if it has been disabled.
      * 
-     * @return \Europa\Dispatcher\Dispatcher
+     * @return Dispatcher
      */
     public function enableRouter()
     {
@@ -219,7 +205,7 @@ class Dispatcher implements DispatcherInterface
     /**
      * Disables the router.
      * 
-     * @return \Europa\Dispatcher\Dispatcher
+     * @return Dispatcher
      */
     public function disableRouter()
     {
@@ -231,45 +217,40 @@ class Dispatcher implements DispatcherInterface
      * Actions the appropriate controller and outputs the response. If no router is specified, it attempts to dispatch
      * using whatever parameters that are already available on the request.
      * 
-     * @param RequestInterface  $request  The request object to dispatch.
-     * @param ResponseInterface $response The response object to output.
-     * 
      * @return void
      */
-    public function dispatch(RequestInterface $request, ResponseInterface $response)
+    public function dispatch()
     {
         // get the controller class name
-        $controller = $this->route($request);
+        $controller = $this->route();
         
         // ensure the controller is valid
         $this->validateController($controller);
         
         // safe to assume it's a valid object now
-        $controller = new $controller($request, $response);
+        $controller = new $controller($this->request, $this->response);
         
         // since it implements the interface, we know this is available
         $controller->action();
         
         // output the result of the controller
-        $response->output($controller->render());
+        $this->response->output($controller->render());
     }
     
     /**
      * Routes the particular request and returns the controller class as a string.
      * 
-     * @param \Europa\Request\RequestInterface The request to route.
-     * 
      * @return string
      */
-    private function route(RequestInterface $request)
+    private function route()
     {
         // any type of router can be applied
         if ($this->useRouter && $this->router) {
-            $this->router->route($request);
+            $this->router->route($this->request);
         }
         
         // the controller parameter originates on the request
-        $controller = $request->getParam($this->controllerKey);
+        $controller = $this->request->getParam($this->controllerKey);
         
         // we don't require a controller filter as the router may have done the necessary steps
         if ($this->useControllerFilter && $this->controllerFilter) {
@@ -284,8 +265,8 @@ class Dispatcher implements DispatcherInterface
      * 
      * @param string $controller The controller to validate.
      * 
-     * @throws \ReflectionException      If the controller cannot be found.
-     * @throws \InvalidArgumentException If the controller does not implement a valid interface.
+     * @throws ReflectionException      If the controller cannot be found.
+     * @throws InvalidArgumentException If the controller does not implement a valid interface.
      * 
      * @return void
      */
@@ -293,16 +274,16 @@ class Dispatcher implements DispatcherInterface
     {
         // attempt to reflect it
         try {
-            $reflector = new \ReflectionClass($controller);
-        } catch (\ReflectionException $e) {
-            throw new \InvalidArgumentException(
+            $reflector = new ReflectionClass($controller);
+        } catch (ReflectionException $e) {
+            throw new InvalidArgumentException(
                 "Controller {$controller} could not be located with message: {$e->getMessage()}"
             );
         }
         
         // make sure it's a valid instance
         if (!$reflector->implementsInterface('\Europa\Controller\ControllerInterface')) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 "Controller {$controller} must implement \Europa\Controller\ControllerInterface."
             );
         }
