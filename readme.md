@@ -1,7 +1,7 @@
 EuropaPHP
 =========
 
-EuropaPHP is an extremely fast, flexible and lightweight <del>M</del>VC Framework designed for PHP 5.3+.
+EuropaPHP is an extremely fast, flexible and lightweight <del>M</del>VC Framework designed for PHP 5.4+.
 
 Why Another PHP Framework?
 --------------------------
