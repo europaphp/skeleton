@@ -264,6 +264,6 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
      */
     public static function isCli()
     {
-        return defined('STDIN');
+        return PHP_SAPI === 'cli';
     }
 }

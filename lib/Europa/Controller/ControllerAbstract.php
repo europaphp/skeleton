@@ -293,12 +293,12 @@ abstract class ControllerAbstract implements ControllerInterface
             return;
         }
         
-        $class         = new ClassReflector($this);
-        $method        = new MethodReflector($this, $method);
-        $classFilters  = $class->getDocBlock()->getTag('filter', true);
-        $methodFilters = $method->getDocBlock()->getTag('filter', true);
+        $class  = (new ClassReflector($this))->getDocBlock();
+        $class  = $class->hasTag('filter') ? $class->getTags('filter') : [];
+        $method = (new MethodReflector($this, $method))->getDocBlock();
+        $method = $method->hasTag('filter') ? $method->getTags('filter') : [];
         
-        foreach (array_merge($classFilters, $methodFilters) as $filter) {
+        foreach (array_merge($class, $method) as $filter) {
             $filter = $filter->getInstance();
             $filter->filter($this);
         }

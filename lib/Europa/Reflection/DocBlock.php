@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Reflection;
+use RuntimeException;
 
 /**
  * Represents a PHP doc block that was applied to a function, class or one of it's members.
@@ -144,27 +145,43 @@ class DocBlock
 
         return $this;
     }
+    
+    /**
+     * Returns whether or not the doc block contains the specified tag.
+     * 
+     * @param string $name The name of the tag to check for.
+     * 
+     * @return bool
+     */
+    public function hasTag($name)
+    {
+        return isset($this->tags[$name]) && $this->tags[$name];
+    }
 
     /**
-     * Returns the specified tag. If $asArray is true, then even if the tag is not an array of tags, it is made into
-     * one.
+     * Returns the specified tag.
      * 
-     * @param string $name    The tag name to get.
-     * @param bool   $asArray Whether or not to force an array.
+     * @param string $name The tag name to get.
      * 
-     * @return mixed
+     * @return DocTag
      */
-    public function getTag($name, $asArray = false)
+    public function getTag($name)
     {
-        if (isset($this->tags[$name])) {
-            $tag = $this->tags[$name];
-            if (!$asArray && count($tag) === 1) {
-                return $tag[0];
-            } else {
-                return $tag;
-            }
-        }
-        return $asArray ? array() : null;
+        $this->checkTagAndThrowIfNotExists($name);
+        return $this->tags[$name][0];
+    }
+    
+    /**
+     * Returns an array of all tags matching $name.
+     * 
+     * @param string $name The name of the tag to get.
+     * 
+     * @return array
+     */
+    public function getTags($name)
+    {
+        $this->checkTagAndThrowIfNotExists($name);
+        return $this->tags[$name];
     }
 
     /**
@@ -287,5 +304,23 @@ class DocBlock
 
         $class = $this->map[$name];
         return new $class(isset($parts[1]) ? $parts[1] : null);
+    }
+    
+    /**
+     * If the specified tag does not exist, an exception is thrown.
+     * 
+     * @param string $name The name of the tag.
+     * 
+     * @throws RuntimeException If the tag doesn't exist.
+     * 
+     * @return void
+     */
+    private function checkTagAndThrowIfNotExists($name)
+    {
+        if (!$this->hasTag($name)) {
+            throw new RuntimeException(
+                'The tag "' . $name . '" does not exist in:' . PHP_EOL . PHP_EOL . $this->compile()
+            );
+        }
     }
 }
