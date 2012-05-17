@@ -15,9 +15,9 @@ interface EventInterface
     /**
      * Ensures the event manager knows what to do.
      * 
-     * @param \Europa\Event\DataInterface $data The event data passed at the time of triggering.
+     * @param array $data The event data passed at the time of triggering.
      * 
      * @return bool
      */
-    public function trigger(DataInterface $data);
+    public function trigger(array $data);
 }

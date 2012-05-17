@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Event;
+use InvalidArgumentException;
 
 /**
  * An event dispatcher for managing multiple events and event stacks.
@@ -10,7 +11,7 @@ namespace Europa\Event;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Dispatcher
+class Dispatcher implements DispatcherInterface
 {
     /**
      * The event stack which contains a stack of callback for each event bound.
@@ -22,33 +23,40 @@ class Dispatcher
     /**
      * Binds an event handler to the stack.
      * 
-     * @param string                       $name     The name of the event to bind to.
-     * @param \Europa\Event\EventInterface $callback The callback to call when triggering.
+     * @param string $name     The name of the event to bind to.
+     * @param mixed  $callback The callback to call when triggering.
      * 
-     * @return void
+     * @return Dispatcher
      */
-    public function bind($name, EventInterface $handler)
+    public function bind($name, $callback)
     {
-        if (!isset($this->stack[$name])) {
-            $this->stack[$name] = array();
+        if (!is_callable($callback)) {
+            throw new InvalidArgumentException('The callback specified for event "' . $name . '" is not callable.');
         }
-        $this->stack[$name][] = $handler;
+        
+        if (!isset($this->stack[$name])) {
+            $this->stack[$name] = [];
+        }
+        
+        $this->stack[$name][] = $callback;
+        
+        return $this;
     }
     
     /**
      * Unbinds an event.
      * 
-     * @param string                       $name    The name of the event to unbind.
-     * @param \Europa\Event\EventInterface $handler The specific handler to unbind, if specified.
+     * @param string $name     The name of the event to unbind.
+     * @param mixed  $callback The specific handler to unbind, if specified.
      * 
      * @return bool
      */
-    public function unbind($name, EventInterface $handler = null)
+    public function unbind($name, $callback = null)
     {
         foreach ($this->getStackNamesForEvent($name) as $event) {
-            if ($handler) {
+            if ($callback) {
                 foreach ($this->stack[$event] as $index => $bound) {
-                    if ($bound === $handler) {
+                    if ($bound === $callback) {
                         unset($this->stack[$event][$index]);
                     }
                 }
@@ -62,16 +70,22 @@ class Dispatcher
     /**
      * Triggers an event stack.
      * 
-     * @param array $data Any data to pass to the event or event stack at the time of triggering.
+     * @param stirng $name The name of the event to trigger.
+     * @param array  $data Any data to pass to the event or event stack at the time of triggering.
      * 
      * @return bool
      */
-    public function trigger($name, DataInterface $data = null)
+    public function trigger($name, array $data = [])
     {
-        $data = $data ? $data : new Data;
         foreach ($this->getStackNamesForEvent($name) as $event) {
-            foreach ($this->stack[$event] as $handler) {
-                if ($handler->trigger($data) === false) {
+            foreach ($this->stack[$event] as $callback) {
+                // handle non-instance callable callbacks
+                if (!$callback instanceof EventInterface) {
+                    $callback = new CallbackEvent($callback);
+                }
+                
+                // cancel
+                if ($callback->trigger($data) === false) {
                     return $this;
                 }
             }

@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Event;
+use InvalidArgumentException;
 
 /**
  * Represents a bound event callback.
@@ -24,12 +25,12 @@ class CallbackEvent implements EventInterface
      * 
      * @param mixed $callback The callable callback to trigger.
      * 
-     * @return \Europa\Event\CallbackEvent
+     * @return CallbackEvent
      */
     public function __construct($callback)
     {
         if (!is_callable($callback, true)) {
-            throw new \InvalidArgumentException('Passed callback is not callable.');
+            throw new InvalidArgumentException('Passed callback is not callable.');
         }
         $this->callback = $callback;
     }
@@ -37,12 +38,12 @@ class CallbackEvent implements EventInterface
     /**
      * Calls the callback passing the current object data into it.
      * 
-     * @param \Europa\Event\DataInterface $data The data passed to the event at the time of triggering.
+     * @param array $data The data passed to the event at the time of triggering.
      * 
      * @return mixed
      */
-    public function trigger(DataInterface $data)
+    public function trigger(array $data)
     {
-        return call_user_func($this->callback, $data);
+        return call_user_func_array($this->callback, $data);
     }
 }
