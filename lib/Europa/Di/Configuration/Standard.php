@@ -3,9 +3,13 @@
 namespace Europa\Di\Configuration;
 use Europa\Di\Container;
 use Europa\Filter\ClassNameFilter;
+use Europa\Filter\ClassResolutionFilter;
 use Europa\Filter\MapFilter;
+use Europa\Fs\Loader;
 use Europa\Fs\Locator\Locator;
 use Europa\Request\RequestAbstract;
+use Europa\View\ViewInterface;
+use Europa\View\ViewScriptInterface;
 
 /**
  * The default configuration.
@@ -29,14 +33,14 @@ class Standard extends ConfigurationAbstract
      * 
      * @var array
      */
-    private $conf = array(
+    private $conf = [
         'addIncludePaths'  => true,
+        'classPaths'       => ['app/classes'],
         'controllerPrefix' => 'Controller\\',
         'controllerSuffix' => '',
-        'langPaths'        => array('app/langs/en-us' => 'ini'),
-        'loadPaths'        => array('app/classes'),
-        'viewPaths'        => array('app/views')
-    );
+        'langPaths'        => ['app/langs/en-us' => 'ini'],
+        'viewPaths'        => ['app/views']
+    ];
     
     /**
      * Sets default options.
@@ -45,7 +49,7 @@ class Standard extends ConfigurationAbstract
      * 
      * @return Standard
      */
-    public function __construct(array $conf = array())
+    public function __construct(array $conf = [])
     {
         // set default path
         $this->conf['path'] = dirname(__FILE__) . '/../../../../';
@@ -66,31 +70,53 @@ class Standard extends ConfigurationAbstract
      */
     public function map(Container $container)
     {
-        $container->addFilter(new MapFilter(array(
-            'controllers' => '\Europa\Di\Container',
-            'dispatcher'  => '\Europa\Dispatcher\Dispatcher',
-            'helpers'     => '\Europa\Di\Container',
-            'loader'      => '\Europa\Fs\Loader',
-            'router'      => '\Europa\Router\Router',
-            'view'        => '\Europa\View\Php',
-        )));
+        $cli = RequestAbstract::isCli();
+        $container->setFilter(new MapFilter([
+            'app'         => 'Europa\App\App',
+            'controllers' => 'Europa\Di\Container',
+            'event'       => 'Europa\Event\Dispatcher',
+            'helpers'     => 'Europa\Di\Container',
+            'loader'      => 'Europa\Fs\Loader',
+            'request'     => $cli ? 'Europa\Request\Cli' : 'Europa\Request\Http',
+            'response'    => $cli ? 'Europa\Response\Cli' : 'Europa\Response\Http',
+            'router'      => 'Europa\Router\Router',
+            'view'        => 'Europa\View\Php'
+        ]));
     }
     
     /**
-     * Configures the dispatcher to use the controller container.
+     * Configures the app.
      * 
      * @param Container $container The container to configure.
      * 
      * @return void
      */
-    public function dispatcher(Container $container)
+    public function app(Container $container)
     {
-        $dispatcher = $container->resolve('dispatcher');
-        $dispatcher->queue('setRouter', array($container->resolve('router')));
-        $dispatcher->queue('setControllerFilter', array(new ClassNameFilter(array(
-            'prefix' => $this->conf['controllerPrefix'],
-            'suffix' => $this->conf['controllerSuffix']
-        ))));
+        $container->resolve('app')->config(function() use ($container) {
+            return $container;
+        });
+    }
+    
+    /**
+     * Sets up the controllers.
+     * 
+     * @param Container $container The container to configure.
+     * 
+     * @return void
+     */
+    public function controllers(Container $container)
+    {
+        $container->resolve('controllers')->queue(function(Container $controllers) use ($container) {
+            $controllers->config('Europa\Controller\ControllerInterface', function() use ($container) {
+                return [$container->request, $container->response];
+            });
+            
+            $controllers->setFilter(new ClassNameFilter([
+                'prefix' => $this->conf['controllerPrefix'],
+                'suffix' => $this->conf['controllerSuffix']
+            ]));
+        });
     }
     
     /**
@@ -102,13 +128,16 @@ class Standard extends ConfigurationAbstract
      */
     public function loader(Container $container)
     {
-        $locator = new Locator($this->conf['path']);
-        $locator->addPaths($this->conf['loadPaths']);
-        $container->resolve('loader')->queue('setLocator', array($locator));
-
-        if ($this->conf['addIncludePaths']) {
-            $locator->addIncludePaths($this->conf['loadPaths']);
-        }
+        $container->resolve('loader')->queue(function(Loader $loader) {
+            $locator = new Locator($this->conf['path']);
+            $locator->addPaths($this->conf['classPaths']);
+            
+            if ($this->conf['addIncludePaths']) {
+                $locator->addIncludePaths($this->conf['classPaths']);
+            }
+            
+            $loader->setLocator($locator);
+        });
     }
     
     /**
@@ -120,10 +149,26 @@ class Standard extends ConfigurationAbstract
      */
     public function view(Container $container)
     {
-        $locator = new Locator($this->conf['path']);
-        $locator->throwWhenLocating(true);
-        $locator->addPaths($this->conf['viewPaths']);
-        $container->resolve('view')->configure(array($locator));
+        $view = $container->resolve('view');
+        
+        $view->config(function() {
+            $locator = new Locator($this->conf['path']);
+            $locator->throwWhenLocating(true);
+            $locator->addPaths($this->conf['viewPaths']);
+            
+            return $locator;
+        });
+        
+        $view->queue(function(ViewScriptInterface $view) use ($container) {
+            $view->setHelperContainer($container->helpers);
+        });
+        
+        $view->queue(function(ViewScriptInterface $view) use ($container) {
+            $interface  = RequestAbstract::isCli() ? 'cli' : 'web';
+            $controller = str_replace(' ', '/', $container->app->getController());
+            
+            $view->setScript($interface . '/' . $controller);
+        });
     }
     
     /**
@@ -135,21 +180,28 @@ class Standard extends ConfigurationAbstract
      */
     public function helpers(Container $container)
     {
-        // the locator for the lang helper
-        $locator = new Locator($this->conf['path']);
-        $locator->throwWhenAdding(false);
-        $locator->addPaths($this->conf['langPaths']);
-        
-        // the default helper setup
-        $helpers = $container->getService('helpers');
-        $helpers->addFilter(new ClassNameFilter(array('prefix' => '\Europa\View\Helper\\')));
-        $helpers->addFilter(new ClassNameFilter(array('prefix' => '\Helper\\')));
-        
-        // default helper configuration
-        $helpers->resolve('lang')->configure(array($container->resolve('view'), $locator));
-        $helpers->resolve('uri')->configure(array($container->resolve('router')));
-        
-        // add the helper container array to the view
-        $container->resolve('view')->queue('setHelperContainer', array($helpers));
+        $container->resolve('helpers')->queueAll([
+            function(Container $helpers) {
+                $helpers->setFilter(new ClassResolutionFilter([
+                    new ClassNameFilter(['prefix' => '\Europa\View\Helper\\'])
+                ]));
+            },
+            
+            function(Container $helpers) use ($container) {
+                $locator = new Locator($this->conf['path']);
+                $locator->throwWhenAdding(false);
+                $locator->addPaths($this->conf['langPaths']);
+                
+                $helpers->resolve('lang')->config(function() use ($container, $locator) {
+                    return [$container->view, $locator];
+                });
+            },
+            
+            function(Container $helpers) use ($container) {
+                $helpers->resolve('uri')->config(function() use ($container) {
+                    return $container->router;
+                });
+            }
+        ]);
     }
 }
