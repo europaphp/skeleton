@@ -261,16 +261,6 @@ class Service
     private function invokeQueue($instance)
     {
         foreach ($this->queue as $callback) {
-            $refl = new ReflectionFunction($callback);
-            
-            if ($refl->getNumberOfParameters()) {
-                $type = $refl->getParameters()[0]->getClass();
-                
-                if ($type && !$this->is($type->getName())) {
-                    continue;
-                }
-            }
-            
             $callback($instance);
         }
         

@@ -107,9 +107,13 @@ class Standard extends ConfigurationAbstract
      */
     public function controllers(Container $container)
     {
-        $container->resolve('controllers')->queue(function(Container $controllers) use ($container) {
+        $container->resolve('controllers')->queue(function($controllers) use ($container) {
             $controllers->config('Europa\Controller\ControllerInterface', function() use ($container) {
                 return [$container->request, $container->response];
+            });
+            
+            $controllers->queue('Europa\Controller\ControllerAbstract', function($controller) {
+                $controller->filter();
             });
             
             $controllers->setFilter(new ClassNameFilter([
@@ -128,7 +132,7 @@ class Standard extends ConfigurationAbstract
      */
     public function loader(Container $container)
     {
-        $container->resolve('loader')->queue(function(Loader $loader) {
+        $container->resolve('loader')->queue(function($loader) {
             $locator = new Locator($this->conf['path']);
             $locator->addPaths($this->conf['classPaths']);
             
@@ -149,9 +153,7 @@ class Standard extends ConfigurationAbstract
      */
     public function view(Container $container)
     {
-        $view = $container->resolve('view');
-        
-        $view->config(function() {
+        $container->config('Europa\View\Php', function() {
             $locator = new Locator($this->conf['path']);
             $locator->throwWhenLocating(true);
             $locator->addPaths($this->conf['viewPaths']);
@@ -159,11 +161,11 @@ class Standard extends ConfigurationAbstract
             return $locator;
         });
         
-        $view->queue(function(ViewScriptInterface $view) use ($container) {
+        $container->queue('Europa\View\Php', function($view) use ($container) {
             $view->setHelperContainer($container->helpers);
         });
         
-        $view->queue(function(ViewScriptInterface $view) use ($container) {
+        $container->queue('Europa\View\ViewScriptInterface', function($view) use ($container) {
             $interface  = RequestAbstract::isCli() ? 'cli' : 'web';
             $controller = str_replace(' ', '/', $container->app->getController());
             
@@ -181,13 +183,13 @@ class Standard extends ConfigurationAbstract
     public function helpers(Container $container)
     {
         $container->resolve('helpers')->queueAll([
-            function(Container $helpers) {
+            function($helpers) {
                 $helpers->setFilter(new ClassResolutionFilter([
                     new ClassNameFilter(['prefix' => '\Europa\View\Helper\\'])
                 ]));
             },
             
-            function(Container $helpers) use ($container) {
+            function($helpers) use ($container) {
                 $locator = new Locator($this->conf['path']);
                 $locator->throwWhenAdding(false);
                 $locator->addPaths($this->conf['langPaths']);
@@ -197,7 +199,7 @@ class Standard extends ConfigurationAbstract
                 });
             },
             
-            function(Container $helpers) use ($container) {
+            function($helpers) use ($container) {
                 $helpers->resolve('uri')->config(function() use ($container) {
                     return $container->router;
                 });

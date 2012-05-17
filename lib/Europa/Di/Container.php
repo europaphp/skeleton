@@ -47,6 +47,13 @@ class Container
     private $filter;
     
     /**
+     * Queues for types of objects.
+     * 
+     * @var array
+     */
+    private $queues = [];
+    
+    /**
      * Container instances for static retrieval.
      * 
      * @var array
@@ -123,7 +130,36 @@ class Container
      */
     public function config($type, Closure $config)
     {
+        // apply global config for this type for future resolutions
         $this->configs[$type] = $config;
+        
+        // apply config to existing resolutions
+        foreach ($this->deps as $dep) {
+            if ($dep->is($type)) {
+                $dep->config($config);
+            }
+        }
+        
+        return $this;
+    }
+    
+    public function queue($type, Closure $closure)
+    {
+        // create a queue for this type if one hasn't been created yet
+        if (!isset($this->queues[$type])) {
+            $this->queues[$type] = [];
+        }
+        
+        // add to the queue for future resolutions
+        $this->queues[$type][] = $closure;
+        
+        // apply new queue closure to existing resolutions
+        foreach ($this->deps as $dep) {
+            if ($dep->is($type)) {
+                $dep->queue($closure);
+            }
+        }
+        
         return $this;
     }
     
@@ -140,10 +176,19 @@ class Container
             $dep = $this->resolveClassFromName($name);
             $dep = new Service($dep);
             
-            // search for a global configuration for an object of this type
+            // search global configurations
             foreach ($this->configs as $type => $config) {
                 if ($dep->is($type)) {
                     $dep->config($config);
+                }
+            }
+            
+            // search global queues
+            foreach ($this->queues as $type => $queue) {
+                if ($dep->is($type)) {
+                    foreach ($queue as $closure) {
+                        $dep->queue($closure);
+                    }
                 }
             }
             
