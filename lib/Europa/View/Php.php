@@ -3,12 +3,16 @@
 namespace Europa\View;
 use Europa\Di\Container;
 use Europa\Fs\Locator\LocatorInterface;
+use Exception;
+use LogicException;
+use RuntimeException;
 
 /**
  * Class for rendering a basic PHP view script.
  * 
- * If parsing content from a file to render, this class can be overridden to provide base functionality for view
- * manipulation while the __toString method is overridden to provide custom parsing.
+ * If parsing content from a file to render, this class can be overridden to provide base
+ * functionality for view manipulation while the __toString method is overridden to provide custom
+ * parsing.
  * 
  * @category Views
  * @package  Europa
@@ -27,7 +31,7 @@ class Php implements ViewScriptInterface
     /**
      * The container to use for helpers.
      * 
-     * @var \Europa\Di\Container
+     * @var Container
      */
     private $container;
     
@@ -41,7 +45,7 @@ class Php implements ViewScriptInterface
     /**
      * The loader to use for view locating and loading.
      * 
-     * @var \Europa\Fs\Locator\LocatorInterface
+     * @var LocatorInterface
      */
     private $locator;
     
@@ -69,9 +73,9 @@ class Php implements ViewScriptInterface
     /**
      * Sets up a Php view renderer.
      * 
-     * @param \Europa\Fs\Locator\LocatorInterface $locator The locator to use for view locating view files.
+     * @param LocatorInterface $locator The locator to use for view locating view files.
      * 
-     * @return \Europa\View\Php
+     * @return Php
      */
     public function __construct(LocatorInterface $locator)
     {
@@ -81,12 +85,12 @@ class Php implements ViewScriptInterface
     /**
      * Calls a helper from the specified container.
      * 
-     * @see \Europa\View\Php::setHelperContainer()
+     * @see Php::setHelperContainer()
      * 
      * @param string $name The name of the helper to create.
      * @param array  $args The arguments to configure it with.
      * 
-     * @throws \LogicException If the container does not exist.
+     * @throws LogicException If the container does not exist.
      * 
      * @return mixed
      */
@@ -95,17 +99,21 @@ class Php implements ViewScriptInterface
         if ($this->container) {
             return $this->container->resolve($name)->configure($args)->create();
         }
-        throw new \LogicException('You must set a helper container using setHelperContainer before trying to call a helper.');
+        
+        throw new LogicException(
+            'You must set a helper container using "setHelperContainer" before trying to call '
+            . 'a helper.'
+        );
     }
     
     /**
      * Calls a helper from the specified container.
      * 
-     * @see \Europa\View\Php::setHelperContainer()
+     * @see Php::setHelperContainer()
      * 
      * @param string $name The name of the helper to create.
      * 
-     * @throws \LogicException If the container does not exist.
+     * @throws LogicException If the container does not exist.
      * 
      * @return mixed
      */
@@ -114,13 +122,17 @@ class Php implements ViewScriptInterface
         if ($this->container) {
             return $this->container->resolve($name)->get();
         }
-        throw new \LogicException('You must set a helper container using setHelperContainer before trying to get a helper.');
+        
+        throw new LogicException(
+            'You must set a helper container using "setHelperContainer" before trying to get '
+            . 'a helper.'
+        );
     }
     
     /**
      * Normalizes and sets the script to render.
      * 
-     * @return \Europa\View\Php
+     * @return Php
      */
     public function setScript($script)
     {
@@ -169,7 +181,7 @@ class Php implements ViewScriptInterface
     {
         // script must be set
         if (!$this->script) {
-            throw new \RuntimeException('A view script must be set prior to rendering.');
+            throw new RuntimeException('A view script must be set prior to rendering.');
         }
         
         // capture the output
@@ -178,8 +190,10 @@ class Php implements ViewScriptInterface
             extract($context);
             include $this->locator->locate($this->script);
             $rendered = ob_get_clean();
-        } catch (\Exception $e) {
-            throw new \LogicException("Unable to render view {$this->script} with message: {$e->getMessage()}");
+        } catch (Exception $e) {
+            throw new LogicException(
+                "Unable to render view {$this->script} with message: {$e->getMessage()}"
+            );
         }
         
         // handle view extensions
@@ -258,7 +272,7 @@ class Php implements ViewScriptInterface
         
         // child views cannot extend themselves
         if ($parent === $child) {
-            throw new \LogicException('Child view cannot extend itself.');
+            throw new LogicException('Child view cannot extend itself.');
         }
         
         // if the child has already extended a parent, don't do anything
@@ -277,9 +291,9 @@ class Php implements ViewScriptInterface
     /**
      * Sets the service container used to locate helpers.
      * 
-     * @param \Europa\Di\Container $container The container to locate helpers with.
+     * @param Container $container The container to locate helpers with.
      * 
-     * @return \Europa\View\Php
+     * @return Php
      */
     public function setHelperContainer(Container $container)
     {
