@@ -1,11 +1,18 @@
 <?php
 
 namespace Europa\Di;
+use BadMethodCallException;
+use Closure;
+use Exception;
+use InvalidArgumentException;
+use ReflectionClass;
+use ReflectionFunction;
+use RuntimeException;
 
 /**
  * A container service that represents a given class. The class represented within is configurable by setting
  * constructor parameters and queuing methods to be called with parameters post-construction. If an instance of
- * \Europa\Di\Service is passed as a parameter to either the constructor or a method, the service is retrieved
+ * Service is passed as a parameter to either the constructor or a method, the service is retrieved
  * before it is passed to the constructor or method. By enabling this, it allows us to preserve object configuration
  * overhead right up until the point it is required by another service.
  * 
@@ -17,13 +24,6 @@ namespace Europa\Di;
 class Service
 {
     /**
-     * The constructor arguments.
-     * 
-     * @var array
-     */
-    private $args = array();
-    
-    /**
      * The service class name.
      * 
      * @var string
@@ -31,11 +31,25 @@ class Service
     private $class;
     
     /**
+     * The constructor arguments.
+     * 
+     * @var array
+     */
+    private $config;
+    
+    /**
      * The service instance if it was already created.
      * 
      * @var mixed
      */
     private $instance;
+    
+    /**
+     * Whether or not the service is transient.
+     * 
+     * @var bool
+     */
+    private $transient = false;
     
     /**
      * The methods to call and the arguments to pass to them.
@@ -50,91 +64,111 @@ class Service
      * @param string $class  The name of the class to represent.
      * @param array  $config The constructor params, if any.
      * 
-     * @return \Europa\Di\Service
+     * @return Service
      */
-    public function __construct($class, array $config = array())
+    public function __construct($class)
     {
         $this->class = $class;
-        $this->args  = $config;
     }
     
     /**
-     * Sets a method to be called and the arguments for that method.
+     * Marks the service as transient. This affects how ->get() behaves. If the service is set as transient, then
+     * ->get() will always return a new instance. If not, then it will cache an instance until either transient is set
+     * to true or until the service is set to refresh the instance.
      * 
-     * @param string $method The method to call.
-     * @param array  $args   The arguments to pass to the method.
-     * 
-     * @return \Europa\Di\Service
+     * @return Service
      */
-    public function __call($method, array $args = array())
+    public function transient($switch = true)
     {
-        return $this->queue($method, $args);
+        $this->transient = $switch ? true : false;
+        
+        return $this;
     }
     
     /**
      * Configures the object. If the object is already exists, it is reset.
      * 
-     * @param array $args The arguments to re-configure the instance with.
-     * 
-     * @return \Europa\Di\Service
+     * @return Service
      */
-    public function configure(array $args)
+    public function config(Closure $callback)
     {
         $this->refresh();
-        $this->args = $args;
+        
+        $this->config = $callback;
+        
         return $this;
     }
     
     /**
-     * Queues a method to be called after instantiation. If the object already exists, it is reset.
+     * Queues a callback to call after instantiation. 
      * 
-     * @param string $method The method to queue.
-     * @param array  $args   The arguments to pass to the method.
+     * @param Closure $callback The callback to queue.
      * 
-     * @return \Europa\Di\Service
+     * @return Service
      */
-    public function queue($method, array $args = array())
+    public function queue(Closure $callback)
     {
         $this->refresh();
-        $this->queue[] = array($method, $args);
+        
+        $this->queue[] = $callback;
+        
         return $this;
     }
     
     /**
-     * Sets an instance and makes sure that it is an instance that the service represents.
+     * Queues an array of closures.
      * 
-     * @param mixed $instance The instance to set.
+     * @param array $queue The queue to add.
      * 
-     * @return \Europa\Di\Service
+     * @return Service
      */
-    public function set($instance)
+    public function queueAll(array $queue)
     {
-        if (!is_object($instance)) {
-            $type = gettype($instance);
-            throw new \InvalidArgumentException("Only object instances may be registered. Type {$type} given.");
+        foreach ($queue as $callback) {
+            $this->queue($callback);
         }
         
-        if (!$instance instanceof $this->class) {
-            $class = get_class($instance);
-            throw new \InvalidArgumentException("The instance must be an instance of {$this->class}. Instance of {$class} given.");
-        }
-        
-        $this->instance = $instance;
         return $this;
     }
     
     /**
-     * Returns the represented service instance. If it is has not been created yet, it is created then cached and
-     * returned.
+     * Clears the queue.
+     * 
+     * @return Service
+     */
+    public function clearQueue()
+    {
+        $this->refresh();
+        
+        $this->queue = [];
+        
+        return $this;
+    }
+    
+    /**
+     * Creates a new instance then returns it even if it is set as transient.
+     * 
+     * @return mixed
+     */
+    public function create(array $config = [])
+    {
+        return $this->invoke($config);
+    }
+    
+    /**
+     * Returns the represented service instance. If the service is transient, a new instance is always returned. If not,
+     * an instance is stored and used for returning.
      * 
      * @return mixed
      */
     public function get()
     {
-        if (!$this->instance) {
-            $this->instance = $this->invokeClass();
-            $this->invokeQueue($this->instance);
+        if ($this->transient) {
+            return $this->invoke();
+        } elseif (!$this->instance) {
+            $this->instance = $this->invoke();
         }
+        
         return $this->instance;
     }
     
@@ -149,66 +183,71 @@ class Service
     }
     
     /**
-     * Creates a new instance then returns it. Does not cache the instance.
+     * Destroys the current instance so it can be recreated even if it is transient.
      * 
-     * @param array $args Any last minute constructor arguments.
-     * 
-     * @return mixed
-     */
-    public function create(array $args = array())
-    {
-        $instance = $this->invokeClass($args);
-        $this->invokeQueue($instance);
-        return $instance;
-    }
-    
-    /**
-     * Resets the instance.
-     * 
-     * @return \Europa\Di\Container
-     */
-    public function reset()
-    {
-        $this->args  = array();
-        $this->queue = array();
-        return $this;
-    }
-    
-    /**
-     * Destroys the current instance so it can be reconfigured the next time it is accessed.
-     * 
-     * @return \Europa\Di\Service
+     * @return Service
      */
     public function refresh()
     {
         $this->instance = null;
+        
         return $this;
+    }
+    
+    /**
+     * Returns whether or not the service is of the specified type.
+     * 
+     * @param mixed $class The class to check for.
+     * 
+     * @return bool
+     */
+    public function is($class)
+    {
+        $class = is_object($class) ? get_class($class) : $class;
+        
+        return is_subclass_of($this->class, $class) || $this->class === $class;
+    }
+    
+    /**
+     * Invokes the class and its queue.
+     * 
+     * @param array $config The constructor config if overriding the default.
+     * 
+     * @return mixed
+     */
+    private function invoke(array $config = [])
+    {
+        if (!$config && $this->config) {
+            $config = $this->config;
+            $config = $config();
+            $config = is_array($config) ? $config : [$config];
+        }
+        
+        return $this->invokeQueue($this->invokeClass($config));
     }
     
     /**
      * Invokes the represented service and returns it.
      * 
-     * @param array $args Any last minute constructor arguments.
-     * 
      * @return mixed
      */
-    private function invokeClass(array $args = array())
+    private function invokeClass(array $config)
     {
         try {
-            $args     = array_merge_recursive($this->args, $args);
-            $instance = new \ReflectionClass($this->class);
-            if ($instance->hasMethod('__construct') && $args) {
-                $this->filterArgsForDependencies($args);
-                $instance = $instance->newInstanceArgs($args);
+            $instance = new ReflectionClass($this->class);
+            
+            if ($instance->hasMethod('__construct') && $config) {
+                $instance = $instance->newInstanceArgs($config);
             } else {
                 $instance = $instance->newInstance();
             }
-        } catch (\Exception $e) {
-            throw new \RuntimeException(
-                "Could not invoke service class {$this->class} with message: {$e->getMessage()}.",
+        } catch (Exception $e) {
+            throw new RuntimeException(
+                "Could not invoke service class {$this->class} because: {$e->getMessage()}",
                 $e->getCode()
             );
         }
+        
         return $instance;
     }
     
@@ -217,40 +256,24 @@ class Service
      * 
      * @param mixed $instance The instance of service to call the queue on.
      * 
-     * @return \Europa\Di\Service
+     * @return Service
      */
     private function invokeQueue($instance)
     {
-        foreach ($this->queue as $queue) {
-            $method = $queue[0];
-            $args   = $queue[1];
-            $this->filterArgsForDependencies($args);
-            if (method_exists($instance, $method)) {
-                call_user_func_array(array($instance, $method), $args);
-            } elseif (method_exists($instance, '__call')) {
-                call_user_func(array($instance, '__call'), $method, $args);
-            } else {
-                throw new \BadMethodCallException("Method {$method} or __call does not exist for {$this->class}.");
+        foreach ($this->queue as $callback) {
+            $refl = new ReflectionFunction($callback);
+            
+            if ($refl->getNumberOfParameters()) {
+                $type = $refl->getParameters()[0]->getClass();
+                
+                if ($type && !$this->is($type->getName())) {
+                    continue;
+                }
             }
+            
+            $callback($instance);
         }
-        return $this;
-    }
-    
-    /**
-     * Filters arguments for a constructor or method and makes sure any top-level dependencies that were passed in
-     * are converted into the service instance that they represent.
-     * 
-     * @param array &$args The arguments to filter.
-     * 
-     * @return array
-     */
-    private function filterArgsForDependencies(array &$args)
-    {
-        foreach ($args as &$arg) {
-            if ($arg instanceof Service) {
-                $arg = $arg->get();
-            }
-        }
-        return $this;
+        
+        return $instance;
     }
 }

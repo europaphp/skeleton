@@ -1,13 +1,14 @@
 <?php
 
 namespace Europa\Di;
+use Closure;
 use Europa\Filter\FilterInterface;
 use Europa\Filter\UpperCamelCaseFilter;
 use RuntimeException;
 
 /**
  * The service injection container represents a collection of configured dependencies. Dependencies are instances
- * of \Europa\Di\Service that represent an object instance. The container provides a fluent interface for
+ * of Service that represent an object instance. The container provides a fluent interface for
  * accessing dependencies so that they can easily be configured.
  * 
  * @category ServiceInjection
@@ -25,25 +26,32 @@ class Container
     const DEFAULT_INSTANCE_NAME = 'default';
     
     /**
+     * Global configurations for types of objects.
+     * 
+     * @var array
+     */
+    private $configs = [];
+    
+    /**
      * Cached service instances.
      * 
      * @var array
      */
-    private $deps = array();
+    private $deps = [];
     
     /**
-     * Filter used for name formatting.
+     * Filter used for class name formatting.
      * 
-     * @var \Europa\Filter\FilterInterface
+     * @var FilterInterface
      */
-    private $filters = array();
+    private $filter;
     
     /**
      * Container instances for static retrieval.
      * 
      * @var array
      */
-    private static $containers = array();
+    private static $containers = [];
     
     /**
      * The default instance name to use.
@@ -60,32 +68,7 @@ class Container
      * 
      * @return mixed
      */
-    public function __call($name, array $args = array())
-    {
-        return $this->createService($name, $args);
-    }
-    
-    /**
-     * Returns an existing instance for the specified service.
-     * 
-     * @param string $name The name of the service.
-     * 
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        return $this->getService($name);
-    }
-    
-    /**
-     * Returns a new instance for the specified service.
-     * 
-     * @param string $name The name of the service.
-     * @param array  $args The arguments, if any, to configure the service with.
-     * 
-     * @return mixed
-     */
-    public function createService($name, array $args = array())
+    public function __call($name, array $args = [])
     {
         return $this->resolve($name)->create($args);
     }
@@ -97,42 +80,9 @@ class Container
      * 
      * @return mixed
      */
-    public function getService($name)
+    public function __get($name)
     {
         return $this->resolve($name)->get();
-    }
-    
-    /**
-     * Creates a service if it doesn't already exist and returns it.
-     * 
-     * @param string $name The name of the service.
-     * 
-     * @return \Europa\Di\Service
-     */
-    public function resolve($name)
-    {
-        if (!isset($this->deps[$name])) {
-            $dep = $this->resolveClassFromName($name);
-            $dep = new Service($dep);
-            $this->deps[$name] = $dep;
-        }
-        return $this->deps[$name];
-    }
-    
-    /**
-     * Detects the value of $value and handles it appropriately.
-     *   - Instances of \Europa\Di\Service are registered on the container.
-     *   - Other instances are created as a service then registered.
-     * 
-     * @param string                      $name    The name of the service.
-     * @param \Europa\Di\Service $service One of many allowed values.
-     * 
-     * @return Container
-     */
-    public function register($name, Service $service)
-    {
-        $this->deps[$name] = $service;
-        return $this;
     }
     
     /**
@@ -142,9 +92,9 @@ class Container
      * 
      * @return bool
      */
-    public function isRegistered($name)
+    public function __isset($name)
     {
-        return isset($this->deps[$name]);
+        return $this->resolve($name)->exists();
     }
     
     /**
@@ -154,25 +104,118 @@ class Container
      * 
      * @return Container
      */
-    public function unRegister($name)
+    public function __unset($name)
     {
         if (!isset($this->deps[$name])) {
             unset($this->deps[$name]);
         }
+        
+        return $this;
+    }
+    
+    /**
+     * Sets the global configuration for a particular type.
+     * 
+     * @param string  $type   The type of object to configure.
+     * @param Closure $config The configuration closure to configure the type of service.
+     * 
+     * @return Container
+     */
+    public function config($type, Closure $config)
+    {
+        $this->configs[$type] = $config;
+        return $this;
+    }
+    
+    /**
+     * Creates a service if it doesn't already exist and returns it.
+     * 
+     * @param string $name The name of the service.
+     * 
+     * @return Service
+     */
+    public function resolve($name)
+    {
+        if (!isset($this->deps[$name])) {
+            $dep = $this->resolveClassFromName($name);
+            $dep = new Service($dep);
+            
+            // search for a global configuration for an object of this type
+            foreach ($this->configs as $type => $config) {
+                if ($dep->is($type)) {
+                    $dep->config($config);
+                }
+            }
+            
+            $this->deps[$name] = $dep;
+        }
+        
+        return $this->deps[$name];
+    }
+    
+    /**
+     * Detects the value of $value and handles it appropriately.
+     *   - Instances of Service are registered on the container.
+     *   - Other instances are created as a service then registered.
+     * 
+     * @param string  $name    The name of the service.
+     * @param Service $service One of many allowed values.
+     * 
+     * @return Container
+     */
+    public function register($name, Service $service)
+    {
+        $this->deps[$name] = $service;
+        
+        return $this;
+    }
+    
+    /**
+     * If the specified service is not regiseterd an exception is raised using the specified error or a default error.
+     * 
+     * @param string $name  The service to expect.
+     * @param string $type  The type of object to expect.
+     * @param string $error The error message to use.
+     * 
+     * @return Container
+     */
+    public function expect($name, $type, $error = null)
+    {
+        // default error message
+        if (!$error) {
+            $error = 'The service "' . $name . '" is required and must be an instance of "' . $type . '."';
+        }
+        
+        // throw error
+        if (!isset($this->$name) || ($type && !$this->resolve($name)->is($type))) {
+            throw new RuntimeException($error);
+        }
+        
         return $this;
     }
     
     /**
      * Sets a filter to use for converting a service name into a class name.
      * 
-     * @param \Europa\Filter\FilterInterface $filter The filter to use for name formatting.
+     * @param FilterInterface $filter The filter to use for name formatting.
      * 
      * @return Container
      */
-    public function addFilter(FilterInterface $filter)
+    public function setFilter(FilterInterface $filter)
     {
-        $this->filters[] = $filter;
+        $this->filter = $filter;
+        
         return $this;
+    }
+    
+    /**
+     * Returns the filter used by the container to resolve classes.
+     * 
+     * @return FilterInterface
+     */
+    public function getFilter()
+    {
+        return $this->filter;
     }
     
     /**
@@ -184,13 +227,11 @@ class Container
      */
     private function resolveClassFromName($name)
     {
-        foreach ($this->filters as $filter) {
-            $class = $filter->filter($name);
-            if (class_exists($class, true)) {
-                return $class;
-            }
+        if ($this->filter) {
+            $name = $this->filter->filter($name);
         }
-        throw new RuntimeException('The class name for the service "' . $name . '" could not be resolved.');
+        
+        return $name;
     }
     
     /**
@@ -216,9 +257,11 @@ class Container
     public static function get($name = null)
     {
         $name = $name ? $name : self::$defaultName;
-        if (!self::has($name)) {
+        
+        if (!self::exists($name)) {
             self::$containers[$name] = new static;
         }
+        
         return self::$containers[$name];
     }
     
@@ -229,7 +272,7 @@ class Container
      * 
      * @return bool
      */
-    public static function has($name)
+    public static function exists($name)
     {
         return isset(self::$containers[$name]);
     }
@@ -243,28 +286,46 @@ class Container
      */
     public static function remove($name)
     {
-        if (!self::has($name)) {
+        if (!self::exists($name)) {
             throw new RuntimeException('The container "' . $name . '" does not exist.');
         }
+        
         unset(self::$containers[$name]);
     }
     
     /**
      * Renames the specified container.
      * 
-     * @param string $from The old name.
-     * @param string $to   The new name.
+     * @param string $from      The old name.
+     * @param string $to        The new name.
+     * @param bool   $overwrite Whether or not to allow overwriting.
      * 
      * @return void
      */
-    public static function rename($from, $to)
+    public static function rename($from, $to, $overwrite = false)
     {
-        if (!self::has($from)) {
-            throw new RuntimeException('Cannot move container "' . $from . '" to "' . $to . '" because "' . $from . '" does not exist.');
+        if (!self::exists($from)) {
+            throw new RuntimeException(
+                'Cannot move container "'
+                . $from
+                . '" to "'
+                . $to
+                . '" because "'
+                . $from
+                . '" does not exist.'
+            );
         }
         
-        if (self::has($to)) {
-            throw new RuntimeException('Cannot move container "' . $from . '" to "' . $to . '" because "' . $to . '" already exists.');
+        if ($overwrite && self::exists($to)) {
+            throw new RuntimeException(
+                'Cannot move container "'
+                . $from
+                . '" to "'
+                . $to
+                . '" because "'
+                . $to
+                . '" already exists.'
+            );
         }
         
         self::set($to, self::get($from));
