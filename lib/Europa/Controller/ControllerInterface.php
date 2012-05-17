@@ -17,8 +17,8 @@ interface ControllerInterface
     /**
      * Constructs a new controller using the specified request and response.
      *
-     * @param \Europa\Request\RequestInterface   $request  The request to use.
-     * @param \Europa\Response\ResponseInterface $response The response to use.
+     * @param RequestInterface  $request  The request to use.
+     * @param ResponseInterface $response The response to use.
      *
      * @return \Europa\Controller\ControllerAbstract
      */
@@ -30,11 +30,4 @@ interface ControllerInterface
      * @return array
      */
     public function action();
-    
-    /**
-     * Renders the view and returns the result.
-     * 
-     * @return string
-     */
-    public function render();
 }
