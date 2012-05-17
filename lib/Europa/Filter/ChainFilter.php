@@ -10,28 +10,8 @@ namespace Europa\Filter;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class FilterArray implements FilterInterface
+class ChainFilter extends FilterArrayAbstract
 {
-    /**
-     * The array of filters to use.
-     * 
-     * @var array
-     */
-    private $filters = array();
-    
-    /**
-     * Adds a filter.
-     * 
-     * @param \Europa\Filter\FilterInterface $filter The filter to add.
-     * 
-     * @return \Europa\Filter\FilterArray
-     */
-    public function add(FilterInterface $filter)
-    {
-        $this->filters[] = $filter;
-        return $this;
-    }
-    
     /**
      * Filters the value and returns the filtered value.
      * 
@@ -41,7 +21,7 @@ class FilterArray implements FilterInterface
      */
     public function filter($value)
     {
-        foreach ($this->filters as $filter) {
+        foreach ($this->getAll() as $filter) {
             $value = $filter->filter($value);
         }
         return $value;

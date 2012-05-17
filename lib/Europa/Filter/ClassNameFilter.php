@@ -63,7 +63,7 @@ class ClassNameFilter implements FilterInterface
         }
         
         // class names always come out with a leading namespace separator
-        $value = '\\' . implode('\\', $parts);
+        $value = implode('\\', $parts);
         return $value;
     }
 }
