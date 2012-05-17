@@ -36,21 +36,36 @@ class Loader
             return true;
         }
         
+        if ($class = $this->resolve($class)) {
+            include $class;
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Resolves the path to the specified class.
+     * 
+     * @param string $class The class to find.
+     * 
+     * @return mixed
+     */
+    public function resolve($class)
+    {
         // normalize
         $file = str_replace(array('\\', '_'), DIRECTORY_SEPARATOR, $class);
         $file = trim($file, DIRECTORY_SEPARATOR);
         
         // attempt loading of classes at same level as framework
         if ($fullpath = realpath(dirname(__FILE__) . '/../../' . $file . '.php')) {
-            include $fullpath;
-            return true;
+            return $fullpath;
         }
         
         // attempt loading from other sources
         if ($this->locator) {
             if ($fullpath = $this->locator->locate($file)) {
-                include $fullpath;
-                return true;
+                return $fullpath;
             }
         }
         
