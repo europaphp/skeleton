@@ -20,22 +20,6 @@ interface RequestInterface extends \Serializable
     public function __toString();
     
     /**
-     * Sets the appropriate method.
-     * 
-     * @param string $method The method to set.
-     * 
-     * @return \Europa\Request
-     */
-    public function setMethod($method);
-    
-    /**
-     * Returns the request method for the request.
-     *
-     * @return string
-     */
-    public function getMethod();
-    
-    /**
      * Sets the specified request parameter.
      * 
      * @param string $name  The name of the parameter.

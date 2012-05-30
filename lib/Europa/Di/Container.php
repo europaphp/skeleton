@@ -128,7 +128,7 @@ class Container
      * 
      * @return Container
      */
-    public function config($type, Closure $config)
+    public function config($type, $config)
     {
         // apply global config for this type for future resolutions
         $this->configs[$type] = $config;
@@ -143,20 +143,29 @@ class Container
         return $this;
     }
     
-    public function queue($type, Closure $closure)
+    /**
+     * Queues the specified method.
+     * 
+     * @param string $type     The type of instance to call the method on.
+     * @param mixed  $callback The method or closure to call.
+     * @param array  $params   The parameters to use if calling a method on the object.
+     * 
+     * @return Container
+     */
+    public function queue($type, $callback, array $params = [])
     {
-        // create a queue for this type if one hasn't been created yet
-        if (!isset($this->queues[$type])) {
-            $this->queues[$type] = [];
-        }
+        $this->ensureQueue($type);
         
         // add to the queue for future resolutions
-        $this->queues[$type][] = $closure;
+        $this->queues[$type][] = [
+            'callback' => $callback,
+            'params'   => $params
+        ];
         
         // apply new queue closure to existing resolutions
         foreach ($this->deps as $dep) {
             if ($dep->is($type)) {
-                $dep->queue($closure);
+                $dep->queue($callback, $params);
             }
         }
         
@@ -186,8 +195,8 @@ class Container
             // search global queues
             foreach ($this->queues as $type => $queue) {
                 if ($dep->is($type)) {
-                    foreach ($queue as $closure) {
-                        $dep->queue($closure);
+                    foreach ($queue as $params) {
+                        $dep->queue($params['callback'], $params['params']);
                     }
                 }
             }
@@ -203,13 +212,23 @@ class Container
      *   - Instances of Service are registered on the container.
      *   - Other instances are created as a service then registered.
      * 
-     * @param string  $name    The name of the service.
-     * @param Service $service One of many allowed values.
+     * @param string $name    The name of the service.
+     * @param mixed  $service One of many allowed values.
      * 
      * @return Container
      */
-    public function register($name, Service $service)
+    public function register($name, $service)
     {
+        // handle objects not of the type Service
+        if (is_object($service) && !$service instanceof Service) {
+            $service = get_class($service);
+        }
+        
+        // handle strings
+        if (is_string($service)) {
+            $service = new Service($service);
+        }
+        
         $this->deps[$name] = $service;
         
         return $this;
@@ -277,6 +296,20 @@ class Container
         }
         
         return $name;
+    }
+    
+    /**
+     * Ensures that the specified queue exists.
+     * 
+     * @param string $type The queue type.
+     * 
+     * @return void
+     */
+    private function ensureQueue($type)
+    {
+        if (!isset($this->queues[$type])) {
+            $this->queues[$type] = [];
+        }
     }
     
     /**

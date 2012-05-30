@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\View\Helper;
+namespace Europa\View\Plugin;
 use Europa\Request;
 use Europa\Router\RouterInterface;
 

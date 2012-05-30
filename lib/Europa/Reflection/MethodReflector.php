@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Reflection;
+use LogicException;
 
 /**
  * Extends the base reflection class to provide further functionality such as named
@@ -13,12 +14,39 @@ namespace Europa\Reflection;
  */
 class MethodReflector extends \ReflectionMethod implements Reflectable
 {
+    private $classname;
+    
     /**
      * The cached doc string.
      * 
      * @var string
      */
     private $docString;
+    
+    /**
+     * Overrides the constructor so we can grab information about the method in relation to the class we are reflecting.
+     * 
+     * @param mixed  $class The class the method we are reflecting is in.
+     * @param string $name  The method name.
+     * 
+     * @return MethodReflector
+     */
+    public function __construct($class, $name)
+    {
+        parent::__construct($class, $name);
+        
+        $this->classname = is_object($class) ? get_class($class) : $class;
+    }
+    
+    /**
+     * Returns whether or not the method is inherited.
+     * 
+     * @return bool
+     */
+    public function isInherited()
+    {
+        return $this->class !== $this->classname;
+    }
     
     /**
      * Returns the visibility of the current method.
@@ -48,6 +76,8 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
      * @param bool  $caseSensitive Whether or not to make them case insensitive.
      * @param bool  $throw         Whether or not to throw exceptions if a required parameter is not defined.
      * 
+     * @throws LogicException If a required parameter is not specified.
+     * 
      * @return array The merged parameters.
      */
     public function mergeNamedArgs(array $params, $caseSensitive = false, $throw = true)
@@ -68,6 +98,7 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
         foreach ($this->getParameters() as $param) {
             $pos  = $param->getPosition();
             $name = $caseSensitive ? $param->getName() : strtolower($param->getName());
+            
             if (array_key_exists($name, $params)) {
                 $merged[$pos] = $params[$name];
             } elseif (array_key_exists($pos, $params)) {
@@ -75,11 +106,12 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
             } elseif ($param->isOptional()) {
                 $merged[$pos] = $param->getDefaultValue();
             } elseif ($throw) {
-                throw new \LogicException('The required parameter "' . $name . '" was not specified.');
+                throw new LogicException('The required parameter "' . $name . '" was not specified.');
             } else {
                 $meged[$pos] = null;
             }
         }
+        
         return $merged;
     }
 

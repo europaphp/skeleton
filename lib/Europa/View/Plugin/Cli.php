@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\View\Helper;
+namespace Europa\View\Plugin;
 
 /**
  * A helper for command line output.

@@ -3,7 +3,9 @@
 namespace Europa\App;
 use Europa\Controller\ControllerInterface;
 use Europa\Di\Container;
+use Europa\View\ViewInterface;
 use InvalidArgumentException;
+use RuntimeException;
 use UnexpectedValueException;
 
 /**
@@ -71,7 +73,7 @@ class App implements AppInterface
      * 
      * @var string
      */
-    const EVENT_PRE_RENDER = 'preRender';
+    const EVENT_PRE_VIEW = 'preView';
     
     /**
      * The event triggered after the view renders the action response. This gets called even if no
@@ -79,7 +81,7 @@ class App implements AppInterface
      * 
      * @var string
      */
-    const EVENT_POST_RENDER = 'postRender';
+    const EVENT_POST_VIEW = 'postView';
     
     /**
      * The event triggered prior to the rendered view is output.
@@ -195,13 +197,13 @@ class App implements AppInterface
         $controller = $this->doInit($this->controller);
         
         // action the dispatching controller to get its response
-        $response = $this->doAction($controller);
+        $context = $this->doAction($controller);
         
         // render the response from the controller
-        $output = $this->doRender($response);
+        $view = $this->doView($context);
         
         // output the rendered view
-        $this->doOutput($output);
+        $this->doOutput($view, $context);
         
         // remove the controller
         $this->controller = null;
@@ -262,66 +264,106 @@ class App implements AppInterface
         $this->container->event->trigger(self::EVENT_PRE_ACTION, [$this, $controller]);
         
         // the response is a simple array
-        $response = $controller->action();
+        $context = $controller->action();
         
         // if a response is not given (or evaluates to a false value) default to an empty array
-        if (!$response) {
-            $response = [];
+        if (!$context) {
+            $context = [];
         }
         
         // validate response
-        if (!is_array($response)) {
+        if (!is_array($context)) {
             throw new UnexpectedValueException('Controllers must either return nothing or an associative array.');
         }
         
         // post-action hook
-        $this->container->event->trigger(self::EVENT_POST_ACTION, [$this, $response]);
+        $this->container->event->trigger(self::EVENT_POST_ACTION, [$this, $controller, $context]);
         
-        return $response;
+        return $context;
     }
     
     /**
      * Performs rendering of the specified response and returns the output.
      * 
-     * @param array $response The response to render.
+     * @param array $context The context to render.
      * 
      * @return string
      */
-    private function doRender(array $response)
+    private function doView(array $context)
     {
         // pre-render hook
-        $this->container->event->trigger(self::EVENT_PRE_RENDER, [$this, $response]);
+        $this->container->event->trigger(self::EVENT_PRE_VIEW, [$this, $context]);
         
-        // defaults to an empty output
-        $output = null;
-        
-        // the view is responsible for handling the response if one is set
-        if (isset($this->container->view)) {
-            $output = $this->container->view->render($response);
-        }
+        // attempt to resolve the view
+        $view = $this->resolveView();
         
         // post-render hook
-        $this->container->event->trigger(self::EVENT_POST_RENDER, [$this, $response, $output]);
+        $this->container->event->trigger(self::EVENT_POST_VIEW, [$this, $view, $context]);
         
-        return $output;
+        return $view;
     }
     
     /**
-     * Outputs the specified output.
+     * Outputs the specified view.
      * 
-     * @param string The string to output.
+     * @param ViewInterface $view    The view to output.
+     * @param array         $context The context to render the view with.
      * 
      * @return void
      */
-    private function doOutput($output)
+    private function doOutput(ViewInterface $view = null, array $context = [])
     {
         // pre-output hook
-        $this->container->event->trigger(self::EVENT_PRE_OUTPUT, [$this, $output]);
+        $this->container->event->trigger(self::EVENT_PRE_OUTPUT, [$this, $view, $context]);
         
         // output response
-        $this->container->response->output($output);
+        $this->container->response->output($view, $context);
         
         // post-output hook
-        $this->container->event->trigger(self::EVENT_POST_OUTPUT, [$this, $output]);
+        $this->container->event->trigger(self::EVENT_POST_OUTPUT, [$this, $view, $context]);
+    }
+    
+    /**
+     * Resolves the view to use.
+     * 
+     * @return ViewInterface | null
+     */
+    private function resolveView()
+    {
+        if ($view = $this->resolveViewFromSuffix()) {
+            return $view;
+        }
+        
+        if ($view = $this->resolveViewFromType()) {
+            return $view;
+        }
+    }
+    
+    /**
+     * Resolves the view to use.
+     * 
+     * @return ViewInterface | null
+     */
+    private function resolveViewFromSuffix()
+    {
+        $suffix = $this->container->request->getUri()->getSuffix();
+        
+        if (isset($this->container->views->$suffix)) {
+            return $this->container->views->$suffix;
+        }
+    }
+    
+    /**
+     * Resolves the view to use.
+     * 
+     * @return ViewInterface | null
+     */
+    private function resolveViewFromType()
+    {
+        foreach ($this->container->request->getAcceptedContentTypes() as $type) {
+            if (isset($this->container->views->$type)) {
+                return $this->container->views->$type;
+            }
+        }
     }
 }

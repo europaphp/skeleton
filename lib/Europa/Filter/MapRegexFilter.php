@@ -10,7 +10,7 @@ namespace Europa\Filter;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class MapFilter implements FilterInterface
+class MapRegexFilter implements FilterInterface
 {
     /**
      * The value map.
@@ -18,7 +18,7 @@ class MapFilter implements FilterInterface
      * @var array
      */
     private $map;
-    
+
     /**
      * Sets up the mapping.
      * 
@@ -30,7 +30,7 @@ class MapFilter implements FilterInterface
     {
         $this->map = $map;
     }
-    
+
     /**
      * Filters the value and returns the filtered value.
      * 
@@ -40,8 +40,10 @@ class MapFilter implements FilterInterface
      */
     public function filter($value)
     {
-        if (isset($this->map[$value])) {
-            return $this->map[$value];
+        foreach ($this->map as $regex => $mapped) {
+            if (preg_match($regex, $value)) {
+                return $mapped;
+            }
         }
         
         return $value;

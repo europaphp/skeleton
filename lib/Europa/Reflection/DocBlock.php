@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Reflection;
+use LogicException;
 use RuntimeException;
 
 /**
@@ -33,24 +34,24 @@ class DocBlock
      * @var array
      */
     private $map = array(
-        'author'     => '\Europa\Reflection\DocTag\AuthorTag',
-        'category'   => '\Europa\Reflection\DocTag\CategoryTag',
-        'deprecated' => '\Europa\Reflection\DocTag\DeprecatedTag',
-        'filter'     => '\Europa\Reflection\DocTag\FilterTag',
-        'internal'   => '\Europa\Reflection\DocTag\InternalTag',
-        'license'    => '\Europa\Reflection\DocTag\LicenseTag',
-        'package'    => '\Europa\Reflection\DocTag\PackageTag',
-        'param'      => '\Europa\Reflection\DocTag\ParamTag',
-        'return'     => '\Europa\Reflection\DocTag\ReturnTag',
-        'see'        => '\Europa\Reflection\DocTag\SeeTag',
-        'subpackage' => '\Europa\Reflection\DocTag\SubpackageTag',
-        'throws'     => '\Europa\Reflection\DocTag\ThrowsTag',
-        'todo'       => '\Europa\Reflection\DocTag\TodoTag',
-        'link'       => '\Europa\Reflection\DocTag\LinkTag',
-        'copyright'  => '\Europa\Reflection\DocTag\CopyrightTag',
-        'since'      => '\Europa\Reflection\DocTag\SinceTag',
-        'var'        => '\Europa\Reflection\DocTag\VarTag',
-        'version'    => '\Europa\Reflection\DocTag\VersionTag',
+        'author'     => 'Europa\Reflection\DocTag\AuthorTag',
+        'category'   => 'Europa\Reflection\DocTag\CategoryTag',
+        'deprecated' => 'Europa\Reflection\DocTag\DeprecatedTag',
+        'filter'     => 'Europa\Reflection\DocTag\FilterTag',
+        'internal'   => 'Europa\Reflection\DocTag\InternalTag',
+        'license'    => 'Europa\Reflection\DocTag\LicenseTag',
+        'package'    => 'Europa\Reflection\DocTag\PackageTag',
+        'param'      => 'Europa\Reflection\DocTag\ParamTag',
+        'return'     => 'Europa\Reflection\DocTag\ReturnTag',
+        'see'        => 'Europa\Reflection\DocTag\SeeTag',
+        'subpackage' => 'Europa\Reflection\DocTag\SubpackageTag',
+        'throws'     => 'Europa\Reflection\DocTag\ThrowsTag',
+        'todo'       => 'Europa\Reflection\DocTag\TodoTag',
+        'link'       => 'Europa\Reflection\DocTag\LinkTag',
+        'copyright'  => 'Europa\Reflection\DocTag\CopyrightTag',
+        'since'      => 'Europa\Reflection\DocTag\SinceTag',
+        'var'        => 'Europa\Reflection\DocTag\VarTag',
+        'version'    => 'Europa\Reflection\DocTag\VersionTag',
     );
 
     /**
@@ -59,7 +60,7 @@ class DocBlock
      * 
      * @param string $docString The doc string to parse, if any, and initialize in the object.
      * 
-     * @return \Europa\Reflection\DocBlock
+     * @return DocBlock
      */
     public function __construct($docString = null)
     {
@@ -84,7 +85,7 @@ class DocBlock
      * @param string $tag   The tag name.
      * @param string $class The class to handle the tag.
      * 
-     * @return \Europa\Reflection\DocBlock
+     * @return DocBlock
      */
     public function map($tag, $class)
     {
@@ -97,7 +98,7 @@ class DocBlock
      * 
      * @param string $description The doc block description.
      * 
-     * @return \Europa\Reflection\DocBlock
+     * @return DocBlock
      */
     public function setDescription($description)
     {
@@ -118,9 +119,9 @@ class DocBlock
     /**
      * Adds the specified tag to the doc block.
      * 
-     * @param \Europa\Reflection\DocTag $tag The tag to add.
+     * @param DocTag $tag The tag to add.
      * 
-     * @return \Europa\Reflection\DocBlock
+     * @return DocBlock
      */
     public function addTag(DocTag $tag)
     {
@@ -180,8 +181,7 @@ class DocBlock
      */
     public function getTags($name)
     {
-        $this->checkTagAndThrowIfNotExists($name);
-        return $this->tags[$name];
+        return isset($this->tags[$name]) ? $this->tags[$name] : [];
     }
 
     /**
@@ -219,6 +219,7 @@ class DocBlock
 
         $tags = $this->parseTags($docString);
         $tags = $this->parseDocTagsFromStrings($tags);
+        
         foreach ($tags as $tag) {
             $this->addTag($tag);
         }
@@ -237,20 +238,26 @@ class DocBlock
     {
         // matches anything up to a "@"
         preg_match('/([a-zA-Z]([^@]+|([^\r]?[^\n][^\s]*[^\*])+))/m', $docString, $desc);
+        
         if (isset($desc[1])) {
             $desc = $desc[1];
             $desc = explode("\n", $desc);
+            
             foreach ($desc as $k => $part) {
                 // removes errant stars from the middle of a description
                 $desc[$k] = trim(preg_replace('#^\*#', '', trim($part)));
+                
                 if (!preg_match('/[a-zA-Z0-9]/', $part)) {
                     $desc[$k] = PHP_EOL;
                 }
             }
+            
             $desc = implode(' ', $desc);
             $desc = trim($desc);
+            
             return $desc;
         }
+        
         return null;
     }
 
@@ -290,20 +297,19 @@ class DocBlock
      * 
      * @param string $string The doc tag string to do the initial parsing.
      * 
-     * @return \Europa\Reflection\DocTag
+     * @return DocTag
      */
     private function parseDocTagFromString($string)
     {
         $string = preg_replace('#\t#', ' ', $string);
-        $parts = explode(' ', $string, 2);
-        $name  = trim(strtolower($parts[0]));
+        $parts  = explode(' ', $string, 2);
+        $name   = trim(strtolower($parts[0]));
 
         if (!isset($this->map[$name])) {
-            throw new \LogicException('Unknown doc tag "' . $name . '".');
+            throw new LogicException('Unknown doc tag "' . $name . '".');
         }
-
-        $class = $this->map[$name];
-        return new $class(isset($parts[1]) ? $parts[1] : null);
+        
+        return new $this->map[$name](isset($parts[1]) ? $parts[1] : null);
     }
     
     /**

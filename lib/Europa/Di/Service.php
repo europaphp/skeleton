@@ -3,6 +3,7 @@
 namespace Europa\Di;
 use BadMethodCallException;
 use Closure;
+use Europa\Reflection\ClassReflector;
 use Exception;
 use InvalidArgumentException;
 use ReflectionClass;
@@ -35,7 +36,7 @@ class Service
      * 
      * @var array
      */
-    private $config;
+    private $config = [];
     
     /**
      * The service instance if it was already created.
@@ -90,11 +91,13 @@ class Service
      * 
      * @return Service
      */
-    public function config(Closure $callback)
+    public function config($callback)
     {
         $this->refresh();
         
-        $this->config = $callback;
+        $this->config = $callback instanceof Closure ? $callback : function() use ($callback) {
+            return $callback;
+        };
         
         return $this;
     }
@@ -103,30 +106,17 @@ class Service
      * Queues a callback to call after instantiation. 
      * 
      * @param Closure $callback The callback to queue.
+     * @param array   $params   The arguments to call with the callback if not specifying a closure.
      * 
      * @return Service
      */
-    public function queue(Closure $callback)
+    public function queue($callback, array $params = [])
     {
         $this->refresh();
         
-        $this->queue[] = $callback;
-        
-        return $this;
-    }
-    
-    /**
-     * Queues an array of closures.
-     * 
-     * @param array $queue The queue to add.
-     * 
-     * @return Service
-     */
-    public function queueAll(array $queue)
-    {
-        foreach ($queue as $callback) {
-            $this->queue($callback);
-        }
+        $this->queue[] = $callback instanceof Closure ? $callback : function() use ($callback, $params) {
+            return call_user_func_array([$this->instance, $callback], $params);
+        };
         
         return $this;
     }
@@ -148,6 +138,8 @@ class Service
     /**
      * Creates a new instance then returns it even if it is set as transient.
      * 
+     * @param array $config Any configuration to invoke with at the time of creation.
+     * 
      * @return mixed
      */
     public function create(array $config = [])
@@ -159,14 +151,16 @@ class Service
      * Returns the represented service instance. If the service is transient, a new instance is always returned. If not,
      * an instance is stored and used for returning.
      * 
+     * @param array $config Any configuration to invoke with at the time of creation.
+     * 
      * @return mixed
      */
-    public function get()
+    public function get(array $config = [])
     {
         if ($this->transient) {
-            return $this->invoke();
+            return $this->invoke($config);
         } elseif (!$this->instance) {
-            $this->instance = $this->invoke();
+            $this->instance = $this->invoke($config);
         }
         
         return $this->instance;
@@ -195,7 +189,7 @@ class Service
     }
     
     /**
-     * Returns whether or not the service is of the specified type.
+     * Returns whether or not the service is of the specified type. This includes all parents, interfaces and traits.
      * 
      * @param mixed $class The class to check for.
      * 
@@ -205,7 +199,23 @@ class Service
     {
         $class = is_object($class) ? get_class($class) : $class;
         
-        return is_subclass_of($this->class, $class) || $this->class === $class;
+        if ($this->class === $class) {
+            return true;
+        }
+        
+        if (is_subclass_of($this->class, $class)) {
+            return true;
+        }
+        
+        if ($this->exists()) {
+            foreach ((new ReflectionClass($this->class))->getTraitNames() as $trait) {
+                if ($trait === $class) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
     }
     
     /**
@@ -217,12 +227,6 @@ class Service
      */
     private function invoke(array $config = [])
     {
-        if (!$config && $this->config) {
-            $config = $this->config;
-            $config = $config();
-            $config = is_array($config) ? $config : [$config];
-        }
-        
         return $this->invokeQueue($this->invokeClass($config));
     }
     
@@ -233,11 +237,13 @@ class Service
      */
     private function invokeClass(array $config)
     {
+        $config = $this->mergeConfiguration($config);
+        
         try {
-            $instance = new ReflectionClass($this->class);
+            $instance = new ClassReflector($this->class);
             
             if ($instance->hasMethod('__construct') && $config) {
-                $instance = $instance->newInstanceArgs($config);
+                $instance = $instance->newInstanceArgs($instance->getMethod('__construct')->mergeNamedArgs($config));
             } else {
                 $instance = $instance->newInstance();
             }
@@ -265,5 +271,28 @@ class Service
         }
         
         return $instance;
+    }
+    
+    /**
+     * Merges the calltime configuration with the pre-configured parameters.
+     * 
+     * @param array $config The calltime configuration.
+     * 
+     * @return array
+     */
+    private function mergeConfiguration(array $config)
+    {
+        // apply configuration if not configured yet
+        if ($this->config instanceof Closure) {
+            $this->config = call_user_func($this->config);
+        }
+        
+        // configuration must be an array
+        if (!is_array($this->config)) {
+            $this->config = [$this->config];
+        }
+        
+        // merge calltime with normal configuration
+        return array_merge($this->config, $config);
     }
 }

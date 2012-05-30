@@ -1,7 +1,6 @@
 <?php
 
-namespace Europa\Di\Configuration;
-use Europa\Di\Container;
+namespace Europa\Di;
 
 /**
  * Contains multiple configurations to apply to a single container.

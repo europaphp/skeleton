@@ -101,7 +101,7 @@ class Xml implements ViewInterface
      */
     private function indent($level)
     {
-        $char = $this->spaces ? str_repeat(' ', $this->spaces) : "\t";
+        $char = $this->config['spaces'] ? str_repeat(' ', $this->config['spaces']) : "\t";
         return str_repeat($char, $level);
     }
 }

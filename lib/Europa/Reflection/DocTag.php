@@ -32,7 +32,7 @@ abstract class DocTag
      * 
      * @param string $tagString The tag to parse.
      * 
-     * @return \Europa\Reflection\DocTagAbstract
+     * @return DocTagAbstract
      */
     public function __construct($tagString = null)
     {
@@ -62,6 +62,7 @@ abstract class DocTag
     {
         $str = trim($tagString);
         $str = explode("\n", $str);
+        
         foreach ($str as $k => $part) {
             $part = trim($part);
 
@@ -79,6 +80,7 @@ abstract class DocTag
 
             $str[$k] = $part;
         }
+        
         $this->tagString = implode(' ', $str);
     }
 
@@ -89,10 +91,12 @@ abstract class DocTag
      */
     public function compile()
     {
-        $str = $this->tag();
+        $str = '@' . $this->tag();
+        
         if ($this->tagString) {
             $str .= ' ' . $this->tagString;
         }
+        
         return $str;
     }
 }

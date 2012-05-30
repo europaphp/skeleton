@@ -2,6 +2,7 @@
 
 namespace Europa\View;
 use Europa\Di\Container;
+use Europa\Di\Pluggable;
 use Europa\Fs\Locator\LocatorInterface;
 use Exception;
 use LogicException;
@@ -21,19 +22,14 @@ use RuntimeException;
  */
 class Php implements ViewScriptInterface
 {
+    use Pluggable;
+    
     /**
      * The child script that was rendered, if any.
      * 
      * @var string
      */
     private $child;
-    
-    /**
-     * The container to use for helpers.
-     * 
-     * @var Container
-     */
-    private $container;
     
     /**
      * The views that have already extended a parent class.
@@ -80,53 +76,6 @@ class Php implements ViewScriptInterface
     public function __construct(LocatorInterface $locator)
     {
         $this->locator = $locator;
-    }
-    
-    /**
-     * Calls a helper from the specified container.
-     * 
-     * @see Php::setHelperContainer()
-     * 
-     * @param string $name The name of the helper to create.
-     * @param array  $args The arguments to configure it with.
-     * 
-     * @throws LogicException If the container does not exist.
-     * 
-     * @return mixed
-     */
-    public function __call($name, array $args = array())
-    {
-        if ($this->container) {
-            return $this->container->resolve($name)->configure($args)->create();
-        }
-        
-        throw new LogicException(
-            'You must set a helper container using "setHelperContainer" before trying to call '
-            . 'a helper.'
-        );
-    }
-    
-    /**
-     * Calls a helper from the specified container.
-     * 
-     * @see Php::setHelperContainer()
-     * 
-     * @param string $name The name of the helper to create.
-     * 
-     * @throws LogicException If the container does not exist.
-     * 
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        if ($this->container) {
-            return $this->container->resolve($name)->get();
-        }
-        
-        throw new LogicException(
-            'You must set a helper container using "setHelperContainer" before trying to get '
-            . 'a helper.'
-        );
     }
     
     /**
@@ -285,19 +234,6 @@ class Php implements ViewScriptInterface
         
         // set the parent
         $this->parentScript = $parent;
-        return $this;
-    }
-    
-    /**
-     * Sets the service container used to locate helpers.
-     * 
-     * @param Container $container The container to locate helpers with.
-     * 
-     * @return Php
-     */
-    public function setHelperContainer(Container $container)
-    {
-        $this->container = $container;
         return $this;
     }
 }

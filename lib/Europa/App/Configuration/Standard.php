@@ -1,10 +1,12 @@
 <?php
 
-namespace Europa\Di\Configuration;
+namespace Europa\App\Configuration;
 use Europa\Di\Container;
+use Europa\Di\ConfigurationAbstract;
 use Europa\Filter\ClassNameFilter;
 use Europa\Filter\ClassResolutionFilter;
 use Europa\Filter\MapFilter;
+use Europa\Filter\MapRegexFilter;
 use Europa\Fs\Loader;
 use Europa\Fs\Locator\Locator;
 use Europa\Request\RequestAbstract;
@@ -34,12 +36,22 @@ class Standard extends ConfigurationAbstract
      * @var array
      */
     private $conf = [
-        'addIncludePaths'  => true,
-        'classPaths'       => ['app/classes'],
-        'controllerPrefix' => 'Controller\\',
-        'controllerSuffix' => '',
-        'langPaths'        => ['app/langs/en-us' => 'ini'],
-        'viewPaths'        => ['app/views']
+        'addIncludePaths'    => true,
+        'classPaths'         => ['app/classes'],
+        'controllerPrefix'   => 'Controller\\',
+        'controllerSuffix'   => '',
+        'langPaths'          => ['app/langs/en-us' => 'ini'],
+        'viewContentTypeMap' => [
+            '/json/i' => 'application/json',
+            '/xml/i'  => 'application/xml',
+            '/.*/'    => 'text/html'
+        ],
+        'viewPaths'          => ['app/views'],
+        'viewMap'            => [
+            '/(application\/)?json/' => 'Europa\View\Json',
+            '/(application\/)?xml/'  => 'Europa\View\Xml',
+            '/.+/'                   => 'Europa\View\Php'
+        ]
     ];
     
     /**
@@ -71,16 +83,16 @@ class Standard extends ConfigurationAbstract
     public function map(Container $container)
     {
         $cli = RequestAbstract::isCli();
+        
         $container->setFilter(new MapFilter([
             'app'         => 'Europa\App\App',
             'controllers' => 'Europa\Di\Container',
             'event'       => 'Europa\Event\Dispatcher',
-            'helpers'     => 'Europa\Di\Container',
             'loader'      => 'Europa\Fs\Loader',
             'request'     => $cli ? 'Europa\Request\Cli' : 'Europa\Request\Http',
             'response'    => $cli ? 'Europa\Response\Cli' : 'Europa\Response\Http',
             'router'      => 'Europa\Router\Router',
-            'view'        => 'Europa\View\Php'
+            'views'       => 'Europa\Di\Container'
         ]));
     }
     
@@ -93,9 +105,7 @@ class Standard extends ConfigurationAbstract
      */
     public function app(Container $container)
     {
-        $container->resolve('app')->config(function() use ($container) {
-            return $container;
-        });
+        $container->resolve('app')->config($container);
     }
     
     /**
@@ -112,14 +122,17 @@ class Standard extends ConfigurationAbstract
                 return [$container->request, $container->response];
             });
             
-            $controllers->queue('Europa\Controller\ControllerAbstract', function($controller) {
-                $controller->filter();
-            });
-            
             $controllers->setFilter(new ClassNameFilter([
                 'prefix' => $this->conf['controllerPrefix'],
                 'suffix' => $this->conf['controllerSuffix']
             ]));
+            
+            $controllers->queue('Europa\Di\Pluggable', function($controller) use ($container) {
+                $plugins = $controller->getPluginContainer();
+                $plugins->setFilter(new ClassNameFilter([
+                    'prefix' => 'Europa\Controller\Plugin\\'
+                ]));
+            });
         });
     }
     
@@ -145,65 +158,59 @@ class Standard extends ConfigurationAbstract
     }
     
     /**
+     * Configures the response to use a view content type mapping.
+     * 
+     * @param Container $container The container to configure.
+     * 
+     * @return void
+     */
+    public function response(Container $container)
+    {
+        $container->queue('Europa\Response\Http', function($response) {
+            $response->setContentTypeFilter(new MapRegexFilter($this->conf['viewContentTypeMap']));
+        });
+    }
+    
+    /**
      * Configures the PHP view specifically since it requires a locator and optional helper.
      * 
      * @param Container $container The container to configure.
      * 
      * @return void
      */
-    public function view(Container $container)
+    public function views(Container $container)
     {
-        $container->config('Europa\View\Php', function() {
-            $locator = new Locator($this->conf['path']);
-            $locator->throwWhenLocating(true);
-            $locator->addPaths($this->conf['viewPaths']);
+        $container->resolve('views')->queue(function($views) use ($container) {
+            $views->setFilter(new MapRegexFilter($this->conf['viewMap']));
             
-            return $locator;
-        });
-        
-        $container->queue('Europa\View\Php', function($view) use ($container) {
-            $view->setHelperContainer($container->helpers);
-        });
-        
-        $container->queue('Europa\View\ViewScriptInterface', function($view) use ($container) {
-            $interface  = RequestAbstract::isCli() ? 'cli' : 'web';
-            $controller = str_replace(' ', '/', $container->app->getController());
+            $views->queue('Europa\View\ViewScriptInterface', function($view) use ($container) {
+                $interface  = RequestAbstract::isCli() ? 'cli' : 'web';
+                $controller = str_replace(' ', '/', $container->app->getController());
+                
+                $view->setScript($interface . '/' . $controller);
+            });
             
-            $view->setScript($interface . '/' . $controller);
-        });
-    }
-    
-    /**
-     * Configures helpers.
-     * 
-     * @param Container $container The container to configure.
-     * 
-     * @return void
-     */
-    public function helpers(Container $container)
-    {
-        $container->resolve('helpers')->queueAll([
-            function($helpers) {
-                $helpers->setFilter(new ClassResolutionFilter([
-                    new ClassNameFilter(['prefix' => '\Europa\View\Helper\\'])
+            $views->config('Europa\View\Php', function() {
+                $locator = new Locator($this->conf['path']);
+                
+                $locator->throwWhenLocating(true);
+                $locator->addPaths($this->conf['viewPaths']);
+                
+                return [$locator];
+            });
+            
+            $views->queue('Europa\View\Php', function($view) use ($container) {
+                $view->getPluginContainer()->setFilter(new ClassNameFilter([
+                    'prefix' => 'Europa\View\Plugin\\'
                 ]));
-            },
-            
-            function($helpers) use ($container) {
+                
                 $locator = new Locator($this->conf['path']);
                 $locator->throwWhenAdding(false);
                 $locator->addPaths($this->conf['langPaths']);
                 
-                $helpers->resolve('lang')->config(function() use ($container, $locator) {
-                    return [$container->view, $locator];
-                });
-            },
-            
-            function($helpers) use ($container) {
-                $helpers->resolve('uri')->config(function() use ($container) {
-                    return $container->router;
-                });
-            }
-        ]);
+                $view->getPluginContainer()->resolve('lang')->config([$view, $locator]);
+                $view->getPluginContainer()->resolve('uri')->config([$container->router]);
+            });
+        });
     }
 }

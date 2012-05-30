@@ -1,7 +1,6 @@
 <?php
 
 namespace Europa\Controller;
-use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
 use Europa\Request\RequestInterface;
 use Europa\Response\ResponseInterface;
@@ -18,25 +17,18 @@ use LogicException;
 abstract class ControllerAbstract implements ControllerInterface
 {
     /**
-     * The request used to dispatch to this controller.
+     * The request object.
      * 
      * @var RequestInterface
      */
     private $request;
     
     /**
-     * The response used to set headers for output
-     *
+     * The response object.
+     * 
      * @var ResponseInterface
      */
     private $response;
-
-    /**
-     * Whether or not to apply filters to action.
-     * 
-     * @var bool
-     */
-    private $useFilters = false;
     
     /**
      * Returns the method that the controller should call during actioning.
@@ -60,7 +52,7 @@ abstract class ControllerAbstract implements ControllerInterface
     }
     
     /**
-     * Returns the request being used.
+     * Returns the request object.
      * 
      * @return RequestInterface
      */
@@ -70,26 +62,13 @@ abstract class ControllerAbstract implements ControllerInterface
     }
     
     /**
-     * Returns the request being used.
+     * Returns the response object.
      * 
      * @return ResponseInterface
      */
     public function getResponse()
     {
         return $this->response;
-    }
-
-    /**
-     * Switches filters on or off.
-     * 
-     * @param bool $switch Whether or not to enable filters.
-     * 
-     * @return ControllerAbstract
-     */
-    public function filter($switch = true)
-    {
-        $this->useFilters = $switch ? true : false;
-        return $this;
     }
     
     /**
@@ -100,66 +79,17 @@ abstract class ControllerAbstract implements ControllerInterface
      */
     public function action()
     {
-        // the method to execute
         $method = $this->getActionMethod();
         
-        // apply all detected filters to the specified method
-        $this->applyFiltersTo($method);
-        
-        // the return value of the action is the view context
-        $result = $this->executeMethod($method, $this->request->getParams());
-        
-        // chainable
-        return $result;
-    }
-
-    /**
-     * Applies filters to the specified method.
-     * 
-     * @param string $method The method to apply the filters to.
-     * 
-     * @return ControllerAbstract
-     */
-    private function applyFiltersTo($method)
-    {
-        if (!$this->useFilters) {
-            return;
-        }
-        
-        $class  = (new ClassReflector($this))->getDocBlock();
-        $class  = $class->hasTag('filter') ? $class->getTags('filter') : [];
-        $method = (new MethodReflector($this, $method))->getDocBlock();
-        $method = $method->hasTag('filter') ? $method->getTags('filter') : [];
-        
-        foreach (array_merge($class, $method) as $filter) {
-            $filter = $filter->getInstance();
-            $filter->filter($this);
-        }
-        
-        return $this;
-    }
-    
-    /**
-     * Executes the specified method.
-     * 
-     * @param string $method The method to execute.
-     * @param array  $params The parameters to pass to the method.
-     * 
-     * @return ControllerAbstract
-     */
-    private function executeMethod($method, array $params = array())
-    {
-        // attempt to call the action
+        // attempt to call the action or use __call as a catch-all
         if (method_exists($this, $method)) {
-            $reflector = new MethodReflector($this, $method);
-            return $reflector->invokeNamedArgs($this, $params);
+            $result = (new MethodReflector($this, $method))->invokeNamedArgs($this, $this->request->getParams());
+        } else if (method_exists($this, '__call')) {
+            $result = $this->__call($method, $params);
+        } else {
+            throw new LogicException("Method \"{$method}\" is not supported and was not trapped in \"__call\".");
         }
         
-        // attempt to catch with __call
-        if (method_exists($this, '__call')) {
-            return $this->__call($method, $params);
-        }
-        
-        throw new LogicException("Method \"{$method}\" is not supported and was not trapped in \"__call\".");
+        return $result;
     }
 }
