@@ -1,8 +1,9 @@
-codesniffer/ export-ignore
-hooks/ export-ignore
-lib/Testes export-ignore
-tests/ export-ignore
-.git export-ignore
 .gitignore export-ignore
 .gitattributes export-ignore
+app/classes/Test export-ignore
+app/classes/Controller/Test.php export-ignore
+app/classes/Helper/Test.php export-ignore
+app/views/cli/test.php export-ignore
+lib/Testes export-ignore
+readme.md export-ignore
 
