@@ -12,102 +12,18 @@ use Europa\Reflection\DocTag;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class FilterTag extends DocTag
+class FilterTag extends GenericTag
 {
-    /**
-     * The name of the filter. This is a class name.
-     * 
-     * @var string
-     */
-    private $name;
-    
-    /**
-     * The value of the filter. This is passed to the constructor.
-     * 
-     * @var string
-     */
-    private $value;
-    
-    /**
-     * Whether or not the specified filter has a value.
-     * 
-     * @var bool
-     */
-    private $hasValue = false;
-    
-    /**
-     * Returns the name of the tag.
-     * 
-     * @return string
-     */
-    public function tag()
-    {
-        return 'filter';
-    }
-
-    /**
-     * Returns the class name of the filter.
-     * 
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-    
-    /**
-     * Returns the value of the doc tag.
-     * 
-     * @return string
-     */
-    public function getValue()
-    {
-        return $this->value;
-    }
-
     /**
      * Returns an instance of the filter.
      * 
      * @param array $args The arguments, if any, to pass to the filter's constructor.
      * 
-     * @return \Europa\Controller\FilterInterface
+     * @return Europa\Controller\FilterInterface
      */
     public function getInstance(array $args = array())
     {
-        $reflector = new ClassReflector($this->getName());
-        if ($this->hasValue && $reflector->hasMethod('__construct')) {
-            return $reflector->newInstanceArgs(array($this->getValue()));
-        }
+        $reflector = new ClassReflector($this->value());
         return $reflector->newInstance();
-    }
-
-    /**
-     * Overridden to provide doc string validation.
-     * 
-     * @param string $tagString The tag string to parse.
-     * 
-     * @return void
-     */
-    public function parse($tagString)
-    {
-        // use default parsing for generating the name and doc string
-        parent::parse($tagString);
-        
-        // a filter class must be specified
-        if (!$this->tagString) {
-            throw new \LogicException('A filter must be specified.');
-        }
-        
-        // tag string is split into two parts, filter name and the value to be passed to the constructor
-        $parts = explode(' ', $this->tagString);
-        
-        // assign name and if specified, value
-        $this->name = trim($parts[0]);
-        
-        // if a value is set, flag it as set and set it
-        if (isset($parts[1])) {
-            $this->value    = trim($parts[1]);
-            $this->hasValue = true;
-        }
     }
 }

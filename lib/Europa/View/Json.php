@@ -21,7 +21,6 @@ class Json implements ViewInterface
     public function render(array $context = array())
     {
         $context = $this->formatParamsToJsonArray($context);
-        
         return json_encode($context);
     }
     
@@ -33,15 +32,12 @@ class Json implements ViewInterface
     private function formatParamsToJsonArray($data)
     {
         $array = array();
-        
         foreach ($data as $name => $item) {
             if (is_array($item) || is_object($item)) {
                 $item = $this->formatParamsToJsonArray($item);
             }
-            
             $array[$name] = $item;
         }
-        
         return $array;
     }
 }

@@ -1,17 +1,17 @@
 <?php
 
 namespace Europa\Reflection\DocTag;
-use Europa\Reflection\DocTag;
+use UnexpectedValueException;
 
 /**
-* Represents a docblock throws tag.
+* Represents a DocBlock throws tag.
 *
 * @category Reflection
 * @package  Europa
 * @author   Trey Shugart <treshugart@gmail.com>
 * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
 */
-class ThrowsTag extends DocTag
+class ThrowsTag extends GenericTag
 {
     /**
      * The name of the exception class that is thrown.
@@ -26,16 +26,6 @@ class ThrowsTag extends DocTag
      * @var array
      */
     private $description;
-    
-    /**
-     * Returns the name of the tag.
-     * 
-     * @return string
-     */
-    public function tag()
-    {
-        return 'throws';
-    }
     
     /**
      * Returns the name of the reference.
@@ -58,22 +48,34 @@ class ThrowsTag extends DocTag
     }
     
     /**
-     * Implements custom parsing for this docblock tag.
+     * Parses the tag value.
      * 
-     * @param string $tagString The tag string to parse.
+     * @param string $value The tag value.
      * 
      * @return void
      */
-    public function parse($tagString)
+    public function parseValue($tagString)
     {
         $parts = explode(' ', $tagString, 2);
+        
         if (!isset($parts[0])) {
-            throw new \LogicException('An exception class must be specified for a @throws tag.');
+            throw new UnexpectedValueException('An exception class must be specified for a @throws tag.');
         }
         
         $this->exception = $parts[0];
+        
         if (isset($parts[1])) {
             $this->description = $parts[1];
         }
+    }
+    
+    /**
+     * Compiles the tag value.
+     * 
+     * @return string
+     */
+    public function compileValue()
+    {
+        return $this->exception . ' ' . $this->description;
     }
 }

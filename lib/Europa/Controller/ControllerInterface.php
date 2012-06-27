@@ -2,7 +2,6 @@
 
 namespace Europa\Controller;
 use Europa\Request\RequestInterface;
-use Europa\Response\ResponseInterface;
 
 /**
  * Defines a basic implementation of controllers in Europa.
@@ -17,12 +16,11 @@ interface ControllerInterface
     /**
      * Constructs a new controller using the specified request and response.
      *
-     * @param RequestInterface  $request  The request to use.
-     * @param ResponseInterface $response The response to use.
+     * @param RequestInterface $request The request to use.
      *
-     * @return \Europa\Controller\ControllerAbstract
+     * @return ControllerInterface
      */
-    public function __construct(RequestInterface $request, ResponseInterface $response);
+    public function __construct(RequestInterface $request);
     
     /**
      * Performs actioning and returns the view context.

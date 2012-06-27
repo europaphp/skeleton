@@ -1,7 +1,6 @@
 <?php
 
 namespace Europa\Request;
-use ArrayIterator;
 
 /**
  * The main request object.
@@ -19,6 +18,13 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
      * @var string
      */
     private $id;
+    
+    /**
+     * The request method.
+     * 
+     * @var string
+     */
+    private $method;
     
     /**
      * Request parameters.
@@ -65,6 +71,29 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
     public function __unset($name)
     {
         return $this->removeParam($name);
+    }
+    
+    /**
+     * Sets the appropriate method.
+     * 
+     * @param string $method The method to set.
+     * 
+     * @return \Europa\Request
+     */
+    public function setMethod($method)
+    {
+        $this->method = $method;
+        return $this;
+    }
+    
+    /**
+     * Returns the request method for the request.
+     *
+     * @return string
+     */
+    public function getMethod()
+    {
+        return $this->method;
     }
     
     /**
@@ -199,11 +228,11 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
     /**
      * Returns an iterator of the parameters.
      * 
-     * @return ArrayIterator
+     * @return \ArrayIterator
      */
     public function getIterator()
     {
-        return new ArrayIterator($this->params);
+        return new \ArrayIterator($this->params);
     }
     
     /**
@@ -236,15 +265,5 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
     public static function isCli()
     {
         return PHP_SAPI === 'cli';
-    }
-    
-    /**
-     * Whether or not the current request is HTTP or not.
-     * 
-     * @return bool
-     */
-    public static function isHttp()
-    {
-        return isset($_SERVER) && isset($_SERVER['REQUEST_URI']);
     }
 }

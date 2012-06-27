@@ -13,9 +13,9 @@ namespace Europa\App;
 interface AppInterface
 {
     /**
-     * Encompasses the whole dispatching process. Instantiates the controller, actions it and outputs the rendered view.
+     * Runs the application.
      * 
-     * @return void
+     * @return AppInterface
      */
     public function run();
 }

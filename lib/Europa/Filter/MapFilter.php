@@ -24,7 +24,7 @@ class MapFilter implements FilterInterface
      * 
      * @parma array $map The mapping to use.
      * 
-     * @return MapFilter
+     * @return \Europa\Filter\MapFilter
      */
     public function __construct(array $map)
     {
@@ -43,7 +43,6 @@ class MapFilter implements FilterInterface
         if (isset($this->map[$value])) {
             return $this->map[$value];
         }
-        
         return $value;
     }
 }

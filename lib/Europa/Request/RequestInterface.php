@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Request;
+use Serializable;
 
 /**
  * Defines a request.
@@ -10,7 +11,7 @@ namespace Europa\Request;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-interface RequestInterface extends \Serializable
+interface RequestInterface extends Serializable
 {
     /**
      * Converts the request to a string representation.
@@ -18,6 +19,22 @@ interface RequestInterface extends \Serializable
      * @return string
      */
     public function __toString();
+    
+    /**
+     * Sets the appropriate method.
+     * 
+     * @param string $method The method to set.
+     * 
+     * @return \Europa\Request
+     */
+    public function setMethod($method);
+    
+    /**
+     * Returns the request method for the request.
+     *
+     * @return string
+     */
+    public function getMethod();
     
     /**
      * Sets the specified request parameter.

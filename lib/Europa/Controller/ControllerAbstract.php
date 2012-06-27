@@ -1,9 +1,9 @@
 <?php
 
 namespace Europa\Controller;
+use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
 use Europa\Request\RequestInterface;
-use Europa\Response\ResponseInterface;
 use LogicException;
 
 /**
@@ -17,18 +17,18 @@ use LogicException;
 abstract class ControllerAbstract implements ControllerInterface
 {
     /**
-     * The request object.
+     * The request used to dispatch to this controller.
      * 
      * @var RequestInterface
      */
     private $request;
-    
+
     /**
-     * The response object.
+     * Whether or not to apply filters to action.
      * 
-     * @var ResponseInterface
+     * @var bool
      */
-    private $response;
+    private $filter = false;
     
     /**
      * Returns the method that the controller should call during actioning.
@@ -38,37 +38,38 @@ abstract class ControllerAbstract implements ControllerInterface
     abstract public function getActionMethod();
     
     /**
-     * Constructs a new controller using the specified request and response.
+     * Constructs a new controller using the specified request.
      *
-     * @param RequestInterface  $request  The request to use.
-     * @param ResponseInterface $response The response to use.
+     * @param RequestInterface $request The request to use.
      *
      * @return ControllerAbstract
      */
-    public function __construct(RequestInterface $request, ResponseInterface $response)
+    public function __construct(RequestInterface $request)
     {
-        $this->request  = $request;
-        $this->response = $response;
+        $this->request = $request;
     }
     
     /**
-     * Returns the request object.
+     * Returns the request being used.
      * 
      * @return RequestInterface
      */
-    public function getRequest()
+    public function request()
     {
         return $this->request;
     }
-    
+
     /**
-     * Returns the response object.
+     * Switches filters on or off.
      * 
-     * @return ResponseInterface
+     * @param bool $switch Whether or not to enable filters.
+     * 
+     * @return ControllerAbstract
      */
-    public function getResponse()
+    public function filter($switch = true)
     {
-        return $this->response;
+        $this->filter = $switch ? true : false;
+        return $this;
     }
     
     /**
@@ -79,17 +80,64 @@ abstract class ControllerAbstract implements ControllerInterface
      */
     public function action()
     {
+        // the method to execute
         $method = $this->getActionMethod();
         
-        // attempt to call the action or use __call as a catch-all
-        if (method_exists($this, $method)) {
-            $result = (new MethodReflector($this, $method))->invokeNamedArgs($this, $this->request->getParams());
-        } else if (method_exists($this, '__call')) {
-            $result = $this->__call($method, $params);
-        } else {
-            throw new LogicException("Method \"{$method}\" is not supported and was not trapped in \"__call\".");
+        // apply all detected filters to the specified method
+        $this->applyFiltersTo($method);
+        
+        // the return value of the action is the view context
+        $result = $this->executeMethod($method, $this->request->getParams());
+        
+        // chainable
+        return $result;
+    }
+
+    /**
+     * Applies filters to the specified method.
+     * 
+     * @param string $method The method to apply the filters to.
+     * 
+     * @return ControllerAbstract
+     */
+    private function applyFiltersTo($method)
+    {
+        if (!$this->filter) {
+            return;
         }
         
-        return $result;
+        $class  = (new ClassReflector($this))->getDocBlock()->getTags('filter');
+        $method = (new MethodReflector($this, $method))->getDocBlock()->getTags('filter');
+        
+        foreach (array_merge($class, $method) as $filter) {
+            $filter = $filter->getInstance();
+            $filter->filter($this);
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Executes the specified method.
+     * 
+     * @param string $method The method to execute.
+     * @param array  $params The parameters to pass to the method.
+     * 
+     * @return ControllerAbstract
+     */
+    private function executeMethod($method, array $params = array())
+    {
+        // attempt to call the action
+        if (method_exists($this, $method)) {
+            $reflector = new MethodReflector($this, $method);
+            return $reflector->invokeNamedArgs($this, $params);
+        }
+        
+        // attempt to catch with __call
+        if (method_exists($this, '__call')) {
+            return $this->__call($method, $params);
+        }
+        
+        throw new LogicException("Method \"{$method}\" is not supported and was not trapped in \"__call\".");
     }
 }

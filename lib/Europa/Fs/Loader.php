@@ -1,7 +1,22 @@
 <?php
 
 namespace Europa\Fs;
-use Europa\Fs\Locator\LocatorInterface;
+use Europa\Fs\Locator;
+
+/**
+ * Default autoload registration for library files.
+ * 
+ * @return void
+ */
+spl_autoload_register(function($class) {
+    $file = str_replace(['\\', '_'], DIRECTORY_SEPARATOR, $class);
+    $file = $file . '.php';
+    $file = __DIR__ . '/../../' . $file;
+    
+    if ($real = realpath($file)) {
+        include $real;
+    }
+});
 
 /**
  * Handles class loading.
@@ -19,6 +34,39 @@ class Loader
      * @var LocatorInterface
      */
     private $locator;
+    
+    /**
+     * Sets up the loader.
+     * 
+     * @return Loader
+     */
+    public function __construct()
+    {
+        $this->locator = new Locator;
+    }
+    
+    /**
+     * Sets the locator.
+     * 
+     * @param LocatorInterface $locator The locator to use for locating class files.
+     * 
+     * @return Loader
+     */
+    public function setLocator(LocatorInterface $locator)
+    {
+        $this->locator = $locator;
+        return $this;
+    }
+    
+    /**
+     * Returns the locator.
+     * 
+     * @return LocatorInterface
+     */
+    public function getLocator()
+    {
+        return $this->locator;
+    }
     
     /**
      * Searches for a class, loads it if it is found and returns whether or not it was loaded.
@@ -53,36 +101,10 @@ class Loader
      */
     public function resolve($class)
     {
-        // normalize
-        $file = str_replace(array('\\', '_'), DIRECTORY_SEPARATOR, $class);
-        $file = trim($file, DIRECTORY_SEPARATOR);
-        
-        // attempt loading of classes at same level as framework
-        if ($fullpath = realpath(dirname(__FILE__) . '/../../' . $file . '.php')) {
+        if ($this->locator && $fullpath = $this->locator->locate($this->normalize($class))) {
             return $fullpath;
         }
-        
-        // attempt loading from other sources
-        if ($this->locator) {
-            if ($fullpath = $this->locator->locate($file)) {
-                return $fullpath;
-            }
-        }
-        
         return false;
-    }
-    
-    /**
-     * Sets the locator. A locator is not required for class loading to work.
-     * 
-     * @param LocatorInterface $locator The locator to use for locating class files.
-     * 
-     * @return Loader
-     */
-    public function setLocator(LocatorInterface $locator)
-    {
-        $this->locator = $locator;
-        return $this;
     }
     
     /**
@@ -96,5 +118,19 @@ class Loader
     {
         spl_autoload_register(array($this, 'load'), true, $prepend);
         return $this;
+    }
+    
+    /**
+     * Normalizes the file.
+     * 
+     * @param string $file The file to normalize.
+     * 
+     * @return string
+     */
+    private function normalize($class)
+    {
+        $file = str_replace(array('\\', '_'), DIRECTORY_SEPARATOR, $class);
+        $file = trim($file, DIRECTORY_SEPARATOR);
+        return $file;
     }
 }

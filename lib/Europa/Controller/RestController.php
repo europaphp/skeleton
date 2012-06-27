@@ -1,20 +1,19 @@
 <?php
 
 namespace Europa\Controller;
-use Europa\Request\Cli;
-use Europa\Request\Http;
-use Europa\Request\RequestInterface;
-use UnexpectedValueException;
+use LogicException;
 
 /**
  * Implements restful "single-action" controllers.
  * 
  * The following methods are supported with any number of user-defined parameters:
+ *   - cli
  *   - connect
  *   - delete
  *   - get
  *   - head
  *   - options
+ *   - patch
  *   - post
  *   - put
  *   - trace
@@ -37,13 +36,6 @@ abstract class RestController extends ControllerAbstract
     const ALL = 'all';
     
     /**
-     * The CLI action name if a CLI request instance is passed in.
-     * 
-     * @var string
-     */
-    const CLI = 'cli';
-    
-    /**
      * Returns the method to action. By default this is the request method returned from the request instance that is
      * is being used.
      * 
@@ -51,18 +43,19 @@ abstract class RestController extends ControllerAbstract
      */
     public function getActionMethod()
     {
-        $request = $this->getRequest();
+        $method = $this->request()->getMethod();
         
-        if ($request instanceof Http) {
-            $method = $request->getMethod();
-        } else if ($request instanceof Cli) {
-            $method = self::CLI;
-        } else {
-            throw new UnexpectedValueException('An unsupported request "' . get_class($request) . '" was specified.');
+        // check for method, fallback to "all"
+        if (!method_exists($this, $method)) {
+            $method = self::ALL;
         }
         
-        if (!method_exists($this, $method) && method_exists($this, self::ALL)) {
-            $method = self::ALL;
+        // check for "all", throw exception if not specified
+        if (!method_exists($this, $method)) {
+            throw new LogicException(sprintf(
+                'If not using a specific request method in your RestController, you must specify a method named "%s".',
+                self::ALL
+            ));
         }
         
         return $method;

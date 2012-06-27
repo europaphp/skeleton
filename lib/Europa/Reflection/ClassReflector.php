@@ -21,11 +21,59 @@ class ClassReflector extends \ReflectionClass implements Reflectable
     private $docString;
     
     /**
+     * Checks to see if the class is of the specified type or has the specified trait.
+     * 
+     * @param string $type The type to check against.
+     * 
+     * @return bool
+     */
+    public function is($type)
+    {
+        return $this->getName() === $type
+            || $this->isSubclassOf($type)
+            || in_array($type, $this->getTraitNames());
+    }
+    
+    /**
+     * Returns if the class derives from any of the specified types.
+     * 
+     * @param array $types The types to check against.
+     * 
+     * @return bool
+     */
+    public function isAny(array $types)
+    {
+        foreach ($types as $type) {
+            if ($this->is($type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Returns if the class derives from all of the specified types.
+     * 
+     * @param array $types The types to check against.
+     * 
+     * @return bool
+     */
+    public function isAll(array $types)
+    {
+        foreach ($types as $type) {
+            if (!$this->is($type)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
      * Overridden to get the \Europa\Reflection\MethodReflector instance for a method.
      * 
      * @param string $method The name of the method to get.
      * 
-     * @return \Europa\Reflection\MethodReflector
+     * @return MethodReflector
      */
     public function getMethod($method)
     {
@@ -98,5 +146,20 @@ class ClassReflector extends \ReflectionClass implements Reflectable
         }
         
         return $this->docString;
+    }
+    
+    /**
+     * Creates a new instance using named parameters.
+     * 
+     * @param array $args The named parameters.
+     * 
+     * @return mixed
+     */
+    public function newInstanceArgs(array $args = null)
+    {
+        if ($this->hasMethod('__construct')) {
+            return parent::newInstanceArgs($this->getMethod('__construct')->mergeNamedArgs($args));
+        }
+        return $this->newInstance();
     }
 }

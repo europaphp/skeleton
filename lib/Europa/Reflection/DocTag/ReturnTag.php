@@ -1,17 +1,17 @@
 <?php
 
 namespace Europa\Reflection\DocTag;
-use Europa\Reflection\DocTag;
+use UnexpectedValueException;
 
 /**
-* Represents a docblock return tag.
+* Represents a DocBlock return tag.
 *
 * @category Reflection
 * @package  Europa
 * @author   Trey Shugart <treshugart@gmail.com>
 * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
 */
-class ReturnTag extends DocTag
+class ReturnTag extends GenericTag
 {
     /**
      * List of possible return type
@@ -28,21 +28,11 @@ class ReturnTag extends DocTag
     private $description;
 
     /**
-     * Return the tag object type
-     * 
-     * @return string
-     */
-    public function tag()
-    {
-        return 'return';
-    }
-
-    /**
      * Set the type of the return tag
      * 
      * @param array $types Type of the return tag
      * 
-     * @return \Europa\Reflection\DocTag\ReturnTag;
+     * @return ReturnTag
      */
     public function setTypes(array $types)
     {
@@ -53,7 +43,7 @@ class ReturnTag extends DocTag
     /**
      * Get the type of the parameter
      * 
-     * @return string
+     * @return array
      */
     public function getTypes()
     {
@@ -65,7 +55,7 @@ class ReturnTag extends DocTag
      * 
      * @param string $description Description of the parameter
      * 
-     * @return \Europa\Reflection\DocTag\ReturnTag;
+     * @return ReturnTag
      */
     public function setDescription($description)
     {
@@ -82,42 +72,9 @@ class ReturnTag extends DocTag
     {
         return $this->description;
     }
-
-    /**
-     * Parse the tag
-     * 
-     * @param string $tabString Return tag
-     * 
-     * @return void
-     */
-    public function parse($tagString)
-    {
-        // use default parsing for generating the name and doc string
-        parent::parse($tagString);
-
-        // a doc string must be specified
-        if (!$this->tagString) {
-            throw new \Europa\Reflection\Exception('A valid return type must be specified. None given.');
-        }
-
-        // split in to type/description parts (only two parts are allowed);
-        $parts = explode(' ', $this->tagString, 2);
-
-        // parse out multiple types
-        $types = explode('|', $parts[0]);
-        for ($i = 0; $i < count($types); $i++) {
-            $this->types[] = trim($types[$i]);
-        }
-
-        // parse out description
-        if (isset($parts[1])) {
-            $this->description = $parts[1];
-        }
-    }
     
     /**
-     * Checks the $value and returns whether or not it is valid when compared
-     * to the method return types.
+     * Checks the $value and returns whether or not it is valid when compared to the method return types.
      * 
      * @param mixed $value The value to check against $types.
      * 
@@ -161,5 +118,44 @@ class ReturnTag extends DocTag
         }
         
         return false;
+    }
+    
+    /**
+     * Parses the tag value.
+     * 
+     * @param string $value The tag value.
+     * 
+     * @return void
+     */
+    public function parseValue($value)
+    {
+        // a doc string must be specified
+        if (!$value) {
+            throw new UnexpectedValueException('A valid return type must be specified.');
+        }
+
+        // split in to type/description parts (only two parts are allowed);
+        $parts = explode(' ', $value, 2);
+
+        // parse out multiple types
+        $types = explode('|', $parts[0]);
+        for ($i = 0; $i < count($types); $i++) {
+            $this->types[] = trim($types[$i]);
+        }
+
+        // parse out description
+        if (isset($parts[1])) {
+            $this->description = $parts[1];
+        }
+    }
+    
+    /**
+     * Compiles the tag value.
+     * 
+     * @return string
+     */
+    public function compileValue()
+    {
+        return implode(' | ', $this->types) . ' ' . $this->description;
     }
 }

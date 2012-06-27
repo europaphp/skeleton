@@ -14,11 +14,11 @@ use Europa\Request\RequestInterface;
 interface RouterInterface
 {
     /**
-     * Routes the specified route using the specified resolver.
+     * Routes the specified request.
      * 
-     * @param \Europa\Request\RequestInterface $request The request to route.
+     * @param RequestInterface $request The request to route.
      * 
-     * @return void
+     * @return bool
      */
     public function route(RequestInterface $request);
     
@@ -28,9 +28,7 @@ interface RouterInterface
      * @param string $name   The name of the route to reverse engineer.
      * @param array  $params The parameters to use when reverse engineering the route.
      * 
-     * @throws \LogicException If the route cannot be found.
-     * 
      * @return string
      */
-    public function reverse($name, array $params = array());
+    public function format($name, array $params = array());
 }

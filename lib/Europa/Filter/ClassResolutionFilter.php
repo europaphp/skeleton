@@ -28,6 +28,5 @@ class ClassResolutionFilter extends FilterArrayAbstract
                 return $class;
             }
         }
-        return false;
     }
 }

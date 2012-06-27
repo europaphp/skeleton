@@ -70,25 +70,18 @@ class Http extends RequestAbstract
     const CONNECT = 'connect';
     
     /**
+     * The PATCH method.
+     * 
+     * @var string
+     */
+    const PATCH = 'patch';
+    
+    /**
      * The request headers.
      * 
      * @var array
      */
     private $headers = array();
-
-    /**
-     * The ip address of the client request.
-     * 
-     * @var string
-     */
-    private $ip;
-    
-    /**
-     * The request method.
-     * 
-     * @var string
-     */
-    private $method;
     
     /**
      * The URI object.
@@ -96,6 +89,13 @@ class Http extends RequestAbstract
      * @var Uri
      */
     private $uri;
+    
+    /**
+     * The ip address of the client request.
+     * 
+     * @var string
+     */
+    private $ip;
     
     /**
      * Sets any defaults that may need setting.
@@ -122,30 +122,6 @@ class Http extends RequestAbstract
     }
     
     /**
-     * Sets the appropriate method.
-     * 
-     * @param string $method The method to set.
-     * 
-     * @return \Europa\Request
-     */
-    public function setMethod($method)
-    {
-        $this->method = $method;
-        
-        return $this;
-    }
-    
-    /**
-     * Returns the request method for the request.
-     *
-     * @return string
-     */
-    public function getMethod()
-    {
-        return $this->method;
-    }
-    
-    /**
      * Sets a header.
      * 
      * @param string $name  The name of the header.
@@ -156,7 +132,6 @@ class Http extends RequestAbstract
     public function setHeader($name, $value)
     {
         $this->headers[$name] = $value;
-        
         return $this;
     }
     
@@ -172,7 +147,6 @@ class Http extends RequestAbstract
         if ($this->hasHeader($name)) {
             return $this->headers[$name];
         }
-        
         return null;
     }
     
@@ -200,7 +174,6 @@ class Http extends RequestAbstract
         if ($this->hasHeader($name)) {
             unset($this->headers[$name]);
         }
-        
         return $this;
     }
     
@@ -214,7 +187,6 @@ class Http extends RequestAbstract
     public function setHeaders(array $headers)
     {
         $this->headers = $headers;
-        
         return $this;
     }
     
@@ -239,7 +211,6 @@ class Http extends RequestAbstract
     public function removeHeaders()
     {
         $this->headers = array();
-        
         return $this;
     }
     
@@ -253,13 +224,11 @@ class Http extends RequestAbstract
     public function accepts($types)
     {
         $accepted = $this->getAcceptedContentTypes();
-        
         foreach ((array) $types as $type) {
             if (!in_array($type, $accepted)) {
                 return false;
             }
         }
-        
         return true;
     }
     
@@ -285,9 +254,7 @@ class Http extends RequestAbstract
     {
         $accept = $this->getHeader('Accept');
         $accept = explode(',', $accept);
-        
         array_walk($accept, 'trim');
-        
         return $accept;
     }
     
@@ -311,7 +278,6 @@ class Http extends RequestAbstract
     public function setUri(Uri $uri)
     {
         $this->uri = $uri;
-        
         return $this;
     }
     
@@ -331,7 +297,6 @@ class Http extends RequestAbstract
     public function setIp($ip)
     {
         $this->ip = $ip;
-        
         return $this;
     }
     
@@ -376,7 +341,6 @@ class Http extends RequestAbstract
         if (isset($_REQUEST)) {
             $this->setParams($_REQUEST);
         }
-        
         return $this;
     }
     
@@ -388,15 +352,12 @@ class Http extends RequestAbstract
     private function initDefaultMethod()
     {
         $method = static::GET;
-        
         if (isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
             $method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
         } elseif (isset($_SERVER['REQUEST_METHOD'])) {
             $method = $_SERVER['REQUEST_METHOD'];
         }
-        
         $this->setMethod(strtolower($method));
-        
         return $this;
     }
     
@@ -417,7 +378,6 @@ class Http extends RequestAbstract
                 $this->setHeader($name, $value);
             }
         }
-        
         return $this;
     }
     
@@ -429,7 +389,6 @@ class Http extends RequestAbstract
     private function initDefaultIp()
     {
         $ip = null;
-        
         if (isset($_SERVER['HTTP_TRUE_CLIENT_IP'])) {
             $ip = $_SERVER['HTTP_TRUE_CLIENT_IP'];
         } elseif (isset($_SERVER['X_FORWARDED_FOR'])) {
@@ -440,7 +399,6 @@ class Http extends RequestAbstract
         } elseif (isset($_SERVER['REMOTE_ADDR'])) {
             $ip = $_SERVER['REMOTE_ADDR'];
         }
-        
         return $this->setIp($ip);
     }
 }

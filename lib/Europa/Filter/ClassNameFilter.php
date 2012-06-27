@@ -20,7 +20,7 @@ class ClassNameFilter implements FilterInterface
     private $config = array(
         'prefix'   => '',
         'suffix'   => '',
-        'nsTokens' => array(DIRECTORY_SEPARATOR, '/', '_', ' ')
+        'nsTokens' => array(DIRECTORY_SEPARATOR, '/', '_', ' ', '.')
     );
     
     /**

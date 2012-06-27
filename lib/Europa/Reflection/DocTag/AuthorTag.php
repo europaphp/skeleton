@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa\Reflection\DocTag;
-use Europa\Reflection\DocTag;
+use UnexpectedValueException;
 
 /**
 * Represents a docblock author tag.
@@ -11,24 +11,21 @@ use Europa\Reflection\DocTag;
 * @author   Trey Shugart <treshugart@gmail.com>
 * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
 */
-class AuthorTag extends DocTag
+class AuthorTag extends GenericTag
 {
     /**
-    * Name of the author
+    * Name author's name.
     * 
     * @var string
     */
-    protected $name;
+    private $name;
     
     /**
-    * Return the tag object type
-    * 
-    * @return string
-    */
-    public function tag()
-    {
-        return 'author';
-    }
+     * The author's email.
+     * 
+     * @var string
+     */
+    private $email;
     
     /**
     * Set the name of the author
@@ -40,6 +37,7 @@ class AuthorTag extends DocTag
     public function setName($name)
     {
         $this->name = $name;
+        return $this;
     }
     
     /**
@@ -53,32 +51,65 @@ class AuthorTag extends DocTag
     }
     
     /**
+     * Sets the author's email address.
+     * 
+     * @param string $email The author's email.
+     * 
+     * @return AuthorTag
+     */
+    public function setEmail($email)
+    {
+        $this->email = $email;
+        return $this;
+    }
+    
+    /**
+     * Returns the author's email.
+     * 
+     * @return string
+     */
+    public function getEmail()
+    {
+        return $this->email;
+    }
+    
+    /**
     * Parse the author tag
     * 
     * @param string Author tag
     * 
     * @return void
     */
-    public function parse($tagString)
+    public function parseValue($value)
     {
-        // use default parsing for generating the name and doc string
-        parent::parse($tagString);
-
-        // a doc string must be specified
-        if (!$this->tagString) {
-            throw new \Europa\Reflection\Exception('A valid author type must be specified. None given.');
-        }
-
         // split in to tag/author name parts
-        $parts = preg_replace('/\s+/', ' ', $this->tagString);
-        $parts = preg_split('/\s+/', $this->tagString, 2);
+        $parts = preg_replace('/\s+/', ' ', $value);
+        $parts = preg_split('/\s+/', $value, 2);
 
-        // require a var name
+        // require a name
         if (!isset($parts[0])) {
-            throw new \Europa\Reflection\Exception('A valid name for the author must be specified. None given.');
+            throw new UnexpectedValueException('A valid name for the author must be specified.');
         }
         
-        // set the type
+        // require an email address
+        if (!isset($parts[1])) {
+            throw new UnexpectedValueException('A valid email address for the author must be specified.');
+        }
+        
+        // set the name
         $this->name = trim($parts[0]);
+        
+        // set the email
+        $this->email = trim($parts[1], '<>');
+    }
+    
+    /**
+     * Compiles the tag value.
+     * 
+     * @return string
+     */
+    public function compileValue()
+    {
+        return $this->name . ' <' . $this->email . '>';
     }
 }

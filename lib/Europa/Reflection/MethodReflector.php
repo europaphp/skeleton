@@ -34,8 +34,17 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
     public function __construct($class, $name)
     {
         parent::__construct($class, $name);
-        
         $this->classname = is_object($class) ? get_class($class) : $class;
+    }
+    
+    /**
+     * Returns the class associated to this method.
+     * 
+     * @return ClassReflector
+     */
+    public function getClass()
+    {
+        return new ClassReflector($this->classname);
     }
     
     /**
@@ -106,7 +115,12 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
             } elseif ($param->isOptional()) {
                 $merged[$pos] = $param->getDefaultValue();
             } elseif ($throw) {
-                throw new LogicException('The required parameter "' . $name . '" was not specified.');
+                throw new LogicException(sprintf(
+                    'The required parameter "%s" for "%s::%s()" was not specified.',
+                    $param->getName(),
+                    $this->getClass()->getName(),
+                    $this->getName()
+                ));
             } else {
                 $meged[$pos] = null;
             }

@@ -1,8 +1,9 @@
 <?php
 
 namespace Europa\Router;
+use Closure;
 use Europa\Request\RequestInterface;
-use Europa\Router\Route\RouteInterface;
+use LogicException;
 
 /**
  * Default request router implementation.
@@ -15,11 +16,11 @@ use Europa\Router\Route\RouteInterface;
 class Router implements RouterInterface
 {
     /**
-     * The subject to match.
+     * Sets the filter the router should use.
      * 
-     * @var string
+     * @var Closure
      */
-    private $subject;
+    private $filter;
     
     /**
      * The array of routes to match.
@@ -29,68 +30,18 @@ class Router implements RouterInterface
     private $routes = array();
     
     /**
-     * Sets the subject.
+     * Routes the specified request.
      * 
-     * @param string $subject The subject to match.
-     * 
-     * @return RequestRouter
-     */
-    public function setSubject($subject)
-    {
-        $this->subject = $subject;
-        return $this;
-    }
-    
-    /**
-     * Returns the subject.
-     * 
-     * @return string
-     */
-    public function getSubject()
-    {
-        return $this->subject;
-    }
-    
-    /**
-     * Routes the specified request. If a subject is specified it is used instead of the default Europa request URI.
-     * 
-     * @param \Europa\Request\RequestInterface $request The request to route.
+     * @param RequestInterface $request The request to route.
      * 
      * @return bool
      */
     public function route(RequestInterface $request)
     {
-        // figure out the subject to match
-        $subject = $this->subject;
-        
-        // by default if no subject is specified, it uses the default string representation of the request
-        if (!$subject) {
-            $subject = $request->__toString();
-        }
-        
-        // query the router and apply parameters on successful result
-        $params = $this->query($subject);
-        if ($params !== false) {
-            $request->setParams($params);
-            return true;
-        }
-        
-        return false;
-    }
-    
-    /**
-     * Returns the parameters from the matched route or false if no route is matched.
-     * 
-     * @param string $subject The subject to match.
-     * 
-     * @return array|false
-     */
-    public function query($subject)
-    {
-        foreach ($this->getRoutes() as $route) {
-            $match = $route->query($subject);
-            if ($match !== false) {
-                return $match;
+        foreach ($this->routes as $route) {
+            if ($result = $route->query($this->filterRequest($request))) {
+                $request->setParams($result);
+                return true;
             }
         }
         return false;
@@ -102,13 +53,24 @@ class Router implements RouterInterface
      * @param string $name   The name of the route to reverse engineer.
      * @param array  $params The parameters to use when reverse engineering the route.
      * 
-     * @throws \LogicException If the route cannot be found.
-     * 
      * @return string
      */
-    public function reverse($name, array $params = array())
+    public function format($name, array $params = array())
     {
-        return $this->getRoute($name)->reverse($params);
+        return $this->getRoute($name)->format($params);
+    }
+    
+    /**
+     * Sets a filter used to turn the request into a matchable string.
+     * 
+     * @param Closure $filter The filter.
+     * 
+     * @return Route
+     */
+    public function filter(Closure $filter)
+    {
+        $this->filter = $filter;
+        return $this;
     }
 
     /**
@@ -124,28 +86,26 @@ class Router implements RouterInterface
         $this->routes[$name] = $route;
         return $this;
     }
-
+    
     /**
-     * Gets a specified route.
+     * Returns the route if it exists.
      * 
-     * @param string $name The name of the route to get.
+     * @param string $name The route name.
      * 
-     * @return Route
+     * @return RouteInterface | null
      */
     public function getRoute($name)
     {
-        // the route must exist
-        if (!isset($this->routes[$name])) {
-            throw new \LogicException('The route "' . $name . '" does not exist.');
+        if (isset($this->routes[$name])) {
+            return $this->routes[$name];
         }
-        
-        return $this->routes[$name];
+        throw new LogicException(sprintf('Cannot get route "%s" because it does not exist.', $name));
     }
     
     /**
-     * Returns if a route was set.
+     * Returns whether or not the route exists.
      * 
-     * @param string $name The name of the route to check for.
+     * @param string $name The route name.
      * 
      * @return bool
      */
@@ -155,27 +115,32 @@ class Router implements RouterInterface
     }
     
     /**
-     * Removes a route.
+     * Removes the route.
      * 
-     * @param string $name The name of the route to remove.
+     * @param string $name The route name.
      * 
-     * @return bool
+     * @return Router
      */
     public function removeRoute($name)
     {
         if (isset($this->routes[$name])) {
             unset($this->routes[$name]);
         }
-        return $this;
+        throw new LogicException(sprintf('Cannot remove route "%s" because it does not exist.', $name));
     }
     
     /**
-     * Returns all routes that were set.
+     * Filters the request.
      * 
-     * @return array
+     * @param RequestInterface $request The request to filter.
+     * 
+     * @return string
      */
-    public function getRoutes()
+    private function filterRequest(RequestInterface $request)
     {
-        return $this->routes;
+        if ($this->filter) {
+            return call_user_func($this->filter, $request);
+        }
+        return $request->__toString();
     }
 }

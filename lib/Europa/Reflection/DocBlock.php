@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Reflection;
+use Europa\Reflection\DocTag;
 use LogicException;
 use RuntimeException;
 
@@ -15,6 +16,13 @@ use RuntimeException;
 class DocBlock
 {
     /**
+     * A default tag, if any to use for parsing unknown tags.
+     * 
+     * @var DocTag\DocTagInterface
+     */
+    private $defaultTag = 'Europa\Reflection\DocTag\GenericTag';
+    
+    /**
      * The description that was given to the doc block.
      * 
      * @var string
@@ -26,47 +34,32 @@ class DocBlock
      * 
      * @var array
      */
-    private $tags = array();
-
+    private $map = [
+        'author' => 'Europa\Reflection\DocTag\AuthorTag',
+        'filter' => 'Europa\Reflection\DocTag\FilterTag',
+        'param'  => 'Europa\Reflection\DocTag\ParamTag',
+        'return' => 'Europa\Reflection\DocTag\ReturnTag',
+        'throws' => 'Europa\Reflection\DocTag\ThrowsTag',
+    ];
+    
     /**
-     * An array of doc tag names to object maps.
+     * The tag instances in this doc block.
      * 
      * @var array
      */
-    private $map = array(
-        'author'     => 'Europa\Reflection\DocTag\AuthorTag',
-        'category'   => 'Europa\Reflection\DocTag\CategoryTag',
-        'deprecated' => 'Europa\Reflection\DocTag\DeprecatedTag',
-        'filter'     => 'Europa\Reflection\DocTag\FilterTag',
-        'internal'   => 'Europa\Reflection\DocTag\InternalTag',
-        'license'    => 'Europa\Reflection\DocTag\LicenseTag',
-        'package'    => 'Europa\Reflection\DocTag\PackageTag',
-        'param'      => 'Europa\Reflection\DocTag\ParamTag',
-        'return'     => 'Europa\Reflection\DocTag\ReturnTag',
-        'see'        => 'Europa\Reflection\DocTag\SeeTag',
-        'subpackage' => 'Europa\Reflection\DocTag\SubpackageTag',
-        'throws'     => 'Europa\Reflection\DocTag\ThrowsTag',
-        'todo'       => 'Europa\Reflection\DocTag\TodoTag',
-        'link'       => 'Europa\Reflection\DocTag\LinkTag',
-        'copyright'  => 'Europa\Reflection\DocTag\CopyrightTag',
-        'since'      => 'Europa\Reflection\DocTag\SinceTag',
-        'var'        => 'Europa\Reflection\DocTag\VarTag',
-        'version'    => 'Europa\Reflection\DocTag\VersionTag',
-    );
+    private $tags = [];
 
     /**
      * Constructs a new doc block object given the doc string. If no doc string is given, nothing is parsed and an
      * empty doc block is created.
      * 
-     * @param string $docString The doc string to parse, if any, and initialize in the object.
+     * @param string $doc The doc string to parse, if any, and initialize in the object.
      * 
      * @return DocBlock
      */
-    public function __construct($docString = null)
+    public function __construct($doc = null)
     {
-        if ($docString) {
-            $this->parse($docString);
-        }
+        $this->parse($doc);
     }
 
     /**
@@ -82,14 +75,14 @@ class DocBlock
     /**
      * Applies a custom mapping for a doc tag that may or may not already be mapped.
      * 
-     * @param string $tag   The tag name.
-     * @param string $class The class to handle the tag.
+     * @param string $name The tag name.
+     * @param string $tag  The tag instance to handle tag parsing.
      * 
      * @return DocBlock
      */
-    public function map($tag, $class)
+    public function map($name, DocTag\DocTagInterface $tag)
     {
-        $this->map[$tag] = $class;
+        $this->map[$name] = $tag;
         return $this;
     }
 
@@ -119,29 +112,24 @@ class DocBlock
     /**
      * Adds the specified tag to the doc block.
      * 
-     * @param DocTag $tag The tag to add.
+     * @param DocTag\DocTagInterface $tag The tag to add.
      * 
      * @return DocBlock
      */
-    public function addTag(DocTag $tag)
+    public function addTag(DocTag\DocTagInterface $tag)
     {
         // used multiple times
         $name = $tag->tag();
-
-        // check to see if it's valid
-        if (!isset($this->map[$name])) {
-            throw new \LogicException('The tag "{$name}" is an invalid tag for the "{get_class($this)}" doc block.');
-        }
 
         // if the tag is already set, we create multiple of the same one
         // otherwise we just set it
         if (isset($this->tags[$name])) {
             if (!is_array($this->tags[$name])) {
-                $this->tags[$name] = array($this->tags[$name]);
+                $this->tags[$name] = [$this->tags[$name]];
             }
             $this->tags[$name][] = $tag;
         } else {
-            $this->tags[$name] = array($tag);
+            $this->tags[$name] = [$tag];
         }
 
         return $this;
@@ -195,14 +183,16 @@ class DocBlock
              . ' * ' . $this->description . PHP_EOL
              . ' * '. PHP_EOL;
         
-        $last = null;
+        $last    = null;
         $longest = 0;
+        
         foreach ($this->tags as $tagGroup) {
             foreach ($tagGroup as $tag) {
-                $str .= ' * @' . $tag->__toString() . PHP_EOL;
+                $str .= ' * @' . $tag->compile() . PHP_EOL;
                 $last = $tag->tag();
             }
         }
+        
         return $str . ' */';
     }
 
@@ -213,11 +203,15 @@ class DocBlock
      * 
      * @return void
      */
-    public function parse($docString)
+    public function parse($doc)
     {
-        $this->description = $this->parseDescription($docString);
+        if (!$doc) {
+            return $this;
+        }
+        
+        $this->description = $this->parseDescription($doc);
 
-        $tags = $this->parseTags($docString);
+        $tags = $this->parseTags($doc);
         $tags = $this->parseDocTagsFromStrings($tags);
         
         foreach ($tags as $tag) {
@@ -230,14 +224,14 @@ class DocBlock
     /**
      * Parses out the description of the specified doc string and returns it.
      * 
-     * @param string $docString The string to parse.
+     * @param string $doc The string to parse.
      * 
      * @return string
      */
-    private function parseDescription($docString)
+    private function parseDescription($doc)
     {
         // matches anything up to a "@"
-        preg_match('/([a-zA-Z]([^@]+|([^\r]?[^\n][^\s]*[^\*])+))/m', $docString, $desc);
+        preg_match('/([a-zA-Z]([^@]+|([^\r]?[^\n][^\s]*[^\*])+))/m', $doc, $desc);
         
         if (isset($desc[1])) {
             $desc = $desc[1];
@@ -264,14 +258,13 @@ class DocBlock
     /**
      * Parses out each tag of the specified doc string and returns them as an array of string.
      * 
-     * @param string $docString The string to parse.
+     * @param string $doc The string to parse.
      * 
      * @return array
      */
-    private function parseTags($docString)
+    private function parseTags($doc)
     {
-        $parts = array();
-        $parts = explode('* @', $docString);
+        $parts = explode('* @', $doc);
         unset($parts[0]);
         return $parts;
     }
@@ -285,10 +278,12 @@ class DocBlock
      */
     private function parseDocTagsFromStrings(array $strings)
     {
-        $tags = array();
+        $tags = [];
+        
         foreach ($strings as $string) {
             $tags[] = $this->parseDocTagFromString($string);
         }
+        
         return $tags;
     }
 
@@ -299,17 +294,22 @@ class DocBlock
      * 
      * @return DocTag
      */
-    private function parseDocTagFromString($string)
+    private function parseDocTagFromString($tag)
     {
-        $string = preg_replace('#\t#', ' ', $string);
-        $parts  = explode(' ', $string, 2);
-        $name   = trim(strtolower($parts[0]));
-
-        if (!isset($this->map[$name])) {
-            throw new LogicException('Unknown doc tag "' . $name . '".');
+        $string = preg_replace('#\t#', ' ', $tag);
+        $parts  = explode(' ', $tag, 2);
+        $name   = trim($parts[0]);
+        $value  = isset($parts[1]) ? trim($parts[1]) : null;
+        
+        if (isset($this->map[$name])) {
+            return new $this->map[$name]($name, $value);
         }
         
-        return new $this->map[$name](isset($parts[1]) ? $parts[1] : null);
+        if ($this->defaultTag) {
+            return new $this->defaultTag($name, $value);
+        }
+        
+        throw new RuntimeException('The tag "' . $name . '" has no associated doc tag parser and no default tag was found.');
     }
     
     /**

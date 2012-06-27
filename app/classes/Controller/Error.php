@@ -1,6 +1,7 @@
 <?php
 
 namespace Controller;
+use Europa\Controller\RestController;
 use Europa\Request\Uri;
 
 /**
@@ -11,7 +12,7 @@ use Europa\Request\Uri;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright(c) 2010 Trey Shugart http://europaphp.org/license
  */
-class Error extends Base
+class Error extends RestController
 {
     /**
      * Displays the error page.

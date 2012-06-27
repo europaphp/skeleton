@@ -1,7 +1,6 @@
 <?php
 
 namespace Europa\Response;
-use Europa\View\ViewInterface;
 
 /**
  * Counterpart to request object, outputs headers and contents
@@ -14,17 +13,27 @@ use Europa\View\ViewInterface;
 class Cli implements ResponseInterface
 {
     /**
-     * Outputs the specified view.
+     * Outputs the specified string.
      * 
-     * @param ViewInterface $view    The view to output.
-     * @param array         $context The context to render the view with.
+     * @param string $content The content to output.
+     * 
+     * @return string
+     */
+    public function output($content)
+    {
+        echo $content;
+    }
+    
+    /**
+     * Appends a line of content.
+     * 
+     * @param string $content The line of content.
      * 
      * @return void
      */
-    public function output(ViewInterface $view = null, array $context = [])
+    public function append($content = '')
     {
-        if ($view) {
-            echo $view->render($context);
-        }
+        echo $content . PHP_EOL;
+        return $this;
     }
 }

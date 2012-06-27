@@ -1,7 +1,6 @@
 <?php
 
 namespace Europa\Response;
-use Europa\View\ViewInterface;
 
 /**
  * Counterpart to request object, outputs headers and contents
@@ -15,12 +14,11 @@ use Europa\View\ViewInterface;
 interface ResponseInterface
 {
     /**
-     * Outputs the specified view.
+     * Outputs the specified string.
      * 
-     * @param ViewInterface $view    The view to output.
-     * @param array         $context The context to render the view with.
+     * @param string $content The content to output.
      * 
-     * @return void
+     * @return string
      */
-    public function output(ViewInterface $view = null, array $context = []);
+    public function output($content);
 }

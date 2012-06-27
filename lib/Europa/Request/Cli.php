@@ -13,6 +13,13 @@ namespace Europa\Request;
 class Cli extends RequestAbstract
 {
     /**
+     * The cli request method.
+     * 
+     * @var string
+     */
+    const METHOD = 'cli';
+    
+    /**
      * The namespace token.
      * 
      * @var string
@@ -29,10 +36,11 @@ class Cli extends RequestAbstract
     /**
      * Constructs a cli request and parses out the parameters.
      * 
-     * @return \Europa\Request\Cli
+     * @return Cli
      */
     public function __construct()
     {
+        $this->setMethod(static::METHOD);
         $this->parseCommands();
         $this->parseParams();
     }
@@ -71,7 +79,7 @@ class Cli extends RequestAbstract
     /**
      * Parses out the commands that were used in the request.
      * 
-     * @return \Europa\Request\Cli
+     * @return Cli
      */
     private function parseCommands()
     {
@@ -79,12 +87,10 @@ class Cli extends RequestAbstract
         $cmds = array();
         
         array_shift($args);
-        
         foreach ($args as $arg) {
             if (strpos($arg, '-') === 0) {
                 break;
             }
-            
             $this->commands[] = $arg;
         }
         
@@ -94,7 +100,7 @@ class Cli extends RequestAbstract
     /**
      * Parses out the cli request parameters - in unix style - and sets them on the request.
      * 
-     * @return \Europa\Request\Cli
+     * @return Cli
      */
     private function parseParams()
     {
@@ -102,14 +108,13 @@ class Cli extends RequestAbstract
         $skip = false;
         
         array_shift($args);
-        
         foreach ($args as $index => $param) {
             if ($skip) {
                 $skip = false;
-                
                 continue;
             }
             
+            // allow dash prefixing
             if ($param[0] === '-') {
                 $cut   = $param[1] === '-' ? 2 : 1;
                 $param = substr($param, $cut, strlen($param));
@@ -117,7 +122,6 @@ class Cli extends RequestAbstract
                 
                 if ($next !== false && $next[0] !== '-') {
                     $this->setParam($param, $next);
-                    
                     $skip = true;
                 } else {
                     $this->setParam($param, true);

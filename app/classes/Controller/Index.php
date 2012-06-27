@@ -1,6 +1,7 @@
 <?php
 
 namespace Controller;
+use Europa\Controller\RestController;
 
 /**
  * A default controller for a base implementation.
@@ -10,7 +11,7 @@ namespace Controller;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Index extends Base
+class Index extends RestController
 {
     /**
      * The default request method.
