@@ -133,7 +133,7 @@ class Europa extends Provider
     public function view($request)
     {
         if ($request instanceof Request\Http && $suffix = $request->getUri()->getSuffix()) {
-            return $this->get('view.http.' . $suffix);
+            return $this->get('view.' . $suffix);
         }
         return $this->get('view.php');
     }
@@ -162,7 +162,7 @@ class Europa extends Provider
      * 
      * @return Json
      */
-    public function viewHttpJson()
+    public function viewJson()
     {
         return new Json;
     }
@@ -172,7 +172,7 @@ class Europa extends Provider
      * 
      * @return Xml
      */
-    public function viewHttpXml()
+    public function viewXml()
     {
         return new Xml;
     }
