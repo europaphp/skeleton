@@ -19,12 +19,12 @@ use Europa\View\Php;
 use Europa\View\Xml;
 
 /**
- * API repository.
+ * The default container.
  * 
- * @category Repositories
- * @package  HostingControl
- * @author   Trey Shugart <tshugart@ultraserve.com.au>
- * @license  Copyright (c) Ultra Serve http://ultraserve.com.au/license
+ * @category Controllers
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
 class Europa extends Provider
 {
