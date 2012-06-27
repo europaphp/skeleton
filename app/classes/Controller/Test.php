@@ -23,7 +23,7 @@ class Test extends RestController
      * 
      * @return void
      */
-    public function all($test = 'Test', $showUntested = false)
+    public function cli($test = 'Test', $showUntested = false)
     {
         // so we can get some helpful data
         $analyzer = new Coverage;
