@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\Router\Route;
+namespace Europa\Router;
 
 /**
  * A route class used for matching via tokens in a string.
@@ -30,8 +30,8 @@ class TokenRoute implements RouteInterface
     public function __construct($expression, array $defaults = [])
     {
         $this->regex = new RegexRoute(
-            $this->parse($this->expression),
-            $this->expression,
+            $this->parse($expression),
+            $expression,
             $defaults
         );
     }
@@ -43,7 +43,7 @@ class TokenRoute implements RouteInterface
      * 
      * @return array | false
      */
-    public function query($query);
+    public function query($query)
     {
         return $this->regex->query($query);
     }
