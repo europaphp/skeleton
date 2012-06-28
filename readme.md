@@ -6,7 +6,7 @@ EuropaPHP is an extremely fast, flexible and lightweight <del>M</del>VC Framewor
 Why Another PHP Framework?
 --------------------------
 
-EuropaPHP is the manifestation of the shortcomings of other PHP frameworks with a strong focus on scalability, standards, the view/controller relationship and dependency injection. It is specifically designed to be paired with your favorite libraries and it will seamlessly integrate with anything.
+EuropaPHP is the manifestation of the shortcomings of other PHP frameworks with a strong focus on scalability, standards, the view/controller relationship and dependency injection. It is specifically designed to be paired with your favourite libraries and it will seamlessly integrate with anything.
 
 Installation
 ------------
@@ -16,9 +16,7 @@ Extract it anywhere you want as long as you can view the `www/index.php` in a br
 So How Do You Use it?
 ---------------------
 
-All documentation is located in the `docs` directory and organized in directories by category or component. To add to the documentation, simply fork, document and submit a pull request. 
-
-For the API documentation see http://europaphp.org/documentation/api. To update the code documentation, simply fork, edit or add doc block comments and sumbit a pull request.
+To check out the documentation, just go into the `lib` directory. Each directory has a `readme` that corresponds to it. To update the documentation, just do as you'd normally do with code.
 
 License
 -------
