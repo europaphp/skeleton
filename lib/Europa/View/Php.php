@@ -183,13 +183,15 @@ class Php implements ViewScriptInterface
         }
         
         // capture the output
-        if ($script = $this->locator->locate($this->script)) {
+        try {
             ob_start();
             extract($context);
-            include $script;
+            include $this->locator->locate($this->script);
             $rendered = ob_get_clean();
-        } else {
-            throw new LogicException(sprintf('Unable to find the view script "%s".', $this->script));
+        } catch (Exception $e) {
+            throw new LogicException(
+                "Unable to render view {$this->script} with message: {$e->getMessage()}"
+            );
         }
         
         // handle view extensions

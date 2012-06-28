@@ -74,6 +74,7 @@ class Finder extends ContainerAbstract
         if ($class = $this->filter->filter($name)) {
             return $this->invokeQueue($this->createInstance($class, $args));
         }
+        $this->throwNotExists($name);
     }
     
     /**

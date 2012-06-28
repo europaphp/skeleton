@@ -128,7 +128,7 @@ class App implements AppInterface
     private function resolve(RequestInterface $request)
     {
         if ($controller = $request->getParam($this->key)) {
-            return $this->container->get('controllers')->get($controller);
+            return $this->container->get('controllers')->get($controller, [$request]);
         }
         
         throw new LogicException(sprintf(

@@ -30,6 +30,7 @@ abstract class Provider extends ContainerAbstract
             $args = array_merge($this->resolveMethodDependencies($method), $args);
             return $method->invokeArgs($this, $args);
         }
+            $this->throwNotExists($name);
     }
     
     /**

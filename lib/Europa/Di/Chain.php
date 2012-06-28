@@ -42,5 +42,6 @@ class Chain extends ContainerAbstract
                 
             }
         }
+        $this->throwNotExists($name);
     }
 }
