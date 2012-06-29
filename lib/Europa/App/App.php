@@ -1,11 +1,10 @@
 <?php
 
 namespace Europa\App;
-use Closure;
 use LogicException;
 use Europa\Di\ContainerInterface;
 use Europa\Request\RequestInterface;
-use Europa\Request\ResponseInterface;
+use Europa\Response\ResponseInterface;
 use Europa\Router\RouterInterface;
 use Europa\View\ViewInterface;
 use UnexpectedValueException;
@@ -28,11 +27,39 @@ class App implements AppInterface
     const KEY = 'controller';
     
     /**
-     * The container that has the required components.
+     * The controller container responsible for finding a controller.
      * 
      * @var ContainerInterface
      */
-    private $container;
+    private $controllers;
+    
+    /**
+     * The request responsible for supplying information to the controller.
+     * 
+     * @var RequestInterface
+     */
+    private $request;
+    
+    /**
+     * The response responsible for outputting the rendered view.
+     * 
+     * @var ResponseInterface
+     */
+    private $response;
+    
+    /**
+     * The router to use for routing the request.
+     * 
+     * @var RouterInterface
+     */
+    private $router;
+    
+    /**
+     * The view responsible for rendering controller response.
+     * 
+     * @var ViewInterface
+     */
+    private $view;
     
     /**
      * The controller key name in the context returned from the router.
@@ -42,20 +69,28 @@ class App implements AppInterface
     private $key = self::KEY;
     
     /**
-     * Constructs a new application. The container is required to provide:
-     *   - controllers
-     *   - request
-     *   - response
-     *   - router
-     *   - view
+     * Constructs a new application.
      * 
-     * @param ContainerInterface $container The container to use.
+     * @param ContainerInterface $controllers The controller container responsible for finding a controller.
+     * @param RequestInterface   $request     The request responsible for supplying information to the controller.
+     * @param ResponseInterface  $response    The response responsible for outputting the rendered view.
+     * @param RouterInterface    $router      The router to use for routing the request.
+     * @param ViewInterface      $view        The view responsible for rendering controller response.
      * 
      * @return App
      */
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
+    public function __construct(
+        ContainerInterface $controllers,
+        RequestInterface   $request,
+        ResponseInterface  $response,
+        RouterInterface    $router,
+        ViewInterface      $view
+    ) {
+        $this->controllers = $controllers;
+        $this->request     = $request;
+        $this->response    = $response;
+        $this->router      = $router;
+        $this->view        = $view;
     }
     
     /**
@@ -78,12 +113,9 @@ class App implements AppInterface
      */
     public function run()
     {
-        // get the request once
-        $request = $this->container->get('request');
-        
         // a route must be matched and contain values
-        if ($context = $this->container->get('router')->route($request)) {
-            $context = $this->callController($request);
+        if ($context = $this->router->route($this->request)) {
+            $context = $this->callController();
         } elseif (is_array($context)) {
             throw new LogicException('The matched route did not contain any context.');
         } else {
@@ -94,7 +126,7 @@ class App implements AppInterface
         $context = $this->ensureContextArray($context);
         
         // output the rendered view using the response
-        $this->container->get('response')->output($this->container->get('view')->render($context));
+        $this->response->output($this->view->render($context));
         
         return $this;
     }
@@ -102,14 +134,12 @@ class App implements AppInterface
     /**
      * Calls the controller that was routed to.
      * 
-     * @param RequestInterface $request The request to call the controller with.
-     * 
      * @return array
      */
-    private function callController(RequestInterface $request)
+    private function callController()
     {
         try {
-            return $this->resolve($request)->action();
+            return $this->resolve()->action();
         } catch (Exception $e) {
             throw new LogicException(sprintf(
                 'The controller could not be resolved with message: %s',
@@ -121,20 +151,18 @@ class App implements AppInterface
     /**
      * Resolves the controller using the specified request.
      * 
-     * @param RequestInterface $request The request to call the controller with.
-     * 
      * @return array
      */
-    private function resolve(RequestInterface $request)
+    private function resolve()
     {
-        if ($controller = $request->getParam($this->key)) {
-            return $this->container->get('controllers')->get($controller, [$request]);
+        if ($controller = $this->request->getParam($this->key)) {
+            return $this->controllers->get($controller, [$this->request]);
         }
         
         throw new LogicException(sprintf(
             'The parameter "%s" was not in the request "%s".',
             $this->key,
-            $request->__toString()
+            (string) $this->request
         ));
     }
     
