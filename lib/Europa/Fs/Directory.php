@@ -1,6 +1,10 @@
 <?php
 
 namespace Europa\Fs;
+use Countable;
+use IteratorAggregate;
+use LogicException;
+use RuntimeException;
 
 /**
  * An object that represents a single directory.
@@ -10,27 +14,27 @@ namespace Europa\Fs;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Directory extends Item implements \IteratorAggregate, \Countable
+class Directory extends Item implements IteratorAggregate, Countable
 {
     /**
      * Opens the directory an constructs the parent info object.
      * 
      * @param string $path The path to open.
      * 
-     * @return \Europa\Fs\Directory
+     * @return Directory
      */
     public function __construct($path)
     {
         $path     = (string) $path;
         $realpath = realpath($path);
         if (!$path || !$realpath) {
-            throw new \LogicException('The path "' . $path . '" must be a valid directory.');
+            throw new LogicException('The path "' . $path . '" must be a valid directory.');
         }
 
         try {
             parent::__construct($realpath);
-        } catch(\RuntimeException $e) {
-            throw new \RuntimeException("Could not open directory {$path} with message: {$e->getMessage()}.");
+        } catch (RuntimeException $e) {
+            throw new RuntimeException("Could not open directory {$path} with message: {$e->getMessage()}.");
         }
     }
     
@@ -57,7 +61,7 @@ class Directory extends Item implements \IteratorAggregate, \Countable
     /**
      * Returns a finder instance representing the current directory.
      * 
-     * @return \Europa\Fs\Finder
+     * @return Finder
      */
     public function getIterator()
     {
@@ -69,10 +73,10 @@ class Directory extends Item implements \IteratorAggregate, \Countable
     /**
      * Merges the current directory to the destination directory and leaves the current directory alone.
      * 
-     * @param \Europa\Fs\Directory $destination   The destination directory.
+     * @param Directory $destination   The destination directory.
      * @param bool                 $fileOverwrite Whether or not to overwrite destination files.
      * 
-     * @return \Europa\Fs\Directory
+     * @return Directory
      */
     public function copy(Directory $destination, $fileOverwrite = true)
     {
@@ -89,12 +93,12 @@ class Directory extends Item implements \IteratorAggregate, \Countable
             }
             if (!is_file($new) || $fileOverwrite) {
                 if (!@copy($old, $new)) {
-                    throw new \RuntimeException(
+                    throw new RuntimeException(
                         'File ' . $old . ' could not be copied to ' . $new . '.'
                     );
                 }
             } elseif (is_file($new) && !$fileOverwrite) {
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     'File ' . $new . ' already exists.'
                 );
             }
@@ -106,10 +110,10 @@ class Directory extends Item implements \IteratorAggregate, \Countable
      * Moves the current directory to the destination directory, deletes the
      * current directory and returns the destination.
      * 
-     * @param \Europa\Fs\Directory $destination   The destination directory.
+     * @param Directory $destination   The destination directory.
      * @param bool                 $fileOverwrite Whether or not to overwrite destination files.
      * 
-     * @return \Europa\Fs\Directory
+     * @return Directory
      */
     public function move(Directory $destination, $fileOverwrite = true)
     {
@@ -123,14 +127,14 @@ class Directory extends Item implements \IteratorAggregate, \Countable
      * 
      * @param string $newName The new name of the directory.
      * 
-     * @return \Europa\Fs\Directory
+     * @return Directory
      */
     public function rename($newName)
     {
         $oldPath = $this->getPathname();
         $newPath = dirname($oldPath) . DIRECTORY_SEPARATOR . basename($newName);
         if (!@rename($oldPath, $newPath)) {
-            throw new \RuntimeException("Path {$oldPath} could not be renamed to {$newPath}.");
+            throw new RuntimeException("Path {$oldPath} could not be renamed to {$newPath}.");
         }
         return self::open($newPath);
     }
@@ -148,14 +152,14 @@ class Directory extends Item implements \IteratorAggregate, \Countable
         
         // then delete it
         if (!@rmdir($this->getPathname())) {
-            throw new \RuntimeException("Could not remove directory {$this->getPathname()}.");
+            throw new RuntimeException("Could not remove directory {$this->getPathname()}.");
         }
     }
     
     /**
      * Empties the current directory.
      * 
-     * @return \Europa\Fs\Directory
+     * @return Directory
      */
     public function clear()
     {
@@ -190,8 +194,8 @@ class Directory extends Item implements \IteratorAggregate, \Countable
     }
     
     /**
-     * Searches for matching text inside each file using the pattern and returns
-     * each file containing matching text in a flat array.
+     * Searches for matching text inside each file using the pattern and returns each file containing matching text in
+     * a flat array.
      * 
      * @param string $regex The pattern to match.
      * 
@@ -205,9 +209,8 @@ class Directory extends Item implements \IteratorAggregate, \Countable
     }
     
     /**
-     * Searches in each file for the matching pattern and replaces it with the
-     * replacement pattern. Returns an array file/count if matching files were
-     * found or false if no matching files were found.
+     * Searches in each file for the matching pattern and replaces it with the replacement pattern. Returns an array
+     * file/count if matching files were found or false if no matching files were found.
      * 
      * @param string $regex       The pattern to match.
      * @param string $replacement The replacement pattern.
@@ -231,12 +234,12 @@ class Directory extends Item implements \IteratorAggregate, \Countable
      * 
      * @param string $path The path to the directory.
      * 
-     * @return \Europa\Fs\Directory
+     * @return Directory
      */
     public static function open($path)
     {
         if (!is_dir($path)) {
-            throw new \RuntimeException("Could not open directory {$path}.");
+            throw new RuntimeException("Could not open directory {$path}.");
         }
         return new static($path);
     }
@@ -248,20 +251,20 @@ class Directory extends Item implements \IteratorAggregate, \Countable
      * @param string $path The path to the directory.
      * @param int    $mask The octal mask of the directory.
      * 
-     * @return \Europa\Fs\Directory
+     * @return Directory
      */
     public static function create($path, $mask = 0777)
     {
         if (is_dir($path)) {
-            throw new \RuntimeException("Directory {$path} already exists.");
+            throw new RuntimeException("Directory {$path} already exists.");
         }
         
         if (!@mkdir($path, $mask, true)) {
-            throw new \RuntimeException("Could not create directory {$path}.");
+            throw new RuntimeException("Could not create directory {$path}.");
         }
         
         if (!@chmod($path, $mask)) {
-            throw new \RuntimeException("Could not set file permissions on {$path} to {$mask}.");
+            throw new RuntimeException("Could not set file permissions on {$path} to {$mask}.");
         }
         
         return static::open($path);
@@ -273,7 +276,7 @@ class Directory extends Item implements \IteratorAggregate, \Countable
      * @param string $path The path to the directory.
      * @param int    $mask The octal mask of the directory.
      * 
-     * @return \Europa\Fs\Directory
+     * @return Directory
      */
     public static function createIfNotExists($path, $mask = 0777)
     {
@@ -289,7 +292,7 @@ class Directory extends Item implements \IteratorAggregate, \Countable
      * @param string $path The path to the directory.
      * @param int    $mask The octal mask of the directory.
      * 
-     * @return \Europa\Fs\Directory
+     * @return Directory
      */
     public static function overwrite($path, $mask = 0777)
     {
