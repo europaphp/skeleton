@@ -103,7 +103,7 @@ If we put all this together, our `boot.php` file may look like the following:
 
 Now all you have to do when you want to setup your application is include the `boot.php` file.
 
-For a complete example, see the default [boot.php file](../../app/boot.php)
+For a complete example, see the default [boot.php](../../app/boot.php) file.
 
 Running Your Application
 ------------------------
@@ -112,11 +112,11 @@ The `Europa\App\App` class was created so that there is an easy way to make the 
 
 The default application ties together 5 components:
 
-- [Controller](../Controller)
-- [Request](../Request)
-- [Response](../Response)
-- [Router](../Router)
-- [View](../View)
+- [Controller](Controller)
+- [Request](Request)
+- [Response](Response)
+- [Router](Router)
+- [View](View)
 
 Each component is required by the application and passed to the constructor. This should be done using a DI container.
 
@@ -132,7 +132,7 @@ By default, you are provided with a class called `Container\Europa` which contai
 
 If you were to set up the application class manually, you would have to set up each dependency. Using a container solves this problem and provides you with each component - including the application - ready to go out of the box.
 
-More information on [Dependency Injection Containers](../Di).
+More information on [Dependency Injection Containers](Di).
 
 Specifying the Controller Request Parameter
 -------------------------------------------
