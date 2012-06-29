@@ -56,4 +56,4 @@ Routers take a request and match it against a subject. If a match is found, the 
 View
 ----
 
-Suite of different styles of output. A view is used in conjunction with a controllers return value and a response to automate output.
+Suite of different styles of output. A view is used in conjunction with a controller's return value and a response to automate output.
