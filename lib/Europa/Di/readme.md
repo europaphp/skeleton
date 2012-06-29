@@ -20,7 +20,7 @@ In Europa, there are three types of containers.
 
 In essence, they all do the same thing: configure and return an object. It's the way they do it that is different.
 
-Retrieving dependencies can be done just as if you were accessing properties or calling methods on an object:
+Retrieving dependencies are done with `create()` and `get()`. Creating an object will always return a new one. Getting one will create if not exists and return it:
 
     <?php
     
@@ -148,7 +148,7 @@ Finders are for dynamic resolution and configuration. They are very useful in si
     });
     
     // returns an instance of Ctrl\IndexController
-    $controller = $finder->index;
+    $controller = $finder->get('index');
 
 ### Dynamic Constructor Arguments
 
@@ -195,7 +195,7 @@ A `Chain` is used when you want to link together multiple containers. It will lo
     $chain->add(new MyContainer);
     $chain->add(new Finder);
     
-    $dep = $chain->someDependency();
+    $dep = $chain->create('someDependency');
 
 ### Passing Arguments
 
