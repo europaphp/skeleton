@@ -20,6 +20,34 @@ In Europa, there are three types of containers.
 
 In essence, they both do the same thing: configure and return an object. It's the way they do it that is different.
 
+Retrieving dependencies can be done just as if you were accessing properties or calling methods on an object:
+
+    <?php
+    
+    use Container\MyContainer;
+    
+    $mc = MyContainer::fetch();
+    
+    // accessing like a property
+    $old = $mc->get('someDep');
+    $new = $mc->get('someDep');
+    
+    // getting will cache the first one
+    var_dump($old === $new); // true
+    
+    $old = $mc->create('someDep');
+    $new = $mc->create('someDep');
+    
+    // calling will always return a new object
+    var_dump($old === $new); // false
+
+You can even pass arguments by index or name. If they are passed by name, their index is resolved using the method definition:
+
+    $mc->get('someDep', [$arg1, $arg2]);
+    $mc->get('someDep', ['arg1' => $arg1, 'arg2' => $arg2]);
+    $mc->create('someDep', [$arg1, $arg2]);
+    $mc->create('someDep', ['arg1' => $arg1, 'arg2' => $arg2]);
+
 Providers
 ---------
 
@@ -61,14 +89,9 @@ Then to use it, it's fairly straight forward:
 
     use Container\MyContainer;
     
-    $mc = new MyContainer; // or MyContainer::fetch()
-    
-    $mail = $mc->get('mailMessage');
-    $mail->setBody('Some body.');
-    $mail->setTo('someone@else.com');
-    
-    // we can also use dot notation
-    $mc->get('mail.transport')->send($mail);
+    $mc  = new MyContainer;
+    $msg = $mc->mailMessage()->setTo('someone@else.com')->setBody('Some body.');
+    $mc->mailTransport->send($msg);
 
 In a more complex example, we can automate the setup of dependencies if one requires another during setup by including it in the method definition:
 
@@ -90,6 +113,10 @@ Additionally, if you don't want the dependency set up right away, just hint it a
     {
         return new Php($locator());
     }
+
+### Passing Arguments
+
+Arguments will be merged with the arguments as defined in the method definition.
 
 Finders
 -------
@@ -121,7 +148,7 @@ Finders are for dynamic resolution and configuration. They are very useful in si
     });
     
     // returns an instance of Ctrl\IndexController
-    $controller = $finder->get('index');
+    $controller = $finder->index;
 
 ### Dynamic Constructor Arguments
 
@@ -149,6 +176,10 @@ To queue a function for one type of instance you type-hint the first argument:
 
     $finder->queue('Some\Instance\Type', function($obj) {});
 
+### Passing Arguments
+
+When arguments are passed, they will be merged with and override the arguments that are specified in the config.
+
 Chains
 ------
 
@@ -164,4 +195,8 @@ A `Chain` is used when you want to link together multiple containers. It will lo
     $chain->add(new MyContainer);
     $chain->add(new Finder);
     
-    $chain->get('someDependency');
+    $dep = $chain->someDependency();
+
+### Passing Arguments
+
+When arguments are passed, they will be handled by their respective container.

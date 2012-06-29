@@ -35,22 +35,6 @@ abstract class ContainerAbstract implements ContainerInterface
     private static $instances = [];
     
     /**
-     * @see self::create()
-     */
-    public function __call($name, array $args = [])
-    {
-        return $this->create($name, $args);
-    }
-    
-    /**
-     * @see self::get()
-     */
-    public function __get($name)
-    {
-        return $this->get($name);
-    }
-    
-    /**
      * Locates the specified service and returns it.
      * 
      * @param string $name The service name.
