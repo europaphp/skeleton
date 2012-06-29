@@ -17,6 +17,13 @@ use RuntimeException;
 class Directory extends Item implements IteratorAggregate, Countable
 {
     /**
+     * The default file mask.
+     * 
+     * @var int
+     */
+    const MASK = 0777;
+    
+    /**
      * Opens the directory an constructs the parent info object.
      * 
      * @param string $path The path to open.
@@ -27,6 +34,7 @@ class Directory extends Item implements IteratorAggregate, Countable
     {
         $path     = (string) $path;
         $realpath = realpath($path);
+        
         if (!$path || !$realpath) {
             throw new LogicException('The path "' . $path . '" must be a valid directory.');
         }
@@ -82,15 +90,18 @@ class Directory extends Item implements IteratorAggregate, Countable
     {
         $self = $this->getPathname();
         $dest = $destination->getPathname() . DIRECTORY_SEPARATOR . $this->getBasename();
+        
         foreach ($this->getIterator() as $file) {
             $old  = $file->getPathname();
             $new  = substr($old, strlen($self));
             $new  = $dest . $new;
             $base = dirname($new);
+            
             if ($file instanceof Directory) {
                 static::create($new);
                 continue;
             }
+            
             if (!is_file($new) || $fileOverwrite) {
                 if (!@copy($old, $new)) {
                     throw new RuntimeException(
@@ -103,6 +114,7 @@ class Directory extends Item implements IteratorAggregate, Countable
                 );
             }
         }
+        
         return $this;
     }
     
@@ -253,7 +265,7 @@ class Directory extends Item implements IteratorAggregate, Countable
      * 
      * @return Directory
      */
-    public static function create($path, $mask = 0777)
+    public static function create($path, $mask = self::MASK)
     {
         if (is_dir($path)) {
             throw new RuntimeException("Directory {$path} already exists.");
@@ -278,7 +290,7 @@ class Directory extends Item implements IteratorAggregate, Countable
      * 
      * @return Directory
      */
-    public static function createIfNotExists($path, $mask = 0777)
+    public static function createIfNotExists($path, $mask = self::MASK)
     {
         if (is_dir($path)) {
             return static::open($path, $mask);
@@ -294,7 +306,7 @@ class Directory extends Item implements IteratorAggregate, Countable
      * 
      * @return Directory
      */
-    public static function overwrite($path, $mask = 0777)
+    public static function overwrite($path, $mask = self::MASK)
     {
         if (is_dir($path)) {
             $dir = new static($path);

@@ -1,6 +1,8 @@
 <?php
 
 namespace Europa\Fs;
+use LogicException;
+use RuntimeException;
 
 /**
  * An object that represents a single file.
@@ -12,6 +14,13 @@ namespace Europa\Fs;
  */
 class File extends Item
 {
+    /**
+     * The default file mask.
+     * 
+     * @var int
+     */
+    const MASK = 0777;
+    
     /**
      * Returns the file contents instead of the file path.
      * 
@@ -27,7 +36,7 @@ class File extends Item
      * 
      * @param string $contents The contents to set to the file.
      * 
-     * @return \Europa\Fs\File
+     * @return File
      */
     public function setContents($contents)
     {
@@ -65,7 +74,7 @@ class File extends Item
     public function delete()
     {
         if (!@unlink($this->getPathname())) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 'Could not delete file ' . $this->getPathname() . '.'
             );
         }
@@ -75,22 +84,20 @@ class File extends Item
     /**
      * Copies the file to the destination directory.
      * 
-     * @param \Europa\Fs\Directory $destination The destination directory.
-     * @param bool                 $fileOverwrite Whether or not to overwrite the destination file if it exists.
+     * @param Directory $destination The destination directory.
+     * @param bool      $overwrite   Whether or not to overwrite the destination file if it exists.
      * 
-     * @return \Europa\Fs\File
+     * @return File
      */
-    public function copy(Directory $destination, $fileOverwrite = true)
+    public function copy(Directory $destination, $overwrite = true)
     {
         $source      = $this->getPathname();
-        $destination = $destination->getPathname()
-                     . DIRECTORY_SEPARATOR
-                     . basename($source);
+        $destination = $destination->getPathname() . DIRECTORY_SEPARATOR . basename($source);
         
         // copy the file to the destination
-        if ($fileOverwrite || !is_file($destination)) {
+        if ($overwrite || !is_file($destination)) {
             if (!@copy($source, $destination)) {
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     'Could not copy file ' . $source . ' to ' . $destination . '.'
                 );
             }
@@ -103,14 +110,14 @@ class File extends Item
     /**
      * Moves the current file to the specified directory.
      * 
-     * @param \Europa\Fs\Directory $destination   The destination directory.
-     * @param bool                 $fileOverwrite Whether or not to overwrite the destination file if it exists.
+     * @param Directory $destination The destination directory.
+     * @param bool      $overwrite   Whether or not to overwrite the destination file if it exists.
      * 
-     * @return \Europa\Fs\File
+     * @return File
      */
-    public function move(Directory $destination, $fileOverwrite = true)
+    public function move(Directory $destination, $overwrite = true)
     {
-        $destination = $this->copy($destination, $fileOverwrite);
+        $destination = $this->copy($destination, $overwrite);
         $this->delete();
         return $destination;
     }
@@ -120,13 +127,13 @@ class File extends Item
      * 
      * @param string $newName The name to rename the current file to.
      * 
-     * @return \Europa\Fs\File
+     * @return File
      */
     public function rename($newPath)
     {
         $oldPath = $this->getPathname();
         if (!@rename($oldPath, $newPath)) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 'Could not rename file from ' . $oldPath . ' to ' . $newPath . '.'
             );
         }
@@ -136,7 +143,7 @@ class File extends Item
     /**
      * Returns whether or not the current file exists in the specified direcory.
      * 
-     * @param \Europa\Fs\Directory $dir The directory to check in.
+     * @param Directory $dir The directory to check in.
      * 
      * @return bool
      */
@@ -152,7 +159,7 @@ class File extends Item
      * 
      * @param string $regex The pattern to match.
      * 
-     * @return false|array
+     * @return false | array
      */
     public function search($regex)
     {
@@ -216,7 +223,7 @@ class File extends Item
             if (array_key_exists($key, $info)) {
                 return $info[$key];
             } else {
-                throw new \LogicException('Information for "' . $this->getRealpath() . '" does not contain "' . $key . '".');
+                throw new LogicException('Information for "' . $this->getRealpath() . '" does not contain "' . $key . '".');
             }
         }
         return $info;
@@ -227,12 +234,12 @@ class File extends Item
      * 
      * @param string $file The file to open.
      * 
-     * @return \Europa\Fs\Directory
+     * @return Directory
      */
     public static function open($file)
     {
         if (!is_file($file)) {
-            throw new \RuntimeException("Could not open file {$file}.");
+            throw new RuntimeException("Could not open file {$file}.");
         }
         return new static($file);
     }
@@ -243,25 +250,47 @@ class File extends Item
      * @param string $file The file to create.
      * @param int    $mask The octal mask of the file.
      * 
-     * @return \Europa\Fs\File
+     * @return File
      */
-    public static function create($file, $mask = 0777)
+    public static function create($file, $mask = self::MASK)
     {
         // the file must not exist
         if (is_file($file)) {
-            throw new \LogicException("The file {$file} already exists.");
+            throw new LogicException("The file {$file} already exists.");
         }
         
-        // create the directory if it doesn't exist
+        // the directory it is supposed to be in
         $dir = dirname($file);
+        
+        // create the directory if it doesn't exist
         if (!is_dir($dir)) {
             Directory::create($dir);
         }
         
         // create the file in the directory
         file_put_contents($file, '');
+        
+        // set permissions
         chmod($file, $mask);
+        
+        // open and return
         return static::open($file);
+    }
+    
+    /**
+     * Creates the file if it doesn't exist and opens it if it does.
+     * 
+     * @param string $file The file to overwrite.
+     * @param int    $mask The octal mask of the file.
+     * 
+     * @return File
+     */
+    public static function createIfNotExists($file, $mask = self::MASK)
+    {
+        if (is_file($path)) {
+            return static::open($path, $mask);
+        }
+        return static::create($path, $mask);
     }
     
     /**
@@ -270,9 +299,9 @@ class File extends Item
      * @param string $file The file to overwrite.
      * @param int    $mask The octal mask of the file.
      * 
-     * @return \Europa\Fs\File
+     * @return File
      */
-    public static function overwrite($file, $mask = 0777)
+    public static function overwrite($file, $mask = self::MASK)
     {
         if (is_file($file)) {
             static::open($file)->delete();
