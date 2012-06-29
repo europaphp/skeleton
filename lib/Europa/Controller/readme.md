@@ -16,7 +16,7 @@ A `RestController` allows you to specify methods which correspond to methods fro
 - get
 - head
 - options
-- patch
+- patch, not exactly in the spec, but it is allowed (and used by Github)
 - post
 - put
 - trace
