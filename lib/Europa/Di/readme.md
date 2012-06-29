@@ -12,10 +12,11 @@ Or:
 
 This can get very tedious and difficult to maintain because of code duplication and organisation. On top of this, there is no way to dynamically configure a dependency or to replace one with another which is useful for testing amongst other things. This is where a dependency injection container comes in.
 
-In Europa, there are two types of containers.
+In Europa, there are three types of containers.
 
 - Provider
 - Finder
+- Chain
 
 In essence, they both do the same thing: configure and return an object. It's the way they do it that is different.
 
@@ -148,3 +149,19 @@ To queue a function for one type of instance you type-hint the first argument:
 
     $finder->queue('Some\Instance\Type', function($obj) {});
 
+Chains
+------
+
+A `Chain` is used when you want to link together multiple containers. It will look for the dependency in each specified container until it reaches the end of the chain. If it's not found it throws an exception just like the other containers.
+
+    <?php
+    
+    use Europa\Di\Chain;
+    use Europa\Di\Finder;
+    use Container\MyContainer;
+    
+    $chain = new Chain;
+    $chain->add(new MyContainer);
+    $chain->add(new Finder);
+    
+    $chain->get('someDependency');
