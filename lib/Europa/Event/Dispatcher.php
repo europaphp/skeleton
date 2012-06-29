@@ -70,7 +70,7 @@ class Dispatcher implements DispatcherInterface
     /**
      * Triggers an event stack.
      * 
-     * @param stirng $name The name of the event to trigger.
+     * @param string $name The name of the event to trigger.
      * @param array  $data Any data to pass to the event or event stack at the time of triggering.
      * 
      * @return bool
@@ -79,13 +79,7 @@ class Dispatcher implements DispatcherInterface
     {
         foreach ($this->getStackNamesForEvent($name) as $event) {
             foreach ($this->stack[$event] as $callback) {
-                // handle non-instance callable callbacks
-                if (!$callback instanceof EventInterface) {
-                    $callback = new CallbackEvent($callback);
-                }
-                
-                // cancel
-                if ($callback->trigger($data) === false) {
+                if (call_user_func_array($callback, $data) === false) {
                     return $this;
                 }
             }
