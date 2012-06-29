@@ -31,11 +31,17 @@ class Europa extends Provider
     /**
      * Returns an application service.
      * 
+     * @param ContainerInterface $controllers The controller container responsible for finding a controller.
+     * @param RequestInterface   $request     The request responsible for supplying information to the controller.
+     * @param ResponseInterface  $response    The response responsible for outputting the rendered view.
+     * @param RouterInterface    $router      The router to use for routing the request.
+     * @param ViewInterface      $view        The view responsible for rendering controller response.
+     * 
      * @return App
      */
-    public function app()
+    public function app($controllers, $request, $response, $router, $view)
     {
-        return new App($this);
+        return new App($controllers, $request, $response, $router, $view);
     }
     
     /**
