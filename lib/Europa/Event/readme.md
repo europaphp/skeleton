@@ -3,7 +3,7 @@ Event
 
 The event component is a super-simple way to bind and trigger events. Instead of building out complex event interfaces it relies on a straight forward way of calling events.
 
-As long as your bound callback `is_callable()`, it can be triggered. This means any class that has an `__invoke()` method, `array($class, 'method')`, closures and lambda functions.
+As long as your bound callback `is_callable()`, it can be triggered. This means any class that has an `__invoke()` method, `array($class, 'method')`, closures, lambda functions and any defined function.
 
 The Event component provides you with a default `Dispatcher` that will solve 99% of your problems. For the rest, there is a `DispatcherInterface` if you need to solve an edge case.
 
@@ -49,3 +49,28 @@ Triggering is simple and also allows you to pass in data that is passed on to ev
     $dispatcher->trigger('hello.pre-world', ['Hello ']);
     echo 'World!';
     $dispatcher->trigger('hello.post-world');
+
+If you've got some callable classes out there, go ahead and use them:
+
+    <?php
+    
+    namespace Event;
+    
+    class MyEvent
+    {
+        public function __invoke()
+        {
+            echo 'Triggered my event!';
+        }
+    }
+
+And trigger it:
+
+    use Europa\Event\Dispatcher;
+    use Event\MyEvent;
+    
+    $dispatcher = new Dispatcher;
+    $dispatcher->bind('myevent', new MyEvent);
+    
+    // outputs "Triggered my event!"
+    $dispatcher->trigger('myevent');
