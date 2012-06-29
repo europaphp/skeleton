@@ -156,7 +156,7 @@ class Europa extends Provider
         
         $view = new Php($locator);
         $view->setScript($interface . '/' . str_replace(' ', '/', $request->getParam('controller')));
-        $view->setHelperContainer($helpers);
+        $view->setHelpers($helpers);
         
         return $view;
     }

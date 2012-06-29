@@ -8,42 +8,6 @@ The recommended controller for web applications (which may also contain command 
 RESTful Controllers
 -------------------
 
-In order to create the basis for a RESTful controller, you extend the `RestController` class.
-
-    <?php
-    
-    namespace Controller;
-    use Europa\Controller\RestController;
-    
-    class Index extends RestController
-    {
-        public function get()
-        {
-            ...
-        }
-    }
-
-Restful controllers support all methods of the [HTTP 1.1 specification](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html) as well as one additional method, `cli`, for making command line requests to the same controller. While not exactly RESTful, the `cli` method allows you to point to the same controller using the command line which in some cases can be very useful.
-
-The `RestController` derives from `ControllerAbstract` which requires an instance of `RequestInterface` and uses the `getMethod()` method to discern which method to call.
-
-If you need to specify which method to use, you specify it on the request.
-
-    <?php
-    
-    use Europa\Request\Http;
-    
-    $request = new Http;
-    $request->setMethod('get');
-
-The controller then knows which method it needs to call when it is actioned.
-
-    $controller = new Controller\Index($request);
-    $controller->action();
-
-Basic Controllers
------------------
-
 At their most basic, controllers must implement `ControllerInterface`.
 
     <?php
@@ -68,7 +32,7 @@ At their most basic, controllers must implement `ControllerInterface`.
 Custom Controllers
 ------------------
 
-Generally using the interface and building a controller from scratch is not necessary and if not using a `RestController`, you would use `ControllerAbstract` to create your own type of controller.
+Generally using `ControllerInterface` and building a controller from scratch is not necessary and if not using a `RestController`, you would use `ControllerAbstract` to create your own type of controller.
 
 For example, you can create multi-action controllers like in some other frameworks:
 

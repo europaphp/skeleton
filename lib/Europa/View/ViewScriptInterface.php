@@ -17,7 +17,7 @@ interface ViewScriptInterface extends ViewInterface
      * 
      * @param string $script The script to render.
      * 
-     * @return \Europa\View\ViewScriptAbstract
+     * @return ViewScriptInterface
      */
     public function setScript($script);
     

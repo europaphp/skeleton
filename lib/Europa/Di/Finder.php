@@ -18,6 +18,13 @@ use ReflectionFunction;
 class Finder extends ContainerAbstract
 {
     /**
+     * A token that represents any type of object.
+     * 
+     * @var string
+     */
+    const ALL = '*';
+    
+    /**
      * Configuration.
      * 
      * @var array
@@ -46,6 +53,17 @@ class Finder extends ContainerAbstract
     public function __construct()
     {
         $this->filter = new ClassResolutionFilter;
+        $this->init();
+    }
+    
+    /**
+     * Initialisation hook for any further setup.
+     * 
+     * @return void
+     */
+    public function init()
+    {
+        
     }
     
     /**
@@ -90,37 +108,41 @@ class Finder extends ContainerAbstract
     /**
      * Sets the configuration for a type of instance.
      * 
-     * @param Closure $fn The closure to run against the instance.
+     * @param string  $type The class type.
+     * @param Closure $fn   The closure to run against the instance.
      * 
      * @return Locator
      */
-    public function config($type, Closure $fn)
+    public function config($type, Closure $fn = null)
     {
+        if ($type instanceof Closure) {
+            $fn   = $type;
+            $type = self::ALL;
+        }
+        
         $this->config[$type] = $fn;
+        
         return $this;
     }
     
     /**
      * Queues a method for a type of instance.
      * 
-     * @param Closure $fn The closure to run against the instance.
+     * @param string  $type The class type.
+     * @param Closure $fn   The closure to run against the instance.
      * 
      * @return Locator
      */
-    public function queue(Closure $fn)
+    public function queue($type, Closure $fn = null)
     {
-        $func = new ReflectionFunction($fn);
-        $args = $func->getParameters();
-        
-        if (!$args) {
-            throw new LogicException(
-                'The queue function must hint at the type of instance it is configuring as its first parameter.'
-            );
+        if ($type instanceof Closure) {
+            $fn   = $type;
+            $type = self::ALL;
         }
         
         $this->queue[] = [
-            'func' => $func,
-            'type' => $args[0]->getClass()->getName()
+            'func' => $fn,
+            'type' => $type
         ];
         
         return $this;
@@ -139,7 +161,7 @@ class Finder extends ContainerAbstract
         $class = new ClassReflector($class);
         
         foreach ($this->config as $type => $fn) {
-            if ($class->is($type)) {
+            if ($type === self::ALL || $class->is($type)) {
                 $args = array_merge($args, (array) $fn());
             }
         }
@@ -156,11 +178,14 @@ class Finder extends ContainerAbstract
      */
     private function invokeQueue($class)
     {
+        $refl = new ClassReflector($class);
+        
         foreach ($this->queue as $item) {
-            if ($class instanceof $item['type']) {
-                $item['func']->invoke($class);
+            if ($item['type'] === self::ALL || $refl->is($item['type'])) {
+                $item['func']($class);
             }
         }
+        
         return $class;
     }
 }

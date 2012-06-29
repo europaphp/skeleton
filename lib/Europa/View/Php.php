@@ -33,7 +33,7 @@ class Php implements ViewScriptInterface
      * 
      * @var Container
      */
-    private $container;
+    private $helpers;
     
     /**
      * The views that have already extended a parent class.
@@ -96,12 +96,12 @@ class Php implements ViewScriptInterface
      */
     public function __call($name, array $args = array())
     {
-        if ($this->container) {
-            return $this->container->get($name, $args);
+        if ($this->helpers) {
+            return $this->helpers->get($name, $args);
         }
         
         throw new LogicException(
-            'You must set a helper container using "setHelperContainer" before trying to call a helper.'
+            'You must set a helper container using "setHelpers" before trying to call a helper.'
         );
     }
     
@@ -118,12 +118,12 @@ class Php implements ViewScriptInterface
      */
     public function __get($name)
     {
-        if ($this->container) {
-            return $this->container->get($name);
+        if ($this->helpers) {
+            return $this->helpers->get($name);
         }
         
         throw new LogicException(
-            'You must set a helper container using "setHelperContainer" before trying to get a helper.'
+            'You must set a helper container using "setHelpers" before trying to get a helper.'
         );
     }
     
@@ -283,19 +283,30 @@ class Php implements ViewScriptInterface
         
         // set the parent
         $this->parentScript = $parent;
+        
         return $this;
     }
     
     /**
-     * Sets the service container used to locate helpers.
+     * Sets the helper container used to locate helpers.
      * 
-     * @param ContainerInterface $container The container to locate helpers with.
+     * @param ContainerInterface $helpers The helper container.
      * 
      * @return Php
      */
-    public function setHelperContainer(ContainerInterface $container)
+    public function setHelpers(ContainerInterface $helpers)
     {
-        $this->container = $container;
+        $this->helpers = $helpers;
         return $this;
+    }
+    
+    /**
+     * Returns the helper container.
+     * 
+     * @return ContainerInterface
+     */
+    public function getHelpers()
+    {
+        return $this->helpers;
     }
 }

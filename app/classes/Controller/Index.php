@@ -1,6 +1,7 @@
 <?php
 
 namespace Controller;
+use Europa\Controller\Filterable;
 use Europa\Controller\RestController;
 
 /**
