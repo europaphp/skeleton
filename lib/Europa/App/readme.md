@@ -103,7 +103,7 @@ If we put all this together, our `boot.php` file may look like the following:
 
 Now all you have to do when you want to setup your application is include the `boot.php` file.
 
-For a complete example, see the default [boot.php file](../../../app/boot.php)
+For a complete example, see the default [boot.php file](../../app/boot.php)
 
 Running Your Application
 ------------------------
