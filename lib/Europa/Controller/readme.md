@@ -10,19 +10,19 @@ RESTful Controllers
 
 A `RestController` allows you to specify methods which correspond to methods from the [HTTP 1.1. Method Definitions](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html). The allowed methods are:
 
-- cli, for handling command line requests
-- connect
-- delete
-- get
-- head
-- options
-- patch, not exactly in the spec, but it is allowed (and used by Github)
-- post
-- put
-- trace
-- all, catches all requests
+- `cli`, for handling command line requests
+- `connect`
+- `delete`
+- `get`
+- `head`
+- `options`
+- `patch`, not exactly in the spec, but it is allowed (and used by Github)
+- `post`
+- `put`
+- `trace`
+- `all`, catches all requests
 
-The `cli` methods is used for catching all command line requests and `all` is used for catching any request where a corresponding method is not defined. All other methods directly correspond to the methods in the HTTP 1.1 Spec.
+The `cli` method is used for catching all command line requests and `all` is used for catching any request where a corresponding method is not defined. All other methods directly correspond to the methods in the HTTP 1.1 Spec.
 
 A controller may look like the following:
 
