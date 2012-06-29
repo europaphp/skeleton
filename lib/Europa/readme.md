@@ -46,7 +46,7 @@ Abstracts both CLI and HTTP requests into a common interface which allows for ea
 Response
 --------
 
-Similar to the request object, each type of request has its own type of response both for the sake of convention and simplicity. An HTTP request abstracts header setting and output.
+Similar to the request object, each type of request has its own type of response both for the sake of convention and simplicity. An HTTP response abstracts header setting and output.
 
 Router
 ------
