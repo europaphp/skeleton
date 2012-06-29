@@ -11,4 +11,4 @@ The EuropaPHP framework files.
 Testes
 ------
 
-The name aside, it this was a better choice for us than PHP Unit. It is easier to use and follows more strict standards.
+The name aside, it this was a better choice for us than PHP Unit. It is easier to use, smaller and follows more strict standards.
