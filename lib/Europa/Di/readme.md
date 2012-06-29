@@ -90,8 +90,8 @@ Then to use it, it's fairly straight forward:
     use Container\MyContainer;
     
     $mc  = new MyContainer;
-    $msg = $mc->mailMessage()->setTo('someone@else.com')->setBody('Some body.');
-    $mc->mailTransport->send($msg);
+    $msg = $mc->create('mailMessage')->setTo('someone@else.com')->setBody('Some body.');
+    $mc->get('mailTransport')->send($msg);
 
 In a more complex example, we can automate the setup of dependencies if one requires another during setup by including it in the method definition:
 
