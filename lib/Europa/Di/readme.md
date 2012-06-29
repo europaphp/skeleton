@@ -18,7 +18,7 @@ In Europa, there are three types of containers.
 - Finder
 - Chain
 
-In essence, they both do the same thing: configure and return an object. It's the way they do it that is different.
+In essence, they all do the same thing: configure and return an object. It's the way they do it that is different.
 
 Retrieving dependencies can be done just as if you were accessing properties or calling methods on an object:
 
