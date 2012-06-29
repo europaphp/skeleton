@@ -55,9 +55,6 @@ class Europa extends Provider
     {
         $finder = new Finder;
         $finder->getFilter()->add(new ClassNameFilter(['prefix' => 'Controller\\']));
-        $finder->config('Europa\Controller\ControllerInterface', function() use ($request) {
-            return [$request()];
-        });
         return $finder;
     }
     

@@ -1,6 +1,8 @@
 <?php
 
 namespace Europa\Request;
+use ArrayIterator;
+use IteratorAggregate;
 
 /**
  * The main request object.
@@ -10,7 +12,7 @@ namespace Europa\Request;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
+abstract class RequestAbstract implements IteratorAggregate, RequestInterface
 {
     /**
      * The request unique id.
@@ -36,7 +38,7 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
     /**
      * Magic alias for setParam().
      * 
-     * @see \Europa\Request\RequestAbstract::setParam()
+     * @see RequestAbstract::setParam()
      */
     public function __set($name, $value)
     {
@@ -46,7 +48,7 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
     /**
      * Magic alias for getParam().
      * 
-     * @see \Europa\Request\RequestAbstract::getParam()
+     * @see RequestAbstract::getParam()
      */
     public function __get($name)
     {
@@ -56,7 +58,7 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
     /**
      * Magic alias for hasParam().
      * 
-     * @see \Europa\Request\RequestAbstract::hasParam()
+     * @see RequestAbstract::hasParam()
      */
     public function __isset($name)
     {
@@ -66,7 +68,7 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
     /**
      * Magic alias for removeParam().
      * 
-     * @see \Europa\Request\RequestAbstract::removeParam()
+     * @see RequestAbstract::removeParam()
      */
     public function __unset($name)
     {
@@ -78,7 +80,7 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
      * 
      * @param string $method The method to set.
      * 
-     * @return \Europa\Request
+     * @return RequestAbstract
      */
     public function setMethod($method)
     {
@@ -113,16 +115,17 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
     /**
      * Returns the specified request parameter.
      * 
-     * @param string $name The name of the parameter.
+     * @param string $name    The name of the parameter.
+     * @param string $default The default value to return, if any.
      * 
      * @return mixed
      */
-    public function getParam($name)
+    public function getParam($name, $default = null)
     {
         if (isset($this->params[$name])) {
             return $this->params[$name];
         }
-        return null;
+        return $default;
     }
     
     /**
@@ -130,7 +133,7 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
      * 
      * @param string $name The parameter to check for.
      * 
-     * @return \Europa\Request
+     * @return RequestAbstract
      */
     public function hasParam($name)
     {
@@ -142,7 +145,7 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
      * 
      * @param string $name The parameter to unset.
      * 
-     * @return \Europa\Request
+     * @return RequestAbstract
      */
     public function removeParam($name)
     {
@@ -157,7 +160,7 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
      * 
      * @param mixed $params The params to set.
      * 
-     * @return \Europa\Request
+     * @return RequestAbstract
      */
     public function setParams($params)
     {
@@ -182,7 +185,7 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
     /**
      * Clears request parameters.
      * 
-     * @return \Europa\Request
+     * @return RequestAbstract
      */
     public function removeParams()
     {
@@ -228,11 +231,11 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
     /**
      * Returns an iterator of the parameters.
      * 
-     * @return \ArrayIterator
+     * @return ArrayIterator
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->params);
+        return new ArrayIterator($this->params);
     }
     
     /**
@@ -250,7 +253,7 @@ abstract class RequestAbstract implements \IteratorAggregate, RequestInterface
      * 
      * @param string $serialized The serialized string.
      * 
-     * @return \Europa\Request
+     * @return RequestAbstract
      */
     public function unserialize($serialized)
     {

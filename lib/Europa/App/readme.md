@@ -1,5 +1,5 @@
-Application
-===========
+App
+===
 
 The application layer serves as a component responsible for setting up and running your application.
 

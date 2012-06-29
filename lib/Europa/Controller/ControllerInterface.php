@@ -14,11 +14,11 @@ use Europa\Request\RequestInterface;
 interface ControllerInterface
 {
     /**
-     * Constructs a new controller using the specified request and response.
+     * Constructs a new controller using the specified request.
      *
      * @param RequestInterface $request The request to use.
      *
-     * @return ControllerInterface
+     * @return ControllerAbstract
      */
     public function __construct(RequestInterface $request);
     
