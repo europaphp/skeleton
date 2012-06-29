@@ -49,16 +49,26 @@ class Finder extends ContainerAbstract
     }
     
     /**
-     * Adds a filter to use for class resolution.
+     * Sets the filter to use for dependency class name resolution.
      * 
-     * @param FilterInterface $filter The filter to add.
+     * @param FilterInterface $filter The filter.
      * 
-     * @return Locator
+     * @return Finder
      */
-    public function addFilter(FilterInterface $filter)
+    public function setFilter(FilterInterface $filter)
     {
-        $this->filter->add($filter);
+        $this->filter = $filter;
         return $this;
+    }
+    
+    /**
+     * Returns the filter.
+     * 
+     * @return FilterInterface
+     */
+    public function getFilter()
+    {
+        return $this->filter;
     }
     
     /**

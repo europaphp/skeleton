@@ -34,6 +34,13 @@ class App implements AppInterface
     private $controllers;
     
     /**
+     * The controller key name in the context returned from the router.
+     * 
+     * @var string
+     */
+    private $key = self::KEY;
+    
+    /**
      * The request responsible for supplying information to the controller.
      * 
      * @var RequestInterface
@@ -60,13 +67,6 @@ class App implements AppInterface
      * @var ViewInterface
      */
     private $view;
-    
-    /**
-     * The controller key name in the context returned from the router.
-     * 
-     * @var string
-     */
-    private $key = self::KEY;
     
     /**
      * Constructs a new application.
@@ -100,10 +100,20 @@ class App implements AppInterface
      * 
      * @return App
      */
-    public function key($key)
+    public function setKey($key)
     {
         $this->key = $key;
         return $this;
+    }
+    
+    /**
+     * Sets the key.
+     * 
+     * @return string
+     */
+    public function getKey()
+    {
+        return $this->key;
     }
     
     /**
@@ -113,16 +123,11 @@ class App implements AppInterface
      */
     public function run()
     {
-        // a route must be matched and contain values
-        if ($context = $this->router->route($this->request)) {
-            $context = $this->callController();
-        } elseif (is_array($context)) {
-            throw new LogicException('The matched route did not contain any context.');
-        } else {
-            throw new LogicException('No route was matched. Try adding a catch all.');
-        }
+        // route
+        $this->router->route($this->request);
         
         // ensure array
+        $context = $this->callController();
         $context = $this->ensureContextArray($context);
         
         // output the rendered view using the response

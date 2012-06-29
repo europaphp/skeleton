@@ -54,7 +54,7 @@ class Europa extends Provider
     public function controllers(Closure $request)
     {
         $finder = new Finder;
-        $finder->addFilter(new ClassNameFilter(['prefix' => 'Controller\\']));
+        $finder->getFilter()->add(new ClassNameFilter(['prefix' => 'Controller\\']));
         $finder->config('Europa\Controller\ControllerInterface', function() use ($request) {
             return [$request()];
         });
@@ -71,8 +71,9 @@ class Europa extends Provider
     public function helpers(Closure $view)
     {
         $finder = new Finder;
-        $finder->addFilter(new ClassNameFilter(['prefix' => 'Helper\\']));
-        $finder->addFilter(new ClassNameFilter(['prefix' => 'Europa\View\Helper\\']));
+        $finder->getFilter()
+            ->add(new ClassNameFilter(['prefix' => 'Helper\\']))
+            ->add(new ClassNameFilter(['prefix' => 'Europa\View\Helper\\']));
         
         // css
         $finder->config('Europa\View\Helper\Css', function() {
