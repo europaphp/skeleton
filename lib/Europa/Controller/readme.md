@@ -8,7 +8,7 @@ The recommended controller for web applications (which may also contain command 
 RESTful Controllers
 -------------------
 
-A rest controller allows you to specify methods which correspond to methods from the [HTTP 1.1. Method Definitions](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html). The allowed methods are:
+A `RestController` allows you to specify methods which correspond to methods from the [HTTP 1.1. Method Definitions](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html). The allowed methods are:
 
 - cli
 - connect
