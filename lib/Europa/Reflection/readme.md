@@ -3,29 +3,147 @@ Reflection
 
 The reflection component extends on PHP's build in reflection classes and offers some very useful features such as calling methods using named parameters instead of index-based parameters and docblock / doctag parsing.
 
+All reflectors implement the `Reflectable` interface.
+
+For the examples, we will use the following class where it applies:
+
+    <?php
+
+    class MyClass extends MyClassAbstract implements MyInterface
+    {
+    	use MyTrait;
+    	
+    	/**
+    	 * Some property.
+    	 * 
+    	 * @var string
+    	 */
+    	private $myProperty;
+    	
+    	public function __construct($name, $value)
+    	{
+		
+    	}
+    	
+    	public function getValue($name)
+    	{
+		
+    	}
+    	
+    	/**
+    	 * Returns both values separated by a colon.
+    	 * 
+    	 * @param string $param1 The first parameter.
+    	 * @param string $param2 The second parameter.
+    	 * 
+    	 * @return string
+    	 */
+    	public function myMethod($param1, $param2)
+    	{
+    		return $param1 . ': ' . $param2;
+    	}
+    }
+
+DocBlock
+--------
+
+The `DocBlock` component is a very large part of the Reflection component. It allows you to represent a doc block as an object. You can parse an existing doc block and modify it or create one using the API.
+
+	<?php
+
+	use Europa\Reflection\DocBlock;
+
+	$block = new DocBlock('
+		/**
+		 * The doc block description.
+		 * 
+		 * @param string $name  The name parameter.
+		 * @param string $value The value parameter.
+		 * 
+		 * @throws InvalidArgumentException If you pass a bad argument.
+		 * 
+		 * @return string
+		 */
+	');
+
+	// returns "The doc block description."
+	$block->getDescription();
+
+	// true
+	$block->hasTag('param');
+
+	// returns array of DocTag instances
+	$block->getTags('param');
+
+	// throws an exception because @see doesn't exist
+	$block->getTag('see');
+
+	// returns an empty array
+	$block->getTags('see');
+
+	$block->setDescription('New description.');
+	$block->addTag(new DocTag\GenericTag('test', 'Tag value.'));
+
+	// returns:
+	// /**
+	//  * New description. 
+	//  * 
+	//  * @param string $name The name parameter.
+	//  * @param string $value The value parameter.
+	//  * @throws InvalidArgumentException If you pass a bad argument.
+	//  * @returns string
+	//  * @test Tag value.
+	//  */
+	$block->compile();
+
+	// true
+	$block->compile() === (string) $block;
+
+Currently, there is no formatting option on the doc bock when compiling.
+
+There are special doc tags and a generic tag used for tags where a class is not defined. The available doc tag classes are:
+
+- `AuthorTag`
+- `FilterTag`
+- `GenericTag`
+- `ParamTag`
+- `ReturnTag`
+- `ThrowsTag`
+
+Each tag may have methods specific to that tag.
+
+### AuthorTag
+
+- `AuthorTag` `setName(string $name)`
+- `string` `getName()`
+- `AuthorTag` `setEmail(string $email)`
+- `string` `getEmail()`
+
+### FilterTag
+
+- `getInstance()` Returns an instance of the class specified in the filter tag.
+
+### ParamTag
+
+- `ParamTag` `setType(string $type)`
+- `string` `getType()`
+- `ParamTag` `setName(string $name)`
+- `string` `getName()`
+- `ParamTag` `setDescription(string $description)`
+- `string``getDescription()`
+
+### ReturnTag
+
+- `ReturnTag` `setTypes(array | string $type)`
+- `array` `getTypes()`
+- `ReturnTag` `setDescription(string $description)`
+- `string` `getDescription()`
+- `bool` `isValid(mixed $value)`
+
 ClassReflector
 --------------
 
-The `ClassReflector` extends PHP's `ReflectionClass` and enables you to use named arguments, docblock parsing, trait checking and more.
-
-For the examples, we'll use the following class:
-
-	<?php
-	
-	class MyClass extends MyClassAbstract implements MyInterface
-	{
-		use MyTrait;
-		
-		public function __construct($name, $value)
-		{
-			
-		}
-		
-		public function getValue($name)
-		{
-			
-		}
-	}
+The `ClassReflector` extends PHP's `ReflectionClass` and enables you to use named arguments, doc block parsing, trait checking and more.
 
 Type checking works for classes, abstract classes, traits and interfaces:
 
@@ -70,89 +188,12 @@ If you prefer to call your constructor using named parameters instead of an inde
 
 Using the overridden `newInstanceArgs()` method also allows you to pass no arguments. The default behavior is raise an error which doesn't make sense if there is a default value of `null` allowed by the default PHP implementation.
 
-DocBlock
---------
-
-The `DocBlock` class allows you to represent a doc block as an object. You can parse an existing doc block and modify it or create one using the API.
-
-	<?php
-	
-	use Europa\Reflection\DocBlock;
-	
-	$block = new DocBlock('
-		/**
-		 * The doc block description.
-		 * 
-		 * @param string $name  The name parameter.
-		 * @param string $value The value parameter.
-		 * 
-		 * @throws InvalidArgumentException If you pass a bad argument.
-		 * 
-		 * @return string
-		 */
-	');
-	
-	// returns "The doc block description."
-	$block->getDescription();
-	
-	// true
-	$block->hasTag('param');
-	
-	// returns array of DocTag instances
-	$block->getTags('param');
-	
-	// throws an exception because @see doesn't exist
-	$block->getTag('see');
-	
-	// returns an empty array
-	$block->getTags('see');
-	
-	$block->setDescription('New description.');
-	$block->addTag(new DocTag\GenericTag('test', 'Tag value.'));
-	
-	// returns:
-	// /**
-	//  * New description. 
-	//  * 
-	//  * @param string $name The name parameter.
-	//  * @param string $value The value parameter.
-	//  * @throws InvalidArgumentException If you pass a bad argument.
-	//  * @returns string
-	//  * @test Tag value.
-	//  */
-	$block->compile();
-	
-	// true
-	$block->compile() === (string) $block;
-
-Currently, there is no formatting option on the doc bock when compiling.
-
 MethodReflector
 ---------------
 
 The `MethodReflector` class extends on the built in `ReflectionMethod` class. It offers functionality that otherwise is not available.
 
-Take the following class:
-
-	<?php
-	
-	class MyClass
-	{
-		/**
-		 * Returns both values separated by a colon.
-		 * 
-		 * @param string $param1 The first parameter.
-		 * @param string $param2 The second parameter.
-		 * 
-		 * @return string
-		 */
-		public function myMethod($param1, $param2)
-		{
-			return $param1 . ': ' . $param2;
-		}
-	}
-
-From that method, we can derive quite a bit of information:
+Using the class from our first example, we can derive quite a bit of information:
 
 	<?php
 	
@@ -189,4 +230,14 @@ Using `getDocBlock()` or `getDocComment()` on the `MethodReflector`, like in the
 PropertyReflector
 -----------------
 
-The `PropertyReflector` is similar to both the `MethodReflector` and `ClassReflector`
+The `PropertyReflector` gives you visibility and doc block functionality.
+
+    <?php
+    
+    $property = new PropertyReflector('MyClass', 'myProperty');
+    
+    // "private"
+    $property->getVisibility();
+    
+    // true
+    $property->getDocBlock()->hasTag('var');

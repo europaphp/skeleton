@@ -41,7 +41,7 @@ class PropertyReflector extends \ReflectionProperty implements Reflectable
     /**
      * Returns the doc block instance for this method.
      * 
-     * @return \Europa\Reflection\DocBlock
+     * @return DocBlock
      */
     public function getDocBlock()
     {
