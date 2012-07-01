@@ -130,7 +130,7 @@ abstract class ControllerAbstract implements ControllerInterface
         // attempt to call the action
         if (method_exists($this, $method)) {
             $reflector = new MethodReflector($this, $method);
-            return $reflector->invokeNamedArgs($this, $params);
+            return $reflector->invokeArgs($this, $params);
         }
         
         // attempt to catch with __call

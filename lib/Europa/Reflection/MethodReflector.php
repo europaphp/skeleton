@@ -2,6 +2,7 @@
 
 namespace Europa\Reflection;
 use LogicException;
+use ReflectionMethod;
 
 /**
  * Extends the base reflection class to provide further functionality such as named
@@ -12,8 +13,13 @@ use LogicException;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class MethodReflector extends \ReflectionMethod implements Reflectable
+class MethodReflector extends ReflectionMethod implements Reflectable
 {
+	/**
+	 * The method's declaring class' name.
+	 * 
+	 * @var string
+	 */
     private $classname;
     
     /**
@@ -142,11 +148,11 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
      * 
      * @return mixed
      */
-    public function invokeNamedArgs($instance, array $args = array())
+    public function invokeArgs($instance, array $args = array())
     {
         // only merged named parameters if necessary
         if ($args && $this->getNumberOfParameters() > 0) {
-            return $this->invokeArgs($instance, $this->mergeNamedArgs($args));
+            return parent::invokeArgs($instance, $this->mergeNamedArgs($args));
         }
         return $this->invoke($instance);
     }
@@ -182,17 +188,31 @@ class MethodReflector extends \ReflectionMethod implements Reflectable
             return $this->docString;
         }
         
-        // if not, check it's interfaces
-        $methodName = $this->getName();
-        foreach ($this->getDeclaringClass()->getInterfaces() as $iFace) {
+        $name = $this->getName();
+		
+        // check traits
+        foreach ($this->getDeclaringClass()->getTraits() as $trait) {
+            // coninue of the method doesn't exist in the $trait
+            if (!$trait->hasMethod($name)) {
+                continue;
+            }
+            
+            // attempt to find it in the current $trait
+            if ($this->docString = $trait->getMethod($name)->getDocComment()) {
+				return $this->docString;
+            }
+        }
+        
+        // check interfaces
+        foreach ($this->getDeclaringClass()->getInterfaces() as $iface) {
             // coninue of the method doesn't exist in the interface
-            if (!$iFace->hasMethod($methodName)) {
+            if (!$iface->hasMethod($name)) {
                 continue;
             }
             
             // attempt to find it in the current interface
-            if ($this->docString = $iFace->getMethod($methodName)->getDocComment()) {
-                 break;
+            if ($this->docString = $iface->getMethod($name)->getDocComment()) {
+				return $this->docString;
             }
         }
         
