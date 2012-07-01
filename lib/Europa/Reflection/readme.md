@@ -110,6 +110,16 @@ There are special doc tags and a generic tag used for tags where a class is not 
 - `ReturnTag`
 - `ThrowsTag`
 
+All tags extend the `GenericTag` and have access to the following methods:
+
+- `string` `__toString()` Alias for `compile()`.
+- `string` `compile()` Compiles the tag.
+- `string` `compileValue()` Compiles the tag value. This is overridden to provide tag specific compilation.
+- `GenericTag` `parse($tag)` Parses the specified tag value.
+- `void` `parseValue($value)` Parses the specified value. This is overridden to provide tag specific parsing.
+- `string` `tag()` Returns the tag name not including the "@".
+- `string` `value()` Returns the value of the tag. This is anything after the tag name.
+
 Each tag may have methods specific to that tag.
 
 ### AuthorTag
