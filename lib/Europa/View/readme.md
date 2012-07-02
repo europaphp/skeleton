@@ -42,7 +42,7 @@ Or, you may have some view scripts written in PHP that you want to render the da
     // <!doctype ...
     (new Php)->setScript('/path/path/to/my/script.php')->render($context);
 
-The decoupling of the view and controller relationship helps you to write more modular and reusable code, however, it is still up to you to write that code.
+The decoupling of the view and controller relationship helps you to write more modular and reusable code, however, it is still up to you to that code modular.
 
 PHP Views
 ---------
