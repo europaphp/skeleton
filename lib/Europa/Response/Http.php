@@ -145,7 +145,7 @@ class Http implements Countable, IteratorAggregate, ResponseInterface
     public function removeHeader($name)
     {
         if (isset($this->headers[$name])) {
-            unset($this->headers[$name]);)
+            unset($this->headers[$name]);
         }
         return $this;
     }

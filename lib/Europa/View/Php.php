@@ -169,7 +169,7 @@ class Php implements ViewScriptInterface
         if ($this->locator) {
             $script = $this->locator->locate($this->script);
         } else {
-            $script = $this->script;
+            $script = is_file($this->script) ? $this->script : false;
         }
         
         // ensure the script can be found
@@ -181,7 +181,7 @@ class Php implements ViewScriptInterface
         try {
             ob_start();
             extract($context);
-            include $this->locator->locate($script);
+            include $script;
             $rendered = ob_get_clean();
         } catch (Exception $e) {
             throw new LogicException(sprintf(

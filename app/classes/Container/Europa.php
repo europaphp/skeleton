@@ -154,9 +154,10 @@ class Europa extends Provider
         $locator = new Locator;
         $locator->addPath(__DIR__ . '/../../views');
         
-        $view = new Php($locator);
-        $view->setScript($interface . '/' . str_replace(' ', '/', $request->getParam('controller')));
+        $view = new Php;
+        $view->setLocator($locator);
         $view->setHelpers($helpers);
+        $view->setScript($interface . '/' . str_replace(' ', '/', $request->getParam('controller')));
         
         return $view;
     }
