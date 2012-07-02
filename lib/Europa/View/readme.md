@@ -21,6 +21,7 @@ Unlink some other frameworks, views are specifically designed to be kept away fr
     
     // mock a request
     $request = new Http;
+    $request->setMethod('get');
     $request->setParam('id', 1);
     
     // action the controller and get the response
