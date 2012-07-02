@@ -116,7 +116,17 @@ This can be extremely useful in architectures that have a plugin or module syste
 
 ### Using Helpers
 
-You can also use helpers within your views. A helper is just a PHP class and that's it. It doesn't have to implement any interfaces or anything. For this reason, we use a container to setup and return instances of our helpers. If we have the following helper:
+You can also use helpers within your views. A helper is just a PHP class and that's it. It doesn't have to implement any interfaces or anything.
+
+Accessing a helper is simple:
+
+    <?php echo $this->myHelper; ?>
+
+Accessing the helper using `__get()` will cache an instance (just like when using `get()` on the container). If you want to use a fresh instance, use `__call()`:
+
+    <?php echo $this->myHelper(); ?>
+
+To setup and return instances of our helpers we supply the view with a container. Given the following helper class:
 
     <?php
     
@@ -132,13 +142,18 @@ You can also use helpers within your views. A helper is just a PHP class and tha
             $this->view = $view;
         }
         
+        public function __toString()
+        {
+            return $this->script();
+        }
+        
         public function script()
         {
             return $this->view->getScript();
         }
     }
 
-We could set it up and use it like so:
+We could set it up and use it with a container like so:
 
     <?php
     
