@@ -271,20 +271,20 @@ class Http extends RequestAbstract
     /**
      * Sets the request URI.
      * 
-     * @param \Europa\Request\Uri $uri The URI to set.
+     * @param Uri $uri The URI to set.
      * 
      * @return Http;
      */
-    public function setUri(Uri $uri)
+    public function setUri($uri)
     {
-        $this->uri = $uri;
+        $this->uri = new Uri($uri);
         return $this;
     }
     
     /**
      * Returns the request URI.
      * 
-     * @return \Europa\Request\Uri
+     * @return Uri
      */
     public function getUri()
     {

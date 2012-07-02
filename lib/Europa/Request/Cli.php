@@ -56,6 +56,19 @@ class Cli extends RequestAbstract
     }
     
     /**
+     * Sets the command.
+     * 
+     * @param string $command The command to set.
+     * 
+     * @return Cli
+     */
+    public function setCommand($command)
+    {
+        $this->commands = preg_split('/\s+/', $command);
+        return $this;
+    }
+    
+    /**
      * Returns the string command that was passed to the console. The command is the part that occurs just before
      * the first argument and after the path to the script. This can contain spaces.
      * 
@@ -64,6 +77,19 @@ class Cli extends RequestAbstract
     public function getCommand()
     {
         return implode(static::T_NS, $this->getCommands());
+    }
+    
+    /**
+     * Sets the commands.
+     * 
+     * @param array $commands The commands to set.
+     * 
+     * @return Cli
+     */
+    public function setCommands(array $commands)
+    {
+        $this->commands = $commands;
+        return $this;
     }
     
     /**
@@ -87,10 +113,12 @@ class Cli extends RequestAbstract
         $cmds = array();
         
         array_shift($args);
+        
         foreach ($args as $arg) {
             if (strpos($arg, '-') === 0) {
                 break;
             }
+            
             $this->commands[] = $arg;
         }
         
@@ -108,6 +136,7 @@ class Cli extends RequestAbstract
         $skip = false;
         
         array_shift($args);
+        
         foreach ($args as $index => $param) {
             if ($skip) {
                 $skip = false;

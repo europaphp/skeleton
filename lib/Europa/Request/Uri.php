@@ -640,7 +640,9 @@ class Uri
      */
     public function fromString($uri)
     {
+        $uri = (string) $uri;
         $uri = parse_url($uri);
+        
         if (!$uri) {
             return $this;
         }
