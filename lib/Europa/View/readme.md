@@ -14,7 +14,6 @@ Unlink some other frameworks, views are specifically designed to be kept away fr
     <?php
     
     use Controller;
-    use Europa\Fs\Locator;
     use Europa\Request\Http;
     use Europa\View\Json;
     use Europa\View\Php;
