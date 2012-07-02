@@ -9,7 +9,7 @@ The available views are:
 - Php
 - Xml
 
-Unlink many frameworks, views are specifically designed to be kept away from your controllers. Say for example we get a response from a controller:
+Unlink some other frameworks, views are specifically designed to be kept away from your controllers. Say for example we get a response from a controller:
 
     <?php
     
