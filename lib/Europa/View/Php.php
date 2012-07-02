@@ -43,7 +43,7 @@ class Php implements ViewScriptInterface
     private $extendStack = array();
     
     /**
-     * The loader to use for view locating and loading.
+     * The locator to use for locating view scripts.
      * 
      * @var LocatorInterface
      */
@@ -71,21 +71,9 @@ class Php implements ViewScriptInterface
     private $script;
     
     /**
-     * Sets up a Php view renderer.
-     * 
-     * @param LocatorInterface $locator The locator to use for view locating view files.
-     * 
-     * @return Php
-     */
-    public function __construct(LocatorInterface $locator)
-    {
-        $this->locator = $locator;
-    }
-    
-    /**
      * Calls a helper from the specified container.
      * 
-     * @see Php::setHelperContainer()
+     * @see Php::setHelpers()
      * 
      * @param string $name The name of the helper to create.
      * @param array  $args The arguments to configure it with.
@@ -108,7 +96,7 @@ class Php implements ViewScriptInterface
     /**
      * Calls a helper from the specified container.
      * 
-     * @see Php::setHelperContainer()
+     * @see Php::setHelpers()
      * 
      * @param string $name The name of the helper to create.
      * 
@@ -128,7 +116,7 @@ class Php implements ViewScriptInterface
     }
     
     /**
-     * Normalizes and sets the script to render.
+     * Normalises and sets the script to render.
      * 
      * @return Php
      */
@@ -177,21 +165,30 @@ class Php implements ViewScriptInterface
      */
     public function render(array $context = array())
     {
-        // script must be set
-        if (!$this->script) {
-            throw new RuntimeException('A view script must be set prior to rendering.');
+        // locate the script if there is a locator
+        if ($this->locator) {
+            $script = $this->locator->locate($this->script);
+        } else {
+            $script = $this->script;
+        }
+        
+        // ensure the script can be found
+        if (!$script) {
+            throw new RuntimeException(sprintf('The script "%s" could not be located.', $this->script));
         }
         
         // capture the output
         try {
             ob_start();
             extract($context);
-            include $this->locator->locate($this->script);
+            include $this->locator->locate($script);
             $rendered = ob_get_clean();
         } catch (Exception $e) {
-            throw new LogicException(
-                "Unable to render view {$this->script} with message: {$e->getMessage()}"
-            );
+            throw new LogicException(sprintf(
+                'Unable to render view "%s" with message: %s',
+                $this->script,
+                $e->getMessage()
+            ));
         }
         
         // handle view extensions
@@ -285,6 +282,29 @@ class Php implements ViewScriptInterface
         $this->parentScript = $parent;
         
         return $this;
+    }
+    
+    /**
+     * Sets the script locator.
+     * 
+     * @param LocatorInterface $locator The locator to use.
+     * 
+     * @return Php
+     */
+    public function setLocator(LocatorInterface $locator)
+    {
+        $this->locator = $locator;
+        return $this;
+    }
+    
+    /**
+     * Returns the script locator.
+     * 
+     * @return LocatorInterface
+     */
+    public function getLocator()
+    {
+        return $this->locator;
     }
     
     /**
