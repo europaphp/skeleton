@@ -1,7 +1,9 @@
 <?php
 
 namespace Europa\Response;
-use Europa\Filter\LowerCamelCaseFilter;
+use ArrayIterator;
+use Countable;
+use IteratorAggregate;
 use Europa\Filter\CamelCaseSplitFilter;
 
 /**
@@ -13,42 +15,28 @@ use Europa\Filter\CamelCaseSplitFilter;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Http implements \IteratorAggregate, ResponseInterface
+class Http implements Countable, IteratorAggregate, ResponseInterface
 {
     /**
      * The JSON content type.
      * 
      * @var string
      */
-    const CONTENT_TYPE_JSON = 'application/json';
+    const JSON = 'application/json';
     
     /**
      * The HTML content type.
      *
      * @var string
      */
-    const CONTENT_TYPE_HTML = 'text/html';
-    
-    /**
-     * The CSV content type.
-     * 
-     * @var string
-     */
-    const CONTENT_TYPE_CSV = 'text/csv';
+    const HTML = 'text/html';
     
     /**
      * The XML content type.
      *
      * @var string
      */
-    const CONTENT_TYPE_XML = 'text/xml';
-    
-    /**
-     * The content-type header name.
-     * 
-     * @var string
-     */
-    const HEADER_CONTENT_TYPE = 'content-type';
+    const XML = 'text/xml';
     
     /**
      * The headers.
@@ -58,77 +46,52 @@ class Http implements \IteratorAggregate, ResponseInterface
     private $headers = array();
     
     /**
-     * The lower camel case filter.
-     * 
-     * @var \Europa\Filter\LowerCamelCaseFilter
-     */
-    private $lccFilter;
-    
-    /**
      * The camel case split filter.
      * 
-     * @var \Europa\Filter\CamelCaseSplitFilter
+     * @var CamelCaseSplitFilter
      */
-    private $ccSplitFilter;
+    private $filter;
     
     /**
      * Sets up a new response object.
      * 
-     * @return \Europa\Response\Response
+     * @return Http
      */
     public function __construct()
     {
-        $this->lccFilter     = new LowerCamelCaseFilter;
-        $this->ccSplitFilter = new CamelCaseSplitFilter;
+        $this->filter = new CamelCaseSplitFilter;
     }
     
     /**
-     * Sets the specified request header.
-     *
-     * @param string $name  The name of the header.
-     * @param mixed  $value The value of the header.
-     *
-     * @return mixed
+     * @see self::hasHeader()
      */
     public function __set($name, $value)
     {
-        return $this->setHeader($name, $value);
-    }
-
-    /**
-     * Returns the specified request header.
-     *
-     * @param string $name The name of the header.
-     *
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        return $this->getHeader($name);
-    }
-
-    /**
-     * Sets the content type header to the specified type
-     * 
-     * @param string $type One of json, http, csv, xml
-     * 
-     * @return true if $type exists, otherwise false
-     * 
-     */
-    public function setContentType($type)
-    {
-        $this->setHeader(self::HEADER_CONTENT_TYPE, $type);
-        return $this;
+        $this->setHeader($this->filter($name), $value);
     }
     
     /**
-     * Returns the content-type of the response.
-     * 
-     * @return string
+     * @see self::getHeader()
      */
-    public function getContentType()
+    public function __get($name)
     {
-        return $this->getHeader(self::HEADER_CONTENT_TYPE);
+        return $this->getHeader($this->filter($name));
+    }
+    
+    /**
+     * @see self::hasHeader()
+     */
+    public function __isset($name)
+    {
+        return $this->hasHeader($this->fitler($name));
+    }
+    
+    /**
+     * @see self::removeHeader()
+     */
+    public function __unset($name)
+    {
+        return $this->removeHeader($this->filter($name));
     }
     
     /**
@@ -137,13 +100,10 @@ class Http implements \IteratorAggregate, ResponseInterface
      * @param string $name  The header type (in camel cased format, will be converted in output)
      * @param string $value The header value
      * 
-     * @return void
+     * @return Http
      */
     public function setHeader($name, $value)
     {
-        // normalize the header name to lower camel case
-        $name = $this->lccFilter->filter($name);
-        
         $this->headers[$name] = $value;
         return $this;
     }
@@ -157,14 +117,37 @@ class Http implements \IteratorAggregate, ResponseInterface
      */
     public function getHeader($name)
     {
-        // normalize the header name to lower camel case
-        $name = $this->lccFilter->filter($name);
-        
         if (isset($this->headers[$name])) {
             return $this->headers[$name];
         }
-        
         return null;
+    }
+    
+    /**
+     * Returns whether or not the specified header exists.
+     * 
+     * @param string $name The header name.
+     * 
+     * @return bool
+     */
+    public function hasHeader($name)
+    {
+        return isset($this->headers[$name]);
+    }
+    
+    /**
+     * Removes the specified header if it exists.
+     * 
+     * @param string $name The header name.
+     * 
+     * @return Http
+     */
+    public function removeHeader($name)
+    {
+        if (isset($this->headers[$name])) {
+            unset($this->headers[$name]);)
+        }
+        return $this;
     }
     
     /** 
@@ -172,7 +155,7 @@ class Http implements \IteratorAggregate, ResponseInterface
      * 
      * @param mixed $headers The headers to set.
      * 
-     * @return Response
+     * @return Http
      */
     public function setHeaders($headers)
     {
@@ -195,6 +178,17 @@ class Http implements \IteratorAggregate, ResponseInterface
     }
     
     /**
+     * Removes all headers.
+     * 
+     * @return Http
+     */
+    public function removeHeaders()
+    {
+        $this->headers = [];
+        return $this;
+    }
+    
+    /**
      * Given content generated from a view, output any headers, set any env vars and output the content.
      * 
      * @param string $content The content to output
@@ -204,15 +198,6 @@ class Http implements \IteratorAggregate, ResponseInterface
     public function output($content)
     {
         foreach ($this->headers as $name => $value) {
-            // ensure camel-cased attr converted to headers, e.g. contentType => content-type
-            $name = $this->ccSplitFilter->filter($name);
-            
-            // uc each part
-            foreach ($name as &$part) {
-                $part = ucfirst($part);
-            }
-            
-            // the header name parts are simply joined together
             header(implode('-', $name) . ': ' . $value);
         }        
         echo $content;
@@ -221,10 +206,38 @@ class Http implements \IteratorAggregate, ResponseInterface
     /**
      * Returns the iterator to use when iterating over the Response object.
      * 
-     * @return \ArrayIterator
+     * @return ArrayIterator
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->headers);
+        return new ArrayIterator($this->headers);
+    }
+    
+    /**
+     * Returns the number of headers set.
+     * 
+     * @return int
+     */
+    public function count()
+    {
+        return count($this->headers);
+    }
+    
+    /**
+     * Turns the camel-cased header name into a valid header.
+     * 
+     * @param string $name The header name.
+     * 
+     * @return string
+     */
+    private function filter($name)
+    {
+        $name = $this->filter->filter($name);
+        
+        foreach ($name as &$part) {
+            ucfirst($part);
+        }
+        
+        return implode('-', $name);
     }
 }
