@@ -121,6 +121,7 @@ You can also use helpers within your views. A helper is just a PHP class and tha
     <?php
     
     namespace Helper;
+    use Europa\View\Php;
     
     class MyHelper
     {
