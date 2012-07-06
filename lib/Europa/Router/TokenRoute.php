@@ -57,7 +57,9 @@ class TokenRoute implements RouteInterface
      */
     public function format(array $params = array())
     {
-        return $this->regex->format($params);
+        $format = $this->regex->format($params);
+        $format = str_replace('.*', '', $format);
+        return $format;
     }
     
     /**
@@ -73,14 +75,17 @@ class TokenRoute implements RouteInterface
         $len = strlen($expression);
         
         // allow a suffix wildcard or default to allowing an optional forward slash
-        if ($expression[$len - 1] === '*' && $expression[$len - 2] === '.') {
-            $expression .= '\.[a-zA-Z90-9]+?';
+        if ($len > 2 && $expression[$len - 1] === '*' && $expression[$len - 2] === '.') {
+            $expression  = substr($expression, 0, $len - 2);
+            $expression .= '(\.[a-zA-Z0-9]+)?';
+        } elseif ($len === 1 && $expression === '*') {
+            $expression = '.*';
         } else {
             $expression .= '/?';
         }
         
         // replace tokens with named matches
-        $expression = preg_replace('!:([a-zA-Z_][a-zA-Z0-9_]*)!', '(?<$1>[^/]+)', $expression);
+        $expression = preg_replace('!:([a-zA-Z_][a-zA-Z0-9_]+)!', '(?<$1>[^/]+)', $expression);
         
         // an expression must be fully matched
         $expression = '^' . $expression . '$';

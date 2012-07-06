@@ -14,59 +14,84 @@ use Traversable;
  */
 trait Configurable
 {
-	/**
-	 * Configuration array. Can be overridden to give defaults.
-	 * 
-	 * @var array
-	 */
-	protected $config = [];
-	
-	/**
-	 * Constructs a new configuration object.
-	 * 
-	 * @param mixed $config Can be an array or object.
-	 * 
-	 * @return Configurable
-	 */
-	public function __construct($config = [])
-	{
-		// allow an array
-		if (is_array($name)) {
-			$this->config = array_merge($this->config, $name);
-			return $this;
-		}
-		
-		// allow traversable
-		if ($name instanceof Traversable) {
-			return $this->setConfig(iterator_to_array($name));
-		}
-		
-		// allow an object
-		if (is_object($name)) {
-			return $this->setConfig((array) $name);
-		}
-		
-		// scalar
-		$this->config[$name] = $value;
-	}
-	
-	/**
-	 * Returns a configuration value.
-	 * 
-	 * @param string $name The name of the value to return. If not specified, the whole configuration is returned.
-	 * 
-	 * @return mixed
-	 */
-	public function config($name = null)
-	{
-		// return whole config array
-		if (!$name) {
-			return $this->config;
-		}
-		
-		// return specified value
-		if (isset($this->config[$name])) {
-			return $this->config[$name];
-		}
-	}
+    /**
+     * Configuration array.
+     * 
+     * @var array
+     */
+    private $config = [];
+    
+    /**
+     * Sets a configuration value or multiple configuration values.
+     * 
+     * @param mixed $name  The name or config array.
+     * @param mixed $value The value or 
+     */
+    public function setConfig($name, $value = null)
+    {
+        // allow an array
+        if (is_array($name)) {
+            $this->config = array_merge($this->config, $name);
+            return $this;
+        }
+        
+        // allow traversable
+        if ($name instanceof Traversable) {
+            return $this->setConfig(iterator_to_array($name));
+        }
+        
+        // allow an object
+        if (is_object($name)) {
+            return $this->setConfig((array) $name);
+        }
+        
+        // scalar
+        $this->config[$name] = $value;
+        
+        return $this;
+    }
+    
+    /**
+     * Returns a configuration value.
+     * 
+     * @param string $name The name of the value to return. If not specified, the whole configuration is returned.
+     * 
+     * @return mixed
+     */
+    public function getConfig($name = null)
+    {
+        // return whole config array
+        if (!$name) {
+            return $this->config;
+        }
+        
+        // return specified value
+        if (isset($this->config[$name])) {
+            return $this->config[$name];
+        }
+    }
+    
+    /**
+     * Returns default configuration. If a `defaultConfiguration` property is set, that is used.
+     * 
+     * @return array
+     */
+    public function getDefaultConfig()
+    {
+        if (isset($this->defaultConfig) && is_array($this->defaultConfig)) {
+            return $this->defaultConfig;
+        }
+        return [];
+    }
+    
+    /**
+     * Resets the configuration back to defaults using `getDefaultConfiguration()`.
+     * 
+     * @return Configurable
+     */
+    public function setDefaultConfig()
+    {
+        $this->config = $this->getDefaultConfig();
+        return $this;
+    }
 }

@@ -15,11 +15,11 @@ use ReflectionMethod;
  */
 class MethodReflector extends ReflectionMethod implements Reflectable
 {
-	/**
-	 * The method's declaring class' name.
-	 * 
-	 * @var string
-	 */
+    /**
+     * The method's declaring class' name.
+     * 
+     * @var string
+     */
     private $classname;
     
     /**
@@ -189,7 +189,7 @@ class MethodReflector extends ReflectionMethod implements Reflectable
         }
         
         $name = $this->getName();
-		
+        
         // check traits
         foreach ($this->getDeclaringClass()->getTraits() as $trait) {
             // coninue of the method doesn't exist in the $trait
@@ -199,7 +199,7 @@ class MethodReflector extends ReflectionMethod implements Reflectable
             
             // attempt to find it in the current $trait
             if ($this->docString = $trait->getMethod($name)->getDocComment()) {
-				return $this->docString;
+                return $this->docString;
             }
         }
         
@@ -212,7 +212,7 @@ class MethodReflector extends ReflectionMethod implements Reflectable
             
             // attempt to find it in the current interface
             if ($this->docString = $iface->getMethod($name)->getDocComment()) {
-				return $this->docString;
+                return $this->docString;
             }
         }
         

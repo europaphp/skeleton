@@ -2,6 +2,7 @@
 
 namespace Europa\Di;
 use LogicException;
+use ReflectionClass;
 
 /**
  * The application service locator and container.
@@ -83,18 +84,20 @@ abstract class ContainerAbstract implements ContainerInterface
      * 
      * @return Container
      */
-    public static function fetch($service = null)
+    public static function fetch()
     {
         $name = get_called_class();
         
         if (!isset(self::$instances[$name])) {
-            self::$instances[$name] = new static;
+            if (func_num_args()) {
+                $inst = (new ReflectionClass)->newInstanceArgs(func_get_args());
+            } else {
+                $inst = new static;
+            }
+            
+            self::$instances[$name] = $inst;
         }
         
-        if ($service) {
-            return self::$instances[$name]->get($service);
-        } else {
-            return self::$instances[$name];
-        }
+        return self::$instances[$name];
     }
 }

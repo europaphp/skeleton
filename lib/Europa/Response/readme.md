@@ -18,7 +18,7 @@ The `Http` response allows you to set headers without affecting header output, a
     $http->contentType = Http::JSON;
     
     // outputs the headers then the json response
-    $http->output('{ success: true }');
+    $http->setBody('{ success: true }')->send();
 
 The `Europa\App\App` class uses this in conjunction with a `Europa\View\ViewInterface`:
 
@@ -32,7 +32,13 @@ The `Europa\App\App` class uses this in conjunction with a `Europa\View\ViewInte
     $json = ['success' => true];
     
     // "{ success: 'true' }"
-    $http->setHeader('Content-Type', 'application/json')->output($view->render($json));
+    $http->setHeader('Content-Type', 'application/json');
+    $http->setBody($view->render($json));
+    $http->send();
+
+If an error occurred, then you can also set an appropriate response code.
+
+    $http->setStatus(404);
 
 CLI Responses
 -------------
@@ -44,4 +50,4 @@ Command line responses are super simple. They simply output the response. They e
     use Europa\Response\Cli;
     
     // "my response..."
-    (new Cli)->output('my response...');
+    (new Cli)->setBody('my response...')->send();

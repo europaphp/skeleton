@@ -14,6 +14,20 @@ use Europa\Request\Uri as U;
 class Js
 {
     /**
+     * The default path.
+     * 
+     * @var string
+     */
+    const PATH = 'js';
+    
+    /**
+     * The default suffix.
+     * 
+     * @var string
+     */
+    const SUFFIX = '.js';
+    
+    /**
      * The URI used to format the script tag.
      * 
      * @var Uri
@@ -25,9 +39,9 @@ class Js
      * 
      * @return Script
      */
-    public function __construct($path)
+    public function __construct($path = self::PATH)
     {
-        $this->uri = new U($path . '.js');
+        $this->uri = new U($path . self::SUFFIX);
     }
     
     /**

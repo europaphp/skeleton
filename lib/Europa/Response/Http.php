@@ -7,16 +7,23 @@ use IteratorAggregate;
 use Europa\Filter\CamelCaseSplitFilter;
 
 /**
- * Counterpart to request object, outputs headers and contents
+ * HTTP response.
  *
- * @category Controller
+ * @category Response
  * @package  Europa
  * @author   Paul Carvosso-White <paulcarvossowhite@gmail.com>
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Http implements Countable, IteratorAggregate, ResponseInterface
+class Http extends ResponseAbstract implements Countable, IteratorAggregate
 {
+    /**
+     * The HTML content type.
+     *
+     * @var string
+     */
+    const HTML = 'text/html';
+    
     /**
      * The JSON content type.
      * 
@@ -25,11 +32,11 @@ class Http implements Countable, IteratorAggregate, ResponseInterface
     const JSON = 'application/json';
     
     /**
-     * The HTML content type.
-     *
-     * @var string
+     * The OK status code.
+     * 
+     * @var int
      */
-    const HTML = 'text/html';
+    const OK = 200;
     
     /**
      * The XML content type.
@@ -39,6 +46,13 @@ class Http implements Countable, IteratorAggregate, ResponseInterface
     const XML = 'text/xml';
     
     /**
+     * The camel case split filter.
+     * 
+     * @var CamelCaseSplitFilter
+     */
+    private $filter;
+    
+    /**
      * The headers.
      * 
      * @var array
@@ -46,11 +60,11 @@ class Http implements Countable, IteratorAggregate, ResponseInterface
     private $headers = array();
     
     /**
-     * The camel case split filter.
+     * The HTTP status to send.
      * 
-     * @var CamelCaseSplitFilter
+     * @var int
      */
-    private $filter;
+    private $status = self::OK;
     
     /**
      * Sets up a new response object.
@@ -189,18 +203,42 @@ class Http implements Countable, IteratorAggregate, ResponseInterface
     }
     
     /**
-     * Given content generated from a view, output any headers, set any env vars and output the content.
+     * Sets the HTTP status code.
      * 
-     * @param string $content The content to output
+     * @param int $status The status to set.
      * 
-     * @return void
+     * @return Http
      */
-    public function output($content)
+    public function setStatus($status)
     {
+        $this->status = (int) $status;
+        return $this;
+    }
+    
+    /**
+     * Returns the status that will be sent.
+     * 
+     * @return int
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+    
+    /**
+     * Outputs the response body.
+     * 
+     * @return ResponseInterface
+     */
+    public function send()
+    {
+        http_response_code($this->status);
+        
         foreach ($this->headers as $name => $value) {
             header(implode('-', $name) . ': ' . $value);
-        }        
-        echo $content;
+        }
+        
+        echo $this->getBody();
     }
     
     /**

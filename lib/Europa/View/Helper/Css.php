@@ -14,6 +14,20 @@ use Europa\Request\Uri as U;
 class Css
 {
     /**
+     * The default path.
+     * 
+     * @var string
+     */
+    const PATH = 'css';
+    
+    /**
+     * The default suffix.
+     * 
+     * @var string
+     */
+    const SUFFIX = '.css';
+    
+    /**
      * The URI used to format the link tag.
      * 
      * @var Uri
@@ -32,7 +46,7 @@ class Css
      * 
      * @return Script
      */
-    public function __construct($path, $xhtml = false)
+    public function __construct($path = self::PATH, $xhtml = false)
     {
         $this->uri   = new U($path . '.css');
         $this->xhtml = $xhtml;

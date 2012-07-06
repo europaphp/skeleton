@@ -30,14 +30,15 @@ class Dispatcher implements DispatcherInterface
      */
     public function bind($name, $callback)
     {
-        if (!is_callable($callback)) {
-            throw new InvalidArgumentException('The callback specified for event "' . $name . '" is not callable.');
-        }
+        // resolve from any value
+        $callback = $this->resolveCallback($name, $callback);
         
+        // create the event stack for the specified event if it doesn't exist
         if (!isset($this->stack[$name])) {
             $this->stack[$name] = [];
         }
         
+        // add the handler to the stack
         $this->stack[$name][] = $callback;
         
         return $this;
@@ -103,5 +104,56 @@ class Dispatcher implements DispatcherInterface
             }
         }
         return $stack;
+    }
+    
+    /**
+     * Attempts to resolve the callback from any type of value.
+     * 
+     * @param string $name     The event name for informational purposes.
+     * @param mixed  $callback The callback to resolve.
+     * 
+     * @return mixed
+     */
+    private function resolveCallback($name, $callback)
+    {
+        if (is_string($callback)) {
+            $callback = $this->resolveCallbackFromString($name, $callback);
+        }
+        
+        $this->validateCallback($name, $callback);
+        
+        return $callback;
+    }
+    
+    /**
+     * Attempts to resolve the callback from a string.
+     * 
+     * @param string $name     The event name for informational purposes.
+     * @param mixed  $callback The callback to resolve.
+     * 
+     * @return mixed
+     */
+    private function resolveCallbackFromString($name, $callback)
+    {
+        if (!class_exists($callback, true)) {
+            throw new InvalidArgumentException(sprintf('The specified callback event class "%s" does not exist.', $callback, $name));
+        }
+        
+        return new $callback;
+    }
+    
+    /**
+     * Validates the callback.
+     * 
+     * @param string $name     The event name for informational purposes.
+     * @param mixed  $callback The callback to validate.
+     * 
+     * @return void
+     */
+    private function validateCallback($name, $callback)
+    {
+        if (!is_callable($callback)) {
+            throw new InvalidArgumentException(sprintf('The specified callback for event "%s" is not callable.', $name));
+        }
     }
 }

@@ -3,7 +3,7 @@
 namespace Europa\Response;
 
 /**
- * Counterpart to request object, outputs headers and contents
+ * Basic response blueprint.
  *
  * @category Controller
  * @package  Europa
@@ -14,11 +14,9 @@ namespace Europa\Response;
 interface ResponseInterface
 {
     /**
-     * Outputs the specified string.
+     * Outputs the response body.
      * 
-     * @param string $content The content to output.
-     * 
-     * @return string
+     * @return ResponseInterface
      */
-    public function output($content);
+    public function send();
 }

@@ -125,8 +125,20 @@ class Router implements RouterInterface
     {
         if (isset($this->routes[$name])) {
             unset($this->routes[$name]);
+            return $this;
         }
         throw new LogicException(sprintf('Cannot remove route "%s" because it does not exist.', $name));
+    }
+    
+    /**
+     * Removes all routes.
+     * 
+     * @return Router
+     */
+    public function removeRoutes()
+    {
+        $this->routes = [];
+        return $this;
     }
     
     /**

@@ -33,7 +33,7 @@ abstract class RequestAbstract implements IteratorAggregate, RequestInterface
      * 
      * @var array
      */
-    private $params = array('controller' => 'index');
+    private $params = [];
 
     /**
      * Magic alias for setParam().
