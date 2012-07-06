@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\View;
+use Europa\Util\Configurable;
 use Europa\View;
 
 /**
@@ -13,29 +14,32 @@ use Europa\View;
  */
 class Xml implements ViewInterface
 {
+    use Configurable;
+    
     /**
      * Configuration array.
      * 
      * @var array
      */
-    private $config = [
-        'declaration' => true,
-        'encoding'    => 'UTF-8',
-        'indent'      => true,
-        'spaces'      => 2,
-        'version'     => '1.0'
+    private $defaultConfig = [
+        'declare'        => true,
+        'encoding'       => 'UTF-8',
+        'indent'         => true,
+        'numericKeyName' => 'item',
+        'spaces'         => 2,
+        'version'        => '1.0'
     ];
     
     /**
      * Sets up the XML view renderer.
      * 
-     * @param strign $config The configuration array.
+     * @param string $config The configuration array.
      * 
      * @return Xml
      */
     public function __construct(array $config = [])
     {
-        $this->config = array_merge($this->config, $config);
+        $this->initConfig($config);
     }
     
     /**
@@ -47,11 +51,11 @@ class Xml implements ViewInterface
     {
         $str = '';
         
-        if ($this->config['declaration']) {
+        if ($this->getConfig('declare')) {
             $str = '<?xml version="'
-                . $this->config['version']
+                . $this->getConfig('version')
                 . '" encoding="'
-                . $this->config['encoding']
+                . $this->getConfig('encoding')
                 . '" ?>'
                 . PHP_EOL;
         }
@@ -60,7 +64,7 @@ class Xml implements ViewInterface
             $str .= $this->renderNode($name, $content);
         }
         
-        return $str;
+        return trim($str);
     }
     
     /**
@@ -73,6 +77,17 @@ class Xml implements ViewInterface
      */
     private function renderNode($name, $content, $level = 0)
     {
+        $keys = $this->getConfig('numericKeyName');
+        
+        // translate a numeric key to a replacement key
+        if (is_numeric($name)) {
+            if (is_string($keys)) {
+                $name = $keys;
+            } elseif (is_array($keys) && isset($keys[$level])) {
+                $name = $keys[$level];
+            }
+        }
+        
         $ind = $this->indent($level);
         $str = $ind . "<{$name}>";
         
@@ -101,7 +116,8 @@ class Xml implements ViewInterface
      */
     private function indent($level)
     {
-        $char = $this->config['spaces'] ? str_repeat(' ', $this->config['spaces']) : "\t";
-        return str_repeat($char, $level);
+        $indent = $this->getConfig('spaces');
+        $indent = $indent ? str_repeat(' ', $indent) : "\t";
+        return str_repeat($indent, $level);
     }
 }

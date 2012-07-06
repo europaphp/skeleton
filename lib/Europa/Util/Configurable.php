@@ -22,6 +22,18 @@ trait Configurable
     private $config = [];
     
     /**
+     * Initialises the configuration.
+     * 
+     * @param array $config The configuration to merge with the defaults.
+     * 
+     * @return Configurable
+     */
+    public function initConfig(array $config = [])
+    {
+        $this->restoreDefaultConfig()->setConfig($config);
+    }
+    
+    /**
      * Sets a configuration value or multiple configuration values.
      * 
      * @param mixed $name  The name or config array.
@@ -89,9 +101,19 @@ trait Configurable
      * 
      * @return Configurable
      */
-    public function setDefaultConfig()
+    public function setDefaultConfig(array $config)
     {
-        $this->config = $this->getDefaultConfig();
+        $this->defaultConfig = $config;
         return $this;
+    }
+    
+    /**
+     * Restores the default configuration.
+     * 
+     * @return Configurable
+     */
+    public function restoreDefaultConfig()
+    {
+        return $this->setConfig($this->getDefaultConfig());
     }
 }

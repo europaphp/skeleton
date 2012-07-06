@@ -110,8 +110,7 @@ class Container extends Provider
      */
     public function __construct($config = [])
     {
-        $this->setDefaultConfig();
-        $this->setConfig($config);
+        $this->initConfig($config);
         
         if (!$this->getConfig('basePath')) {
             $this->setConfig('basePath', __DIR__ . '/' . self::PATH);
