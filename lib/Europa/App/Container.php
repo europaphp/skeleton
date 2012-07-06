@@ -80,7 +80,18 @@ class Container extends Provider
          * 
          * @var array
          */
-        'viewPaths' => ['app/views' => 'php']
+        'viewPaths' => ['app/views' => 'php'],
+        
+        /**
+         * The content type to view type mapping.
+         * 
+         * @var array
+         */
+        'viewTypes' => [
+            'application/json' => 'Json',
+            'text/xml'         => 'Xml',
+            'text/html'        => 'Php'
+        ]
     ];
     
     /**
@@ -285,8 +296,8 @@ class Container extends Provider
      */
     public function view($request)
     {
-        if ($request instanceof Request\Http && $suffix = $request->getUri()->getSuffix()) {
-            return $this->{'view' . ucfirst($suffix)};
+        if ($request instanceof Request\Http) {
+            return $this->{'view' . $request->accepts($this->getConfig('viewTypes'))};
         }
         return $this->viewPhp;
     }
