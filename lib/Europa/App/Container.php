@@ -83,7 +83,7 @@ class Container extends Provider
         'viewPaths' => ['app/views' => 'php'],
         
         /**
-         * The content type to view type mapping.
+         * The content type to view type mapping. If modifying this, you must ensure that you have a provider method that matches. I.e. `view[Type]`.
          * 
          * @var array
          */
@@ -290,14 +290,19 @@ class Container extends Provider
     }
     
     /**
-     * Returns the view.
+     * Returns the view. Always falls back to using the PHP view.
      * 
      * @return RequestInterface
      */
     public function view($request)
     {
         if ($request instanceof Request\Http) {
-            return $this->{'view' . $request->accepts($this->getConfig('viewTypes'))};
+            $view   = $request->accepts($this->getConfig('viewTypes'));
+            $method = 'view' . $view;
+            
+            if ($view && method_exists($this, $method)) {
+                return $this->$method;
+            }
         }
         return $this->viewPhp;
     }
