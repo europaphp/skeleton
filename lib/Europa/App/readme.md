@@ -120,7 +120,7 @@ The default application ties together 5 components:
 
 Each component is required by the application and passed to the constructor. This should be done using a DI container.
 
-By default, you are provided with a class called `Container\Europa` which contains the necessary components to easily run your app.
+By default, you are provided with a class called `Europa\App\Container` which contains the necessary components to easily run your app.
 
     <?php
     
@@ -128,15 +128,33 @@ By default, you are provided with a class called `Container\Europa` which contai
     
     include 'boot.php';
     
-    Container::fetch()->get('app')->run();
+    Container::fetch()->app->run();
 
 If you were to set up the application class manually, you would have to set up each dependency. Using a container solves this problem and provides you with each component - including the application - ready to go out of the box.
 
 More information on [Dependency Injection Containers](Di).
+
+Modifying the Application During Runtime
+----------------------------------------
+
+The `Europa\App\App` class uses the `Europa\Util\Eventable` trait which enables events to be bound and triggered. It defines **8** events that can be used to modify the app during runtime. Each event is at least passed in the application instance as the first argument. The events in order of triggering are:
+
+- `route.pre(App $app)` Called prior to routing even if no router is bound.
+- `route.post(App $app)` Called after routing even if no router is bound.
+- `action.pre(App $app)` Called before actioning the controller.
+- `action.post(App $app, array $context)` Called after the controller is actioned. The context returned from the controller is provided.
+- `render.pre(App $app, array $context)` Called before the view is rendered and after the controller is actioned.
+- `render.post(App $app, string $rendered)` Called after the view view is rendered, but before it is sent. The rendered string from the view is provided.
+- `send.pre(App $app, string $rendered)` Called after rendering, prior to sending the response.
+- `send.post(App $app, string $rendered)` Called after sending the response.
+
+This can be useful, for example, if you would like to add any response headers depending on which view is sent. You could bind an event to `output.pre`, detect the type of view and set appropriate headers on the response before it is sent.
+
+You could also bind an event at any point before `render.post` to detect what type of response the request wants and set the view accordingly.
 
 Specifying the Controller Request Parameter
 -------------------------------------------
 
 By default, the controller is resolved using the `controller` request parameter. This can be set by the router, or directly set on the request. If you need to change this to, say, `ctrl` or something else, you do so by telling the application.
 
-    Container::fetch()->get('app')->setKey('ctrl');
+    Container::fetch()->app->setKey('ctrl');
