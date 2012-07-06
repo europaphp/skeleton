@@ -217,19 +217,28 @@ class Http extends RequestAbstract
     /**
      * Returns whether or not the request accepts the passed content types.
      * 
-     * @param array $types The types to check.
+     * @param array $types    The types to check.
+     * @param int   $maxIndex The maximum number of items to look at in order before returning false.
      * 
      * @return bool
      */
-    public function accepts($types)
+    public function accepts($types, $max = null)
     {
-        $accepted = $this->getAcceptedContentTypes();
-        foreach ((array) $types as $type) {
-            if (!in_array($type, $accepted)) {
-                return false;
+        $accepts = $this->getAcceptedContentTypes();
+        $max     = $max ? $max : count($accepts);
+        
+        foreach ((array) $types as $index => $value) {
+            $returnBool  = !is_string($index);
+            $returnType  = $returnBool ? true : $value;
+            $contentType = $returnBool ? $value : $index;
+            $position    = array_search($contentType, $accepts);
+            
+            if ($position !== false && $position < $max) {
+                return $returnType;
             }
         }
-        return true;
+        
+        return false;
     }
     
     /**
