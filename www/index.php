@@ -1,9 +1,9 @@
 <?php
 
-use Container\Europa;
+use Europa\App\Container;
 
 define('EUROPA_START_TIME', microtime());
 
 require_once __DIR__ . '/../app/boot.php';
 
-Europa::fetch()->get('app')->run();
+Container::fetch()->get('app')->run();

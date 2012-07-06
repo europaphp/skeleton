@@ -5,5 +5,5 @@ use IteratorAggregate;
 
 interface FinderInterface extends IteratorAggregate
 {
-	
+    
 }
