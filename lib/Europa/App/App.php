@@ -278,15 +278,13 @@ class App implements AppInterface
      */
     public function run()
     {
-        $this->runRouter();
-        $this->runResponse($this->runController());
-        return $this;
+        return $this->runRouter()->runResponse($this->runView($this->runController()));
     }
     
     /**
      * Routes the request.
      * 
-     * @return void
+     * @return App
      */
     private function runRouter()
     {    
@@ -297,6 +295,8 @@ class App implements AppInterface
         }
         
         $this->event()->trigger('route.post', [$this]);
+        
+        return $this;
     }
     
     /**
@@ -317,21 +317,43 @@ class App implements AppInterface
     }
     
     /**
-     * Sends the response.
+     * Runs the view and returns the rendered string.
      * 
-     * @param array $context The controller response.
+     * @param array $context The context returned from the actioned controller.
      * 
-     * @return void
+     * @return string
      */
-    private function runResponse(array $context)
+    private function runView(array $context)
     {
+        $rendered = null;
+        
+        $this->event()->trigger('render.pre', [$this, $context]);
+        
         if ($this->view) {
             $rendered = $this->response->setBody($this->view->render($context));
         }
         
-        $this->event()->trigger('render.pre', [$this, $rendered]);
-        $this->response->send();
         $this->event()->trigger('render.post', [$this, $rendered]);
+        
+        return $rendered;
+    }
+    
+    /**
+     * Sends the response.
+     * 
+     * @param string $rendered The rendered view.
+     * 
+     * @return App
+     */
+    private function runResponse($rendered)
+    {
+        $this->event()->trigger('send.pre', [$this, $rendered]);
+        
+        $this->response->send();
+        
+        $this->event()->trigger('send.post', [$this, $rendered]);
+        
+        return $this;
     }
     
     /**
