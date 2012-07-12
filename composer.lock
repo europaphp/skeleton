@@ -1,0 +1,19 @@
+{
+    "hash": "f4061745d3cd494b3b9724cb987e4490",
+    "packages": [
+        {
+            "package": "treshugart/testes",
+            "version": "dev-master",
+            "source-reference": "b7a9313cafffafc26764a0c3164f2e9049ef8e36",
+            "commit-date": "1342060151"
+        }
+    ],
+    "packages-dev": null,
+    "aliases": [
+
+    ],
+    "minimum-stability": "stable",
+    "stability-flags": {
+        "treshugart/testes": 20
+    }
+}
