@@ -28,14 +28,14 @@ use Europa\View\Xml;
 class Container extends Provider
 {
     use Configurable;
-    
+
     /**
      * The path relative to this file that is the application root.
      * 
      * @var string
      */
     const PATH = '../../..';
-    
+
     /**
      * The default configuration.
      * 
@@ -48,7 +48,7 @@ class Container extends Provider
          * @var string
          */
         'basePath' => null,
-        
+
         /**
          * The controller container filter's configuration.
          * 
@@ -57,7 +57,7 @@ class Container extends Provider
         'controllerFilterConfig' => [
             ['prefix' => 'Controller\\']
         ],
-        
+
         /**
          * The helper container filter's configuration.
          * 
@@ -67,23 +67,24 @@ class Container extends Provider
             ['prefix' => 'Helper\\'],
             ['prefix' => 'Europa\View\Helper\\']
         ],
-        
+
         /**
          * The language file paths relative to the application base path.
          * 
          * @var array
          */
         'langPaths' => ['app/langs/en-us' => 'ini'],
-        
+
         /**
          * The view file paths relative to the application base path.
          * 
          * @var array
          */
         'viewPaths' => ['app/views' => 'php'],
-        
+
         /**
-         * The content type to view type mapping. If modifying this, you must ensure that you have a provider method that matches. I.e. `view[Type]`.
+         * The content type to view type mapping. If modifying this, you must ensure that you have a provider method
+         * that matches. I.e. `view[Type]`.
          * 
          * @var array
          */
@@ -93,14 +94,14 @@ class Container extends Provider
             'text/html'        => 'Php'
         ]
     ];
-    
+
     /**
      * The application install path.
      * 
      * @var string
      */
     private $path;
-    
+
     /**
      * Sets up the container.
      * 
@@ -111,12 +112,12 @@ class Container extends Provider
     public function __construct($config = [])
     {
         $this->initConfig($config);
-        
+
         if (!$this->getConfig('basePath')) {
             $this->setConfig('basePath', __DIR__ . '/' . self::PATH);
         }
     }
-    
+
     /**
      * Returns an application service.
      * 
@@ -135,7 +136,7 @@ class Container extends Provider
         $app->setView($view);
         return $app;
     }
-    
+
     /**
      * Returns the container responsible for locating controllers.
      * 
@@ -146,14 +147,14 @@ class Container extends Provider
     public function controllers(Closure $request)
     {
         $finder = new Finder;
-        
+
         foreach ($this->getConfig('controllerFilterConfig') as $config) {
             $finder->getFilter()->add(new ClassNameFilter($config));
         }
-        
+
         return $finder;
     }
-    
+
     /**
      * Returns the helper container.
      * 
@@ -166,22 +167,22 @@ class Container extends Provider
     public function helpers(Closure $view, Closure $langLocator, Closure $router)
     {
         $finder = new Finder;
-        
+
         foreach ($this->getConfig('helperFilterConfig') as $config) {
             $finder->getFilter()->add(new ClassNameFilter($config));
         }
-        
+
         $finder->config('Europa\View\Helper\Lang', function() use ($view, $langLocator) {
             return [$view(), $langLocator()];
         });
-        
+
         $finder->config('Europa\View\Helper\Uri', function() use ($router) {
             return [$router()];
         });
-        
+
         return $finder;
     }
-    
+
     /**
      * Returns the language file locator.
      * 
@@ -193,7 +194,7 @@ class Container extends Provider
         $locator->addPaths($this->getConfig('langPaths'));
         return $locator;
     }
-    
+
     /**
      * Returns the request.
      * 
@@ -203,7 +204,7 @@ class Container extends Provider
     {
         return RequestAbstract::isCli() ? $this->requestCli : $this->requestHttp;
     }
-    
+
     /**
      * Returns the CLI request.
      * 
@@ -213,7 +214,7 @@ class Container extends Provider
     {
         return new Request\Cli;
     }
-    
+
     /**
      * Returns the HTTP request.
      * 
@@ -223,7 +224,7 @@ class Container extends Provider
     {
         return new Request\Http;
     }
-    
+
     /**
      * Returns the response.
      * 
@@ -233,7 +234,7 @@ class Container extends Provider
     {
         return RequestAbstract::isCli() ? $this->responseCli : $this->responseHttp;
     }
-    
+
     /**
      * Returns the CLI response.
      * 
@@ -243,7 +244,7 @@ class Container extends Provider
     {
         return new Response\Cli;
     }
-    
+
     /**
      * Returns the HTTP response.
      * 
@@ -253,7 +254,7 @@ class Container extends Provider
     {
         return new Response\Http;
     }
-    
+
     /**
      * Returns the correct router for the correct interface.
      * 
@@ -263,7 +264,7 @@ class Container extends Provider
     {
         return RequestAbstract::isCli() ? $this->routerCli : $this->routerHttp;
     }
-    
+
     /**
      * Returns a router for CLI purposes.
      * 
@@ -275,7 +276,7 @@ class Container extends Provider
         $router->setRoute('default', new RegexRoute('(?<controller>.+)', ':controller', ['controller' => 'help']));
         return $router;
     }
-    
+
     /**
      * Returns a router for http purposes.
      * 
@@ -287,7 +288,7 @@ class Container extends Provider
         $router->setRoute('default', new RegexRoute('(?<controller>[^.?]+)?', ':controller', ['controller' => 'index']));
         return $router;
     }
-    
+
     /**
      * Returns the view. Always falls back to using the PHP view.
      * 
@@ -298,14 +299,14 @@ class Container extends Provider
         if ($request instanceof Request\Http) {
             $view   = $request->accepts($this->getConfig('viewTypes'));
             $method = 'view' . $view;
-            
+
             if ($view && method_exists($this, $method)) {
                 return $this->$method;
             }
         }
         return $this->viewPhp;
     }
-    
+
     /**
      * Returns the CLI view.
      * 
@@ -321,7 +322,7 @@ class Container extends Provider
         $view->setHelpers($helpers);
         return $view;
     }
-    
+
     /**
      * Returns the view script locator.
      * 
@@ -333,7 +334,7 @@ class Container extends Provider
         $locator->addPaths($this->getConfig('viewPaths'));
         return $locator;
     }
-    
+
     /**
      * Returns the JSON view.
      * 
@@ -343,7 +344,7 @@ class Container extends Provider
     {
         return new Json;
     }
-    
+
     /**
      * Returns the XML view.
      * 

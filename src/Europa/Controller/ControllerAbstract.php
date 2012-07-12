@@ -29,14 +29,14 @@ abstract class ControllerAbstract implements ControllerInterface
      * @var bool
      */
     private $filter = false;
-    
+
     /**
      * Returns the method that the controller should call during actioning.
      * 
      * @return string
      */
     abstract public function getActionMethod();
-    
+
     /**
      * Constructs a new controller using the specified request.
      *
@@ -48,7 +48,7 @@ abstract class ControllerAbstract implements ControllerInterface
     {
         $this->request = $request;
     }
-    
+
     /**
      * Returns the request being used.
      * 
@@ -71,7 +71,7 @@ abstract class ControllerAbstract implements ControllerInterface
         $this->filter = $switch ? true : false;
         return $this;
     }
-    
+
     /**
      * Executes the controller's action. Both preAction and postAction hooks are invoked. If filtering is enabled and
      * any are applied to the action, they are applied before the preAction hook.
@@ -82,13 +82,13 @@ abstract class ControllerAbstract implements ControllerInterface
     {
         // the method to execute
         $method = $this->getActionMethod();
-        
+
         // apply all detected filters to the specified method
         $this->applyFiltersTo($method);
-        
+
         // the return value of the action is the view context
         $result = $this->executeMethod($method, $this->request->getParams());
-        
+
         // chainable
         return $result;
     }
@@ -105,18 +105,18 @@ abstract class ControllerAbstract implements ControllerInterface
         if (!$this->filter) {
             return;
         }
-        
+
         $class  = (new ClassReflector($this))->getDocBlock()->getTags('filter');
         $method = (new MethodReflector($this, $method))->getDocBlock()->getTags('filter');
-        
+
         foreach (array_merge($class, $method) as $filter) {
             $filter = $filter->getInstance();
             $filter->filter($this);
         }
-        
+
         return $this;
     }
-    
+
     /**
      * Executes the specified method.
      * 
@@ -132,12 +132,12 @@ abstract class ControllerAbstract implements ControllerInterface
             $reflector = new MethodReflector($this, $method);
             return $reflector->invokeArgs($this, $params);
         }
-        
+
         // attempt to catch with __call
         if (method_exists($this, '__call')) {
             return $this->__call($method, $params);
         }
-        
-        throw new LogicException("Method \"{$method}\" is not supported and was not trapped in \"__call\".");
+
+        throw new LogicException(sprintf('Method "%s" is not supported and was not trapped in "__call()".', $method));
     }
 }

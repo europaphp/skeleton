@@ -21,14 +21,14 @@ class MethodReflector extends ReflectionMethod implements Reflectable
      * @var string
      */
     private $classname;
-    
+
     /**
      * The cached doc string.
      * 
      * @var string
      */
     private $docString;
-    
+
     /**
      * Overrides the constructor so we can grab information about the method in relation to the class we are reflecting.
      * 
@@ -42,7 +42,7 @@ class MethodReflector extends ReflectionMethod implements Reflectable
         parent::__construct($class, $name);
         $this->classname = is_object($class) ? get_class($class) : $class;
     }
-    
+
     /**
      * Returns the class associated to this method.
      * 
@@ -52,7 +52,7 @@ class MethodReflector extends ReflectionMethod implements Reflectable
     {
         return new ClassReflector($this->classname);
     }
-    
+
     /**
      * Returns whether or not the method is inherited.
      * 
@@ -62,7 +62,7 @@ class MethodReflector extends ReflectionMethod implements Reflectable
     {
         return $this->class !== $this->classname;
     }
-    
+
     /**
      * Returns the visibility of the current method.
      * 
@@ -73,14 +73,14 @@ class MethodReflector extends ReflectionMethod implements Reflectable
         if ($this->isPrivate()) {
             return 'private';
         }
-        
+
         if ($this->isProtected()) {
             return 'protected';
         }
-        
+
         return 'public';
     }
-    
+
     /**
      * Takes the passed named parameters and returns a merged array of the passed parameters and the method's default
      * parameters in the order in which they were defined. If a required parameter is not defined and $throw is true,
@@ -99,7 +99,7 @@ class MethodReflector extends ReflectionMethod implements Reflectable
     {
         // resulting merged parameters will be stored here
         $merged = array();
-        
+
         // apply strict position parameters and case sensitivity
         foreach ($params as $name => $value) {
             if (is_numeric($name)) {
@@ -108,12 +108,12 @@ class MethodReflector extends ReflectionMethod implements Reflectable
                 $params[strtolower($name)] = $value;
             }
         }
-        
+
         // we check each parameter and set accordingly
         foreach ($this->getParameters() as $param) {
             $pos  = $param->getPosition();
             $name = $caseSensitive ? $param->getName() : strtolower($param->getName());
-            
+
             if (array_key_exists($name, $params)) {
                 $merged[$pos] = $params[$name];
             } elseif (array_key_exists($pos, $params)) {
@@ -131,17 +131,16 @@ class MethodReflector extends ReflectionMethod implements Reflectable
                 $meged[$pos] = null;
             }
         }
-        
+
         return $merged;
     }
 
     /**
-     * Instead of just calling with the arguments in their natural order, this method allows
-     * the method to be called with arguments which keys match the original method definition
-     * of names.
+     * Instead of just calling with the arguments in their natural order, this method allows the method to be called
+     * with arguments which keys match the original method definition of names.
      * 
-     * Note, that reflection can only call public members of an object, therefore, you cannot
-     * invoke protected or private methods with this method.
+     * Note, that reflection can only call public members of an object, therefore, you cannot invoke protected or
+     * private methods with this method.
      * 
      * @param object $instance The object instance to call the method on.
      * @param array  $args     The named arguments to merge and pass to the method.
@@ -160,7 +159,7 @@ class MethodReflector extends ReflectionMethod implements Reflectable
     /**
      * Returns the doc block instance for this method.
      * 
-     * @return \Europa\Reflection\DocBlock
+     * @return DocBlock
      */
     public function getDocBlock()
     {
@@ -168,12 +167,12 @@ class MethodReflector extends ReflectionMethod implements Reflectable
     }
 
     /**
-     * Returns the docblock for the specified method. If it's not defined, then it
-     * goes up the inheritance tree and through its interfaces.
+     * Returns the docblock for the specified method. If it's not defined, then it goes up the inheritance tree and
+     * through its interfaces.
      * 
      * @todo Implement parent class method docblock sniffing not just interfaces.
      * 
-     * @return string|null
+     * @return string | null
      */
     public function getDocComment()
     {
@@ -181,41 +180,41 @@ class MethodReflector extends ReflectionMethod implements Reflectable
         if ($this->docString) {
             return $this->docString;
         }
-        
+
         // attempt to get it from the current method
         if ($docblock = parent::getDocComment()) {
             $this->docString = $docblock;
             return $this->docString;
         }
-        
+
         $name = $this->getName();
-        
+
         // check traits
         foreach ($this->getDeclaringClass()->getTraits() as $trait) {
             // coninue of the method doesn't exist in the $trait
             if (!$trait->hasMethod($name)) {
                 continue;
             }
-            
+
             // attempt to find it in the current $trait
             if ($this->docString = $trait->getMethod($name)->getDocComment()) {
                 return $this->docString;
             }
         }
-        
+
         // check interfaces
         foreach ($this->getDeclaringClass()->getInterfaces() as $iface) {
             // coninue of the method doesn't exist in the interface
             if (!$iface->hasMethod($name)) {
                 continue;
             }
-            
+
             // attempt to find it in the current interface
             if ($this->docString = $iface->getMethod($name)->getDocComment()) {
                 return $this->docString;
             }
         }
-        
+
         return $this->docString;
     }
 }

@@ -134,6 +134,7 @@ class Http extends ResponseAbstract implements Countable, IteratorAggregate
         if (isset($this->headers[$name])) {
             return $this->headers[$name];
         }
+        
         return null;
     }
     
@@ -235,7 +236,7 @@ class Http extends ResponseAbstract implements Countable, IteratorAggregate
         http_response_code($this->status);
         
         foreach ($this->headers as $name => $value) {
-            header(implode('-', $name) . ': ' . $value);
+            header($name . ': ' . $value);
         }
         
         echo $this->getBody();
@@ -273,7 +274,7 @@ class Http extends ResponseAbstract implements Countable, IteratorAggregate
         $name = $this->filter->filter($name);
         
         foreach ($name as &$part) {
-            ucfirst($part);
+            $part = ucfirst($part);
         }
         
         return implode('-', $name);
