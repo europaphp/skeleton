@@ -22,6 +22,13 @@ trait Configurable
     private $config = [];
     
     /**
+     * Default configuration array for all instances.
+     * 
+     * @var array
+     */
+    private static $defaultConfigs = [];
+    
+    /**
      * Initialises the configuration.
      * 
      * @param array $config The configuration to merge with the defaults.
@@ -30,36 +37,31 @@ trait Configurable
      */
     public function initConfig(array $config = [])
     {
-        $this->restoreDefaultConfig()->setConfig($config);
+        // if a default configuration property is given, use it
+        if (isset($this->defaultConfig)) {
+            $this->setConfig($this->defaultConfig);
+        }
+        
+        // if a default configuration was set using `setDefaultConfig()`, use it next
+        $this->setConfig(self::$defaultConfigs[self::ensureDefaultConfigArray()]);
+        
+        // finally use the passed in config
+        $this->setConfig($config);
+        
+        return $this;
     }
     
     /**
      * Sets a configuration value or multiple configuration values.
      * 
      * @param mixed $name  The name or config array.
-     * @param mixed $value The value or 
+     * @param mixed $value The value or null if passing an array as the first argument.
+     * 
+     * @return Configurable
      */
     public function setConfig($name, $value = null)
     {
-        // allow an array
-        if (is_array($name)) {
-            $this->config = array_merge($this->config, $name);
-            return $this;
-        }
-        
-        // allow traversable
-        if ($name instanceof Traversable) {
-            return $this->setConfig(iterator_to_array($name));
-        }
-        
-        // allow an object
-        if (is_object($name)) {
-            return $this->setConfig((array) $name);
-        }
-        
-        // scalar
-        $this->config[$name] = $value;
-        
+        self::setConfigArray($this->config, $name, $value);
         return $this;
     }
     
@@ -72,48 +74,110 @@ trait Configurable
      */
     public function getConfig($name = null)
     {
+        return self::getConfigArray($this->config, $name);
+    }
+    
+    /**
+     * Sets a default configuration value or multiple default configuration values.
+     * 
+     * @param mixed $name  The name or config array.
+     * @param mixed $value The value or null if passing an array as the first argument.
+     * 
+     * @return void
+     */
+    public static function setDefaultConfig($name, $value = null)
+    {
+        self::setConfigArray(self::$defaultConfigs[self::ensureDefaultConfigArray()], $name, $value);
+    }
+    
+    /**
+     * Returns a default configuration value.
+     * 
+     * @param string $name The name of the value to return. If not specified, the whole configuration is returned.
+     * 
+     * @return mixed
+     */
+    public static function getDefaultConfig($name = null)
+    {
+        return self::getConfigArray(self::getDefaultConfigArray(), $name);
+    }
+    
+    /**
+     * Modifies a configuration array. Used for specific and default configurations.
+     * 
+     * @param &array $config The configuration array to modify.
+     * @param mxied  $name   The name.
+     * @param mixed  $value  The value.
+     * 
+     * @return void
+     */
+    private static function setConfigArray(array &$config, $name, $value = null)
+    {
+        // allow an array
+        if (is_array($name)) {
+            $config = array_merge($config, $name);
+            return;
+        }
+        
+        // allow traversable
+        if ($name instanceof Traversable) {
+            static::setConfigArray($config, iterator_to_array($name));
+            return;
+        }
+        
+        // allow an object
+        if (is_object($name)) {
+            static::setConfigArray((array) $config, $name);
+            return;
+        }
+        
+        // scalar
+        $config[$name] = $value;
+    }
+    
+    /**
+     * Returns the config value or the whole config array if no value is passed.
+     * 
+     * @param array  $config The config array.
+     * @param string $name   The name of the value.
+     * 
+     * @return mixed
+     */
+    private static function getConfigArray(array $config, $name = null)
+    {
         // return whole config array
         if (!$name) {
-            return $this->config;
+            return $config;
         }
         
         // return specified value
-        if (isset($this->config[$name])) {
-            return $this->config[$name];
+        if (isset($config[$name])) {
+            return $config[$name];
         }
     }
     
     /**
-     * Returns default configuration. If a `defaultConfiguration` property is set, that is used.
+     * Ensures that there is a default configuration for the class and returns the class name.
      * 
-     * @return array
+     * @return string
      */
-    public function getDefaultConfig()
+    private static function ensureDefaultConfigArray()
     {
-        if (isset($this->defaultConfig) && is_array($this->defaultConfig)) {
-            return $this->defaultConfig;
+        $class = get_called_class();
+        if (!isset(self::$defaultConfigs[$class])) {
+            self::$defaultConfigs[$class] = [];
         }
-        return [];
+        return $class;
     }
     
-    /**
-     * Resets the configuration back to defaults using `getDefaultConfiguration()`.
-     * 
-     * @return Configurable
-     */
-    public function setDefaultConfig(array $config)
-    {
-        $this->defaultConfig = $config;
-        return $this;
-    }
     
     /**
-     * Restores the default configuration.
+     * Ensures that there is a default configuration for the class.
      * 
-     * @return Configurable
+     * @return void
      */
-    public function restoreDefaultConfig()
+    private static function getDefaultConfigArray()
     {
-        return $this->setConfig($this->getDefaultConfig());
+        return self::$defaultConfigs[self::ensureDefaultConfigArray()];
     }
 }

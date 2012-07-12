@@ -16,6 +16,7 @@ use Europa\Util\Configurable;
 use Europa\View\Json;
 use Europa\View\Php;
 use Europa\View\Xml;
+use UnexpectedValueException;
 
 /**
  * The default container.
@@ -30,77 +31,34 @@ class Container extends Provider
     use Configurable;
 
     /**
-     * The path relative to this file that is the application root.
+     * The application install path.
      * 
      * @var string
      */
-    const PATH = '../../..';
-
+    private $path;
+    
     /**
      * The default configuration.
      * 
      * @var array
      */
     private $defaultConfig = [
-        /**
-         * The application base path if not using the default.
-         * 
-         * @var string
-         */
         'basePath' => null,
-
-        /**
-         * The controller container filter's configuration.
-         * 
-         * @var array
-         */
         'controllerFilterConfig' => [
             ['prefix' => 'Controller\\']
         ],
-
-        /**
-         * The helper container filter's configuration.
-         * 
-         * @var array
-         */
         'helperFilterConfig' => [
             ['prefix' => 'Helper\\'],
             ['prefix' => 'Europa\View\Helper\\']
         ],
-
-        /**
-         * The language file paths relative to the application base path.
-         * 
-         * @var array
-         */
         'langPaths' => ['app/langs/en-us' => 'ini'],
-
-        /**
-         * The view file paths relative to the application base path.
-         * 
-         * @var array
-         */
         'viewPaths' => ['app/views' => 'php'],
-
-        /**
-         * The content type to view type mapping. If modifying this, you must ensure that you have a provider method
-         * that matches. I.e. `view[Type]`.
-         * 
-         * @var array
-         */
         'viewTypes' => [
             'application/json' => 'Json',
             'text/xml'         => 'Xml',
             'text/html'        => 'Php'
         ]
     ];
-
-    /**
-     * The application install path.
-     * 
-     * @var string
-     */
-    private $path;
 
     /**
      * Sets up the container.
@@ -114,7 +72,10 @@ class Container extends Provider
         $this->initConfig($config);
 
         if (!$this->getConfig('basePath')) {
-            $this->setConfig('basePath', __DIR__ . '/' . self::PATH);
+            throw new UnexpectedValueException(sprintf(
+                'A valid "basePath" must be specified in the "%s" configuration.',
+                get_class($this)
+            ));
         }
     }
 
