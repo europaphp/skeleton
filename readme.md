@@ -16,7 +16,7 @@ Extract it anywhere you want as long as you can view the `www/index.php` in a br
 So How Do You Use it?
 ---------------------
 
-To check out the documentation, just go into the `lib` directory. Each directory has a `readme` that corresponds to it. To update the documentation, just do as you'd normally do with code.
+To check out the documentation, just go into the `src` directory. Each directory has a `readme` that corresponds to it. To update the documentation, just do as you'd normally do with code.
 
 License
 -------
