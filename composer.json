@@ -1,0 +1,24 @@
+{
+    "authors": [
+        {
+            "name": "Trey Shugart",
+            "email": "treshugart@gmail.com",
+            "homepage": "http://iamtres.com",
+            "role": "Lead Developer"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "Europa": "src"
+        }
+    },
+    "description": "A feather-weight, extremely-fast, diverse, scalable and productive PHP 5.4 View Controller framework.",
+    "homepage": "http://github.com/treshugart/EuropaPHP",
+    "keywords": ["mvc", "view", "controller", "fast", "scalable", "simple"],
+    "license": "MIT",
+    "name": "treshugart/europaphp",
+    "require": {
+        "php": ">=5.4.0",
+        "treshugart/testes": "dev-master"
+    }
+}
