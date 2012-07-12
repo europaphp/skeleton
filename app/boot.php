@@ -11,16 +11,13 @@ require_once __DIR__ . '/../vendor/autoload.php';
 ini_set('display_errors', 'on');
 error_reporting(E_ALL | E_STRICT);
 
-// set application base path
-Container::setDefaultConfig('basePath', __DIR__ . '/..');
-
 // autoloading
 $loader = new Loader;
 $loader->getLocator()->addPath(__DIR__ . '/classes');
 $loader->register();
 
 // ensure the proper view is set after routing
-Container::fetch()->get('app')->event()->bind('route.post', function($app) {
+Container::fetch(['basePath' => __DIR__ . '/..'])->get('app')->event()->bind('route.post', function($app) {
     if ($app->getView() instanceof ViewScriptInterface) {
         $script = $app->getRequest()->isCli() ? 'cli' : 'web';
         $script = $script . '/' . $app->getRequest()->controller;

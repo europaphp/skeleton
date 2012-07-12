@@ -116,7 +116,7 @@ abstract class ContainerAbstract implements ContainerInterface
 
         if (!isset(self::$instances[$name])) {
             if (func_num_args()) {
-                $inst = (new ReflectionClass)->newInstanceArgs(func_get_args());
+                $inst = (new ReflectionClass(get_called_class()))->newInstanceArgs(func_get_args());
             } else {
                 $inst = new static;
             }

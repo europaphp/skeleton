@@ -69,6 +69,36 @@ class ClassReflector extends \ReflectionClass implements Reflectable
     }
     
     /**
+     * Returns an array of parent class reflectors. The top-most parent is the first item and the last is the current.
+     * 
+     * @return array
+     */
+    public function getTree()
+    {
+        $tree      = [];
+        $reflector = $this;
+        while ($reflector) {
+            $tree[]    = $reflector;
+            $reflector = $reflector->getParentClass();
+        }
+        return array_reverse($tree);
+    }
+    
+    /**
+     * Returns an array of parent class names. The top-most parent is the first item and the last is the current.
+     * 
+     * @return array
+     */
+    public function getTreeNames()
+    {
+        $tree = [];
+        foreach ($this->getTree() as $parent) {
+            $tree[] = $parent->getName();
+        }
+        return $tree;
+    }
+    
+    /**
      * Overridden to get the \Europa\Reflection\MethodReflector instance for a method.
      * 
      * @param string $method The name of the method to get.

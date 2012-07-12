@@ -12,7 +12,8 @@
 <?php endif; ?>
 
 
-Coverage: <?php echo $percent > 50 ? $this->cli->color($percent, 'green') : $this->cli->color($percent, 'red'); ?> %
+<?php echo $this->cli->color('Coverage:', 'yellow'); ?> <?php echo $this->cli->color($percent . '%', $percent >= 50 ? 'green' : 'red'); ?>
+
 <?php if ($showUntested && $report->getUntestedFileCount()): ?>
 
 Untested Files and Lines

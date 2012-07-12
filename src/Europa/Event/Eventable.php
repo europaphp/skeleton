@@ -1,8 +1,6 @@
 <?php
 
-namespace Europa\Util;
-use Europa\Event\Dispatcher;
-use Europa\Event\DispatcherInterface;
+namespace Europa\Event;
 
 /**
  * A trait that allows an event dispatcher to be applied to it.
@@ -20,7 +18,7 @@ trait Eventable
      * @var array
      */
     private $event;
-    
+
     /**
      * Sets or returns an event object. If returning an event object and one does not already exist, then a default one
      * is created. If setting an event object, then the current trait instance is returned.
@@ -36,12 +34,12 @@ trait Eventable
             $this->event = $event;
             return $this;
         }
-        
+
         // set if not exists
         if (!$this->event) {
             $this->event = new Dispatcher;
         }
-        
+
         // get event
         return $this->event;
     }

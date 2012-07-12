@@ -12,7 +12,6 @@ use Europa\Request\RequestAbstract;
 use Europa\Response;
 use Europa\Router\RegexRoute;
 use Europa\Router\Router;
-use Europa\Util\Configurable;
 use Europa\View\Json;
 use Europa\View\Php;
 use Europa\View\Xml;
@@ -28,8 +27,6 @@ use UnexpectedValueException;
  */
 class Container extends Provider
 {
-    use Configurable;
-
     /**
      * The application install path.
      * 
@@ -42,7 +39,7 @@ class Container extends Provider
      * 
      * @var array
      */
-    private $defaultConfig = [
+    private $config = [
         'basePath' => null,
         'controllerFilterConfig' => [
             ['prefix' => 'Controller\\']
@@ -67,11 +64,11 @@ class Container extends Provider
      * 
      * @return Container
      */
-    public function __construct($config = [])
+    public function __construct(array $config = [])
     {
-        $this->initConfig($config);
-
-        if (!$this->getConfig('basePath')) {
+        $this->config = array_merge($this->config, $config);
+        
+        if (!$this->config['basePath']) {
             throw new UnexpectedValueException(sprintf(
                 'A valid "basePath" must be specified in the "%s" configuration.',
                 get_class($this)
@@ -109,7 +106,7 @@ class Container extends Provider
     {
         $finder = new Finder;
 
-        foreach ($this->getConfig('controllerFilterConfig') as $config) {
+        foreach ($this->config['controllerFilterConfig'] as $config) {
             $finder->getFilter()->add(new ClassNameFilter($config));
         }
 
@@ -129,7 +126,7 @@ class Container extends Provider
     {
         $finder = new Finder;
 
-        foreach ($this->getConfig('helperFilterConfig') as $config) {
+        foreach ($this->config['helperFilterConfig'] as $config) {
             $finder->getFilter()->add(new ClassNameFilter($config));
         }
 
@@ -151,8 +148,8 @@ class Container extends Provider
      */
     public function langLocator()
     {
-        $locator = new Locator($this->getConfig('basePath'));
-        $locator->addPaths($this->getConfig('langPaths'));
+        $locator = new Locator($this->config['basePath']);
+        $locator->addPaths($this->config['langPaths']);
         return $locator;
     }
 
@@ -258,7 +255,7 @@ class Container extends Provider
     public function view($request)
     {
         if ($request instanceof Request\Http) {
-            $view   = $request->accepts($this->getConfig('viewTypes'));
+            $view   = $request->accepts($this->config['viewTypes']);
             $method = 'view' . $view;
 
             if ($view && method_exists($this, $method)) {
@@ -291,8 +288,8 @@ class Container extends Provider
      */
     public function viewPhpLocator()
     {
-        $locator = new Locator($this->getConfig('basePath'));
-        $locator->addPaths($this->getConfig('viewPaths'));
+        $locator = new Locator($this->config['basePath']);
+        $locator->addPaths($this->config['viewPaths']);
         return $locator;
     }
 

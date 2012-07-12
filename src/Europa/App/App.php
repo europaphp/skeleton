@@ -3,10 +3,10 @@
 namespace Europa\App;
 use LogicException;
 use Europa\Di\ContainerInterface;
+use Europa\Event\Eventable;
 use Europa\Request\RequestInterface;
 use Europa\Response\ResponseInterface;
 use Europa\Router\RouterInterface;
-use Europa\Util\Eventable;
 use Europa\View\ViewInterface;
 use Europa\View\ViewScriptInterface;
 use UnexpectedValueException;
