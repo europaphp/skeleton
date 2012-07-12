@@ -4,7 +4,8 @@ use Europa\App\Container;
 use Europa\Fs\Loader;
 use Europa\View\ViewScriptInterface;
 
-require_once __DIR__. '/../src/Europa/Fs/Loader.php';
+require_once __DIR__ . '/../src/Europa/Fs/Loader.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 // scrict standards
 ini_set('display_errors', 'on');
