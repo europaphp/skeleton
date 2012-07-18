@@ -1,6 +1,8 @@
 <?php
 
 namespace Europa\Fs\Iterator;
+use FilterIterator;
+use Iterator;
 
 /**
  * Filters the iterator based on path names and patterns.
@@ -10,7 +12,7 @@ namespace Europa\Fs\Iterator;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class PathnameFilterIterator extends \FilterIterator
+class PathnameFilterIterator extends FilterIterator
 {
     /**
      * Patterns for inclusion.
@@ -29,13 +31,13 @@ class PathnameFilterIterator extends \FilterIterator
     /**
      * Sets up the pathname filter.
      * 
-     * @param \Iterator $iterator The iterator to filter.
-     * @param array     $include  The inclusion patterns.
-     * @param array     $exclude  The exclusion patterns.
+     * @param Iterator $iterator The iterator to filter.
+     * @param array    $include  The inclusion patterns.
+     * @param array    $exclude  The exclusion patterns.
      * 
-     * @return \Europa\Fs\Iterator\PathnameFilterIterator
+     * @return PathnameFilterIterator
      */
-    public function __construct(\Iterator $iterator, array $include, array $exclude)
+    public function __construct(Iterator $iterator, array $include, array $exclude)
     {
         $this->include = $include;
         $this->exclude = $exclude;
@@ -85,6 +87,6 @@ class PathnameFilterIterator extends \FilterIterator
      */
     private function match($pattern)
     {
-        return (bool) preg_match('#' . $pattern . '#', $this->getPathname());
+        return preg_match($pattern, $this->current()->getPathname());
     }
 }

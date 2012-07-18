@@ -187,6 +187,18 @@ class File extends Item
         file_put_contents($pathname, $contents);
         return $count;
     }
+    
+    /**
+     * Returns whether or not the file contains the specified pattern.
+     * 
+     * @param string $pattern The pattern to match.
+     * 
+     * @return bool
+     */
+    public function contains($pattern)
+    {
+        return $this->search($pattern) !== false;
+    }
 
     /**
      * Returns the file name without extension.

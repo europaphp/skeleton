@@ -3,16 +3,17 @@
 namespace Europa\Fs\Iterator;
 use Europa\Fs\Directory;
 use Europa\Fs\File;
+use IteratorIterator;
 
 /**
- * An iterator that represents a collection of \Europa\Fs\Directory and \Europa\Fs\File instances.
+ * An iterator that represents a collection of Europa\Fs\Directory and Europa\Fs\File instances.
  * 
  * @category Fs
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class FsIteratorIterator extends \IteratorIterator
+class FsIteratorIterator extends IteratorIterator
 {
     /**
      * The pathname of the last item in the iterator that was accessed.
@@ -54,12 +55,22 @@ class FsIteratorIterator extends \IteratorIterator
      * 
      * @param int $offset The offset to use.
      * 
-     * @return \Europa\Fs\Iterator\FsIterator
+     * @return FsIterator
      */
     public function setOffset($offset)
     {
         $this->offset = (int) $offset;
         return $this;
+    }
+    
+    /**
+     * Returns the offset.
+     * 
+     * @return int
+     */
+    public function getOffset()
+    {
+        return $this->offset;
     }
 
     /**
@@ -67,7 +78,7 @@ class FsIteratorIterator extends \IteratorIterator
      * 
      * @param int $limit The limit to use.
      * 
-     * @return \Europa\Fs\Iterator\FsIterator
+     * @return FsIterator
      */
     public function setLimit($limit)
     {
@@ -76,10 +87,20 @@ class FsIteratorIterator extends \IteratorIterator
     }
     
     /**
-     * Returns specific directory/file instances. Fixes an issue with PHP's FilterIterator that causes the first item
+     * Returns the limit.
+     * 
+     * @return int
+     */
+    public function getLimit()
+    {
+        return $this->limit;
+    }
+    
+    /**
+     * Returns specific directory / file instances. Fixes an issue with PHP's FilterIterator that causes the first item
      * to be repeated.
      * 
-     * @return Directory|File
+     * @return Directory | File
      */
     public function current()
     {

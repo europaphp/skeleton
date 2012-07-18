@@ -1,6 +1,20 @@
 <?php
 
 namespace Europa\Fs;
+use AppendIterator;
+use ArrayIterator;
+use InvalidArgumentException;
+use Iterator;
+use IteratorAggregate;
+use Europa\Fs\Directory;
+use Europa\Fs\File;
+use Europa\Fs\Iterator\CallbackFilterIterator;
+use Europa\Fs\Iterator\FsIteratorIterator;
+use Europa\Fs\Iterator\PathnameFilterIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use SplFileInfo;
+use Traversable;
 
 /**
  * Handles the finding of files and directories.
@@ -10,7 +24,7 @@ namespace Europa\Fs;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Finder implements \IteratorAggregate
+class Finder implements IteratorAggregate
 {
     /**
      * The directories to search in.
@@ -76,27 +90,30 @@ class Finder implements \IteratorAggregate
     private $append = array();
     
     /**
-     * Returns the iterator for the implementation of \IteratorAggregate.
+     * Returns the iterator for the implementation of IteratorAggregate.
      * 
-     * @return \Iterator
+     * @return Iterator
      */
     public function getIterator()
     {
-        $pre = new \AppendIterator;
+        $pre = new AppendIterator;
+        
         foreach ($this->prepend as $prepend) {
             $pre->append($this->normalizeTraversable($prepend));
         }
+        
         foreach ($this->dirs as $dir) {
             $pre->append($this->getRecursiveIterator($dir));
         }
         
-        $post = new \AppendIterator;
+        $post = new AppendIterator;
         $post->append($this->applyFilters($pre));
+        
         foreach ($this->append as $append) {
             $post->append($this->normalizeTraversable($append));
         }
         
-        $it = new Iterator\FsIteratorIterator($post);
+        $it = new FsIteratorIterator($post);
         $it->setOffset($this->offset);
         $it->setLimit($this->limit);
 
@@ -108,7 +125,7 @@ class Finder implements \IteratorAggregate
      * 
      * @param mixed $prepend The item to prepend.
      * 
-     * @return \Europa\Fs\Finder
+     * @return Finder
      */
     public function prepend($prepend)
     {
@@ -121,7 +138,7 @@ class Finder implements \IteratorAggregate
      * 
      * @param mixed $append The item to append.
      * 
-     * @return \Europa\Fs\Finder
+     * @return Finder
      */
     public function append($append)
     {
@@ -134,7 +151,7 @@ class Finder implements \IteratorAggregate
      * 
      * @param string $pattern The pattern to match.
      * 
-     * @return \Europa\Fs\Finder
+     * @return Finder
      */
     public function is($pattern)
     {
@@ -147,7 +164,7 @@ class Finder implements \IteratorAggregate
      * 
      * @param string $pattern The pattern to match.
      * 
-     * @return \Europa\Fs\Finder
+     * @return Finder
      */
     public function not($pattern)
     {
@@ -156,41 +173,58 @@ class Finder implements \IteratorAggregate
     }
     
     /**
+     * Returns files containing the specified pattern.
+     * 
+     * @param string $pattern The pattern to match.
+     * 
+     * @return Finder
+     */
+    public function contains($pattern)
+    {
+        return $this->files()->filter(function($item) use ($pattern) {
+            return $item->contains($pattern);
+        });
+    }
+    
+    /**
      * Filters out all directories and leaves only files.
      * 
-     * @return \Europa\Fs\Finder
+     * @return Finder
      */
     public function files()
     {
-        $this->filter(function($item) {
-            return $item->current()->isFile();
+        return $this->filter(function($item) {
+            return $item instanceof File;
         });
-        return $this;
     }
     
     /**
      * Filters out all files and leaves only directories.
      * 
-     * @return \Europa\Fs\Finder
+     * @return Finder
      */
     public function directories()
     {
-        $this->filter(function($item) {
-            return $item->current()->isDir();
+        return $this->filter(function($item) {
+            return $item instanceof Directory;
         });
-        return $this;
     }
     
     /**
      * Applies a custom filter to the listing.
      * 
-     * @param \Closure $filter The custom filter.
+     * @param mixed $filter The custom filter.
      * 
-     * @return \Europa\Fs\Finder
+     * @return Finder
      */
-    public function filter(\Closure $filter)
+    public function filter($filter)
     {
+        if (!is_callable($filter)) {
+            throw new InvalidArgumentException('The filter must be callable.');
+        }
+        
         $this->filters[] = $filter;
+        
         return $this;
     }
     
@@ -199,7 +233,7 @@ class Finder implements \IteratorAggregate
      * 
      * @param string $path The path to add to the list of search paths.
      * 
-     * @return \Europa\Fs\Finder
+     * @return Finder
      */
     public function in($path)
     {
@@ -212,7 +246,7 @@ class Finder implements \IteratorAggregate
     /**
      * Only seeks to the specified hierarchical depth.
      * 
-     * @return \Europa\Fs\Finder
+     * @return Finder
      */
     public function depth($depth = null)
     {
@@ -228,7 +262,7 @@ class Finder implements \IteratorAggregate
      * 
      * @param int $offset The offset to use.
      * 
-     * @return \Europa\Fs\Finder
+     * @return Finder
      */
     public function offset($offset)
     {
@@ -241,7 +275,7 @@ class Finder implements \IteratorAggregate
      * 
      * @param int $limit The limit to use.
      * 
-     * @return \Europa\Fs\Finder
+     * @return Finder
      */
     public function limit($limit)
     {
@@ -255,7 +289,7 @@ class Finder implements \IteratorAggregate
      * @param int $page  The page to use.
      * @param int $limit The limit to use.
      * 
-     * @return \Europa\Fs\Finder
+     * @return Finder
      */
     public function page($page, $limit)
     {
@@ -266,6 +300,19 @@ class Finder implements \IteratorAggregate
         $this->limit  = $limit;
         $this->offset = ($page * $limit) - $limit;
 
+        return $this;
+    }
+    
+    /**
+     * Allows the sorting of the returned files.
+     * 
+     * @param mixed $cb The callable callback to use for sorting.
+     * 
+     * @return Finder
+     */
+    public function sort($cb)
+    {
+        $this->sort[] = $cb;
         return $this;
     }
 
@@ -288,13 +335,13 @@ class Finder implements \IteratorAggregate
      * 
      * @param string $dir The directory to search in.
      * 
-     * @return \Iterator
+     * @return Iterator
      */
-    private function applyFilters(\Iterator $iterator)
+    private function applyFilters(Iterator $iterator)
     {
-        $iterator = new Iterator\PathnameFilterIterator($iterator, $this->is, $this->not);
-        $iterator = new Iterator\ClosureFilterIterator($iterator, $this->filters);
-        return $iterator;
+        $iterator = new PathnameFilterIterator($iterator, $this->is, $this->not);
+        $iterator = new CallbackFilterIterator($iterator, $this->filters);
+        return new FsIteratorIterator($iterator);
     }
     
     /**
@@ -302,16 +349,18 @@ class Finder implements \IteratorAggregate
      * 
      * @param string $dir The directory to get the recursive iterator for.
      * 
-     * @return \RecursiveIteratorIterator
+     * @return RecursiveIteratorIterator
      */
     private function getRecursiveIterator($dir)
     {
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($dir),
-            \RecursiveIteratorIterator::SELF_FIRST
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($dir),
+            RecursiveIteratorIterator::SELF_FIRST
         );
+        
         $iterator->setMaxDepth($this->depth);
-        return $iterator;
+        
+        return new FsIteratorIterator($iterator);
     }
     
     /**
@@ -319,23 +368,24 @@ class Finder implements \IteratorAggregate
      * 
      * @param mixed $iterator The iterator to normalize.
      * 
-     * @return \Iterator
+     * @return Iterator
      */
     private function normalizeTraversable($iterator)
     {
-        if ($iterator instanceof \IteratorAggregate) {
+        if ($iterator instanceof IteratorAggregate) {
             $iterator = $iterator->getIterator();
-        } elseif ($iterator instanceof \Iterator) {
+        } elseif ($iterator instanceof Iterator) {
             $iterator = $iterator;
-        } elseif ($iterator instanceof \Traversable || is_array($iterator)) {
-            $traversable = new \ArrayIterator();
+        } elseif ($iterator instanceof Traversable || is_array($iterator)) {
+            $traversable = new ArrayIterator();
             foreach ($iterator as $item) {
-                $traversable->append($item instanceof \SplFileInfo ? $item : new \SplFileInfo($item));
+                $traversable->append($item instanceof SplFileInfo ? $item : new SplFileInfo($item));
             }
             $iterator = $traversable;
         } else {
-            throw new \InvalidArgumentException('The specified traversable item cannot be applied to the finder.');
+            throw new InvalidArgumentException('The specified traversable item cannot be applied to the finder.');
         }
-        return $iterator;
+        
+        return FsIteratorIterator($iterator);
     }
 }
