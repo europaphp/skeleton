@@ -153,21 +153,29 @@ class File extends Item
     }
     
     /**
-     * Searches the current file for the matching pattern and returs the all
-     * matches that were found as an array using preg_match_all. If no matches
-     * are found, false is returned.
+     * Searches the current file for the matching pattern and returns the matches. The index is the line the match was
+     * found on and the value is the array of matches.
      * 
      * @param string $regex The pattern to match.
      * 
-     * @return false | array
+     * @return array
      */
-    public function search($regex)
+    public function find($regex)
     {
-        preg_match_all($regex, file_get_contents($this->getPathname()), $matches);
-        if (count($matches[0])) {
-            return $matches;
+        preg_match_all($regex, file_get_contents($this->getPathname()), $matches, PREG_SET_ORDER);
+        
+        if (count($matches)) {
+            $lines    = [];
+            $contents = $this->getContents();
+            
+            foreach ($matches as $match) {
+                $lines[substr_count($contents, "\n", 0, strpos($contents, $match[0])) + 1] = $match;
+            }
+            
+            return $lines;
         }
-        return false;
+        
+        return [];
     }
     
     /**
@@ -179,7 +187,7 @@ class File extends Item
      * 
      * @return int
      */
-    public function searchAndReplace($regex, $replacement)
+    public function findAndReplace($regex, $replacement)
     {
         $pathname = $this->getPathname();
         $contents = file_get_contents($pathname);
@@ -197,7 +205,7 @@ class File extends Item
      */
     public function contains($pattern)
     {
-        return $this->search($pattern) !== false;
+        return count($this->find($pattern)) > 0;
     }
 
     /**
