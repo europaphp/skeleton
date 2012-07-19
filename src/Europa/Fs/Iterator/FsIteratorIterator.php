@@ -16,13 +16,6 @@ use IteratorIterator;
 class FsIteratorIterator extends IteratorIterator
 {
     /**
-     * The pathname of the last item in the iterator that was accessed.
-     * 
-     * @var string
-     */
-    private $last;
-
-    /**
      * The offset.
      * 
      * @var int
@@ -97,22 +90,12 @@ class FsIteratorIterator extends IteratorIterator
     }
     
     /**
-     * Returns specific directory / file instances. Fixes an issue with PHP's FilterIterator that causes the first item
-     * to be repeated.
+     * Returns specific directory / file instances.
      * 
      * @return Directory | File
      */
     public function current()
     {
-        // make sure it's not the same as the last one
-        // fixes an issue in PHP's FilterIterator
-        if (parent::current()->getPathName() === $this->last) {
-            $this->next();
-        }
-        
-        // mark the last one so we can fix the PHP issue
-        $this->last = parent::current()->getPathname();
-
         // continue on until the offset is met
         while ($this->index < $this->offset) {
             $this->next();
