@@ -16,7 +16,7 @@ use Testes\Finder\Finder;
 class Test extends RestController
 {
     /**
-     * The default request method.
+     * Runs tests.
      * 
      * @param string $test         The test to run.
      * @param bool   $showUntested Whether or not to show untested lines of code.
@@ -25,15 +25,15 @@ class Test extends RestController
      */
     public function cli($test = 'Test', $showUntested = false)
     {
-        // so we can get some helpful data
+        // start covering tests
         $analyzer = new Coverage;
         $analyzer->start();
         
-        // re-run the test b/c two xdebug functions can't be run at the same time
+        // run tests
         $suite = new Finder(__DIR__ . '/../Test/Test');
         $suite = $suite->run();
         
-        // gather useful data
+        // stop covering and analyze results
         $analyzer = $analyzer->stop();
         $analyzer->addDirectory(__DIR__ . '/../../../src/Europa');
         $analyzer->is('\.php$');

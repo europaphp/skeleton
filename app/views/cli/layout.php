@@ -1,8 +1,9 @@
 
-<?php echo $this->cli->color('EuropaPHP Command Line Interface', 'cyan'); ?>
+<?php echo $this->cli->color($this->lang->title, 'cyan'); ?>
 
-<?php echo $this->cli->color('--------------------------------', 'cyan'); ?>
+<?php echo $this->cli->color($this->lang->titleUnderline, 'cyan'); ?>
 
 
-<?php echo $this->renderChild(); ?>
+<?php echo trim($this->renderChild()); ?>
+
 

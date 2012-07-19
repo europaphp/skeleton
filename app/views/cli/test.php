@@ -1,4 +1,5 @@
 <?php $this->extend('cli/layout'); ?>
+
 <?php if ($suite->getAssertions()->isPassed()): ?>
 <?php echo $this->cli->color('All tests passed!', 'green'); ?><?php else: ?>
 <?php echo $this->cli->color('Failed', 'red'); ?>

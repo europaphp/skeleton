@@ -200,3 +200,8 @@ A `Chain` is used when you want to link together multiple containers. It will lo
 ### Passing Arguments
 
 When arguments are passed, they will be handled by their respective container.
+
+Using Multiple Instances of a Container
+---------------------------------------
+
+There may be situations when you need to use mutiple instances of one type of container.

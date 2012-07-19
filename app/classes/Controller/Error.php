@@ -26,4 +26,14 @@ class Error extends RestController
             'uri' => $uri->getRootPart() . $uri->getRequestPart() . $uri->getQueryPart(),
         );
     }
+    
+    /**
+     * Generates command line error information.
+     * 
+     * @return void
+     */
+    public function cli()
+    {
+        
+    }
 }

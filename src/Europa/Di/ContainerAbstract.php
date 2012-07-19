@@ -1,8 +1,8 @@
 <?php
 
 namespace Europa\Di;
+use Europa\Reflection\ClassReflector;
 use LogicException;
-use ReflectionClass;
 
 /**
  * The application service locator and container.
@@ -104,19 +104,25 @@ abstract class ContainerAbstract implements ContainerInterface
     }
 
     /**
-     * Returns a container instance.
+     * Returns a container instance. Allows multiple named instances of the same type of container.
      * 
      * @param string $name The name of the container to get.
+     * @param array  $args The arguments to pass to the container constructor. Can be passed by name.
      * 
      * @return Container
      */
-    public static function fetch()
+    public static function fetch($name = self::NAME, array $args = [])
     {
-        $name = get_called_class();
+        if (is_array($name)) {
+            $args = $name;
+            $name = self::NAME;
+        }
+        
+        $name = get_called_class() . $name;
 
         if (!isset(self::$instances[$name])) {
-            if (func_num_args()) {
-                $inst = (new ReflectionClass(get_called_class()))->newInstanceArgs(func_get_args());
+            if ($args) {
+                $inst = (new ClassReflector(get_called_class()))->newInstanceArgs(func_get_args());
             } else {
                 $inst = new static;
             }
