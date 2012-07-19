@@ -97,7 +97,7 @@ class Finder extends ContainerAbstract
      * 
      * @return mixed
      */
-    public function create($name, array $args = [])
+    public function __call($name, array $args = [])
     {
         if ($class = $this->filter->filter($name)) {
             return $this->invokeQueue($this->createInstance($class, $args));

@@ -109,6 +109,10 @@ class Container extends Provider
         foreach ($this->config['controllerFilterConfig'] as $config) {
             $finder->getFilter()->add(new ClassNameFilter($config));
         }
+        
+        $finder->config('Europa\Controller\RestController', function() use ($request) {
+            return [$request()];
+        });
 
         return $finder;
     }

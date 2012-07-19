@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Di;
+use Exception;
 
 /**
  * The application service locator and container.
@@ -33,11 +34,11 @@ class Chain extends ContainerAbstract
      * 
      * @return mixed
      */
-    public function create($name, array $args = [])
+    public function __call($name, array $args = [])
     {
         foreach ($this->containers as $container) {
             try {
-                return $container->create($name, $args);
+                return $container->__call($name, $args);
             } catch (Exception $e) {
                 
             }

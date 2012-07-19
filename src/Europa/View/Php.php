@@ -85,7 +85,7 @@ class Php implements ViewScriptInterface
     public function __call($name, array $args = array())
     {
         if ($this->helpers) {
-            return $this->helpers->get($name, $args);
+            return $this->helpers->__create($name, $args);
         }
         
         throw new LogicException(
@@ -107,7 +107,7 @@ class Php implements ViewScriptInterface
     public function __get($name)
     {
         if ($this->helpers) {
-            return $this->helpers->get($name);
+            return $this->helpers->__get($name);
         }
         
         throw new LogicException(

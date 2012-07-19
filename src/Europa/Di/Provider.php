@@ -24,7 +24,7 @@ abstract class Provider extends ContainerAbstract
      * 
      * @return mixed
      */
-    public function create($name, array $args = [])
+    public function __call($name, array $args = [])
     {
         if ($method = $this->resolveMethod($name)) {
             $args = array_merge($this->resolveMethodDependencies($method), $args);
@@ -67,7 +67,7 @@ abstract class Provider extends ContainerAbstract
             
             // create a closure that returns the dependency
             $get = function() use ($method, $param) {
-                return $this->get($param->getName());
+                return $this->__get($param->getName());
             };
             
             // If the parameter is type-hinted as a closure, then give them a closure that returns the dependency

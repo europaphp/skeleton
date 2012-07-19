@@ -36,53 +36,18 @@ abstract class ContainerAbstract implements ContainerInterface
     private static $instances = [];
 
     /**
-     * Creates a new instance specified by name.
-     * 
-     * @param string $name The service name.
-     * @param array  $args The arguments to pass, if any.
-     * 
-     * @return mixed
-     */
-    public function __call($name, array $args = [])
-    {
-        return $this->create($name, $args);
-    }
-
-    /**
      * Locates the specified service and returns it.
      * 
      * @param string $name The service name.
-     * @param string $args The arguments to use.
      * 
      * @return mixed
      */
     public function __get($name)
     {
-        return $this->get($name);
-    }
-
-    /**
-     * Locates the specified service and returns it.
-     * 
-     * @param string $name The service name.
-     * @param string $args The arguments to use.
-     * 
-     * @return mixed
-     */
-    public function get($name, array $args = [])
-    {
-        // if arguments are passed and an instance is cached, return it
-        if (!$args && isset($this->cache[$name])) {
-            return $this->cache[$name];
+        if (!isset($this->cache[$name])) {
+            $this->cache[$name] = $this->__call($name);
         }
-
-        // creates a new instance and invokes its methods
-        $inst = $this->create($name, $args);
-
-        // cache instance
-        $this->cache[$name] = $inst;
-
-        return $inst;
+        return $this->cache[$name];
     }
 
     /**
@@ -111,7 +76,7 @@ abstract class ContainerAbstract implements ContainerInterface
      * 
      * @return Container
      */
-    public static function fetch($name = self::NAME, array $args = [])
+    public static function get($name = self::NAME, array $args = [])
     {
         if (is_array($name)) {
             $args = $name;
