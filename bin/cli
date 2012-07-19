@@ -2,7 +2,7 @@
 <?php
 
 if ($_SERVER['argc'] === 1) {
-	$_SERVER['argv'][1] = 'help';
+    $_SERVER['argv'][1] = 'help';
 }
 
 include __DIR__ . '/../www/index.php';
