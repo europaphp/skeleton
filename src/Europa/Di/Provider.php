@@ -24,7 +24,7 @@ abstract class Provider extends ContainerAbstract
      * 
      * @return mixed
      */
-    public function __call($name, array $args = [])
+    public function create($name, array $args = [])
     {
         if ($method = $this->resolveMethod($name)) {
             $args = array_merge($this->resolveMethodDependencies($method), $args);

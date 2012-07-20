@@ -26,27 +26,20 @@ Retrieving dependencies are done with `create()` and `get()`. Creating an object
     
     use Container\MyContainer;
     
-    $mc = MyContainer::fetch();
+    $mc = MyContainer::get();
     
     // accessing like a property
-    $old = $mc->get('someDep');
-    $new = $mc->get('someDep');
+    $old = $mc->someDep;
+    $new = $mc->someDep;
     
     // getting will cache the first one
     var_dump($old === $new); // true
     
-    $old = $mc->create('someDep');
-    $new = $mc->create('someDep');
+    $old = $mc->someDep();
+    $new = $mc->someDep();
     
     // calling will always return a new object
     var_dump($old === $new); // false
-
-You can even pass arguments by index or name. If they are passed by name, their index is resolved using the method definition:
-
-    $mc->get('someDep', [$arg1, $arg2]);
-    $mc->get('someDep', ['arg1' => $arg1, 'arg2' => $arg2]);
-    $mc->create('someDep', [$arg1, $arg2]);
-    $mc->create('someDep', ['arg1' => $arg1, 'arg2' => $arg2]);
 
 Providers
 ---------

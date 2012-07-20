@@ -34,6 +34,30 @@ abstract class ContainerAbstract implements ContainerInterface
      * @var array
      */
     private static $instances = [];
+    
+    /**
+     * Creates a new instance specified by name.
+     * 
+     * @param string $name The service name.
+     * @param array  $args The arguments to pass, if any.
+     * 
+     * @return mixed
+     */
+    abstract public function create($name);
+    
+    /**
+     * Creates a new instance specified by name.
+     * 
+     * @param string $name The service name.
+     * @param array  $args The arguments to pass, if any.
+     * 
+     * @return mixed
+     */
+    public function __call($name, array $args = [])
+    {
+        $this->cache[$name] = $this->create($name, $args);
+        return $this->cache[$name];
+    }
 
     /**
      * Locates the specified service and returns it.

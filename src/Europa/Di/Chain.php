@@ -34,7 +34,7 @@ class Chain extends ContainerAbstract
      * 
      * @return mixed
      */
-    public function __call($name, array $args = [])
+    public function create($name, array $args = [])
     {
         foreach ($this->containers as $container) {
             try {

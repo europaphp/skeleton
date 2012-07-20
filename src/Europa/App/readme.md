@@ -128,7 +128,7 @@ By default, you are provided with a class called `Europa\App\Container` which co
     
     include 'boot.php';
     
-    Container::fetch()->app->run();
+    Container::get()->app->run();
 
 If you were to set up the application class manually, you would have to set up each dependency. Using a container solves this problem and provides you with each component - including the application - ready to go out of the box.
 
@@ -157,4 +157,4 @@ Specifying the Controller Request Parameter
 
 By default, the controller is resolved using the `controller` request parameter. This can be set by the router, or directly set on the request. If you need to change this to, say, `ctrl` or something else, you do so by telling the application.
 
-    Container::fetch()->app->setKey('ctrl');
+    Container::get()->app->setKey('ctrl');
