@@ -85,7 +85,7 @@ class Php implements ViewScriptInterface
     public function __call($name, array $args = array())
     {
         if ($this->helpers) {
-            return $this->helpers->__create($name, $args);
+            return $this->helpers->__call($name, $args);
         }
         
         throw new LogicException(

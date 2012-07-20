@@ -69,7 +69,7 @@ abstract class ContainerAbstract implements ContainerInterface
     public function __get($name)
     {
         if (!isset($this->cache[$name])) {
-            $this->cache[$name] = $this->__call($name);
+            $this->__call($name);
         }
         return $this->cache[$name];
     }
