@@ -96,24 +96,23 @@ class Finder implements IteratorAggregate
      */
     public function getIterator()
     {
-        $pre = new AppendIterator;
+        $it = new AppendIterator;
         
         foreach ($this->prepend as $prepend) {
-            $pre->append($this->normalizeTraversable($prepend));
+            $it->append($this->normalizeTraversable($prepend));
         }
         
         foreach ($this->dirs as $dir) {
-            $pre->append($this->getRecursiveIterator($dir));
+            $it->append($this->getRecursiveIterator($dir));
         }
         
-        $post = new AppendIterator;
-        $post->append($this->applyFilters($pre));
+        $it = $this->applyFilters($it);
         
         foreach ($this->append as $append) {
-            $post->append($this->normalizeTraversable($append));
+            $it->append($this->normalizeTraversable($append));
         }
         
-        $it = new FsIteratorIterator($post);
+        $it = new FsIteratorIterator($it);
         $it->setOffset($this->offset);
         $it->setLimit($this->limit);
 
