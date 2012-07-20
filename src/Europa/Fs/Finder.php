@@ -327,7 +327,7 @@ class Finder implements IteratorAggregate
         foreach ($this->getIterator() as $item) {
             $arr[] = $item->getPathname();
         }
-        return $arr;
+        return array_unique($arr);
     }
     
     /**
