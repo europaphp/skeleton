@@ -53,17 +53,6 @@ class Finder extends ContainerAbstract
     public function __construct()
     {
         $this->filter = new ClassResolutionFilter;
-        $this->init();
-    }
-    
-    /**
-     * Initialisation hook for any further setup.
-     * 
-     * @return void
-     */
-    public function init()
-    {
-        
     }
     
     /**

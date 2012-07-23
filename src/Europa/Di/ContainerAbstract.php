@@ -108,17 +108,55 @@ abstract class ContainerAbstract implements ContainerInterface
         }
         
         $name = get_called_class() . $name;
-
+        
         if (!isset(self::$instances[$name])) {
-            if ($args) {
-                $inst = (new ClassReflector(get_called_class()))->newInstanceArgs(func_get_args());
-            } else {
-                $inst = new static;
-            }
-
-            self::$instances[$name] = $inst;
+            self::init($name, $args);
         }
-
+        
         return self::$instances[$name];
+    }
+    
+    /**
+     * Initializes a new instance.
+     * 
+     * @param string $name The name of the container to init.
+     * @param array  $args The arguments to pass to the container constructor. Can be passed by name.
+     * 
+     * @return void
+     */
+    public static function init($name = self::NAME, array $args = [])
+    {
+        if (is_array($name)) {
+            $args = $name;
+            $name = self::NAME;
+        }
+        
+        $name = get_called_class() . $name;
+        
+        if ($args) {
+            $inst = (new ClassReflector(get_called_class()))->newInstanceArgs(func_get_args());
+        } else {
+            $inst = new static;
+        }
+        
+        self::$instances[$name] = $inst;
+    }
+    
+    /**
+     * Removes the specified instance.
+     * 
+     * @param string $name The name of the container to remove.
+     * 
+     * @return void
+     */
+    public static function rm($name = self::NAME)
+    {
+        if (!$name) {
+            $name = self::NAME;
+        }
+        
+        if (isset(self::$instances[$name])) {
+            unset(self::$instances[$name]);
+        }
     }
 }

@@ -16,8 +16,11 @@ $loader = new Loader;
 $loader->getLocator()->addPath(__DIR__ . '/classes');
 $loader->register();
 
+// set up the main container
+Container::init(['basePath' => __DIR__ . '/..']);
+
 // ensure the proper view is set after routing
-Container::get(['basePath' => __DIR__ . '/..'])->app->event()->bind('route.post', function($app) {
+Container::get()->app->event()->bind('route.post', function($app) {
     if ($app->getView() instanceof ViewScriptInterface) {
         $script = $app->getRequest()->isCli() ? 'cli' : 'web';
         $script = $script . '/' . $app->getRequest()->controller;
