@@ -107,18 +107,81 @@ abstract class ContainerAbstract implements ContainerInterface
             $name = self::NAME;
         }
         
-        $name = get_called_class() . $name;
-
-        if (!isset(self::$instances[$name])) {
-            if ($args) {
-                $inst = (new ClassReflector(get_called_class()))->newInstanceArgs(func_get_args());
-            } else {
-                $inst = new static;
-            }
-
-            self::$instances[$name] = $inst;
+        $inst = static::formatName($name);
+        
+        if ($args || !isset(self::$instances[$inst])) {
+            static::init($name, $args);
         }
-
-        return self::$instances[$name];
+        
+        return self::$instances[$inst];
+    }
+    
+    /**
+     * Initializes a new instance.
+     * 
+     * @param string $name The name of the container to init.
+     * @param array  $args The arguments to pass to the container constructor. Can be passed by name.
+     * 
+     * @return void
+     */
+    public static function init($name = self::NAME, array $args = [])
+    {
+        if (is_array($name)) {
+            $args = $name;
+            $name = self::NAME;
+        }
+        
+        $name = static::formatName($name);
+        
+        if ($args) {
+            $inst = (new ClassReflector(get_called_class()))->newInstanceArgs($args);
+        } else {
+            $inst = new static;
+        }
+        
+        self::$instances[$name] = $inst;
+    }
+    
+    /**
+     * Returns whether or not the specified instance exists.
+     * 
+     * @param string $name The instance name.
+     * 
+     * @return bool
+     */
+    public static function has($name = self::NAME)
+    {
+        return isset(self::$instances[static::formatName($name)]);
+    }
+    
+    /**
+     * Removes the specified instance.
+     * 
+     * @param string $name The name of the container to remove.
+     * 
+     * @return void
+     */
+    public static function remove($name = self::NAME)
+    {
+        $name = static::formatName($name);
+        
+        if (isset(self::$instances[$name])) {
+            unset(self::$instances[$name]);
+        }
+    }
+    
+    /**
+     * Formats a default instance name.
+     * 
+     * @param string $name The name to format.
+     * 
+     * @return string
+     */
+    private static function formatName($name)
+    {
+        if (!$name) {
+            $name = self::NAME;
+        }
+        return get_called_class() . '.' . $name;
     }
 }
