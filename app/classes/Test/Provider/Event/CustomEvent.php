@@ -1,13 +1,12 @@
 <?php
 
 namespace Test\Provider\Event;
-use Europa\Event\DataInterface;
-use Europa\Event\EventInterface;
+use stdClass;
 
-class CustomEvent implements \Europa\Event\EventInterface
+class CustomEvent
 {
-    public function trigger(DataInterface $data)
+    public function __invoke(stdClass $data)
     {
-        $data->triggered = true;
+        $data->called = true;
     }
 }

@@ -3,6 +3,7 @@
 namespace Europa\Router;
 use Closure;
 use Europa\Request\RequestInterface;
+use InvalidArgumentException;
 use LogicException;
 
 /**
@@ -63,13 +64,18 @@ class Router implements RouterInterface
     /**
      * Sets a filter used to turn the request into a matchable string.
      * 
-     * @param Closure $filter The filter.
+     * @param mixed $filter The filter.
      * 
      * @return Route
      */
-    public function filter(Closure $filter)
+    public function filter($filter)
     {
+        if (!is_callable($filter)) {
+            throw new InvalidArgumentException('The filter supplied to the router is not callable.');
+        }
+        
         $this->filter = $filter;
+        
         return $this;
     }
 
@@ -128,6 +134,26 @@ class Router implements RouterInterface
             return $this;
         }
         throw new LogicException(sprintf('Cannot remove route "%s" because it does not exist.', $name));
+    }
+    
+    /**
+     * Sets an array or object of routes.
+     * 
+     * @param mixed $routes The routes to set.
+     * 
+     * @return Router
+     */
+    public function setRoutes($routes)
+    {
+        if (!is_array($routes) && !is_object($routes)) {
+            throw new InvalidArgumentException('The routes must either be an array or object.');
+        }
+        
+        foreach ($routes as $name => $route) {
+            $this->setRoute($name, $route);
+        }
+        
+        return $this;
     }
     
     /**

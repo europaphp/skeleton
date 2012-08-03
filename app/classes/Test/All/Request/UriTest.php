@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\Test\Request;
+namespace Test\All\Request;
 use Europa\Request\Uri;
-use Testes\Test\Test;
+use Testes\Test\UnitAbstract;
 
-class UriTest extends Test
+class UriTest extends UnitAbstract
 {
     public function parameterSetAndGet()
     {

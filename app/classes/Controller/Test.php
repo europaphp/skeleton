@@ -30,7 +30,7 @@ class Test extends RestController
         $analyzer->start();
         
         // run tests
-        $suite = new Finder(__DIR__ . '/../Test/Test');
+        $suite = new Finder(__DIR__ . '/..', $test);
         $suite = $suite->run();
         
         // stop covering and analyze results

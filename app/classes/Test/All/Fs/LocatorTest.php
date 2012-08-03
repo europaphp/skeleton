@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\Fs;
+namespace Test\All\Fs;
 use Europa\Fs\Locator;
-use Testes\Test\Test;
+use Testes\Test\UnitAbstract;
 
-class LocatorTest extends Test
+class LocatorTest extends UnitAbstract
 {
     public function basePathUsage()
     {

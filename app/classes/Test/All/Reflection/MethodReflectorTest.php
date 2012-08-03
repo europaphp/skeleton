@@ -1,15 +1,15 @@
 <?php
 
-namespace Test\Test\Reflection;
-use Europa\Reflection;
+namespace Test\All\Reflection;
+use Europa\Reflection\MethodReflector;
 use Exception;
-use Testes\Test\Test;
+use Testes\Test\UnitAbstract;
 
-class MethodReflector extends Test
+class MethodReflectorTest extends UnitAbstract
 {
     public function testParameterMapping()
     {
-        $method = new Reflection\MethodReflector('\Provider\Reflection\Mapping', 'someMethod');
+        $method = new MethodReflector('Test\Provider\Reflection\Mapping', 'someMethod');
         
         try {
             $result = $method->mergeNamedArgs(

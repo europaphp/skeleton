@@ -1,13 +1,13 @@
 <?php
 
-namespace Test\Test\Controller;
+namespace Test\All\Controller;
 use Europa\Request;
 use Europa\Response;
 use Exception;
 use Test\Provider\Controller\TestNamedParamController;
-use Testes\Test\Test;
+use Testes\Test\UnitAbstract;
 
-class RestControllerTest extends Test
+class RestControllerTest extends UnitAbstract
 {
     public function testNamedParamMapping()
     {

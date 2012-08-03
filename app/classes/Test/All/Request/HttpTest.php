@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\Test\Request;
+namespace Test\All\Request;
 use Europa\Request\Http;
-use Testes\Test\Test;
+use Testes\Test\UnitAbstract;
 
-class HttpTest extends Test
+class HttpTest extends UnitAbstract
 {
     private $request;
     

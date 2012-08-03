@@ -1,12 +1,12 @@
 <?php
 
-namespace Test\Test\Fs;
+namespace Test\All\Fs;
 use Europa\Fs\Directory;
 use Europa\Fs\File;
 use Exception;
-use Testes\Test\Test;
+use Testes\Test\UnitAbstract;
 
-class FileAndDirectoryTest extends Test
+class FileAndDirectoryTest extends UnitAbstract
 {
     public function setUp()
     {

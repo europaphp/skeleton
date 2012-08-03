@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\Test\Filter;
+namespace Test\All\Filter;
 use Europa\Filter\CallbackFilter;
-use Testes\Test\Test;
+use Testes\Test\UnitAbstract;
 
-class CallbackFilterTest extends Test
+class CallbackFilterTest extends UnitAbstract
 {
     public function closure()
     {

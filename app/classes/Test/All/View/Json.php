@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\Test\View;
+namespace Test\All\View;
 use Europa\View\Json as JsonView;
-use Testes\Test\Test;
+use Testes\Test\UnitAbstract;
 
-class Json extends Test
+class Json extends UnitAbstract
 {
     function rendering()
     {
@@ -17,6 +17,9 @@ class Json extends Test
             'success' => true
         );
         
-        $this->assert($view->render($data) === '{"data":{"val1":1,"val2":2},"success":true}', 'The data was not rendered properly.');
+        $this->assert(
+            $view->render($data) === '{"data":{"val1":1,"val2":2},"success":true}',
+            'The data was not rendered properly.'
+        );
     }
 }

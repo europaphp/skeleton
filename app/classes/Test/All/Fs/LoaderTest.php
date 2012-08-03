@@ -1,21 +1,19 @@
 <?php
 
-namespace Test\Test\Fs;
+namespace Test\All\Fs;
 use Europa\Fs\Loader;
 use Europa\Fs\Locator;
-use Testes\Test\Test;
+use Testes\Test\UnitAbstract;
 
-class LoaderTest extends Test
+class LoaderTest extends UnitAbstract
 {
     private $loader;
     
     public function setUp()
     {
-        $this->loader  = new Loader;
-        $this->locator = new Locator;
+        $this->loader = new Loader;
         $this->loader->register();
-        $this->loader->setLocator($this->locator);
-        $this->locator->addPath(dirname(__FILE__) . '/../..');
+        $this->loader->getLocator()->addPath(dirname(__FILE__) . '/../..');
     }
     
     public function testRegisterAutoload()
@@ -43,7 +41,7 @@ class LoaderTest extends Test
     public function testLoadOldStyleNamespacedClass()
     {
         $this->assert(
-            $this->loader->load('Provider_Fs_TestClass'),
+            $this->loader->load('Test_Provider_Fs_TestClass'),
             'Unable to load old style namespaced class.'
         );
     }

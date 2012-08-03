@@ -4,8 +4,8 @@
         {
             "package": "treshugart/testes",
             "version": "dev-master",
-            "source-reference": "b7a9313cafffafc26764a0c3164f2e9049ef8e36",
-            "commit-date": "1342060151"
+            "source-reference": "1bf00553d06ba69e84eecdf20e6cd4ac598ffa8d",
+            "commit-date": "1343346226"
         }
     ],
     "packages-dev": null,

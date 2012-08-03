@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\Test\Filter;
+namespace Test\All\Filter;
 use Europa\Filter\CamelCaseSplitFilter;
-use Testes\Test\Test;
+use Testes\Test\UnitAbstract;
 
-class CamelCaseSplitFilterTest extends Test
+class CamelCaseSplitFilterTest extends UnitAbstract
 {
     private $filter;
     
