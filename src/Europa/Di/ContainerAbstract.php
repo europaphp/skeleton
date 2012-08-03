@@ -107,13 +107,13 @@ abstract class ContainerAbstract implements ContainerInterface
             $name = self::NAME;
         }
         
-        $name = get_called_class() . $name;
+        $inst = static::formatName($name);
         
-        if (!isset(self::$instances[$name])) {
-            self::init($name, $args);
+        if ($args || !isset(self::$instances[$inst])) {
+            static::init($name, $args);
         }
         
-        return self::$instances[$name];
+        return self::$instances[$inst];
     }
     
     /**
@@ -131,15 +131,27 @@ abstract class ContainerAbstract implements ContainerInterface
             $name = self::NAME;
         }
         
-        $name = get_called_class() . $name;
+        $name = static::formatName($name);
         
         if ($args) {
-            $inst = (new ClassReflector(get_called_class()))->newInstanceArgs(func_get_args());
+            $inst = (new ClassReflector(get_called_class()))->newInstanceArgs($args);
         } else {
             $inst = new static;
         }
         
         self::$instances[$name] = $inst;
+    }
+    
+    /**
+     * Returns whether or not the specified instance exists.
+     * 
+     * @param string $name The instance name.
+     * 
+     * @return bool
+     */
+    public static function has($name = self::NAME)
+    {
+        return isset(self::$instances[static::formatName($name)]);
     }
     
     /**
@@ -149,14 +161,27 @@ abstract class ContainerAbstract implements ContainerInterface
      * 
      * @return void
      */
-    public static function rm($name = self::NAME)
+    public static function remove($name = self::NAME)
     {
-        if (!$name) {
-            $name = self::NAME;
-        }
+        $name = static::formatName($name);
         
         if (isset(self::$instances[$name])) {
             unset(self::$instances[$name]);
         }
+    }
+    
+    /**
+     * Formats a default instance name.
+     * 
+     * @param string $name The name to format.
+     * 
+     * @return string
+     */
+    private static function formatName($name)
+    {
+        if (!$name) {
+            $name = self::NAME;
+        }
+        return get_called_class() . '.' . $name;
     }
 }

@@ -3,14 +3,14 @@
 namespace Europa\Filter;
 
 /**
- * Converts the value to a string representation.
+ * Converts the value from a string to a scalar data type.
  * 
  * @category Filters
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class ToStringFilter implements FilterInterface
+class FromStringFilter implements FilterInterface
 {
     /**
      * Filters the value and returns the filtered value.
@@ -21,17 +21,15 @@ class ToStringFilter implements FilterInterface
      */
     public function filter($value)
     {
-        if ($value === true) {
-            $value = 'true';
-        } elseif ($value === false) {
-            $value = 'false';
+        if ($value === 'true') {
+            $value = true;
+        } elseif ($value === 'false') {
+            $value = false;
         } elseif (is_numeric($value)) {
-            $value = (string) $value;
-        } elseif (is_array($value)) {
-            $value = serialize($value);
-        } elseif (is_null($value)) {
-            $value = 'null';
+            $value = strpos($value, '.') === false ? (int) $value : (float) $value;
+        } elseif ($value === 'null') {
+            $value = null;
         }
-        return (string) $value;
+        return $value;
     }
 }

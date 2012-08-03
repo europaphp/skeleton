@@ -1,7 +1,6 @@
 <?php
 
 namespace Europa\View;
-use Europa\Util\Configurable;
 use Europa\View;
 
 /**
@@ -14,14 +13,12 @@ use Europa\View;
  */
 class Xml implements ViewInterface
 {
-    use Configurable;
-    
     /**
      * Configuration array.
      * 
      * @var array
      */
-    private $defaultConfig = [
+    private $config = [
         'declare'        => true,
         'encoding'       => 'UTF-8',
         'indent'         => true,
@@ -39,7 +36,7 @@ class Xml implements ViewInterface
      */
     public function __construct(array $config = [])
     {
-        $this->initConfig($config);
+        $this->config = array_merge($this->config, $config);
     }
     
     /**
@@ -51,11 +48,11 @@ class Xml implements ViewInterface
     {
         $str = '';
         
-        if ($this->getConfig('declare')) {
+        if ($this->config['declare']) {
             $str = '<?xml version="'
-                . $this->getConfig('version')
+                . $this->config['version']
                 . '" encoding="'
-                . $this->getConfig('encoding')
+                . $this->config['encoding']
                 . '" ?>'
                 . PHP_EOL;
         }
@@ -77,7 +74,7 @@ class Xml implements ViewInterface
      */
     private function renderNode($name, $content, $level = 0)
     {
-        $keys = $this->getConfig('numericKeyName');
+        $keys = $this->config['numericKeyName'];
         
         // translate a numeric key to a replacement key
         if (is_numeric($name)) {
@@ -116,7 +113,7 @@ class Xml implements ViewInterface
      */
     private function indent($level)
     {
-        $indent = $this->getConfig('spaces');
+        $indent = $this->config['spaces'];
         $indent = $indent ? str_repeat(' ', $indent) : "\t";
         return str_repeat($indent, $level);
     }

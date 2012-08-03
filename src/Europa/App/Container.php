@@ -32,7 +32,7 @@ class Container extends Provider
      * 
      * @var string
      */
-    private $path;
+    private $root;
     
     /**
      * The default configuration.
@@ -40,7 +40,6 @@ class Container extends Provider
      * @var array
      */
     private $config = [
-        'basePath' => null,
         'controllerFilterConfig' => [
             ['prefix' => 'Controller\\']
         ],
@@ -60,18 +59,21 @@ class Container extends Provider
     /**
      * Sets up the container.
      * 
-     * @param array $config The configuration.
+     * @param string $root   The application install path.
+     * @param array  $config The configuration.
      * 
      * @return Container
      */
-    public function __construct(array $config = [])
+    public function __construct($root, array $config = [])
     {
+        $this->root   = realpath($root);
         $this->config = array_merge($this->config, $config);
         
-        if (!$this->config['basePath']) {
+        if (!$this->root) {
             throw new UnexpectedValueException(sprintf(
-                'A valid "basePath" must be specified in the "%s" configuration.',
-                get_class($this)
+                'A valid "path" must be specified for the container "%s". The path "%s" is not valid.',
+                get_class(),
+                $root
             ));
         }
     }
@@ -152,7 +154,7 @@ class Container extends Provider
      */
     public function langLocator()
     {
-        $locator = new Locator($this->config['basePath']);
+        $locator = new Locator($this->root);
         $locator->addPaths($this->config['langPaths']);
         return $locator;
     }
@@ -292,7 +294,7 @@ class Container extends Provider
      */
     public function viewPhpLocator()
     {
-        $locator = new Locator($this->config['basePath']);
+        $locator = new Locator($this->root);
         $locator->addPaths($this->config['viewPaths']);
         return $locator;
     }
