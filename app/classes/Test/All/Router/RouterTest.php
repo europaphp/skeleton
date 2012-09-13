@@ -50,9 +50,19 @@ class RouterTest extends UnitAbstract
     public function tokenRoutes()
     {
         $route = new TokenRoute('my/route/:param1/(:param2)/(:param3)/test.*');
-        $this->assert($route->query('my/route/value1/test'));
-        $this->assert($route->query('my/route/value1/value2/test'));
-        $this->assert($route->query('my/route/value1/value2/value3/test'));
+
+        $result = $route->query('my/route/value1/test');
+        var_dump($result);
+        $this->assert($result && $result['param1'] === 'value1');
+
+        $result = $route->query('my/route/value1/value2/test');
+        var_dump($result);
+        $this->assert($result && $result['param1'] === 'value1' && $result['param2'] === 'value2');
+
+        $result = $route->query('my/route/value1/value2/value3/test');
+        var_dump($result);
+        $this->assert($result && $result['param1'] === 'value1' && $result['param2'] === 'value2' && $result['param3'] === 'value3');
+
         $this->assert($route->query('my/route/value1/value2/value3/test.json'));
         $this->assert(!$route->query('my/route/test'));
         $this->assert(!$route->query('my/route/value1'));

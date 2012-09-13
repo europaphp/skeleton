@@ -75,9 +75,6 @@ class TokenRoute implements RouteInterface
         $paramRegex   = ':([a-zA-Z][a-zA-Z0-9_]*)';
         $paramReplace = '(?<$%d>[^/]+)';
 
-        // optional route parameters are specified by using parenthesis around them
-        $expression = preg_replace('!(/)?\(' . $paramRegex . '\)!', '$1?' . sprintf($paramReplace, 2), $expression);
-
         // so we can look ahead
         $len = strlen($expression);
         
@@ -86,16 +83,21 @@ class TokenRoute implements RouteInterface
             $expression  = substr($expression, 0, $len - 2);
             $expression .= '(\.[a-zA-Z0-9]+)?';
         } elseif ($len === 1 && $expression === '*') {
-            $expression = '.*';
+            $expression .= '.*';
         } else {
             $expression .= '/?';
         }
+
+        // optional route parameters are specified by using parenthesis around them
+        $expression = preg_replace('!(/)?\(' . $paramRegex . '\)!', '($1?' . sprintf($paramReplace, 2) . ')?', $expression);
         
-        // replace tokens with named matches
+        // replace required tokens with named matches
         $expression = preg_replace('!' . $paramRegex . '!', sprintf($paramReplace, 1), $expression);
         
         // an expression must be fully matched
         $expression = '^' . $expression . '$';
+
+        var_dump($expression);
         
         return $expression;
     }
