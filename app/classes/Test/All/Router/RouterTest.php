@@ -46,4 +46,18 @@ class RouterTest extends UnitAbstract
         $this->assert($router->format('test1', ['test' => 1]) === 'test1/1', 'First route was not formatted.');
         $this->assert($router->format('test2', ['test' => 2]) === 'test2/2', 'Second route was not formatted.');
     }
+
+    public function tokenRoutes()
+    {
+        $route = new TokenRoute('my/route/:param1/(:param2)/(:param3)/test.*');
+        $this->assert($route->query('my/route/value1/test'));
+        $this->assert($route->query('my/route/value1/value2/test'));
+        $this->assert($route->query('my/route/value1/value2/value3/test'));
+        $this->assert($route->query('my/route/value1/value2/value3/test.json'));
+        $this->assert(!$route->query('my/route/test'));
+        $this->assert(!$route->query('my/route/value1'));
+        $this->assert(!$route->query('my/route/value1/'));
+        $this->assert(!$route->query('my/route/value1/tes'));
+        $this->assert(!$route->query('my/route/value1/test.json.xml'));
+    }
 }

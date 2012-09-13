@@ -133,7 +133,12 @@ class FsIteratorIterator extends IteratorIterator
     {
         $this->count = 0;
         $this->index = 0;
-        return parent::rewind();
+        parent::rewind();
+
+        // move past the current and parent directories without incrementing the index
+        while ($this->isDot()) {
+            parent::next();
+        }
     }
 
     /**
@@ -148,5 +153,15 @@ class FsIteratorIterator extends IteratorIterator
             return $valid && $this->limit > $this->count;
         }
         return $valid;
+    }
+
+    /**
+     * Returns whether or not the current item is a dot.
+     * 
+     * @return bool
+     */
+    private function isDot()
+    {
+        return parent::current() && (parent::current()->getBasename() === '.' || parent::current()->getBasename() === '..');
     }
 }
