@@ -96,8 +96,6 @@ class TokenRoute implements RouteInterface
         
         // an expression must be fully matched
         $expression = '^' . $expression . '$';
-
-        var_dump($expression);
         
         return $expression;
     }
