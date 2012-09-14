@@ -49,7 +49,7 @@ class RouterTest extends UnitAbstract
 
     public function tokenRoutes()
     {
-        $route = new TokenRoute('my/route/:param1/(:param2)/(:param3)/test.*');
+        $route = new TokenRoute('my/route/:param1/(:param2)/(:param3)/test');
 
         $result = $route->query('my/route/value1/test');
         $this->assert($result && $result['param1'] === 'value1');
@@ -65,6 +65,16 @@ class RouterTest extends UnitAbstract
         $this->assert(!$route->query('my/route/value1'));
         $this->assert(!$route->query('my/route/value1/'));
         $this->assert(!$route->query('my/route/value1/tes'));
-        $this->assert(!$route->query('my/route/value1/test.json.xml'));
+        $this->assert(!$route->query('my/route/value1/tests'));
+
+        // test for trailing forward slashes
+        $this->assert($route->query('my/route/value1/test/'));
+        $this->assert(!$route->query('my/route/value1/tes/'));
+        $this->assert(!$route->query('my/route/value1/tests/'));
+
+        // test for suffixes
+        $this->assert($route->query('my/route/value1/test.json'));
+        $this->assert(!$route->query('my/route/value1/tes.xml'));
+        $this->assert(!$route->query('my/route/value1/tests.html'));
     }
 }

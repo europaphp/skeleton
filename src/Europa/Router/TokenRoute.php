@@ -77,22 +77,15 @@ class TokenRoute implements RouteInterface
 
         // so we can look ahead
         $len = strlen($expression);
-        
-        // allow a suffix wildcard or default to allowing an optional forward slash
-        if ($len > 2 && $expression[$len - 1] === '*' && $expression[$len - 2] === '.') {
-            $expression  = substr($expression, 0, $len - 2);
-            $expression .= '(\.[a-zA-Z0-9]+)?';
-        } elseif ($len === 1 && $expression === '*') {
-            $expression .= '.*';
-        } else {
-            $expression .= '/?';
-        }
 
         // optional route parameters are specified by using parenthesis around them
         $expression = preg_replace('!(/)?\(' . $paramRegex . '\)!', '($1?' . sprintf($paramReplace, 2) . ')?', $expression);
         
         // replace required tokens with named matches
         $expression = preg_replace('!' . $paramRegex . '!', sprintf($paramReplace, 1), $expression);
+
+        // routes allow a suffix or a trailing forward slash
+        $expression .= '(/|\.[a-z]+)?';
         
         // an expression must be fully matched
         $expression = '^' . $expression . '$';
