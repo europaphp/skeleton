@@ -14,14 +14,36 @@ use Europa\View;
 class Json implements ViewInterface
 {
     /**
+     * The configuration for the view.
+     * 
+     * @var array
+     */
+    private $config = [
+        'jsonp' => null
+    ];
+
+    /**
+     * Sets up the JSON view renderer.
+     * 
+     * @param string $config The configuration array.
+     * 
+     * @return Json
+     */
+    public function __construct(array $config = [])
+    {
+        $this->config = array_merge($this->config, $config);
+    }
+
+    /**
      * JSON encodes the parameters on the view and returns them.
      * 
      * @return string
      */    
     public function render(array $context = array())
     {
-        $context = $this->formatParamsToJsonArray($context);
-        return json_encode($context);
+        $render = $this->formatParamsToJsonArray($context);
+        $render = json_encode($context);
+        return $this->config['jsonp'] ? $this->config['jsonp'] . '(' . $render . ')' : $render;
     }
     
     /**

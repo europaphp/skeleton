@@ -227,14 +227,11 @@ class Http extends RequestAbstract
         $accepts = $this->getAcceptedContentTypes();
         $max     = $max ? $max : count($accepts);
         
-        foreach ((array) $types as $index => $value) {
-            $returnBool  = !is_string($index);
-            $returnType  = $returnBool ? true : $value;
-            $contentType = $returnBool ? $value : $index;
-            $position    = array_search($contentType, $accepts);
-            
+        foreach ((array) $types as $value) {
+            $position = array_search($value, $accepts);
+
             if ($position !== false && $position < $max) {
-                return $returnType;
+                return $value;
             }
         }
         

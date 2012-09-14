@@ -47,6 +47,7 @@ class Container extends Provider
             ['prefix' => 'Helper\\'],
             ['prefix' => 'Europa\View\Helper\\']
         ],
+        'jsonp'     => 'callback',
         'langPaths' => ['app/langs/en-us' => 'ini'],
         'viewPaths' => ['app/views' => 'php'],
         'viewTypes' => [
@@ -260,14 +261,24 @@ class Container extends Provider
      */
     public function view($request)
     {
+        // We only negotiate a content type if the request is using Http.
         if ($request instanceof Request\Http) {
-            $view   = $request->accepts($this->config['viewTypes']);
-            $method = 'view' . $view;
+            $method = null;
 
-            if ($view && method_exists($this, $method)) {
+            // Specifying a suffix overrides the Accept header.
+            if ($suffix = $request->getUri()->getSuffix()) {
+                $method = 'view' . ucfirst($suffix);
+            } elseif ($type = $request->accepts(array_keys($this->config['viewTypes']))) {
+                $method = 'view' . $this->config['viewTypes'][$type];
+            }
+
+            // Only render a different view if one exists.
+            if ($method && method_exists($this, $method)) {
                 return $this->$method;
             }
         }
+
+        // Default to using a PHP view.
         return $this->viewPhp;
     }
 
@@ -304,9 +315,9 @@ class Container extends Provider
      * 
      * @return Json
      */
-    public function viewJson()
+    public function viewJson($request)
     {
-        return new Json;
+        return new Json(['jsonp' => $request->getParam($this->config['jsonp'])]);
     }
 
     /**
