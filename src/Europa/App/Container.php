@@ -294,7 +294,7 @@ class Container extends Provider
     {
         $view = new Php;
         $view->setLocator($viewPhpLocator);
-        $view->setHelpers($helpers);
+        $view->setHelperContainer($helpers);
         return $view;
     }
 

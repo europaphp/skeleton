@@ -69,51 +69,13 @@ class Php implements ViewScriptInterface
      * @var string
      */
     private $script;
-    
+
     /**
-     * Calls a helper from the specified container.
+     * The context to render.
      * 
-     * @see Php::setHelpers()
-     * 
-     * @param string $name The name of the helper to create.
-     * @param array  $args The arguments to configure it with.
-     * 
-     * @throws LogicException If the container does not exist.
-     * 
-     * @return mixed
+     * @var array
      */
-    public function __call($name, array $args = array())
-    {
-        if ($this->helpers) {
-            return $this->helpers->__call($name, $args);
-        }
-        
-        throw new LogicException(
-            'You must set a helper container using "setHelpers" before trying to call a helper.'
-        );
-    }
-    
-    /**
-     * Calls a helper from the specified container.
-     * 
-     * @see Php::setHelpers()
-     * 
-     * @param string $name The name of the helper to create.
-     * 
-     * @throws LogicException If the container does not exist.
-     * 
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        if ($this->helpers) {
-            return $this->helpers->__get($name);
-        }
-        
-        throw new LogicException(
-            'You must set a helper container using "setHelpers" before trying to get a helper.'
-        );
-    }
+    private $context;
     
     /**
      * Normalises and sets the script to render.
@@ -163,7 +125,7 @@ class Php implements ViewScriptInterface
      * 
      * @return string
      */
-    public function render(array $context = array())
+    public function render(array $context = [])
     {
         // locate the script if there is a locator
         if ($this->locator) {
@@ -176,11 +138,17 @@ class Php implements ViewScriptInterface
         if (!$script) {
             throw new RuntimeException(sprintf('The script "%s" could not be located.', $this->script));
         }
-        
         // capture the output
         ob_start();
-        extract($context);
+
+        // set convenience variables
+        $context = new Context($context);
+        $helpers = $this->helpers;
+
+        // render
         include $script;
+
+        // get output
         $rendered = ob_get_clean();
         
         // handle view extensions
@@ -198,7 +166,7 @@ class Php implements ViewScriptInterface
             $this->child = $rendered;
             
             // render and return the output of the parent
-            return $this->render($context);
+            return $this->render($context->toArray());
         }
         
         return $rendered;
@@ -306,7 +274,7 @@ class Php implements ViewScriptInterface
      * 
      * @return Php
      */
-    public function setHelpers(ContainerInterface $helpers)
+    public function setHelperContainer(ContainerInterface $helpers)
     {
         $this->helpers = $helpers;
         return $this;
@@ -317,7 +285,7 @@ class Php implements ViewScriptInterface
      * 
      * @return ContainerInterface
      */
-    public function getHelpers()
+    public function getHelperContainer()
     {
         return $this->helpers;
     }
