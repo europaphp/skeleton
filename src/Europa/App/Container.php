@@ -13,6 +13,7 @@ use Europa\Response;
 use Europa\Router\RegexRoute;
 use Europa\Router\Router;
 use Europa\View\Json;
+use Europa\View\Jsonp;
 use Europa\View\Php;
 use Europa\View\Xml;
 use UnexpectedValueException;
@@ -47,13 +48,14 @@ class Container extends Provider
             ['prefix' => 'Helper\\'],
             ['prefix' => 'Europa\View\Helper\\']
         ],
-        'jsonp'     => 'callback',
+        'jsonpCallbackKey' => 'callback',
         'langPaths' => ['app/langs/en-us' => 'ini'],
         'viewPaths' => ['app/views' => 'php'],
         'viewTypes' => [
-            'application/json' => 'Json',
-            'text/xml'         => 'Xml',
-            'text/html'        => 'Php'
+            'application/json'       => 'Json',
+            'application/javascript' => 'Jsonp',
+            'text/xml'               => 'Xml',
+            'text/html'              => 'Php'
         ]
     ];
 
@@ -311,13 +313,26 @@ class Container extends Provider
     }
 
     /**
-     * Returns the JSON view.
+     * Returns a new JSON view.
      * 
      * @return Json
      */
     public function viewJson($request)
     {
-        return new Json(['jsonp' => $request->getParam($this->config['jsonp'])]);
+        if ($request->hasParam($this->config['jsonpCallbackKey'])) {
+            return $this->viewJsonp;
+        }
+        return new Json;
+    }
+
+    /**
+     * Returns the JSON view.
+     * 
+     * @return Json
+     */
+    public function viewJsonp($request)
+    {
+        return new Jsonp($request->getParam($this->config['jsonpCallbackKey']));
     }
 
     /**

@@ -1,7 +1,6 @@
 <?php
 
 namespace Europa\View;
-use Europa\View;
 
 /**
  * A view class for rendering JSON data from bound parameters.
@@ -14,27 +13,6 @@ use Europa\View;
 class Json implements ViewInterface
 {
     /**
-     * The configuration for the view.
-     * 
-     * @var array
-     */
-    private $config = [
-        'jsonp' => null
-    ];
-
-    /**
-     * Sets up the JSON view renderer.
-     * 
-     * @param string $config The configuration array.
-     * 
-     * @return Json
-     */
-    public function __construct(array $config = [])
-    {
-        $this->config = array_merge($this->config, $config);
-    }
-
-    /**
      * JSON encodes the parameters on the view and returns them.
      * 
      * @return string
@@ -43,7 +21,7 @@ class Json implements ViewInterface
     {
         $render = $this->formatParamsToJsonArray($context);
         $render = json_encode($context);
-        return $this->config['jsonp'] ? $this->config['jsonp'] . '(' . $render . ')' : $render;
+        return $render;
     }
     
     /**
