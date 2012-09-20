@@ -7,12 +7,12 @@ use UnexpectedValueException;
 /**
  * Boots the application.
  * 
- * @category App
+ * @category Boot
  * @package  Rex
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  http://europaphp.org/license
  */
-class BootFiles implements BootInterface
+class Files implements BootstrapperInterface
 {
     /**
      * The regex to match loadable files with.

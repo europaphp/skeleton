@@ -44,6 +44,29 @@ abstract class ContainerAbstract implements ContainerInterface
      * @return mixed
      */
     abstract public function create($name);
+
+    /**
+     * Statically configures and returns the container of the specified name.
+     * 
+     * @param string $name The name of the container to return.
+     * @param array  $args The arguments to pass to the container's constructor.
+     * 
+     * @return ContainerAbstract
+     */
+    public static function __callStatic($name, array $args = [])
+    {
+        $name = static::formatName($name);
+
+        if (!$args) {
+            if (isset(self::$instances[$name])) {
+                return self::$instances[$name];
+            } else {
+                return self::$instances[$name] = new static;
+            }
+        }
+        
+        return self::$instances[$name] = (new ClassReflector(get_called_class()))->newInstanceArgs($args);
+    }
     
     /**
      * Creates a new instance specified by name.
@@ -90,84 +113,6 @@ abstract class ContainerAbstract implements ContainerInterface
             $name,
             get_class($this)
         ));
-    }
-
-    /**
-     * Returns a container instance. Allows multiple named instances of the same type of container.
-     * 
-     * @param string $name The name of the container to get.
-     * @param array  $args The arguments to pass to the container constructor. Can be passed by name.
-     * 
-     * @return Container
-     */
-    public static function get($name = self::NAME, array $args = [])
-    {
-        if (is_array($name)) {
-            $args = $name;
-            $name = self::NAME;
-        }
-        
-        $inst = static::formatName($name);
-        
-        if ($args || !isset(self::$instances[$inst])) {
-            static::init($name, $args);
-        }
-        
-        return self::$instances[$inst];
-    }
-    
-    /**
-     * Initializes a new instance.
-     * 
-     * @param string $name The name of the container to init.
-     * @param array  $args The arguments to pass to the container constructor. Can be passed by name.
-     * 
-     * @return void
-     */
-    public static function init($name = self::NAME, array $args = [])
-    {
-        if (is_array($name)) {
-            $args = $name;
-            $name = self::NAME;
-        }
-        
-        $name = static::formatName($name);
-        
-        if ($args) {
-            $inst = (new ClassReflector(get_called_class()))->newInstanceArgs($args);
-        } else {
-            $inst = new static;
-        }
-        
-        self::$instances[$name] = $inst;
-    }
-    
-    /**
-     * Returns whether or not the specified instance exists.
-     * 
-     * @param string $name The instance name.
-     * 
-     * @return bool
-     */
-    public static function has($name = self::NAME)
-    {
-        return isset(self::$instances[static::formatName($name)]);
-    }
-    
-    /**
-     * Removes the specified instance.
-     * 
-     * @param string $name The name of the container to remove.
-     * 
-     * @return void
-     */
-    public static function remove($name = self::NAME)
-    {
-        $name = static::formatName($name);
-        
-        if (isset(self::$instances[$name])) {
-            unset(self::$instances[$name]);
-        }
     }
     
     /**

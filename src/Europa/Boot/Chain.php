@@ -10,7 +10,7 @@ namespace Europa\Boot;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class BootChain implements BootInterface
+class Chain implements BootstrapperInterface
 {
     /**
      * The chain of bootstrappers to boot with.
@@ -22,11 +22,11 @@ class BootChain implements BootInterface
     /**
      * Adds a bootstrapper to the chain.
      * 
-     * @param BootInterface $boot The bootstrapper to add.
+     * @param BootstrapperInterface $boot The bootstrapper to add.
      * 
      * @return BootChain
      */
-    public function add(BootInterface $boot)
+    public function add(BootstrapperInterface $boot)
     {
         $this->boots[] = $boot;
         return $this;

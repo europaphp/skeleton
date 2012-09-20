@@ -7,12 +7,12 @@ use ReflectionMethod;
 /**
  * Abstraction for bootstrap classes containing bootstrapping methods.
  * 
- * @category App
+ * @category Boot
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class BootClass implements BootInterface
+abstract class Provider implements BootstrapperInterface
 {
     /**
      * Runs each bootstrap method.

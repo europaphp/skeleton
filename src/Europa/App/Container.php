@@ -38,6 +38,13 @@ class Container extends Provider
     /**
      * The default configuration.
      * 
+     * - `controllerFilterConfig` The controller filter configuration used to resolve controller class names.
+     * - `helperFilterConfig` The helper filter configuration used to resolve helper class names.
+     * - `jsonpCallbackKey` If a content type of JSON is requested - either by using a `.json` suffix or by using an `application/json` content type request header - and this is set in the request, a `Jsonp` view instance is used rather than `Json` and the value of this request parameter is used as the callback.
+     * - `langPaths` Language paths and suffixes to supply to the language file locator.
+     * - `viewPaths` View paths and suffixes to supply to the view script locator.
+     * - `viewTypes` Mapping of content-type to view class mapping.
+     * 
      * @var array
      */
     private $config = [

@@ -1,109 +1,178 @@
 App
 ===
 
-The application layer serves as a component responsible for setting up and running your application.
+The application layer serves as a component responsible for running your application.
 
-Setting Up Your Application
----------------------------
+The Default Bootstrapper
+==============================
 
-You may know the term "bootstrap". If not, a bootstrap is responsible for preparing your application to run. The first step in getting your application booted is to have a file that initiates bootstrapping. Lets call it `boot.php`.
-    
-    <?php
-    
-    use Europa\Fs\Loader;
-    
-    include 'lib/Europa/Fs/Loader.php';
-    
-    $loader = new Loader;
-    $loader->getLocator()->addPath(__DIR__ . '/classes');
-    $loader->register();
-
-We first include `Europa\Fs\Loader`. This ensures autoloading is registered for whatever path Europa is installed in. The next step is to make sure we register any other paths that we have classes in because we will need them available in the bootstrap process.
-
-Nothing is stopping you from filling this file with a bunch of crap and calling it good, but it is recommended you that you use a bootstrapping method to organise and conventionalise the way you set up your app.
-
-### Bootstrapping Using a Directory of Files
-
-The `BootFiles` bootstrap class is responsible for taking a bunch of PHP files and loading them alphabetically. Say we have a directory called `boot` that has all of our bootstrap files.
-
-    use Europa\App\BootFiles;
-    
-    $boot = new BootFiles(__DIR__ . '/boot');
-    $boot->boot();
-
-This will load all `.php` files in the `boot` directory alphabetically. If we don't have `.php` files but want to load all `.inc` files that are prefixed with `boot_` (not sure why), then we can by specifying an optional regex as the second argument:
-
-    $boot = new BootFiles(__DIR__ . '/boot', '/^boot_(.*?)\.inc$/');
-
-### Bootstrapping Using an Object
-
-The `BootClass` bootstrap abstract class is responsible for taking the child class and calling each public, non-inherited method in the order in which it is defined.
-
-Take the following subclass:
+There is a default bootstrapper that you can use to bootstrap your application instead of building your own:
 
     <?php
-    
-    namespace Boot;
-    use Europa\App\BootClass;
-    
-    class MyBootstrapper extends BootClass
-    {
-        public function errorReporting()
-        {
-            ...
-        }
-        
-        public function defaultDateTime()
-        {
-            ...
-        }
-    }
 
-You can then add that to your bootstrap:
+    (new Europa\App\Bootstrapper)->boot($root, $config);
 
-    use Boot\MyBootstrapper;
-    
-    $boot = new MyBootstrapper;
-    $boot->boot();
+The `$root` argument specifies the root path of your application. All paths in the configuration are relative to this path.
 
-### Bootstrapping Using Multiple Bootstrapping Methods
+The `$config` array is an array of configuration options that customise how the bootstrapper works. These options are:
 
-There may be instances where you need to use more than one bootstrapper. This is where you'd use the `BootChain` class.
+- `containerConfig` The container configuration to initialise the `Europa\App\Container` container with.
+- `errorLevel` The error level to use. Defaults to `E_ALL | E_STRICT`.
+- `loadPaths` Array of autoload paths relative to the application root.
+- `showErrors` Whether or not to display errors.
+- `cliViewPath` The cli script path relative to the base view path set in the container.
+- `webViewPath` The web view path relative to the base view path set in the container.
+- `postBoot` A callable argument that gets called when booting is done. You can call your own bootstrapper here. It gets passed 2 arguments, the first is the application root and the second is the bootstrapper configuration.
 
-    use Boot\MyBootstrapper;
-    use Europa\App\BootChain;
-    use Europa\App\BootFiles;
-    
-    $boot = new BootChain;
-    $boot->add(new BootFiles(__DIR__ . '/boot'));
-    $boot->add(new MyBootstrapper);
-    $boot->boot();
+The Default DI Container
+------------------------
 
-### Completing Your Bootstrap File
+The default DI container is a subclass of `Europa\Di\Provider` that allows you to access certain dependencies that it automatically configures for you. The constructor gets passed a `$root` parameter that tells it what the application root is as well as a configuration array to customise how some of the dependencies are set up.
 
-If we put all this together, our `boot.php` file may look like the following:
+    Europa\App\Container::default([$appRootPath, $configArray]);
 
-    <?php
-    
-    use Boot\MyBootstrapper;
-    use Europa\App\BootChain;
-    use Europa\App\BootFiles;
-    use Europa\Fs\Loader;
-    
-    include 'lib/Europa/Fs/Loader.php';
-    
-    $loader = new Loader;
-    $loader->getLocator()->addPath(__DIR__ . '/classes');
-    $loader->register();
-    
-    $boot = new BootChain;
-    $boot->add(new BootFiles(__DIR__ . '/boot'));
-    $boot->add(new MyBootstrapper);
-    $boot->boot();
+By simply accessing the container we want and pass it some configurations, we can ensure that the container is already set up before we access it to attempt to get any dependencies out of it. This means you can configure your container in your bootstrapping process before you access it somewhere in your business logic.
 
-Now all you have to do when you want to setup your application is include the `boot.php` file.
+If you want to pre-configure multiple instances of the same container, all you have to do is specify which instance you want to initialise:
 
-For a complete example, see the default [boot.php](../../app/boot.php) file.
+    Europa\App\Container::myContainerName([$appRootPath, $configArray]);
+
+Which you can access like:
+
+    Europa\App\Container::myContainerName()->someDependency->someMethod();
+
+If for some reason you need to reconfigure it, you just access it with some arguments:
+
+    Europa\App\Container::myContainerName([$newAppRootPath, $newConfigArray]);
+
+### Available Dependencies
+
+The default container gives you a bunch of dependencies that it can automatically configure and give you.
+
+#### Application Runner `Europa\App\App app`
+
+The default application runner.
+
+    $container->app->run();
+
+#### Controller Finder `Europa\Di\Finder controllers`
+
+The controller DI finder.
+
+    $container->controllers->index->action();
+
+#### Helper Finder `Europa\Di\Finder helpers`
+
+The view helper DI finder.
+
+    echo $container->helpers->js('path/to/js/file');
+
+#### Language File Locator `langLocator`
+
+The language file locator.
+
+    echo $container->langLocator->locate('web/index');
+
+#### Request `Europa\Request\RequestInterface request`
+
+Returns a request instance based on which interface (cli / http) you are using.
+
+    $container->request instanceof Europa\Request\Http;
+
+#### Cli Request `Europa\Request\Cli requestCli`
+
+Returns the CLI request.
+
+    $container->requestCli instanceof Europa\Request\Cli;
+
+#### Http Request `Europa\Request\Http requestHttp`
+
+Returns the HTTP request.
+
+    $container->requestHttp instanceof Europa\Request\Http;
+
+#### Response `Europa\Response\ResponseInterface response`
+
+Returns a response instance based on which interface (cli / http) you are using.
+
+    $container->response instanceof Europa\Response\Http;
+
+#### Cli Response `Europa\Response\Cli responseCli`
+
+Returns the CLI response.
+
+    $container->responseCli instanceof Europa\Response\Cli;
+
+#### Http Response `Europa\Response\Http responseHttp`
+
+Returns the HTTP response.
+
+    $container->responseHttp instanceof Europa\Response\Http;
+
+#### Router `Europa\Router\RouterInterface router`
+
+Returns a router instance based on which interface (cli / http) you are using.
+
+    $container->router->query($someCliCommandOrHttpUri);
+
+#### Cli Router `Europa\Router\Cli routerCli`
+
+Returns the CLI router.
+
+    $container->routerCli->query('some cli command')
+
+#### Http Router `Europa\Router\Http routerHttp`
+
+Returns the HTTP router.
+
+    $container->routerHttp->query('some/uri);
+
+#### View Renderer `Europa\View\ViewInterface view`
+
+Returns the appropriate view for the content type that was requested.
+
+    echo $container->view->render($context);
+
+#### PHP View Renderer `Europa\View\Php viewPhp`
+
+Returns the PHP view renderer.
+
+    echo $container->viewPhp->setScript('some/php/script')->render($context);
+
+#### PHP View Locator `Europa\Fs\Locator viewPhpLocator`
+
+Returns the PHP view locator.
+
+    echo $container->viewPhpLocator->addPath('some/other/path/to/your/views');
+
+#### JSON View Renderer `Europa\View\Json viewJson`
+
+Returns the JSON view renderer.
+
+    echo $container->viewJson->render($context);
+
+#### JSONP View Renderer `Europa\View\Jsonp viewJsonp`
+
+Returns the JSONP view renderer.
+
+    echo $container->viewJsonp('jsonpCallback')->render($context);
+
+#### XML View Renderer `Europa\View\Xml viewXml`
+
+Returns the XML view renderer.
+
+    echo $container->viewXml->render($context);
+
+### Configuration
+
+The following configuration options can be specified as the second argument to the default container's constructor. Any of these options relating to paths are relative to the root path specified to the container as the first argument.
+
+- `controllerFilterConfig` The controller filter configuration used to resolve controller class names.
+- `helperFilterConfig` The helper filter configuration used to resolve helper class names.
+- `jsonpCallbackKey` If a content type of JSON is requested - either by using a `.json` suffix or by using an application/json` content type request header - and this is set in the request, a `Jsonp` view instance is used rather than `Json` and the value of this request parameter is used as the callback.
+- `langPaths` Language paths and suffixes to supply to the language file locator.
+- `viewPaths` View paths and suffixes to supply to the view script locator.
+- `viewTypes` Mapping of content-type to view class mapping.
 
 Running Your Application
 ------------------------

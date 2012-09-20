@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa\App;
-use Europa\Boot\BootClass;
+use Europa\Boot\Provider;
 use Europa\Fs\Loader;
 use Europa\View\ViewScriptInterface;
 
@@ -13,7 +13,7 @@ use Europa\View\ViewScriptInterface;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Boot extends BootClass
+class Boot extends Provider
 {
     /**
      * The root path. All paths specified in the config are relative to this.
@@ -25,17 +25,18 @@ class Boot extends BootClass
     /**
      * The default configuration.
      * 
-     * - containerConfig: The container configuration to initialise the container with.
-     * - errorLevel: The error level to use. Defaults to "E_ALL | E_STRICT".
-     * - loadPaths: Array of autoload paths relative to the application root.
-     * - showErrors: Whether or not to display errors.
-     * - cliViewPath: The cli script path relative to the base view path set in the container.
-     * - webViewPath: The web view path relative to the base view path set in the container.
-     * - postBoot: A callable argument that gets called when booting is done. You can call your own bootstrapper here.
+     * - `containerConfig` The container configuration to initialise the container with.
+     * - `errorLevel` The error level to use. Defaults to `E_ALL | E_STRICT`.
+     * - `loadPaths` Array of autoload paths relative to the application root.
+     * - `showErrors` Whether or not to display errors.
+     * - `cliViewPath` The cli script path relative to the base view path set in the container.
+     * - `webViewPath` The web view path relative to the base view path set in the container.
+     * - `postBoot` A callable argument that gets called when booting is done. You can call your own bootstrapper here.
      * 
      * @var array
      */
     private $config = [
+        'containerName' => 'europa',
         'containerConfig' => [],
         'errorLevel' => null,
         'loadPaths' => [
@@ -103,7 +104,7 @@ class Boot extends BootClass
      */
     public function setUpContainer()
     {
-        Container::init([$this->root, $this->config['containerConfig']]);
+        Container::{$this->config['containerName']}($this->root, $this->config['containerConfig']);
     }
 
     /**
@@ -114,7 +115,7 @@ class Boot extends BootClass
      */
     public function setViewAfterRendering()
     {
-        Container::get()->app->event()->bind('route.post', function($app) {
+        Container::{$this->config['containerName']}()->app->event()->bind('route.post', function($app) {
             if ($app->getView() instanceof ViewScriptInterface) {
                 $script = $app->getRequest()->isCli() ? $this->config['cliViewPath'] : $this->config['webViewPath'];
                 $script = $script . '/' . $app->getRequest()->controller;
