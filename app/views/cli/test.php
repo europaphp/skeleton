@@ -1,29 +1,29 @@
 <?php $this->extend('cli/layout'); ?>
 
-<?php if ($suite->getAssertions()->isPassed()): ?>
-<?php echo $this->cli->color('All tests passed!', 'green'); ?><?php else: ?>
-<?php echo $this->cli->color('Failed', 'red'); ?>
+<?php if ($context->suite->getAssertions()->isPassed()): ?>
+<?php echo $helpers->cli->color('All tests passed!', 'green'); ?><?php else: ?>
+<?php echo $helpers->cli->color('Failed', 'red'); ?>
 
-<?php echo $this->cli->color('------', 'red'); ?>
+<?php echo $helpers->cli->color('------', 'red'); ?>
 
-<?php foreach ($suite->getAssertions()->getFailed() as $ass): ?>
-  <?php echo $this->cli->color($ass->getTestClass(), 'red/white'); ?>:<?php echo $this->cli->color($ass->getTestLine(), 'yellow'); ?> <?php echo $ass->getMessage(); ?>
+<?php foreach ($context->suite->getAssertions()->getFailed() as $ass): ?>
+  <?php echo $helpers->cli->color($ass->getTestClass(), 'red/white'); ?>:<?php echo $helpers->cli->color($ass->getTestLine(), 'yellow'); ?> <?php echo $ass->getMessage(); ?>
 
 <?php endforeach; ?>
 <?php endif; ?>
 
 
-<?php echo $this->cli->color('Coverage:', 'yellow'); ?> <?php echo $this->cli->color($percent . '%', $percent >= 50 ? 'green' : 'red'); ?>
+<?php echo $helpers->cli->color('Coverage:', 'yellow'); ?> <?php echo $helpers->cli->color($context->percent . '%', $context->percent >= 50 ? 'green' : 'red'); ?>
 
-<?php if ($showUntested && $report->getUntestedFileCount()): ?>
+<?php if ($context->showUntested && $context->report->getUntestedFileCount()): ?>
 
 Untested Files and Lines
 ------------------------
-<?php foreach ($report->getUntestedFiles() as $file): ?>
-<?php echo $this->cli->color($file, 'red'); ?>
+<?php foreach ($context->report->getUntestedFiles() as $file): ?>
+<?php echo $helpers->cli->color($file, 'red'); ?>
 
 <?php foreach ($file->getUntestedLines() as $line): ?>
-  <?php echo $this->cli->color($line->getNumber(), 'yellow'); ?>: <?php echo $line; ?>
+  <?php echo $helpers->cli->color($line->getNumber(), 'yellow'); ?>: <?php echo $line; ?>
 <?php endforeach; ?>
 <?php endforeach; ?>
 <?php endif; ?>

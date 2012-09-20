@@ -55,7 +55,7 @@ class Boot extends BootClass
      * 
      * @return Boot
      */
-    public function __construct($root, array $config)
+    public function __construct($root, array $config = [])
     {
         // set app root path
         $this->root = realpath($root);
