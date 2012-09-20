@@ -157,7 +157,8 @@ class Container extends Provider
      */
     public function langLocator()
     {
-        $locator = new Locator($this->root);
+        $locator = new Locator;
+        $locator->setBasePath($this->root);
         $locator->addPaths($this->config['langPaths']);
         return $locator;
     }
@@ -307,7 +308,8 @@ class Container extends Provider
      */
     public function viewPhpLocator()
     {
-        $locator = new Locator($this->root);
+        $locator = new Locator;
+        $locator->setBasePath($this->root);
         $locator->addPaths($this->config['viewPaths']);
         return $locator;
     }

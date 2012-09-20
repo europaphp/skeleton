@@ -1,16 +1,16 @@
 <?php
 
-namespace Europa\App;
+namespace Europa\Boot;
 
 /**
  * Allows multiple bootstrappers to be chained together.
  * 
- * @category App
+ * @category Boot
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class BootChain implements BootstrapperInterface
+class BootChain implements BootInterface
 {
     /**
      * The chain of bootstrappers to boot with.

@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\App;
+namespace Europa\Boot;
 use ReflectionClass;
 use ReflectionMethod;
 
