@@ -56,24 +56,22 @@ class Locator implements LocatorInterface
      */
     private $throwWhenLocating = false;
 
-    /**
-     * Constructs a locator and sets the base path.
-     * 
-     * @param string $base The base path to set.
-     * 
-     * @return Locator
-     */
-    public function __construct($base = null)
+    public function setBasePath($base)
     {
-        if ($base) {
-            $real = realpath($base);
-            
-            if (!$real) {
-                throw new InvalidArgumentException(sprintf('The base path "%s" does not exist.', $base));
-            }
-            
-            $this->base = $real;
+        $real = realpath($base);
+        
+        if (!$real) {
+            throw new InvalidArgumentException(sprintf('The base path "%s" does not exist.', $base));
         }
+        
+        $this->base = $real;
+        
+        return $this;
+    }
+
+    public function getBasePath()
+    {
+        return $this->base;
     }
     
     /**
