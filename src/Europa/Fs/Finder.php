@@ -9,7 +9,9 @@ use IteratorAggregate;
 use Europa\Fs\Directory;
 use Europa\Fs\File;
 use Europa\Fs\Iterator\CallbackFilterIterator;
+use Europa\Fs\Iterator\DotFilterIterator;
 use Europa\Fs\Iterator\FsIteratorIterator;
+use Europa\Fs\Iterator\LimitIterator;
 use Europa\Fs\Iterator\PathnameFilterIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -96,27 +98,43 @@ class Finder implements IteratorAggregate
      */
     public function getIterator()
     {
+        // So we can merge results.
         $it = new AppendIterator;
         
+        // Prepend paths.
         foreach ($this->prepend as $prepend) {
             $it->append($this->normalizeTraversable($prepend));
         }
         
+        // Add directories recursively.
         foreach ($this->dirs as $dir) {
             $it->append($this->getRecursiveIterator($dir));
         }
-        
-        $it = $this->applyFilters($it);
-        
-        foreach ($this->append as $append) {
-            $it->append($this->normalizeTraversable($append));
-        }
-        
-        $it = new FsIteratorIterator($it);
+
+        // Limit results.
+        $it = new LimitIterator($it);
         $it->setOffset($this->offset);
         $it->setLimit($this->limit);
 
+        // Apply filters.
+        $it = $this->applyFilters($it);
+
+        // Append paths.
+        foreach ($this->append as $append) {
+            $it->append($this->normalizeTraversable($append));
+        }
+
         return $it;
+    }
+
+    /**
+     * Returns an FsIterator of the current finder results.
+     * 
+     * @return FsIterator
+     */
+    public function getFsIterator()
+    {
+        return new FsIterator($this->getIterator());
     }
     
     /**
@@ -181,7 +199,7 @@ class Finder implements IteratorAggregate
     public function contains($pattern)
     {
         return $this->files()->filter(function($item) use ($pattern) {
-            return $item->contains($pattern);
+            return (new File($item))->contains($pattern);
         });
     }
     
@@ -193,7 +211,7 @@ class Finder implements IteratorAggregate
     public function files()
     {
         return $this->filter(function($item) {
-            return $item instanceof File;
+            return $item->isFile();
         });
     }
     
@@ -205,7 +223,7 @@ class Finder implements IteratorAggregate
     public function directories()
     {
         return $this->filter(function($item) {
-            return $item instanceof Directory;
+            return $item->isDir();
         });
     }
     
@@ -221,9 +239,7 @@ class Finder implements IteratorAggregate
         if (!is_callable($filter)) {
             throw new InvalidArgumentException('The filter must be callable.');
         }
-        
         $this->filters[] = $filter;
-        
         return $this;
     }
     
@@ -338,9 +354,10 @@ class Finder implements IteratorAggregate
      */
     private function applyFilters(Iterator $iterator)
     {
+        $iterator = new DotFilterIterator($iterator);
         $iterator = new PathnameFilterIterator($iterator, $this->is, $this->not);
         $iterator = new CallbackFilterIterator($iterator, $this->filters);
-        return new FsIteratorIterator($iterator);
+        return $iterator;
     }
     
     /**
@@ -358,8 +375,8 @@ class Finder implements IteratorAggregate
         );
         
         $iterator->setMaxDepth($this->depth);
-        
-        return new FsIteratorIterator($iterator);
+
+        return $iterator;
     }
     
     /**

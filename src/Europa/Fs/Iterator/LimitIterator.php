@@ -1,8 +1,6 @@
 <?php
 
 namespace Europa\Fs\Iterator;
-use Europa\Fs\Directory;
-use Europa\Fs\File;
 use IteratorIterator;
 
 /**
@@ -13,7 +11,7 @@ use IteratorIterator;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class FsIteratorIterator extends IteratorIterator
+class LimitIterator extends IteratorIterator
 {
     /**
      * The offset.
@@ -103,14 +101,9 @@ class FsIteratorIterator extends IteratorIterator
 
         // keep track of the number of items
         $this->count++;
-        
-        // directory object
-        if (parent::current()->isDir()) {
-            return new Directory(parent::current()->getPathname());
-        }
-        
-        // file object
-        return new File(parent::current()->getPathname());
+
+        // Return parent's current object.
+        return parent::current();
     }
 
     /**
@@ -134,11 +127,6 @@ class FsIteratorIterator extends IteratorIterator
         $this->count = 0;
         $this->index = 0;
         parent::rewind();
-
-        // move past the current and parent directories without incrementing the index
-        while ($this->isDot()) {
-            parent::next();
-        }
     }
 
     /**
