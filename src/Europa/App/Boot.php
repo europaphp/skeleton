@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\App;
+use Europa\Boot\Files;
 use Europa\Boot\Provider;
 use Europa\Fs\Finder;
 use Europa\View\ViewScriptInterface;
@@ -33,19 +34,22 @@ class Boot extends Provider
      * The default configuration.
      * 
      * - `appPath` The application path containing the modules relative to the root path.
-     * - `appPaths` Array of autoload paths relative to the `appPath`.
+     * - `bootFile` The optional file that is included for each module at the end of bootstrapping.
+     * - `classPaths` The class paths relative to each module.
      * - `containerName` The name of the DI container to configure.
      * - `containerConfig` The container configuration to initialise the container with.
      * - `errorLevel` The error level to use. Defaults to `E_ALL | E_STRICT`.
+     * - `langPaths` The language file paths relative to each module.
+     * - `modules` The modules to load. Values correspond to each module's directory name.
      * - `showErrors` Whether or not to display errors.
+     * - `viewPaths` The view file paths relative to each module.
      * 
      * @var array
      */
     private $config = [
         'appPath'    => 'app',
+        'bootFile'   => 'boot.php',
         'classPaths' => ['classes' => 'php'],
-        'langPaths'  => ['langs/en-us' => 'ini'],
-        'viewPaths'  => ['views' => 'php'],
         'containerName'    => 'europa',
         'containerConfig'  => [
             'classPaths' => [],
@@ -53,7 +57,10 @@ class Boot extends Provider
             'viewPaths'  => []
         ],
         'errorLevel' => null,
-        'showErrors' => true
+        'langPaths'  => ['langs/en-us' => 'ini'],
+        'modules'    => [],
+        'showErrors' => true,
+        'viewPaths'  => ['views' => 'php']
     ];
 
     /**
@@ -97,15 +104,9 @@ class Boot extends Provider
      * 
      * @return void
      */
-    public function setUpModules()
+    public function setUpContainerConfigForModules()
     {
-        $finder = new Finder;
-        $finder->in($this->root . '/' . $this->config['appPath']);
-        $finder->directories();
-        $finder->depth(0);
-        
-        foreach ($finder as $item) {
-            $module     = $item->getBasename();
+        foreach ($this->config['modules'] as $module) {
             $modulePath = $this->config['appPath'] . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR;
 
             foreach (['classPaths', 'langPaths', 'viewPaths'] as $config) {
@@ -134,5 +135,27 @@ class Boot extends Provider
     public function registerAutoloading()
     {
         $this->container->loader->register();
+    }
+
+    /**
+     * Finally, we bootstrap modules.
+     * 
+     * @return void
+     */
+    public function bootstrapModules()
+    {
+        foreach ($this->config['modules'] as $module) {
+            $bootFile = $this->root
+                . DIRECTORY_SEPARATOR
+                . $this->config['appPath']
+                . DIRECTORY_SEPARATOR
+                . $module
+                . DIRECTORY_SEPARATOR
+                . $this->config['bootFile'];
+
+            if (is_file($bootFile)) {
+                require_once $bootFile;
+            }
+        }
     }
 }

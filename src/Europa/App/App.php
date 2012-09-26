@@ -9,6 +9,8 @@ use Europa\Response\ResponseInterface;
 use Europa\Router\RouterInterface;
 use Europa\View\ViewInterface;
 use Europa\View\ViewScriptInterface;
+use Exception;
+use RuntimeException;
 use UnexpectedValueException;
 
 /**
@@ -419,14 +421,7 @@ class App implements AppInterface
      */
     private function callController()
     {
-        try {
-            return $this->resolveController()->action();
-        } catch (Exception $e) {
-            throw new LogicException(sprintf(
-                'The controller could not be resolved with message: %s',
-                $e->getMessage()
-            ));
-        }
+        return $this->resolveController()->action();
     }
     
     /**
@@ -437,7 +432,15 @@ class App implements AppInterface
     private function resolveController()
     {
         if ($controller = $this->getController()) {
-            return $this->controllers->__get($controller);
+            try {
+                return $this->controllers->__get($controller);
+            } catch (Exception $e) {
+                throw new RuntimeException(sprintf(
+                    'The controller "%s" could not be found in the container "%s".',
+                    $controller,
+                    get_class($this->controllers)
+                ));
+            }
         }
         
         throw new LogicException(sprintf(

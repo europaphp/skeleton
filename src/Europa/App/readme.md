@@ -16,13 +16,16 @@ The `$root` argument specifies the root path of your application. All paths in t
 
 The `$config` array is an array of configuration options that customise how the bootstrapper works. These options are:
 
-- `containerConfig` The container configuration to initialise the `Europa\App\Container` container with.
+- `appPath` The application path containing the modules relative to the root path.
+- `bootFile` The optional file that is included for each module at the end of bootstrapping.
+- `classPaths` The class paths relative to each module.
+- `containerName` The name of the DI container to configure.
+- `containerConfig` The container configuration to initialise the container with.
 - `errorLevel` The error level to use. Defaults to `E_ALL | E_STRICT`.
-- `loadPaths` Array of autoload paths relative to the application root.
+- `langPaths` The language file paths relative to each module.
+- `modules` The modules to load. Values correspond to each module's directory name.
 - `showErrors` Whether or not to display errors.
-- `cliViewPath` The cli script path relative to the base view path set in the container.
-- `webViewPath` The web view path relative to the base view path set in the container.
-- `postBoot` A callable argument that gets called when booting is done. You can call your own bootstrapper here. It gets passed 2 arguments, the first is the application root and the second is the bootstrapper configuration.
+- `viewPaths` The view file paths relative to each module.
 
 The Default DI Container
 ------------------------
@@ -72,6 +75,18 @@ The view helper DI finder.
 The language file locator.
 
     echo $container->langLocator->locate('web/index');
+
+#### Class Loader `loader`
+
+The class loader instance.
+
+    $container->loader->register();
+
+#### Class Loader Class File Locator `loaderLocator`
+
+The locator that locates class files for the loader.
+
+    $container->loaderLocator->addPath('path/to/class/files', 'suffix');
 
 #### Request `Europa\Request\RequestInterface request`
 

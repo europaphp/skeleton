@@ -1,5 +1,7 @@
 <?php
 
+use Europa\App\Boot;
+
 // Registers autoloading from the Europa install path.
 require_once __DIR__ . '/../src/Europa/Fs/Loader.php';
 
@@ -7,4 +9,7 @@ require_once __DIR__ . '/../src/Europa/Fs/Loader.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 
 // Boot!
-(new Europa\App\Boot(__DIR__ . '/..'))->boot();
+$boot = new Boot(__DIR__ . '/..', [
+    'modules' => ['demo']
+]);
+$boot->boot();
