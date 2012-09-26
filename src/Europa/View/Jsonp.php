@@ -17,7 +17,7 @@ class Jsonp extends Json
      * 
      * @var string
      */
-    const CALLBACK = 'jsonpCallback';
+    const CALLBACK = 'callback';
 
     /**
      * The callback function name to wrap the JSON data in.

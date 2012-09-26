@@ -20,10 +20,11 @@
 Untested Files and Lines
 ------------------------
 <?php foreach ($context->report->getUntestedFiles() as $file): ?>
-<?php echo $helpers->cli->color($file, 'red'); ?>
+<?php echo $helpers->cli->color($file, 'cyan'); ?>
 
 <?php foreach ($file->getUntestedLines() as $line): ?>
   <?php echo $helpers->cli->color($line->getNumber(), 'yellow'); ?>: <?php echo $line; ?>
 <?php endforeach; ?>
+
 <?php endforeach; ?>
 <?php endif; ?>

@@ -15,35 +15,41 @@ use UnexpectedValueException;
 class Files implements BootstrapperInterface
 {
     /**
-     * The regex to match loadable files with.
+     * The files to use.
      * 
-     * @var string
+     * @var array
      */
-    private $match;
-    
+    private $files = [];
+
     /**
-     * The path containing the bootstrap files.
+     * Adds a single file.
      * 
-     * @var string
+     * @param string $file The file to add.
+     * 
+     * @return Files
      */
-    private $path;
-    
-    /**
-     * Constructs a new bootstrapper.
-     * 
-     * @param string $path  The boot path.
-     * @param string $match The regex to match loadable files with.
-     * 
-     * @return Boot
-     */
-    public function __construct($path, $match = '/\.php$/')
+    public function addFile($file)
     {
-        $this->match = $match;
-        $this->path  = realpath($path);
-        
-        if (!$this->path) {
-            throw new UnexpectedValueException('The boot path "' . $path . '" does not exist.');
+        if (!is_file($file)) {
+            throw new UnexpectedValueException(sprintf('The file "%s" does not exist.', $file));
         }
+        $this->files[] = $file;
+        return $this;
+    }
+
+    /**
+     * Adds an array of files.
+     * 
+     * @param array $files The files to add.
+     * 
+     * @return Files
+     */
+    public function addFiles(array $files)
+    {
+        foreach ($files as $file) {
+            $this->addFile($file);
+        }
+        return $this;
     }
     
     /**
@@ -53,12 +59,9 @@ class Files implements BootstrapperInterface
      */
     public function boot()
     {
-        foreach (new DirectoryIterator($this->path) as $file) {
-            if (preg_match($this->match, $file->getBasename())) {
-                include $file->getPathname();
-            }
+        foreach ($this->files as $file) {
+            include $file->getPathname();
         }
-        
         return $this;
     }
 }

@@ -4,11 +4,11 @@
 <?php echo $context->description . PHP_EOL; ?>
 
 Usage:
-  <?php echo $helpers->cli->color('bin/cli', 'yellow'); ?> <?php echo $helpers->cli->color($command, 'green'); ?> <?php echo $helpers->cli->color('[args]', 'yellow'); ?>
+  <?php echo $helpers->cli->color('bin/cli', 'yellow'); ?> <?php echo $helpers->cli->color($context->command, 'green'); ?> <?php echo $helpers->cli->color('[options]', 'yellow'); ?>
 
 
 <?php if ($context->params): ?>
-<?php echo $helpers->lang->arguments; ?>
+<?php echo $helpers->lang->options; ?>
 
 <?php foreach ($context->params as $name => $param): ?>
   <?php echo $helpers->cli->color(str_replace('$', '--', $name), 'green') . str_repeat(' ', $param['pad']); ?> <?php echo $param['description']; ?>

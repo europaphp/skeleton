@@ -55,7 +55,7 @@ class Container extends Provider
             ['prefix' => 'Helper\\'],
             ['prefix' => 'Europa\View\Helper\\']
         ],
-        'jsonpCallbackKey' => 'callback',
+        'jsonpCallbackKey' => Jsonp::CALLBACK,
         'langPaths' => ['app/langs/en-us' => 'ini'],
         'viewPaths' => ['app/views' => 'php'],
         'viewTypes' => [
