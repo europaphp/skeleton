@@ -2,7 +2,7 @@
 
 namespace Europa\App;
 use Europa\Boot\Provider;
-use Europa\Fs\Loader;
+use Europa\Fs\Finder;
 use Europa\View\ViewScriptInterface;
 
 /**
@@ -23,29 +23,37 @@ class Boot extends Provider
     private $root;
 
     /**
+     * The container that is set up.
+     * 
+     * @var Container
+     */
+    private $container;
+
+    /**
      * The default configuration.
      * 
+     * - `appPath` The application path containing the modules relative to the root path.
+     * - `appPaths` Array of autoload paths relative to the `appPath`.
+     * - `containerName` The name of the DI container to configure.
      * - `containerConfig` The container configuration to initialise the container with.
      * - `errorLevel` The error level to use. Defaults to `E_ALL | E_STRICT`.
-     * - `loadPaths` Array of autoload paths relative to the application root.
      * - `showErrors` Whether or not to display errors.
-     * - `cliViewPath` The cli script path relative to the base view path set in the container.
-     * - `webViewPath` The web view path relative to the base view path set in the container.
-     * - `postBoot` A callable argument that gets called when booting is done. You can call your own bootstrapper here.
      * 
      * @var array
      */
     private $config = [
-        'containerName' => 'europa',
-        'containerConfig' => [],
-        'errorLevel' => null,
-        'loadPaths' => [
-            'app/classes'
+        'appPath'    => 'app',
+        'classPaths' => ['classes' => 'php'],
+        'langPaths'  => ['langs/en-us' => 'ini'],
+        'viewPaths'  => ['views' => 'php'],
+        'containerName'    => 'europa',
+        'containerConfig'  => [
+            'classPaths' => [],
+            'langPaths'  => [],
+            'viewPaths'  => []
         ],
-        'showErrors' => true,
-        'cliViewPath' => 'cli',
-        'webViewPath' => 'web',
-        'postBoot' => null
+        'errorLevel' => null,
+        'showErrors' => true
     ];
 
     /**
@@ -85,16 +93,27 @@ class Boot extends Provider
     }
 
     /**
-     * Registers autoloading using the specified load paths. Load paths are specified relative to the root path that
-     * was given.
+     * Adds appropriate paths to the container config so that all dependencies are notified of each modules paths.
      * 
      * @return void
      */
-    public function registerAutoloading()
+    public function setUpModules()
     {
-        $loader = new Loader;
-        $loader->getLocator()->setBasePath($this->root)->addPaths($this->config['loadPaths']);
-        $loader->register();
+        $finder = new Finder;
+        $finder->in($this->root . '/' . $this->config['appPath']);
+        $finder->directories();
+        $finder->depth(0);
+        
+        foreach ($finder as $item) {
+            $module     = $item->getBasename();
+            $modulePath = $this->config['appPath'] . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR;
+
+            foreach (['classPaths', 'langPaths', 'viewPaths'] as $config) {
+                foreach ($this->config[$config] as $path => $suffix) {
+                    $this->config['containerConfig'][$config][$modulePath . $path] = $suffix;
+                }
+            }
+        }
     }
 
     /**
@@ -104,37 +123,16 @@ class Boot extends Provider
      */
     public function setUpContainer()
     {
-        Container::{$this->config['containerName']}($this->root, $this->config['containerConfig']);
+        $this->container = Container::{$this->config['containerName']}($this->root, $this->config['containerConfig']);
     }
 
     /**
-     * Binds an event to the application to set the appropriate view script after rendering, but only if the view
-     * is an instance of ViewScriptInterface.
+     * Registers autoloading using the container loader.
      * 
      * @return void
      */
-    public function setViewAfterRendering()
+    public function registerAutoloading()
     {
-        Container::{$this->config['containerName']}()->app->event()->bind('route.post', function($app) {
-            if ($app->getView() instanceof ViewScriptInterface) {
-                $script = $app->getRequest()->isCli() ? $this->config['cliViewPath'] : $this->config['webViewPath'];
-                $script = $script . '/' . $app->getRequest()->controller;
-                $script = str_replace(' ', '/', $script);
-                $app->getView()->setScript($script);
-            }
-        });
-    }
-
-    /**
-     * Executes a specified handler after all default booting occurs. This makes it easier to boot a custom app by
-     * simply using your own booter, rather than having to set up autoloading, etc, then use your booter.
-     * 
-     * @return void
-     */
-    public function postBoot()
-    {
-        if (is_callable($this->config['postBoot'])) {
-            call_user_func($this->config['postBoot'], $this->root, $this->config);
-        }
+        $this->container->loader->register();
     }
 }

@@ -29,6 +29,62 @@ class App implements AppInterface
      * @var string
      */
     const KEY = 'controller';
+
+    /**
+     * Event that gets called before routing.
+     * 
+     * @var string
+     */
+    const EVENT_ROUTE_PRE = 'route.pre';
+
+    /**
+     * Event that gets called after routing.
+     * 
+     * @var string
+     */
+    const EVENT_ROUTE_POST = 'route.post';
+
+    /**
+     * Event that gets called before actioning.
+     * 
+     * @var string
+     */
+    const EVENT_ACTION_PRE = 'action.pre';
+
+    /**
+     * Event that gets called after actioning.
+     * 
+     * @var string
+     */
+    const EVENT_ACTION_POST = 'action.post';
+
+    /**
+     * Event that gets called before rendering.
+     * 
+     * @var string
+     */
+    const EVENT_RENDER_PRE = 'render.pre';
+
+    /**
+     * Event that gets called after rendering.
+     * 
+     * @var string
+     */
+    const EVENT_RENDER_POST = 'render.post';
+
+    /**
+     * Event that gets called before sending.
+     * 
+     * @var string
+     */
+    const EVENT_SEND_PRE = 'send.pre';
+
+    /**
+     * Event that gets called after sending.
+     * 
+     * @var string
+     */
+    const EVENT_SEND_POST = 'send.post';
     
     /**
      * The controller container responsible for finding a controller.
@@ -288,13 +344,13 @@ class App implements AppInterface
      */
     private function runRouter()
     {    
-        $this->event()->trigger('route.pre', [$this]);
+        $this->event()->trigger(self::EVENT_ROUTE_PRE, [$this]);
         
         if ($this->router) {
             $this->router->route($this->request);
         }
         
-        $this->event()->trigger('route.post', [$this]);
+        $this->event()->trigger(self::EVENT_ROUTE_POST, [$this]);
         
         return $this;
     }
@@ -306,12 +362,12 @@ class App implements AppInterface
      */
     private function runController()
     {    
-        $this->event()->trigger('action.pre', [$this]);
+        $this->event()->trigger(self::EVENT_ACTION_PRE, [$this]);
         
         $context = $this->callController();
         $context = $this->ensureContextArray($context);
         
-        $this->event()->trigger('action.post', [$this, $context]);
+        $this->event()->trigger(self::EVENT_ACTION_POST, [$this, $context]);
         
         return $context;
     }
@@ -327,13 +383,13 @@ class App implements AppInterface
     {
         $rendered = null;
         
-        $this->event()->trigger('render.pre', [$this, $context]);
+        $this->event()->trigger(self::EVENT_RENDER_PRE, [$this, $context]);
         
         if ($this->view) {
             $rendered = $this->response->setBody($this->view->render($context));
         }
         
-        $this->event()->trigger('render.post', [$this, $rendered]);
+        $this->event()->trigger(self::EVENT_RENDER_POST, [$this, $rendered]);
         
         return $rendered;
     }
@@ -347,11 +403,11 @@ class App implements AppInterface
      */
     private function runResponse($rendered)
     {
-        $this->event()->trigger('send.pre', [$this, $rendered]);
+        $this->event()->trigger(self::EVENT_SEND_PRE, [$this, $rendered]);
         
         $this->response->send();
         
-        $this->event()->trigger('send.post', [$this, $rendered]);
+        $this->event()->trigger(self::EVENT_SEND_POST, [$this, $rendered]);
         
         return $this;
     }

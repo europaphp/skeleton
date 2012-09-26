@@ -56,6 +56,13 @@ class Locator implements LocatorInterface
      */
     private $throwWhenLocating = false;
 
+    /**
+     * Allows a base path to be supplied which all paths should be specified relative to.
+     * 
+     * @param string $base The base path.
+     * 
+     * @return Locator
+     */
     public function setBasePath($base)
     {
         $real = realpath($base);
@@ -69,6 +76,11 @@ class Locator implements LocatorInterface
         return $this;
     }
 
+    /**
+     * Returns the base path that was set.
+     * 
+     * @return string
+     */
     public function getBasePath()
     {
         return $this->base;

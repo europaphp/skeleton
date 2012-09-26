@@ -7,6 +7,7 @@ use Europa\Di\Provider;
 use Europa\Di\Finder;
 use Europa\Filter\ClassNameFilter;
 use Europa\Fs\Locator;
+use Europa\Fs\Loader;
 use Europa\Request;
 use Europa\Request\RequestAbstract;
 use Europa\Response;
@@ -15,6 +16,7 @@ use Europa\Router\Router;
 use Europa\View\Json;
 use Europa\View\Jsonp;
 use Europa\View\Php;
+use Europa\View\ViewScriptInterface;
 use Europa\View\Xml;
 use UnexpectedValueException;
 
@@ -48,6 +50,7 @@ class Container extends Provider
      * @var array
      */
     private $config = [
+        'cliViewPath' => 'cli',
         'controllerFilterConfig' => [
             ['prefix' => 'Controller\\']
         ],
@@ -56,14 +59,16 @@ class Container extends Provider
             ['prefix' => 'Europa\View\Helper\\']
         ],
         'jsonpCallbackKey' => Jsonp::CALLBACK,
-        'langPaths' => ['app/langs/en-us' => 'ini'],
-        'viewPaths' => ['app/views' => 'php'],
+        'classPaths' => [],
+        'langPaths' => [],
+        'viewPaths' => [],
         'viewTypes' => [
             'application/json'       => 'Json',
             'application/javascript' => 'Jsonp',
             'text/xml'               => 'Xml',
             'text/html'              => 'Php'
-        ]
+        ],
+        'webViewPath' => 'web'
     ];
 
     /**
@@ -104,6 +109,14 @@ class Container extends Provider
         $app = new App($controllers, $request, $response);
         $app->setRouter($router);
         $app->setView($view);
+        $app->event()->bind(App::EVENT_RENDER_PRE, function($app) {
+            if ($app->getView() instanceof ViewScriptInterface) {
+                $script = $app->getRequest()->isCli() ? $this->config['cliViewPath'] : $this->config['webViewPath'];
+                $script = $script . '/' . $app->getRequest()->controller;
+                $script = str_replace(' ', '/', $script);
+                $app->getView()->setScript($script);
+            }
+        });
         return $app;
     }
 
@@ -167,6 +180,33 @@ class Container extends Provider
         $locator = new Locator;
         $locator->setBasePath($this->root);
         $locator->addPaths($this->config['langPaths']);
+        return $locator;
+    }
+
+    /**
+     * Returns the class loader.
+     * 
+     * @param Locator $loaderLocator The locator used to locate class files.
+     * 
+     * @return Loader
+     */
+    public function loader($loaderLocator)
+    {
+        $loader = new Loader;
+        $loader->setLocator($loaderLocator);
+        return $loader;
+    }
+
+    /**
+     * Returns the class file locator.
+     * 
+     * @return LocatorInterface
+     */
+    public function loaderLocator()
+    {
+        $locator = new Locator;
+        $locator->setBasePath($this->root);
+        $locator->addPaths($this->config['classPaths']);
         return $locator;
     }
 

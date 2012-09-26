@@ -95,7 +95,7 @@ class Help extends RestController
         $longest = 0;
         
         // format class names from each file name and sort them
-        foreach ($finder as $file) {
+        foreach ($finder->getFsIterator() as $file) {
             $class = $file->getFilename();
             $class = str_replace(__DIR__, '', $file->getPath()) . '\\' . $class;
             $class = str_replace(DIRECTORY_SEPARATOR, '\\', $class);

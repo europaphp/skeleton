@@ -10,7 +10,7 @@ use Europa\Fs\Directory;
 use Europa\Fs\File;
 use Europa\Fs\Iterator\CallbackFilterIterator;
 use Europa\Fs\Iterator\DotFilterIterator;
-use Europa\Fs\Iterator\FsIteratorIterator;
+use Europa\Fs\Iterator\FsIterator;
 use Europa\Fs\Iterator\LimitIterator;
 use Europa\Fs\Iterator\PathnameFilterIterator;
 use RecursiveDirectoryIterator;
