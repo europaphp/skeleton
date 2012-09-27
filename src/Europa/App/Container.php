@@ -324,7 +324,7 @@ class Container extends Provider
             // Specifying a suffix overrides the Accept header.
             if ($suffix = $request->getUri()->getSuffix()) {
                 $method = 'view' . ucfirst($suffix);
-            } elseif ($type = $request->accepts(array_keys($this->config()->viewTypes))) {
+            } elseif ($type = $request->accepts(array_keys($this->config()->viewTypes->export()))) {
                 $method = 'view' . $this->config()->viewTypes->$type;
             }
 
