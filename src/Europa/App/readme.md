@@ -16,16 +16,15 @@ The `$root` argument specifies the root path of your application. All paths in t
 
 The `$config` array is an array of configuration options that customise how the bootstrapper works. These options are:
 
-- `appPath` The application path containing the modules relative to the root path.
-- `bootFile` The optional file that is included for each module at the end of bootstrapping.
-- `classPaths` The class paths relative to each module.
-- `containerName` The name of the DI container to configure.
-- `containerConfig` The container configuration to initialise the container with.
-- `errorLevel` The error level to use. Defaults to `E_ALL | E_STRICT`.
-- `langPaths` The language file paths relative to each module.
-- `modules` The modules to load. Values correspond to each module's directory name.
-- `showErrors` Whether or not to display errors.
-- `viewPaths` The view file paths relative to each module.
+- `cliViewPath` The path that cli view scripts reside under.
+- `controllerFilterConfig` The controller filter configuration used to resolve controller class names.
+- `helperFilterConfig` The helper filter configuration used to resolve helper class names.
+- `jsonpCallbackKey` If a content type of JSON is requested - either by using a `.json` suffix or by using an `application/json` content type request header - and this is set in the request, a `Jsonp` view instance is used rather than `Json` and the value of this request parameter is used as the callback.
+- `classPaths` Class load paths that will be added to the `loaderLocator`.
+- `langPaths` Language paths and suffixes to supply to the language file locator.
+- `viewPaths` View paths and suffixes to supply to the view script locator.
+- `viewTypes` Mapping of content-type to view class mapping.
+- `webViewPath` The path that web view script reside under.
 
 The Default DI Container
 ------------------------
