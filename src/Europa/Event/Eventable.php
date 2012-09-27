@@ -5,7 +5,7 @@ namespace Europa\Event;
 /**
  * A trait that allows an event dispatcher to be applied to it.
  * 
- * @category Utilities
+ * @category Event
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license

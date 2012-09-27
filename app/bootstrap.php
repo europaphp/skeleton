@@ -9,9 +9,9 @@ require_once __DIR__ . '/../src/Europa/Fs/Loader.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 
 // Setup and configure bootstrapper.
-$boot = new Bootstrapper(__DIR__ . '/..', [
+$bootstrapper = new Bootstrapper(__DIR__ . '/..', [
     'modules' => ['demo']
 ]);
 
 // Boot the application.
-$boot->boot();
+$bootstrapper->bootstrap();

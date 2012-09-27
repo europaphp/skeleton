@@ -35,7 +35,7 @@ class Test extends RestController
         
         // stop covering and analyze results
         $analyzer = $analyzer->stop();
-        $analyzer->addDirectory(__DIR__ . '/../../../src/Europa');
+        $analyzer->addDirectory(__DIR__ . '/../../../../src/Europa');
         $analyzer->is('\.php$');
         
         return [

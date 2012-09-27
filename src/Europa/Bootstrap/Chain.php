@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\Boot;
+namespace Europa\Bootstrap;
 
 /**
  * Allows multiple bootstrappers to be chained together.
@@ -17,7 +17,7 @@ class Chain implements BootstrapperInterface
      * 
      * @var array
      */
-    private $boots = [];
+    private $bootstrappers = [];
     
     /**
      * Adds a bootstrapper to the chain.
@@ -26,21 +26,21 @@ class Chain implements BootstrapperInterface
      * 
      * @return BootChain
      */
-    public function add(BootstrapperInterface $boot)
+    public function add(BootstrapperInterface $bootstrapper)
     {
-        $this->boots[] = $boot;
+        $this->bootstrappers[] = $bootstrapper;
         return $this;
     }
     
     /**
      * Bootstraps the app.
      * 
-     * @return BootInterface
+     * @return BootstrapperInterface
      */
-    public function boot()
+    public function bootstrap()
     {
-        foreach ($this->boots as $boot) {
-            $boot->boot();
+        foreach ($this->bootstrappers as $bootstrapper) {
+            $bootstrapper->bootstrap();
         }
         return $this;
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\Boot;
+namespace Europa\Bootstrap;
 
 /**
  * Base bootstrapper interface.
@@ -17,5 +17,5 @@ interface BootstrapperInterface
      * 
      * @return BootInterface
      */
-    public function boot();
+    public function bootstrap();
 }

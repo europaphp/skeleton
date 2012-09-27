@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\Boot;
+namespace Europa\Bootstrap;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -17,9 +17,9 @@ abstract class Provider implements BootstrapperInterface
     /**
      * Runs each bootstrap method.
      * 
-     * @return BootClass
+     * @return Provider
      */
-    public function boot()
+    public function bootstrap()
     {
         $that = new ReflectionClass($this);
         
@@ -45,7 +45,7 @@ abstract class Provider implements BootstrapperInterface
             return false;
         }
         
-        if ($method->getName() === 'boot') {
+        if ($method->getName() === 'bootstrap') {
             return false;
         }
         

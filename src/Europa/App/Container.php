@@ -2,6 +2,7 @@
 
 namespace Europa\App;
 use Closure;
+use Europa\Config\Configurable;
 use Europa\Controller\ControllerAbstract;
 use Europa\Di\Provider;
 use Europa\Di\Finder;
@@ -30,6 +31,8 @@ use UnexpectedValueException;
  */
 class Container extends Provider
 {
+    use Configurable;
+
     /**
      * The application install path.
      * 
@@ -40,16 +43,19 @@ class Container extends Provider
     /**
      * The default configuration.
      * 
+     * - `cliViewPath` The path that cli view scripts reside under.
      * - `controllerFilterConfig` The controller filter configuration used to resolve controller class names.
      * - `helperFilterConfig` The helper filter configuration used to resolve helper class names.
      * - `jsonpCallbackKey` If a content type of JSON is requested - either by using a `.json` suffix or by using an `application/json` content type request header - and this is set in the request, a `Jsonp` view instance is used rather than `Json` and the value of this request parameter is used as the callback.
+     * - `classPaths` Class load paths that will be added to the `loaderLocator`.
      * - `langPaths` Language paths and suffixes to supply to the language file locator.
      * - `viewPaths` View paths and suffixes to supply to the view script locator.
      * - `viewTypes` Mapping of content-type to view class mapping.
+     * - `webViewPath` The path that web view script reside under.
      * 
      * @var array
      */
-    private $config = [
+    private $defaultConfig = [
         'cliViewPath' => 'cli',
         'controllerFilterConfig' => [
             ['prefix' => 'Controller\\']
@@ -79,10 +85,10 @@ class Container extends Provider
      * 
      * @return Container
      */
-    public function __construct($root, array $config = [])
+    public function __construct($root, $config = [])
     {
-        $this->root   = realpath($root);
-        $this->config = array_merge($this->config, $config);
+        $this->root = realpath($root);
+        $this->config()->import($config);
         
         if (!$this->root) {
             throw new UnexpectedValueException(sprintf(
@@ -111,7 +117,7 @@ class Container extends Provider
         $app->setView($view);
         $app->event()->bind(App::EVENT_RENDER_PRE, function($app) {
             if ($app->getView() instanceof ViewScriptInterface) {
-                $script = $app->getRequest()->isCli() ? $this->config['cliViewPath'] : $this->config['webViewPath'];
+                $script = $app->getRequest()->isCli() ? $this->config()->cliViewPath : $this->config()->webViewPath;
                 $script = $script . '/' . $app->getRequest()->controller;
                 $script = str_replace(' ', '/', $script);
                 $app->getView()->setScript($script);
@@ -131,8 +137,8 @@ class Container extends Provider
     {
         $finder = new Finder;
 
-        foreach ($this->config['controllerFilterConfig'] as $config) {
-            $finder->getFilter()->add(new ClassNameFilter($config));
+        foreach ($this->config()->controllerFilterConfig as $config) {
+            $finder->getFilter()->add(new ClassNameFilter($config->export()));
         }
         
         $finder->config('Europa\Controller\RestController', function() use ($request) {
@@ -155,8 +161,8 @@ class Container extends Provider
     {
         $finder = new Finder;
 
-        foreach ($this->config['helperFilterConfig'] as $config) {
-            $finder->getFilter()->add(new ClassNameFilter($config));
+        foreach ($this->config()->helperFilterConfig as $config) {
+            $finder->getFilter()->add(new ClassNameFilter($config->export()));
         }
 
         $finder->config('Europa\View\Helper\Lang', function() use ($view, $langLocator) {
@@ -179,7 +185,7 @@ class Container extends Provider
     {
         $locator = new Locator;
         $locator->setBasePath($this->root);
-        $locator->addPaths($this->config['langPaths']);
+        $locator->addPaths($this->config()->langPaths->export());
         return $locator;
     }
 
@@ -206,7 +212,7 @@ class Container extends Provider
     {
         $locator = new Locator;
         $locator->setBasePath($this->root);
-        $locator->addPaths($this->config['classPaths']);
+        $locator->addPaths($this->config()->classPaths->export());
         return $locator;
     }
 
@@ -318,8 +324,8 @@ class Container extends Provider
             // Specifying a suffix overrides the Accept header.
             if ($suffix = $request->getUri()->getSuffix()) {
                 $method = 'view' . ucfirst($suffix);
-            } elseif ($type = $request->accepts(array_keys($this->config['viewTypes']))) {
-                $method = 'view' . $this->config['viewTypes'][$type];
+            } elseif ($type = $request->accepts(array_keys($this->config()->viewTypes))) {
+                $method = 'view' . $this->config()->viewTypes->$type;
             }
 
             // Only render a different view if one exists.
@@ -357,7 +363,7 @@ class Container extends Provider
     {
         $locator = new Locator;
         $locator->setBasePath($this->root);
-        $locator->addPaths($this->config['viewPaths']);
+        $locator->addPaths($this->config()->viewPaths->export());
         return $locator;
     }
 
@@ -368,7 +374,7 @@ class Container extends Provider
      */
     public function viewJson($request)
     {
-        if ($request->hasParam($this->config['jsonpCallbackKey'])) {
+        if ($request->hasParam($this->config()->jsonpCallbackKey)) {
             return $this->viewJsonp;
         }
         return new Json;
@@ -381,7 +387,7 @@ class Container extends Provider
      */
     public function viewJsonp($request)
     {
-        return new Jsonp($request->getParam($this->config['jsonpCallbackKey']));
+        return new Jsonp($request->getParam($this->config()->jsonpCallbackKey));
     }
 
     /**

@@ -1,7 +1,6 @@
 <?php
 
-namespace Europa\Boot;
-use DirectoryIterator;
+namespace Europa\Bootstrap;
 use UnexpectedValueException;
 
 /**
@@ -57,7 +56,7 @@ class Files implements BootstrapperInterface
      * 
      * @return void
      */
-    public function boot()
+    public function bootstrap()
     {
         foreach ($this->files as $file) {
             include $file->getPathname();
