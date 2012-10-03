@@ -1,19 +1,65 @@
 {
-    "hash": "f4061745d3cd494b3b9724cb987e4490",
+    "hash": "9a2dd928ea304372dec7520750e1379e",
     "packages": [
+
+    ],
+    "packages-dev": [
         {
-            "package": "treshugart/testes",
-            "version": "dev-master",
-            "source-reference": "1bf00553d06ba69e84eecdf20e6cd4ac598ffa8d",
-            "commit-date": "1343346226"
+            "name": "treshugart/testes",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/treshugart/Testes.git",
+                "reference": "1.0.0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/treshugart/Testes/zipball/1.0.0",
+                "reference": "1.0.0",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0",
+                "ext-xdebug": "*"
+            },
+            "time": "2012-07-26 23:43:46",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-0": {
+                    "Testes": "src"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "Dead simple unit and story test framework.",
+            "homepage": "http://github.com/treshugart/Testes",
+            "keywords": [
+                "testing",
+                "BDD",
+                "test",
+                "Behavior",
+                "development",
+                "unit",
+                "story",
+                "driven"
+            ]
         }
     ],
-    "packages-dev": null,
     "aliases": [
 
     ],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "treshugart/testes": 20
-    }
+    "stability-flags": [
+
+    ]
 }
