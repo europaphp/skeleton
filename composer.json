@@ -21,6 +21,6 @@
         "php": ">=5.4.0"
     },
     "require-dev": {
-        "treshugart/testes": "1.*"
+        "treshugart/testes": "1.0.*"
     }
 }
