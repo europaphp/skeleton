@@ -18,7 +18,9 @@
     "license": "MIT",
     "name": "treshugart/europaphp",
     "require": {
-        "php": ">=5.4.0",
-        "treshugart/testes": "dev-master"
+        "php": ">=5.4.0"
+    },
+    "require-dev": {
+        "treshugart/testes": "1.*"
     }
 }
