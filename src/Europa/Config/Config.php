@@ -17,6 +17,28 @@ class Config implements ConfigInterface
 
     public function __set($name, $value)
     {
+        return $this->offsetSet($name, $value);
+    }
+
+    public function __get($name)
+    {
+        return $this->offsetGet($name);
+    }
+
+    public function __isset($name)
+    {
+        return $this->offsetExists($name);
+    }
+
+    public function __unset($name)
+    {
+        return $this->offsetUnset($name);
+    }
+
+    public function offsetSet($name, $value)
+    {
+        $name = $name ?: count($this->config) - 1;
+        
         if ($this->readonly) {
             throw new LogicException(sprintf(
                 'Cannot modify configuration "%s" because it is set as readonly.',
@@ -28,49 +50,44 @@ class Config implements ConfigInterface
             $value = new static($value);
         }
 
-        $this->config[$name] = $value;
+        if (strpos($name, '.') !== false) {
+            $names  = explode('.', $name);
+            $last   = array_pop($names);
+            $config = $this;
+
+            foreach ($names as $name) {
+                $config = $config->offsetGet($name);
+            }
+
+            $config->offsetSet($last, $value);
+        } else {
+            $this->config[$name] = $value;
+        }
 
         return $this;
-    }
-
-    public function __get($name)
-    {
-        if (isset($this->config[$name])) {
-            return $this->config[$name];
-        }
-    }
-
-    public function __isset($name)
-    {
-        return isset($this->config[$name]);
-    }
-
-    public function __unset($name)
-    {
-        if (isset($this->config[$name])) {
-            unset($this->config[$name]);
-        }
-        return $this;
-    }
-
-    public function offsetSet($name, $value)
-    {
-        return $this->__set($name, $value);
     }
 
     public function offsetGet($name)
     {
-        return $this->__get($name);
+        if (!isset($this->config[$name])) {
+            $this->config[$name] = new static;
+        }
+
+        return $this->config[$name];
     }
 
     public function offsetExists($name)
     {
-        return $this->__isset($name);
+        return isset($this->config[$name]);
     }
 
     public function offsetUnset($name)
     {
-        return $this->__unset($name);
+        if (isset($this->config[$name])) {
+            unset($this->config[$name]);
+        }
+
+        return $this;
     }
 
     public function getIterator()
@@ -82,7 +99,7 @@ class Config implements ConfigInterface
     {
         if (is_array($config) || is_object($config)) {
             foreach ($config as $name => $value) {
-                $this->__set($name, $value);
+                $this->offsetSet($name, $value);
             }
         }
         return $this;
@@ -94,7 +111,7 @@ class Config implements ConfigInterface
         
         foreach ($this->config as $name => $value) {
             if ($value instanceof static) {
-                $value = $value->toArray();
+                $value = $value->export();
             }
 
             $config[$name] = $value;
