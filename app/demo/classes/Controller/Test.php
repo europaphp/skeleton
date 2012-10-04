@@ -18,12 +18,12 @@ class Test extends RestController
     /**
      * Runs tests.
      * 
-     * @param string $test         The test to run.
-     * @param bool   $showUntested Whether or not to show untested lines of code.
+     * @param string $test     The test to run.
+     * @param bool   $untested Whether or not to show untested lines of code.
      * 
      * @return void
      */
-    public function cli($test = 'Test', $showUntested = false)
+    public function all($test = 'Test', $untested = false)
     {
         // start covering tests
         $analyzer = new Coverage;
@@ -39,10 +39,10 @@ class Test extends RestController
         $analyzer->is('\.php$');
         
         return [
-            'percent'      => round(number_format($analyzer->getPercentTested(), 2), 2),
-            'suite'        => $suite,
-            'report'       => $analyzer,
-            'showUntested' => $showUntested
+            'percent'  => round(number_format($analyzer->getPercentTested(), 2), 2),
+            'suite'    => $suite,
+            'report'   => $analyzer,
+            'untested' => $untested
         ];
     }
 }

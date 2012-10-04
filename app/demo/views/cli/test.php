@@ -15,7 +15,7 @@
 
 <?php echo $helpers->cli->color('Coverage:', 'yellow'); ?> <?php echo $helpers->cli->color($context->percent . '%', $context->percent >= 50 ? 'green' : 'red'); ?>
 
-<?php if ($context->showUntested && $context->report->getUntestedFileCount()): ?>
+<?php if ($context->untested && $context->report->getUntestedFileCount()): ?>
 
 Untested Files and Lines
 ------------------------

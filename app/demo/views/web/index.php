@@ -1,4 +1,1 @@
-<?php $this->extend('web/layout'); ?>
-
-<h1><?php echo $helpers->lang->h1; ?></h1>
-<h2>~ <?php echo $helpers->lang->h2; ?> ~</h2>
+<?php echo $this->renderScript('web/test', $context->toArray()) ?>

@@ -1,13 +1,15 @@
 <!doctype html>
 <html>
     <head>
-        <?php echo $helpers->css('css/lib/layout'); ?>
+        <?php echo $helpers->css('css/lib/bootstrap'); ?>
+        <?php echo $helpers->css('css/lib/bootstrap-responsive'); ?>
         <title><?php echo $helpers->lang->title; ?></title>
     </head>
     <body>
-        <div id="body"><?php echo $this->renderChild(); ?></div>
-        <div id="footer">
-            <p><?php echo $helpers->lang->time(round(microtime() - EUROPA_START_TIME, 3)); ?></p>
-        </div>
+        <div class="container">
+            <div class="page-header">
+                <h1><?php echo $helpers->lang->heading ?> <small><?php echo $helpers->lang->tagline(round(microtime() - EUROPA_START_TIME, 3)) ?></small></h1>
+            </div>
+            <?php echo $this->renderChild(); ?>
     </body>
 </html>

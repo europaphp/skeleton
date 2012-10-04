@@ -1,7 +1,6 @@
 <?php
 
 namespace Controller;
-use Europa\Controller\RestController;
 
 /**
  * A default controller for a base implementation.
@@ -11,15 +10,7 @@ use Europa\Controller\RestController;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Index extends RestController
+class Index extends Test
 {
-    /**
-     * The default request method.
-     * 
-     * @return void
-     */
-    public function get()
-    {
-        
-    }
+    
 }

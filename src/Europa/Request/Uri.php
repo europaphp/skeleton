@@ -422,7 +422,7 @@ class Uri
     
     /**
      * Returns the port part of the URI. If the port exists and is not the default port for the scheme it is returned
-     * with the loading colon. If it does not exist or is the default port for the scheme, then it is not returned.
+     * with the leading colon. If it does not exist or is the default port for the scheme, then it is not returned.
      * In order to detect the default scheme port, however, a scheme must be set. Otherwise there is nothing to compare
      * the port against and it is returned no matter what if it is set.
      * 
@@ -430,15 +430,11 @@ class Uri
      */
     public function getPortPart()
     {
-        $port = $this->getPort();
-        if ($port) {
-            $scheme = $this->getScheme();
-            if ($scheme && !isset($this->portMap[$scheme])) {
+        if ($port = $this->getPort()) {
+            if ($this->portMap[$this->getScheme()] === $port) {
                 return null;
             }
-            if ($scheme && $this->portMap[$scheme] === $port) {
-                return null;
-            }
+
             return ':' . $port;
         }
         return '';
@@ -662,6 +658,10 @@ class Uri
             if (isset($uri[$index])) {
                 $this->$method($uri[$index]);
             }
+        }
+
+        if (!isset($uri['port']) && isset($uri['scheme']) && isset($this->portMap[$uri['scheme']])) {
+            $this->setPort($this->portMap[$uri['scheme']]);
         }
         
         return $this;

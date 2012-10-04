@@ -11,7 +11,7 @@ class FileAndDirectoryTest extends UnitAbstract
     public function setUp()
     {
         if (!$this->testWritable()) {
-            $this->assert(false, "Could not run tests because the directory {$dir} is not writable.");
+            $this->assert(false, "Could not run tests because the directory {$this->getBaseTestDir()} is not writable.");
         }
     }
 
@@ -71,21 +71,16 @@ class FileAndDirectoryTest extends UnitAbstract
 
     private function testWritable()
     {
-        return is_writable($this->getBaseTestDir());
+        return is_writable(sys_get_temp_dir());
     }
 
     private function getTestFile()
     {
-        return $this->getBaseTestDir() . '/test.file';
+        return sys_get_temp_dir() . '/test.file';
     }
 
     private function getTestDir()
     {
-        return $this->getBaseTestDir() . '/test.dir';
-    }
-
-    private function getBaseTestDir()
-    {
-        return realpath(dirname(__FILE__) . '/../../');
+        return sys_get_temp_dir() . '/test.dir';
     }
 }
