@@ -11,12 +11,94 @@ EuropaPHP is the manifestation of the shortcomings of other PHP frameworks with 
 Installation
 ------------
 
-Extract it anywhere you want as long as you can view the `www/index.php` in a browser. The `index.php` file can be located anywhere as long as you update the `require` statement in it.
+There are a couple ways to install Europa.
 
-So How Do You Use it?
----------------------
+### Source
 
-To check out the documentation, just go into the `src` directory. Each directory has a `readme` that corresponds to it. To update the documentation, just do as you'd normally do with code.
+Download from Github and extract it to where you want it.
+
+### Composer
+
+    composer create-project treshugart/europaphp [installation path] [branch or tag]
+
+That's really it.
+
+Running Tests
+-------------
+
+From the install directory:
+
+    bin/cli test
+
+Command Line Usage
+------------------
+
+To checkout available commands, run:
+
+    bin/cli
+
+This will spit out a bunch of command line commands and options and tell you how to use it.
+
+Configuration
+-------------
+
+By default, you can use the `Europa` class which is a DI container with pre-configured objects. This class accepts a configuration object that you can use to alter how some of the dependencies are set up.
+
+###### `controllers.filter.configs`
+
+An array of `ClassNameFilter` configurations to use in the controller finder. By default, controllers are prefixed with the `Controller\` namespace.
+
+###### `helpers.filter.configs`
+
+An array of `ClassNameFilter` configurations to use in the helper finder. By default, the finder looks for a helper prefixed with `Helper\`. It falls back to using `Europa\View\Helper\`.
+
+### `paths.app`
+
+The application path. This defaults to `app`, relative to the install path.
+
+### `paths.root`
+
+The root path. This will default to the install path.
+
+### `paths.classes`
+
+An array of class paths and suffixes to pass on to the locator used to find classes.
+
+### `paths.langs`
+
+An array of class paths and suffixes to pass on to the locator used to find language files.
+
+### `paths.views`
+
+An array of class paths and suffixes to pass on to the locator used to find view scripts. If using a view that does not support scripts or files, then this will be ignored.
+
+### `views.cli`
+
+The CLI view path, relative to the base view paths.
+
+### `views.web`
+
+The web view path, relative to the base view paths.
+
+### `views.jsonp.callback`
+
+The name of the JSONP callback parameter. If using a JSON content type and this parameter is found in the request, it automatically switches to JSONP.
+
+### `views.map`
+
+The content type to view instance mapping. This is used to determine which view will be used to render a given content type. If the content type is not recognised, it defaults to using `text/html` and the `Php` view.
+
+If you want to use a custom view script engine, you just map `text/html` to the desired view engine. The only requirement is that your view engine implement `Europa\View\ViewInterface`. If you support scripts and want a script to be automatically chosen for you based on any of the configuration variables, then it must implement `Europa\View\ViewScriptInterface`.
+
+Documentation
+-------------
+
+To check out the documentation, just go into the `src` directory. Each directory has a `readme` that corresponds to it. To update the documentation, fork, pull-request, rinse, repeat.
+
+Contributing
+------------
+
+To contirbute, just fork and submit pull-requests. Each request will be reviewed and ideally will include corresponding tests and possibly a place in the documentation.
 
 License
 -------

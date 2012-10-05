@@ -15,15 +15,28 @@ use Europa\Request\Uri;
 class Error extends RestController
 {
     /**
+     * Shows an error via CLI.
+     * 
+     * @return array
+     */
+    public function cli()
+    {
+        return [
+            'command' => $this->request()->controller
+        ];
+    }
+
+    /**
      * Displays the error page.
      * 
-     * @return void
+     * @return array
      */
     public function all()
     {
         $uri = Uri::detect();
-        return array(
+
+        return [
             'uri' => $uri->getRootPart() . $uri->getRequestPart() . $uri->getQueryPart(),
-        );
+        ];
     }
 }

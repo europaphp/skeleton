@@ -1,1 +1,1 @@
-<?php echo $this->renderScript('web/test', $context->toArray()) ?>
+<?php $this->extend('web/layout') ?>

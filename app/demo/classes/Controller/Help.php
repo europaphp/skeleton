@@ -6,6 +6,7 @@ use Europa\Filter\CamelCaseSplitFilter;
 use Europa\Filter\ClassNameFilter;
 use Europa\Fs\Finder;
 use Europa\Reflection\ClassReflector;
+use LogicException;
 
 /**
  * Generates help information.
@@ -39,11 +40,20 @@ class Help extends RestController
      */
     private function getCommand($command)
     {
-        $filter  = new ClassNameFilter;
-        $class   = $filter->filter($command);
-        $class   = __NAMESPACE__ . '\\' . $class;
-        $class   = new ClassReflector($class);
-        $block   = $class->getMethod('cli')->getDocBlock();
+        $filter = new ClassNameFilter;
+        $class  = $filter->__invoke($command);
+        $class  = __NAMESPACE__ . '\\' . $class;
+        $class  = new ClassReflector($class);
+
+        if ($class->hasMethod('cli')) {
+            $method = $class->getMethod('cli');
+        } elseif ($class->hasMethod('all')) {
+            $method = $class->getMethod('all');
+        } else {
+            throw new LogicException(sprintf('The command "%s" is not valid.', $command));
+        }
+
+        $block   = $method->getDocBlock();
         $params  = [];
         $longest = 0;
         
@@ -107,7 +117,7 @@ class Help extends RestController
             }
             
             $command = str_replace('\\', ' ', $class);
-            $command = $filter->filter($command);
+            $command = $filter->__invoke($command);
             $command = implode('-', $command);
             $command = str_replace(' -', ' ', $command);
             $command = strtolower($command);
@@ -124,13 +134,17 @@ class Help extends RestController
             $refl = new ClassReflector($refl);
             $name = $refl->getName();
             
-            // only show cli methods
-            if (!$refl->hasMethod('cli')) {
+            // only show "cli" and "all" methods
+            if ($refl->hasMethod('cli')) {
+                $method = $refl->getMethod('cli');
+            } elseif ($refl->hasMethod('all')) {
+                $method = $refl->getMethod('all');
+            } else {
                 continue;
             }
             
             $command            = str_pad($command, $longest, ' ', STR_PAD_LEFT);
-            $commands[$command] = $refl->getMethod('cli')->getDocBlock()->getDescription();;
+            $commands[$command] = $method->getDocBlock()->getDescription();;
         }
         
         return [

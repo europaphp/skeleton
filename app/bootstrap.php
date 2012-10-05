@@ -1,17 +1,26 @@
 <?php
 
-use Europa\App\Bootstrapper;
+use Europa\Module\Manager;
 
-// Registers autoloading from the Europa install path.
 require_once __DIR__ . '/../src/Europa/Fs/Loader.php';
-
-// Composer dependency autoloader.
 require_once __DIR__ . '/../vendor/autoload.php';
 
-// Setup and configure bootstrapper.
-$bootstrapper = new Bootstrapper(__DIR__ . '/..', [
-    'modules' => ['demo']
-]);
+$europa = Europa::main(['paths.root' => __DIR__ . '/..']);
+$europa->loader->register();
+$europa->modules->register('demo');
 
-// Boot the application.
-$bootstrapper->bootstrap();
+foreach ($europa->modules as $module) {
+    $map = [
+        'classes' => 'loaderLocator',
+        'langs'   => 'langLocator',
+        'views'   => 'viewLocator'
+    ];
+
+    foreach ($map as $config => $locator) {
+        foreach ($europa->config->paths->$config as $path => $suffix) {
+            $europa->$locator->addPath($module->name() . '/' . $path, $suffix);
+        }
+    }
+}
+
+$europa->modules->bootstrap();
