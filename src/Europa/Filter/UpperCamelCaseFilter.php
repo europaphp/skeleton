@@ -10,7 +10,7 @@ namespace Europa\Filter;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class UpperCamelCaseFilter implements FilterInterface
+class UpperCamelCaseFilter
 {
     /**
      * Filters the value and returns the filtered value.
@@ -19,18 +19,23 @@ class UpperCamelCaseFilter implements FilterInterface
      * 
      * @return mixed
      */
-    public function filter($value)
+    public function __invoke($value)
     {
         $temp  = array();
         $parts = preg_split('/[^a-zA-Z0-9]/', $value);
+
         foreach ($parts as $part) {
             $part = trim($part);
+
             if (!$part) {
                 continue;
             }
+
             $temp[] = ucfirst($part);
         }
+
         $value = implode('', $temp);
+
         return $value;
     }
 }

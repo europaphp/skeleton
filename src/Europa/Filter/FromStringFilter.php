@@ -10,7 +10,7 @@ namespace Europa\Filter;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class FromStringFilter implements FilterInterface
+class FromStringFilter
 {
     /**
      * Filters the value and returns the filtered value.
@@ -19,7 +19,7 @@ class FromStringFilter implements FilterInterface
      * 
      * @return mixed
      */
-    public function filter($value)
+    public function __invoke($value)
     {
         if ($value === 'true') {
             $value = true;
@@ -30,6 +30,7 @@ class FromStringFilter implements FilterInterface
         } elseif ($value === 'null') {
             $value = null;
         }
+
         return $value;
     }
 }

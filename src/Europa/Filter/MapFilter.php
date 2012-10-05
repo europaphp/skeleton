@@ -10,7 +10,7 @@ namespace Europa\Filter;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class MapFilter implements FilterInterface
+class MapFilter
 {
     /**
      * The value map.
@@ -22,13 +22,35 @@ class MapFilter implements FilterInterface
     /**
      * Sets up the mapping.
      * 
-     * @parma array $map The mapping to use.
+     * @param array $map The mapping to use.
      * 
-     * @return \Europa\Filter\MapFilter
+     * @return MapFilter
      */
     public function __construct(array $map)
     {
         $this->map = $map;
+    }
+
+    /**
+     * Adds mapping.
+     * 
+     * @return MapFilter
+     */
+    public function map($from, $to)
+    {
+        $this->map[$from] = $to;
+        return $this;
+    }
+
+    /**
+     * Clears the mapping.
+     * 
+     * @return MapFilter
+     */
+    public function clear()
+    {
+        $this->map = [];
+        return $this;
     }
     
     /**
@@ -38,11 +60,12 @@ class MapFilter implements FilterInterface
      * 
      * @return mixed
      */
-    public function filter($value)
+    public function __invoke($value)
     {
         if (isset($this->map[$value])) {
             return $this->map[$value];
         }
+
         return $value;
     }
 }

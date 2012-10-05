@@ -19,11 +19,12 @@ class ChainFilter extends FilterArrayAbstract
      * 
      * @return mixed
      */
-    public function filter($value)
+    public function __invoke($value)
     {
-        foreach ($this->getAll() as $filter) {
-            $value = $filter->filter($value);
+        foreach ($this as $filter) {
+            $value = $filter->__invoke($value);
         }
+
         return $value;
     }
 }

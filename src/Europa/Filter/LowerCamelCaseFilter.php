@@ -10,7 +10,7 @@ namespace Europa\Filter;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class LowerCamelCaseFilter implements FilterInterface
+class LowerCamelCaseFilter
 {
     /**
      * Filters the value and returns the filtered value.
@@ -19,11 +19,12 @@ class LowerCamelCaseFilter implements FilterInterface
      * 
      * @return mixed
      */
-    public function filter($value)
+    public function __invoke($value)
     {
         $ucc   = new UpperCamelCaseFilter;
         $value = $ucc->filter($value);
         $value = lcfirst($value);
+
         return $value;
     }
 }

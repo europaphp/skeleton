@@ -10,7 +10,7 @@ namespace Europa\Filter;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class ClassNameFilter implements FilterInterface
+class ClassNameFilter
 {
     /**
      * Default configuration.
@@ -42,7 +42,7 @@ class ClassNameFilter implements FilterInterface
      * 
      * @return mixed
      */
-    public function filter($value)
+    public function __invoke($value)
     {
         // each part is formatted using the upper camel case filter
         $ucc = new UpperCamelCaseFilter;
@@ -58,12 +58,14 @@ class ClassNameFilter implements FilterInterface
         
         // split into class namespaces and format each namespace part into upper camel case
         $parts = explode('\\', $value);
+
         foreach ($parts as &$part) {
-            $part = $ucc->filter($part);
+            $part = $ucc->__invoke($part);
         }
         
         // class names always come out with a leading namespace separator
         $value = implode('\\', $parts);
+
         return $value;
     }
 }

@@ -1,6 +1,9 @@
 <?php
 
 namespace Europa\Filter;
+use ArrayIterator;
+use IteratorAggregate;
+use UnexpectedValueException;
 
 /**
  * Filters a value using more than one filter.
@@ -10,7 +13,7 @@ namespace Europa\Filter;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class FilterArrayAbstract implements FilterInterface
+abstract class FilterArrayAbstract implements IteratorAggregate
 {
     /**
      * The array of filters to use.
@@ -18,18 +21,6 @@ abstract class FilterArrayAbstract implements FilterInterface
      * @var array
      */
     private $filters = [];
-    
-    /**
-     * Constructs a new array filter.
-     * 
-     * @param array $filters The filters to add.
-     * 
-     * @return FilterArrayAbstract
-     */
-    public function __construct($filters = [])
-    {
-        $this->addAll($filters);
-    }
 
     /**
      * Adds a filter.
@@ -38,33 +29,23 @@ abstract class FilterArrayAbstract implements FilterInterface
      * 
      * @return FilterArrayAbstract
      */
-    public function add(FilterInterface $filter)
+    public function add($filter)
     {
-        $this->filters[] = $filter;
-        return $this;
-    }
-    
-    /**
-     * Adds more than one filter.
-     * 
-     * @param array $filters The filters to add.
-     * 
-     * @return FilterArrayAbstract
-     */
-    public function addAll(array $filters)
-    {
-        foreach ($filters as $filter) {
-            $this->add($filter);
+        if (!is_callable($filter)) {
+            throw new UnexpectedValueException('The specified filter is not callable.');
         }
+
+        $this->filters[] = $filter;
+
         return $this;
     }
-    
+
     /**
-     * Removes all filters.
+     * Removes all of the filters.
      * 
      * @return FilterArrayAbstract
      */
-    public function removeAll()
+    public function clear()
     {
         $this->filters = [];
         return $this;
@@ -75,8 +56,8 @@ abstract class FilterArrayAbstract implements FilterInterface
      * 
      * @return array
      */
-    public function getAll()
+    public function getIterator()
     {
-        return $this->filters;
+        return new ArrayIterator($this->filters);
     }
 }

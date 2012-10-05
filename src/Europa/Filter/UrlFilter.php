@@ -10,7 +10,7 @@ namespace Europa\Filter;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class UrlFilter implements FilterInterface
+class UrlFilter
 {
     /**
      * Filters the value and returns the filtered value.
@@ -19,11 +19,11 @@ class UrlFilter implements FilterInterface
      * 
      * @return mixed
      */
-    public function filter($value)
+    public function __invoke($value)
     {
-        $value = (new ClassNameFilter)->filter($value);
+        $value = (new ClassNameFilter)->__invoke($value);
         $value = str_replace('\\', '/', $value);
-        $value = (new CamelCaseSplitFilter)->filter($value);
+        $value = (new CamelCaseSplitFilter)->__invoke($value);
         $value = array_map('strtolower', $value);
         $value = implode('-', $value);
         $value = str_replace('/-', '/', $value);

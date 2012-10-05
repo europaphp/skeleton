@@ -20,10 +20,11 @@ class ClassResolutionFilter extends FilterArrayAbstract
      * 
      * @return mixed
      */
-    public function filter($value)
+    public function __invoke($value)
     {
-        foreach ($this->getAll() as $filter) {
-            $class = $filter->filter($value);
+        foreach ($this as $filter) {
+            $class = $filter->__invoke($value);
+            
             if (class_exists($class, true)) {
                 return $class;
             }

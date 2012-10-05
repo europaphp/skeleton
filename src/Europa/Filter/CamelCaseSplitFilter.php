@@ -10,7 +10,7 @@ namespace Europa\Filter;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class CamelCaseSplitFilter implements FilterInterface
+class CamelCaseSplitFilter
 {
     /**
      * Filters the value and returns the filtered value.
@@ -19,17 +19,20 @@ class CamelCaseSplitFilter implements FilterInterface
      * 
      * @return mixed
      */
-    public function filter($value)
+    public function __invoke($value)
     {
         $parts = array('');
+
         foreach (str_split($value) as $char) {
             $lower = strtolower($char);
+
             if ($char === $lower) {
                 $parts[count($parts) - 1] .= $lower;
             } else {
                 $parts[] = $char;
             }
         }
+
         return $parts;
     }
 }
