@@ -44,11 +44,11 @@ Configuration
 
 By default, you can use the `Europa` class which is a DI container with pre-configured objects. This class accepts a configuration object that you can use to alter how some of the dependencies are set up.
 
-###### `controllers.filter.configs`
+### `controllers.filter.configs`
 
 An array of `ClassNameFilter` configurations to use in the controller finder. By default, controllers are prefixed with the `Controller\` namespace.
 
-###### `helpers.filter.configs`
+### `helpers.filter.configs`
 
 An array of `ClassNameFilter` configurations to use in the helper finder. By default, the finder looks for a helper prefixed with `Helper\`. It falls back to using `Europa\View\Helper\`.
 
