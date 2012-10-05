@@ -2,6 +2,7 @@
 
 namespace Europa\Di;
 use Europa\Reflection\ClassReflector;
+use Exception;
 use LogicException;
 
 /**
@@ -15,13 +16,6 @@ use LogicException;
 abstract class ContainerAbstract implements ContainerInterface
 {
     /**
-     * Default instance name.
-     * 
-     * @var string
-     */
-    const NAME = 'default';
-
-    /**
      * Non-transient services that have already been located and set up.
      * 
      * @var array
@@ -29,12 +23,19 @@ abstract class ContainerAbstract implements ContainerInterface
     private $cache = [];
 
     /**
+     * List of transient services.
+     * 
+     * @var array
+     */
+    private $transient = [];
+
+    /**
      * Di instances.
      * 
      * @var array
      */
     private static $instances = [];
-    
+
     /**
      * Creates a new instance specified by name.
      * 
@@ -43,7 +44,7 @@ abstract class ContainerAbstract implements ContainerInterface
      * 
      * @return mixed
      */
-    abstract public function create($name);
+    abstract public function __call($name, array $args = []);
 
     /**
      * Statically configures and returns the container of the specified name.
@@ -55,31 +56,17 @@ abstract class ContainerAbstract implements ContainerInterface
      */
     public static function __callStatic($name, array $args = [])
     {
-        $name = static::formatName($name);
+        $key = get_called_class() . $name;
 
-        if (!$args) {
-            if (isset(self::$instances[$name])) {
-                return self::$instances[$name];
-            } else {
-                return self::$instances[$name] = new static;
-            }
+        if (!$args && isset(self::$instances[$key])) {
+            return self::$instances[$key];
         }
         
-        return self::$instances[$name] = (new ClassReflector(get_called_class()))->newInstanceArgs($args);
-    }
-    
-    /**
-     * Creates a new instance specified by name.
-     * 
-     * @param string $name The service name.
-     * @param array  $args The arguments to pass, if any.
-     * 
-     * @return mixed
-     */
-    public function __call($name, array $args = [])
-    {
-        $this->cache[$name] = $this->create($name, $args);
-        return $this->cache[$name];
+        try {
+            return self::$instances[$key] = (new ClassReflector(get_called_class()))->newInstanceArgs($args);
+        } catch (Exception $e) {
+            throw new LogicException(sprintf('Could not get the container "%s" from "%s" because: %s', $name, get_called_class(), $e->getMessage()));
+        }
     }
 
     /**
@@ -91,42 +78,29 @@ abstract class ContainerAbstract implements ContainerInterface
      */
     public function __get($name)
     {
-        if (!isset($this->cache[$name])) {
-            $this->__call($name);
+        if (isset($this->transient[$name])) {
+            return $this->__call($name);
         }
+
+        if (!isset($this->cache[$name])) {
+            $this->cache[$name] = $this->__call($name);
+        }
+
         return $this->cache[$name];
     }
 
     /**
-     * Throws an exception if the dependency does not exist.
+     * Denotes certain services as transient.
      * 
-     * @param string $name The dependency name.
+     * @param mixed $names The name or names of the transient services.
      * 
-     * @throws LogicException
-     * 
-     * @return void
+     * @return ContainerAbstract
      */
-    protected function throwNotExists($name)
+    public function transient($names)
     {
-        $trace = debug_backtrace()[1];
-        throw new LogicException(sprintf('Could not resolve dependency "%s" in "%s".',
-            $name,
-            get_class($this)
-        ));
-    }
-    
-    /**
-     * Formats a default instance name.
-     * 
-     * @param string $name The name to format.
-     * 
-     * @return string
-     */
-    private static function formatName($name)
-    {
-        if (!$name) {
-            $name = self::NAME;
+        foreach ((array) $names as $name) {
+            $this->transient[$name] = $name;
         }
-        return get_called_class() . '.' . $name;
+        return $this;
     }
 }

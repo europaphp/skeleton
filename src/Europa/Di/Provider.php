@@ -3,7 +3,6 @@
 namespace Europa\Di;
 use Europa\Filter\LowerCamelCaseFilter;
 use Europa\Reflection\MethodReflector;
-use Exception;
 use LogicException;
 
 /**
@@ -17,36 +16,35 @@ use LogicException;
 abstract class Provider extends ContainerAbstract
 {
     /**
-     * Configures the specified instance.
+     * Creates a new instance specified by name.
      * 
-     * @param string $class The class to configure.
-     * @param array  $args  Any arguments to merge with the configuration.
+     * @param string $name The service name.
+     * @param array  $args  Any custom arguments to merge.
      * 
      * @return mixed
      */
-    public function create($name, array $args = [])
+    public function __call($name, array $args = [])
     {
-        if ($method = $this->resolveMethod($name)) {
-            $args = array_merge($this->resolveMethodDependencies($method), $args);
+        if (method_exists($this, $name)) {
+            $method = new MethodReflector($this, $name);
+            $args   = array_merge($this->resolveDependencies($method), $args);
+            
             return $method->invokeArgs($this, $args);
         }
-        $this->throwNotExists($name);
+
+        throw new LogicException(sprintf('Could not resolve dependency "%s" in provider "%s".', $name, get_class($this)));
     }
-    
+
     /**
-     * Resolves the mapping for the specified service.
+     * Returns whether or not the specified service is available.
      * 
      * @param string $name The service name.
      * 
-     * @return string
+     * @return bool
      */
-    private function resolveMethod($name)
+    public function __isset($name)
     {
-        $name = (new LowerCamelCaseFilter)->filter($name);
-        if (method_exists($this, $name)) {
-            return new MethodReflector($this, $name);
-        }
-        return false;
+        return method_exists($this, $name);
     }
     
     /**
@@ -56,7 +54,7 @@ abstract class Provider extends ContainerAbstract
      * 
      * @return array
      */
-    private function resolveMethodDependencies(MethodReflector $method)
+    private function resolveDependencies(MethodReflector $method)
     {
         $deps = [];
         

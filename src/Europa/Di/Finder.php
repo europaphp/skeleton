@@ -3,9 +3,9 @@
 namespace Europa\Di;
 use Closure;
 use Europa\Filter\ClassResolutionFilter;
-use Europa\Filter\FilterInterface;
 use Europa\Reflection\ClassReflector;
-use ReflectionFunction;
+use LogicException;
+use UnexpectedValueException;
 
 /**
  * The application service locator and container.
@@ -54,6 +54,35 @@ class Finder extends ContainerAbstract
     {
         $this->filter = new ClassResolutionFilter;
     }
+
+    /**
+     * Creates a new instance specified by name.
+     * 
+     * @param string $name The service name.
+     * @param array  $args  Any custom arguments to merge.
+     * 
+     * @return mixed
+     */
+    public function __call($name, array $args = [])
+    {
+        if ($class = call_user_func($this->filter, $name)) {
+            return $this->invokeQueue($this->createInstance($class, $args));
+        }
+        
+        throw new LogicException(sprintf('Could not resolve dependency "%s" in finder "%s".', $name, get_class($this)));
+    }
+
+    /**
+     * Returns whether or not the specified service is available.
+     * 
+     * @param string $name The service name.
+     * 
+     * @return bool
+     */
+    public function __isset($name)
+    {
+        return class_exists($this->filter->filter($name));
+    }
     
     /**
      * Sets the filter to use for dependency class name resolution.
@@ -62,9 +91,14 @@ class Finder extends ContainerAbstract
      * 
      * @return Finder
      */
-    public function setFilter(FilterInterface $filter)
+    public function setFilter($filter)
     {
+        if (!is_callable($filter)) {
+            throw new UnexpectedValueException('The provided filter is not callable.');
+        }
+
         $this->filter = $filter;
+
         return $this;
     }
     
@@ -76,22 +110,6 @@ class Finder extends ContainerAbstract
     public function getFilter()
     {
         return $this->filter;
-    }
-    
-    /**
-     * Creates a new instance specified by name.
-     * 
-     * @param string $name The service name.
-     * @param array  $args The arguments to pass, if any.
-     * 
-     * @return mixed
-     */
-    public function create($name, array $args = [])
-    {
-        if ($class = $this->filter->filter($name)) {
-            return $this->invokeQueue($this->createInstance($class, $args));
-        }
-        $this->throwNotExists($name);
     }
     
     /**
@@ -141,17 +159,19 @@ class Finder extends ContainerAbstract
      * Creates a new instance.
      * 
      * @param string $class The class instance to create.
-     * @param array  $args  The arguments to merge with config args.
+     * @param array  $args  Any custom arguments to merge.
      * 
      * @return mixed
      */
-    private function createInstance($class, array $args)
+    private function createInstance($class, array $args = [])
     {
         $class = new ClassReflector($class);
         
         foreach ($this->config as $type => $fn) {
             if ($type === self::ALL || $class->is($type)) {
-                $args = array_merge($args, (array) $fn());
+                $temp = $fn();
+                $temp = is_array($temp) ? $temp : [$temp];
+                $args = array_merge($args, $temp);
             }
         }
         

@@ -2,6 +2,7 @@
 
 namespace Europa\Di;
 use Exception;
+use LogicException;
 
 /**
  * The application service locator and container.
@@ -14,6 +15,31 @@ use Exception;
 class Chain extends ContainerAbstract
 {
     /**
+     * The containers registered in the chain.
+     * 
+     * @var array
+     */
+    private $containers = [];
+
+    /**
+     * Creates a new instance specified by name.
+     * 
+     * @param string $name The service name.
+     * 
+     * @return mixed
+     */
+    public function __call($name)
+    {
+        foreach ($this->containers as $container) {
+            if (isset($container->$name)) {
+                return $container->$name;
+            }
+        }
+        
+        throw new LogicException(sprintf('Could not resolve dependency "%s" in any of the bound containers.', $name, get_class($this)));
+    }
+
+    /**
      * Adds a container to the chain.
      * 
      * @param ContainerInterface $container The container to add.
@@ -24,25 +50,5 @@ class Chain extends ContainerAbstract
     {
         $this->containers[] = $container;
         return $this;
-    }
-    
-    /**
-     * Creates a new instance specified by name.
-     * 
-     * @param string $name The service name.
-     * @param array  $args The arguments to pass, if any.
-     * 
-     * @return mixed
-     */
-    public function create($name, array $args = [])
-    {
-        foreach ($this->containers as $container) {
-            try {
-                return $container->__call($name, $args);
-            } catch (Exception $e) {
-                
-            }
-        }
-        $this->throwNotExists($name);
     }
 }

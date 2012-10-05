@@ -13,16 +13,6 @@ namespace Europa\Di;
 interface ContainerInterface
 {
     /**
-     * Creates a new instance specified by name.
-     * 
-     * @param string $name The service name.
-     * @param array  $args The arguments to pass, if any.
-     * 
-     * @return mixed
-     */
-    public function __call($name, array $args = []);
-    
-    /**
      * Locates the specified service. Can be transient.
      * 
      * @param string $name The service name.
@@ -30,4 +20,13 @@ interface ContainerInterface
      * @return mixed
      */
     public function __get($name);
+
+    /**
+     * Returns whether or not the specified service is available.
+     * 
+     * @param string $name The service name.
+     * 
+     * @return bool
+     */
+    public function __isset($name);
 }
