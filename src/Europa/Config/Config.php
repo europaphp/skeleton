@@ -10,9 +10,11 @@ class Config implements ConfigInterface
 
     private $readonly = false;
 
-    public function __construct($config = [])
+    public function __construct()
     {
-        $this->import($config);
+        foreach (func_get_args() as $config) {
+            $this->import($config);
+        }
     }
 
     public function __set($name, $value)
@@ -37,7 +39,9 @@ class Config implements ConfigInterface
 
     public function offsetSet($name, $value)
     {
-        $name = $name ?: count($this->config) - 1;
+        if (!$name) {
+            $name = count($this->config);
+        }
         
         if ($this->readonly) {
             throw new LogicException(sprintf(
@@ -69,11 +73,14 @@ class Config implements ConfigInterface
 
     public function offsetGet($name)
     {
-        if (!isset($this->config[$name])) {
-            $this->config[$name] = new static;
+        if (!array_key_exists($name, $this->config)) {
+            $this->config[$name] = new static(['parent' => $this]);
         }
 
-        return $this->config[$name];
+        $value = $this->config[$name];
+        $value = $this->parse($value);
+
+        return $value;
     }
 
     public function offsetExists($name)
@@ -102,6 +109,7 @@ class Config implements ConfigInterface
                 $this->offsetSet($name, $value);
             }
         }
+
         return $this;
     }
 
@@ -111,10 +119,10 @@ class Config implements ConfigInterface
         
         foreach ($this->config as $name => $value) {
             if ($value instanceof static) {
-                $value = $value->export();
+                $config[$name] = $value->export();
+            } else {
+                $config[$name] = $this->offsetGet($name);
             }
-
-            $config[$name] = $value;
         }
 
         return $config;
@@ -124,5 +132,20 @@ class Config implements ConfigInterface
     {
         $this->readonly = $switch ? true : false;
         return $this;
+    }
+
+    private function parse($value)
+    {
+        if (is_string($value) && $value[0] === '=') {
+            preg_match_all('/\{([^{]+)\}/', $value, $holders);
+
+            foreach ($holders[1] as $holder) {
+                $value = str_replace('{' . $holder . '}', $this->offsetGet($holder), $value);
+            }
+
+            $value = substr($value, 1);
+        }
+
+        return $value;
     }
 }
