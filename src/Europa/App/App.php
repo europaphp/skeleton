@@ -3,7 +3,6 @@
 namespace Europa\App;
 use LogicException;
 use Europa\Di\ContainerInterface;
-use Europa\Event\Eventable;
 use Europa\Request\RequestInterface;
 use Europa\Response\ResponseInterface;
 use Europa\Router\RouterInterface;
@@ -23,8 +22,6 @@ use UnexpectedValueException;
  */
 class App implements AppInterface
 {
-    use Eventable;
-    
     /**
      * The default controller key name.
      * 
@@ -89,13 +86,6 @@ class App implements AppInterface
     const EVENT_SEND_POST = 'send.post';
     
     /**
-     * The controller container responsible for finding a controller.
-     * 
-     * @var ContainerInterface
-     */
-    private $controllers;
-    
-    /**
      * The controller key name in the context returned from the router.
      * 
      * @var string
@@ -103,47 +93,25 @@ class App implements AppInterface
     private $key = self::KEY;
     
     /**
-     * The request responsible for supplying information to the controller.
-     * 
-     * @var RequestInterface
-     */
-    private $request;
-    
-    /**
-     * The response responsible for sending the rendered view.
-     * 
-     * @var ResponseInterface
-     */
-    private $response;
-    
-    /**
-     * The router to use for routing the request.
-     * 
-     * @var RouterInterface
-     */
-    private $router;
-    
-    /**
-     * The view responsible for rendering controller response.
-     * 
-     * @var ViewInterface
-     */
-    private $view;
-    
-    /**
      * Constructs a new application.
      * 
-     * @param ContainerInterface $controllers The controller container responsible for finding a controller.
-     * @param RequestInterface   $request     The request responsible for supplying information to the controller.
-     * @param ResponseInterface  $response    The response responsible for sending the rendered view.
+     * @param ContainerInterface $container The container that has all of the required dependencies to run the app.
      * 
      * @return App
      */
-    public function __construct(ContainerInterface $controllers, RequestInterface $request, ResponseInterface $response)
+    public function __construct(ContainerInterface $container)
     {
-        $this->controllers = $controllers;
-        $this->request     = $request;
-        $this->response    = $response;
+        $this->container = $container;
+    }
+
+    /**
+     * Returns the application container.
+     * 
+     * @return ContainerInterface
+     */
+    public function container()
+    {
+        return $this->container;
     }
     
     /**
@@ -155,7 +123,7 @@ class App implements AppInterface
      */
     public function setController($controller)
     {
-        $this->request->setParam($this->key, $controller);
+        $this->container->request->setParam($this->key, $controller);
         return $this;
     }
     
@@ -166,144 +134,7 @@ class App implements AppInterface
      */
     public function getController()
     {
-        return $this->request->getParam($this->key);
-    }
-    
-    /**
-     * Sets the controller container.
-     * 
-     * @param ContainerInterface $controllers The controller container.
-     * 
-     * @return App
-     */
-    public function setControllers(ContainerInterface $controllers)
-    {
-        $this->controllers = $controllers;
-        return $this;
-    }
-    
-    /**
-     * Returns the controller container.
-     * 
-     * @return ContainerInterface
-     */
-    public function getControllers()
-    {
-        return $this->controllers;
-    }
-    
-    /**
-     * Sets the request.
-     * 
-     * @param RequestInterface $request The request.
-     * 
-     * @return App
-     */
-    public function setRequest(RequestInterface $request)
-    {
-        $this->request = $request;
-        return $this;
-    }
-    
-    /**
-     * Returns the request.
-     * 
-     * @return RequestInterface
-     */
-    public function getRequest()
-    {
-        return $this->request;
-    }
-    
-    /**
-     * Sets the response.
-     * 
-     * @param ResponseInterface $response The response.
-     * 
-     * @return App
-     */
-    public function setResponse(ResponseInterface $response)
-    {
-        $this->response = $response;
-        return $this;
-    }
-    
-    /**
-     * Returns the response.
-     * 
-     * @return ResponseInterface
-     */
-    public function getResponse()
-    {
-        return $this->response;
-    }
-    
-    /**
-     * Sets the router.
-     * 
-     * @param RouterInterface $router The router.
-     * 
-     * @return App
-     */
-    public function setRouter(RouterInterface $router)
-    {
-        $this->router = $router;
-        return $this;
-    }
-    
-    /**
-     * Returns the router.
-     * 
-     * @return RouterInterface
-     */
-    public function getRouter()
-    {
-        return $this->router;
-    }
-    
-    /**
-     * Removes the router.
-     * 
-     * @return App
-     */
-    public function removeRouter()
-    {
-        $this->router = null;
-        return $this;
-    }
-    
-    /**
-     * Sets the view.
-     * 
-     * @param ViewInterface $view The view.
-     * 
-     * @return App
-     */
-    public function setView(ViewInterface $view)
-    {
-        $this->view = $view;
-        return $this;
-    }
-    
-    /**
-     * Returns the view.
-     * 
-     * @return ViewInterface
-     */
-    public function getView()
-    {
-        return $this->view;
-    }
-    
-    /**
-     * Removes the view.
-     * 
-     * @return App
-     */
-    public function removeView()
-    {
-        $this->view = null;
-        return $this;
+        return $this->container->request->getParam($this->key);
     }
     
     /**
@@ -346,13 +177,13 @@ class App implements AppInterface
      */
     private function runRouter()
     {    
-        $this->event()->trigger(self::EVENT_ROUTE_PRE, [$this]);
+        $this->container->event->trigger(self::EVENT_ROUTE_PRE, [$this]);
         
-        if ($this->router) {
-            $this->router->route($this->request);
+        if ($this->container->router) {
+            $this->container->router->route($this->container->request);
         }
         
-        $this->event()->trigger(self::EVENT_ROUTE_POST, [$this]);
+        $this->container->event->trigger(self::EVENT_ROUTE_POST, [$this]);
         
         return $this;
     }
@@ -364,12 +195,12 @@ class App implements AppInterface
      */
     private function runController()
     {    
-        $this->event()->trigger(self::EVENT_ACTION_PRE, [$this]);
+        $this->container->event->trigger(self::EVENT_ACTION_PRE, [$this]);
         
         $context = $this->callController();
         $context = $this->ensureContextArray($context);
         
-        $this->event()->trigger(self::EVENT_ACTION_POST, [$this, $context]);
+        $this->container->event->trigger(self::EVENT_ACTION_POST, [$this, $context]);
         
         return $context;
     }
@@ -385,13 +216,13 @@ class App implements AppInterface
     {
         $rendered = null;
         
-        $this->event()->trigger(self::EVENT_RENDER_PRE, [$this, $context]);
+        $this->container->event->trigger(self::EVENT_RENDER_PRE, [$this, $context]);
         
-        if ($this->view) {
-            $rendered = $this->response->setBody($this->view->render($context));
+        if ($this->container->view) {
+            $rendered = $this->container->response->setBody($this->container->view->render($context));
         }
         
-        $this->event()->trigger(self::EVENT_RENDER_POST, [$this, $rendered]);
+        $this->container->event->trigger(self::EVENT_RENDER_POST, [$this, $rendered]);
         
         return $rendered;
     }
@@ -405,11 +236,11 @@ class App implements AppInterface
      */
     private function runResponse($rendered)
     {
-        $this->event()->trigger(self::EVENT_SEND_PRE, [$this, $rendered]);
+        $this->container->event->trigger(self::EVENT_SEND_PRE, [$this, $rendered]);
         
-        $this->response->send();
+        $this->container->response->send();
         
-        $this->event()->trigger(self::EVENT_SEND_POST, [$this, $rendered]);
+        $this->container->event->trigger(self::EVENT_SEND_POST, [$this, $rendered]);
         
         return $this;
     }
@@ -433,12 +264,12 @@ class App implements AppInterface
     {
         if ($controller = $this->getController()) {
             try {
-                return $this->controllers->__get($controller);
+                return $this->container->controllers->$controller;
             } catch (Exception $e) {
                 throw new RuntimeException(sprintf(
                     'The controller "%s" could not be found in the container "%s".',
                     $controller,
-                    get_class($this->controllers)
+                    get_class($this->container->controllers)
                 ));
             }
         }
@@ -446,7 +277,7 @@ class App implements AppInterface
         throw new LogicException(sprintf(
             'The controller parameter "%s" was not found in the request "%s".',
             $this->key,
-            (string) $this->request
+            (string) $this->container->request
         ));
     }
     
