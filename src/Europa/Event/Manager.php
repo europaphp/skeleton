@@ -11,14 +11,14 @@ use InvalidArgumentException;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Dispatcher implements DispatcherInterface
+class Manager implements ManagerInterface
 {
     /**
      * The event stack which contains a stack of callback for each event bound.
      * 
      * @var array
      */
-    private $stack = array();
+    private $stack = [];
     
     /**
      * Binds an event handler to the stack.
@@ -45,15 +45,20 @@ class Dispatcher implements DispatcherInterface
     }
     
     /**
-     * Unbinds an event.
+     * Unbinds the specified event handler, event stack, or all event stacks.
      * 
      * @param string $name     The name of the event to unbind.
      * @param mixed  $callback The specific handler to unbind, if specified.
      * 
      * @return bool
      */
-    public function unbind($name, $callback = null)
+    public function unbind($name = null, $callback = null)
     {
+        if (!$name) {
+            $this->stack = [];
+            return $this;
+        }
+
         foreach ($this->getStackNamesForEvent($name) as $event) {
             if ($callback) {
                 foreach ($this->stack[$event] as $index => $bound) {
@@ -65,6 +70,7 @@ class Dispatcher implements DispatcherInterface
                 unset($this->stack[$event]);
             }
         }
+
         return $this;
     }
     
@@ -97,12 +103,14 @@ class Dispatcher implements DispatcherInterface
      */
     private function getStackNamesForEvent($name)
     {
-        $stack = array();
+        $stack = [];
+
         foreach ($this->stack as $event => $handlers) {
             if (strpos($event, $name) === 0) {
                 $stack[] = $event;
             }
         }
+
         return $stack;
     }
     
