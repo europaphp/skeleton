@@ -1,4 +1,3 @@
-#!/usr/local/bin/php
 <?php
 
 if ($_SERVER['argc'] === 1) {
