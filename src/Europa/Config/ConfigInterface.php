@@ -2,9 +2,10 @@
 
 namespace Europa\Config;
 use ArrayAccess;
+use Countable;
 use IteratorAggregate;
 
-interface ConfigInterface extends ArrayAccess, IteratorAggregate
+interface ConfigInterface extends ArrayAccess, Countable, IteratorAggregate
 {
     public function __set($name, $value);
 
