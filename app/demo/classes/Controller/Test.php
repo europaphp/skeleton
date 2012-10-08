@@ -23,7 +23,7 @@ class Test extends RestController
      * 
      * @return void
      */
-    public function all($test = 'Test', $untested = false)
+    public function all($test = 'Test', $untested = false, $analyze = null)
     {
         // start covering tests
         $analyzer = new Coverage;
@@ -35,7 +35,7 @@ class Test extends RestController
         
         // stop covering and analyze results
         $analyzer = $analyzer->stop();
-        $analyzer->addDirectory(__DIR__ . '/../../../../src/Europa');
+        $analyzer->addDirectory(__DIR__ . '/../../../../' . ($analyze ? ltrim($analyze, '\\/.') : 'src/Europa'));
         $analyzer->is('\.php$');
         
         return [
