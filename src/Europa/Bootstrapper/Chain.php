@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\Bootstrap;
+namespace Europa\Bootstrapper;
 
 /**
  * Allows multiple bootstrappers to be chained together.

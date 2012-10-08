@@ -23,7 +23,7 @@ Nothing is stopping you from filling this file with a bunch of crap and calling 
 
 The `Files` bootstrap class is responsible for taking a bunch of PHP files and loading them alphabetically. Say we have a directory called `boot` that has all of our bootstrap files.
 
-    use Europa\Bootstrap\Files;
+    use Europa\Bootstrapper\Files;
     
     $bootstrapper = new Files;
     $bootstrapper->addFile($someFile);
@@ -32,7 +32,7 @@ The `Files` bootstrap class is responsible for taking a bunch of PHP files and l
 
 If you want, you can use a `Finder` to get a list of files for you:
 
-    use Europa\Bootstrap\Files;
+    use Europa\Bootstrapper\Files;
     use Europa\Fs\Finder;
 
     $finder = new Finder;
@@ -52,7 +52,7 @@ Take the following subclass:
 
     <?php
     
-    use Europa\Bootstrap\Provider;
+    use Europa\Bootstrapper\Provider;
     
     class MyBootstrapper extends Provider
     {
@@ -78,8 +78,8 @@ You can then add that to your bootstrap:
 There may be instances where you need to use more than one bootstrapper. This is where you'd use the `Chain` class.
 
     use MyBootstrapper;
-    use Europa\Bootstrap\Chain;
-    use Europa\Bootstrap\Files;
+    use Europa\Bootstrapper\Chain;
+    use Europa\Bootstrapper\Files;
     use Europa\Fs\Finder;
 
     $finder = new Finder;

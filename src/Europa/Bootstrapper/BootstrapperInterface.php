@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\Bootstrap;
+namespace Europa\Bootstrapper;
 
 /**
  * Base bootstrapper interface.

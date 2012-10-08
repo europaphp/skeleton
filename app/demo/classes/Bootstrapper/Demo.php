@@ -2,7 +2,7 @@
 
 namespace Bootstrapper;
 use Europa;
-use Europa\Bootstrap\Provider;
+use Europa\Bootstrapper\Provider;
 use Europa\Config\Config;
 use Europa\View\ViewScriptInterface;
 
