@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa\View\Helper;
-use Europa\Request\Uri as U;
+use Europa\Request\Uri as UriObject;
 
 /**
  * The helper used to format link tags.
@@ -14,13 +14,6 @@ use Europa\Request\Uri as U;
 class Css
 {
     /**
-     * The default path.
-     * 
-     * @var string
-     */
-    const PATH = 'css';
-    
-    /**
      * The default suffix.
      * 
      * @var string
@@ -28,38 +21,14 @@ class Css
     const SUFFIX = '.css';
     
     /**
-     * The URI used to format the link tag.
-     * 
-     * @var Uri
-     */
-    private $uri;
-    
-    /**
-     * Whether or not to format the tag as XHTML.
-     * 
-     * @var bool
-     */
-    private $xhtml;
-    
-    /**
-     * Formats a script tag that references a CSS file.
-     * 
-     * @return Script
-     */
-    public function __construct($path = self::PATH, $xhtml = false)
-    {
-        $this->uri   = new U($path . '.css');
-        $this->xhtml = $xhtml;
-    }
-    
-    /**
      * Formats the link URI.
      * 
      * @return string
      */
-    public function __toString()
+    public function compile($path, $xhtml = false)
     {
-        $xhtml = $this->xhtml ? ' /' : '';
-        return '<link rel="stylesheet" type="text/css" href="' . $this->uri->__toString() . '"' . $xhtml . '>';
+        $uri   = new UriObject($path);
+        $xhtml = $xhtml ? ' /' : '';
+        return '<link rel="stylesheet" type="text/css" href="' . $uri . '"' . $xhtml . '>';
     }
 }

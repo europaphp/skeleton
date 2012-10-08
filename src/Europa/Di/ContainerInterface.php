@@ -12,6 +12,8 @@ namespace Europa\Di;
  */
 interface ContainerInterface
 {
+    public function __set($name, $value);
+
     /**
      * Locates the specified service. Can be transient.
      * 
@@ -29,4 +31,8 @@ interface ContainerInterface
      * @return bool
      */
     public function __isset($name);
+
+    public function __unset($name);
+
+    public function transient($name);
 }

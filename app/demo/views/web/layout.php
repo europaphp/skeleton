@@ -1,8 +1,8 @@
 <!doctype html>
 <html>
     <head>
-        <?php echo $helpers->css('css/lib/bootstrap'); ?>
-        <?php echo $helpers->css('css/lib/bootstrap-responsive'); ?>
+        <?php echo $helpers->css->compile('css/lib/bootstrap'); ?>
+        <?php echo $helpers->css->compile('css/lib/bootstrap-responsive'); ?>
         <title><?php echo $helpers->lang->title; ?></title>
     </head>
     <body>

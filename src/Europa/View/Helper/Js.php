@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa\View\Helper;
-use Europa\Request\Uri as U;
+use Europa\Request\Uri as UriObject;
 
 /**
  * The helper used to format script tags.
@@ -14,13 +14,6 @@ use Europa\Request\Uri as U;
 class Js
 {
     /**
-     * The default path.
-     * 
-     * @var string
-     */
-    const PATH = 'js';
-    
-    /**
      * The default suffix.
      * 
      * @var string
@@ -28,29 +21,14 @@ class Js
     const SUFFIX = '.js';
     
     /**
-     * The URI used to format the script tag.
-     * 
-     * @var Uri
-     */
-    private $uri;
-    
-    /**
-     * Formats a script tag that references a JS file.
-     * 
-     * @return Script
-     */
-    public function __construct($path = self::PATH)
-    {
-        $this->uri = new U($path . self::SUFFIX);
-    }
-    
-    /**
-     * Formats the script URI.
+     * Formats the link URI.
      * 
      * @return string
      */
-    public function __toString()
+    public function compile($path, $xhtml = false)
     {
-        return '<script type="text/javascript" src="' . $this->uri->__toString() . '"></script>';
+        $uri   = new UriObject($path);
+        $xhtml = $xhtml ? ' /' : '';
+        return '<link rel="stylesheet" type="text/css" href="' . $uri . '"' . $xhtml . '>';
     }
 }

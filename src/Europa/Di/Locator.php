@@ -15,7 +15,7 @@ use UnexpectedValueException;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  http://europaphp.org/license
  */
-class Finder extends ContainerAbstract
+class Locator extends Container
 {
     /**
      * A token that represents any type of object.
@@ -29,7 +29,7 @@ class Finder extends ContainerAbstract
      * 
      * @var array
      */
-    private $config = [];
+    private $args = [];
     
     /**
      * The class resolution filter for resolving dependencies.
@@ -43,7 +43,7 @@ class Finder extends ContainerAbstract
      * 
      * @var array
      */
-    private $queue = [];
+    private $call = [];
     
     /**
      * Sets up a new locator.
@@ -55,35 +55,15 @@ class Finder extends ContainerAbstract
         $this->filter = new ClassResolutionFilter;
     }
 
-    /**
-     * Creates a new instance specified by name.
-     * 
-     * @param string $name The service name.
-     * @param array  $args  Any custom arguments to merge.
-     * 
-     * @return mixed
-     */
-    public function __call($name, array $args = [])
+    public function __get($name)
     {
-        if ($class = call_user_func($this->filter, $name)) {
-            return $this->invokeQueue($this->createInstance($class, $args));
+        if (parent::__isset($name)) {
+            return parent::__get($name);
         }
-        
-        throw new LogicException(sprintf('Could not resolve dependency "%s" in finder "%s".', $name, get_class($this)));
+
+        return $this->createInstance($this->filter->__invoke($name));
     }
 
-    /**
-     * Returns whether or not the specified service is available.
-     * 
-     * @param string $name The service name.
-     * 
-     * @return bool
-     */
-    public function __isset($name)
-    {
-        return class_exists($this->filter->filter($name));
-    }
-    
     /**
      * Sets the filter to use for dependency class name resolution.
      * 
@@ -120,14 +100,14 @@ class Finder extends ContainerAbstract
      * 
      * @return Locator
      */
-    public function config($type, Closure $fn = null)
+    public function args($type, Closure $fn = null)
     {
         if ($type instanceof Closure) {
             $fn   = $type;
             $type = self::ALL;
         }
         
-        $this->config[$type] = $fn;
+        $this->args[$type] = $fn;
         
         return $this;
     }
@@ -140,14 +120,14 @@ class Finder extends ContainerAbstract
      * 
      * @return Locator
      */
-    public function queue($type, Closure $fn = null)
+    public function call($type, Closure $fn = null)
     {
         if ($type instanceof Closure) {
             $fn   = $type;
             $type = self::ALL;
         }
         
-        $this->queue[] = [
+        $this->call[] = [
             'func' => $fn,
             'type' => $type
         ];
@@ -159,15 +139,16 @@ class Finder extends ContainerAbstract
      * Creates a new instance.
      * 
      * @param string $class The class instance to create.
-     * @param array  $args  Any custom arguments to merge.
      * 
      * @return mixed
      */
-    private function createInstance($class, array $args = [])
+    private function createInstance($class)
     {
         $class = new ClassReflector($class);
+        $args  = [];
         
-        foreach ($this->config as $type => $fn) {
+        foreach ($this->args as $type => $fn) {
+            var_dump($type);
             if ($type === self::ALL || $class->is($type)) {
                 $temp = $fn();
                 $temp = is_array($temp) ? $temp : [$temp];
@@ -189,7 +170,7 @@ class Finder extends ContainerAbstract
     {
         $refl = new ClassReflector($class);
         
-        foreach ($this->queue as $item) {
+        foreach ($this->call as $item) {
             if ($item['type'] === self::ALL || $refl->is($item['type'])) {
                 $item['func']($class);
             }

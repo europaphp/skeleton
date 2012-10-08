@@ -13,51 +13,23 @@ namespace Europa\View\Helper;
 class Json
 {
     /**
-     * The PHP view variables to register for JavaScript.
-     * 
-     * @var array
-     */
-    private $vars = array();
-    
-    /**
-     * The namespace to register the variables under.
-     * 
-     * @var string
-     */
-    private $ns = null;
-    
-    /**
-     * Registers variables to be passed from the view to JavaScript.
-     * 
-     * @param array $vars The variables to pass to JavaScript.
-     * @param array $ns   The namespace to use.
-     * 
-     * @return Json
-     */
-    public function __construct(array $vars, $ns = null)
-    {
-        $this->vars = $vars;
-        $this->ns   = $ns;
-    }
-    
-    /**
      * Returns a JSON representation of the specified variables in the specified namespace.
      * 
      * @return string
      */
-    public function __toString()
+    public function compile(array $vars, $ns = null)
     {
         $js = '';
         $ns = 'window';
         
-        if ($this->ns) {
-            foreach (explode('.', $this->ns) as $subNs) {
+        if ($ns) {
+            foreach (explode('.', $ns) as $subNs) {
                 $ns .= '[' . $subNs . ']';
                 $js .= $ns . ' = {};' . PHP_EOL;
             }
         }
         
-        foreach ($this->vars as $name => $value) {
+        foreach ($vars as $name => $value) {
             $js .= $ns . '[' . json_encode($name) . '] = ' . $this->toJson($value) . ';' . PHP_EOL;
         }
         

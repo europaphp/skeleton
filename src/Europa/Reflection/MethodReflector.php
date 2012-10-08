@@ -64,6 +64,16 @@ class MethodReflector extends ReflectionMethod implements Reflectable
     }
 
     /**
+     * Returns whether or not the specified method has a magic name.
+     * 
+     * @return bool
+     */
+    public function isMagic()
+    {
+        return strpos($this->getName(), '__') === 0;
+    }
+
+    /**
      * Returns the visibility of the current method.
      * 
      * @return string

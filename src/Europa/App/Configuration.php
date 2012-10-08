@@ -1,13 +1,13 @@
 <?php
 
-use Europa\App\App;
+namespace Europa\App;
 use Europa\Config\Config;
 use Europa\Controller\ControllerAbstract;
-use Europa\Di\Provider;
-use Europa\Di\Finder;
+use Europa\Di\ConfigurationAbstract;
+use Europa\Di\Locator as DiLocator;
 use Europa\Event\Manager as EventManager;
 use Europa\Filter\ClassNameFilter;
-use Europa\Fs\Locator;
+use Europa\Fs\Locator as FsLocator;
 use Europa\Fs\Loader;
 use Europa\Module\Manager as ModuleManager;
 use Europa\Request;
@@ -29,7 +29,7 @@ use Europa\View\Xml;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Europa extends Provider
+class Configuration extends ConfigurationAbstract
 {
     /**
      * The default configuration.
@@ -47,10 +47,10 @@ class Europa extends Provider
      * @var array
      */
     private $config = [
-        'controllers.filter.configs' => [
+        'controllers' => [
             ['prefix' => 'Controller\\']
         ],
-        'helpers.filter.configs' => [
+        'helpers' => [
             ['prefix' => 'Helper\\'],
             ['prefix' => 'Europa\View\Helper\\']
         ],
@@ -82,14 +82,12 @@ class Europa extends Provider
     {
         $this->config = new Config($this->config, $config);
         
-        if (!$this->config->paths->root = realpath($this->config->paths->root)) {
+        if (!$this->config['paths.root'] = realpath($this->config['paths.root'])) {
             throw new UnexpectedValueException(sprintf(
                 'A valid applicaiton root must be specified in the configuration as "root". The path "%s" is not valid.',
-                $this->config->paths->root
+                $this->config['paths.root']
             ));
         }
-
-        $this->loader->register();
     }
 
     /**
@@ -97,19 +95,9 @@ class Europa extends Provider
      * 
      * @return App
      */
-    public function app()
+    public function app($container)
     {
-        return new App($this);
-    }
-
-    /**
-     * Returns the container configuration.
-     * 
-     * @return Config
-     */
-    public function config()
-    {
-        return $this->config;
+        return new App($container);
     }
 
     /**
@@ -117,19 +105,19 @@ class Europa extends Provider
      * 
      * @return ClosureContainer
      */
-    public function controllers()
+    public function controllers($container)
     {
-        $finder = new Finder;
+        $locator = new DiLocator;
 
-        foreach ($this->config->controllers->filter->configs as $config) {
-            $finder->getFilter()->add(new ClassNameFilter($config->export()));
+        foreach ($this->config['controllers'] as $config) {
+            $locator->getFilter()->add(new ClassNameFilter($config->export()));
         }
         
-        $finder->config('Europa\Controller\ControllerAbstract', function() {
-            return [$this->request];
+        $locator->args('Europa\Controller\ControllerAbstract', function() use ($container) {
+            return [$container->request];
         });
 
-        return $finder;
+        return $locator;
     }
 
     /**
@@ -137,16 +125,16 @@ class Europa extends Provider
      * 
      * @return EventManager
      */
-    public function event()
+    public function event($container)
     {
         $event = new EventManager;
-        $event->bind('render.pre', function($app) {
-            if ($this->view instanceof ViewScriptInterface) {
-                $script = $this->request->isCli() ? $this->config->views->cli : $this->config->views->web;
+        $event->bind('render.pre', function($app) use ($container) {
+            if ($container->view instanceof ViewScriptInterface) {
+                $script = $container->request->isCli() ? $this->config['views.cli'] : $this->config['views.web'];
                 $script = $script . '/' . $app->getController();
                 $script = str_replace(' ', '/', $script);
 
-                $this->view->setScript($script);
+                $container->view->setScript($script);
             }
         });
 
@@ -160,21 +148,21 @@ class Europa extends Provider
      */
     public function helpers()
     {
-        $finder = new Finder;
+        $locator = new DiLocator;
 
-        foreach ($this->config->helpers->filter->configs as $config) {
-            $finder->getFilter()->add(new ClassNameFilter($config->export()));
+        foreach ($this->config['helpers'] as $config) {
+            $locator->getFilter()->add(new ClassNameFilter($config->export()));
         }
 
-        $finder->config('Europa\View\Helper\Lang', function() {
-            return [$this->view, $this->langLocator];
+        $locator->args('Europa\View\Helper\Lang', function() use ($container) {
+            return [$container->view, $container->langLocator];
         });
 
-        $finder->config('Europa\View\Helper\Uri', function() {
+        $locator->call('Europa\View\Helper\Uri', function() use ($container) {
             return [$this->router];
         });
 
-        return $finder;
+        return $locator;
     }
 
     /**
@@ -184,8 +172,8 @@ class Europa extends Provider
      */
     public function langLocator()
     {
-        $locator = new Locator;
-        $locator->setBasePath($this->config->paths->app);
+        $locator = new FsLocator;
+        $locator->setBasePath($this->config['paths.app']);
         return $locator;
     }
 
@@ -194,10 +182,10 @@ class Europa extends Provider
      * 
      * @return Loader
      */
-    public function loader()
+    public function loader($container)
     {
         $loader = new Loader;
-        $loader->setLocator($this->loaderLocator);
+        $loader->setLocator($container->loaderLocator);
         return $loader;
     }
 
@@ -208,8 +196,8 @@ class Europa extends Provider
      */
     public function loaderLocator()
     {
-        $locator = new Locator;
-        $locator->setBasePath($this->config->paths->app);
+        $locator = new FsLocator;
+        $locator->setBasePath($this->config['paths.app']);
         return $locator;
     }
 
@@ -218,9 +206,23 @@ class Europa extends Provider
      * 
      * @return ModuleManager
      */
-    public function modules()
+    public function modules($container)
     {
-        return new ModuleManager($this->config->paths->app);
+        foreach ($this->config['modules.enabled'] as $module) {
+            $map = [
+                'classes' => 'loaderLocator',
+                'langs'   => 'langLocator',
+                'views'   => 'viewLocator'
+            ];
+
+            foreach ($map as $config => $locator) {
+                foreach ($this->config['paths.' . $config] as $path => $suffix) {
+                    $container->$locator->addPath($module . '/' . $path, $suffix);
+                }
+            }
+        }
+
+        return new ModuleManager($this->config['paths.app']);
     }
 
     /**
@@ -228,9 +230,9 @@ class Europa extends Provider
      * 
      * @return RequestInterface
      */
-    public function request()
+    public function request($container)
     {
-        return RequestAbstract::isCli() ? $this->requestCli : $this->requestHttp;
+        return RequestAbstract::isCli() ? $container->requestCli : $container->requestHttp;
     }
 
     /**
@@ -258,9 +260,9 @@ class Europa extends Provider
      * 
      * @return ResponseInterface
      */
-    public function response()
+    public function response($container)
     {
-        return RequestAbstract::isCli() ? $this->responseCli : $this->responseHttp;
+        return RequestAbstract::isCli() ? $container->responseCli : $container->responseHttp;
     }
 
     /**
@@ -288,9 +290,9 @@ class Europa extends Provider
      * 
      * @return Router
      */
-    public function router()
+    public function router($container)
     {
-        return RequestAbstract::isCli() ? $this->routerCli : $this->routerHttp;
+        return RequestAbstract::isCli() ? $container->routerCli : $container->routerHttp;
     }
 
     /**
@@ -322,27 +324,27 @@ class Europa extends Provider
      * 
      * @return RequestInterface
      */
-    public function view()
+    public function view($container)
     {
         // We only negotiate a content type if the request is using Http.
-        if ($this->request instanceof Request\Http) {
-            $method = null;
+        if ($container->request instanceof Request\Http) {
+            $service = null;
 
             // Specifying a suffix overrides the Accept header.
-            if ($suffix = $this->request->getUri()->getSuffix()) {
-                $method = 'view' . ucfirst($suffix);
-            } elseif ($type = $this->request->accepts(array_keys($this->config->view->map->export()))) {
-                $method = 'view' . $this->config->view->map->$type;
+            if ($suffix = $container->request->getUri()->getSuffix()) {
+                $service = 'view' . ucfirst($suffix);
+            } elseif ($type = $container->request->accepts(array_keys($this->config['view.map']->export()))) {
+                $service = 'view' . $this->config['view.map.' . $type];
             }
 
             // Only render a different view if one exists.
-            if ($method && method_exists($this, $method)) {
-                return $this->$method;
+            if ($service && isset($container, $service)) {
+                return $this->$service;
             }
         }
 
         // Default to using a PHP view.
-        return $this->viewPhp;
+        return $container->viewPhp;
     }
 
     /**
@@ -350,11 +352,11 @@ class Europa extends Provider
      * 
      * @return Php
      */
-    public function viewPhp()
+    public function viewPhp($container)
     {
         $view = new Php;
-        $view->setLocator($this->viewLocator);
-        $view->setHelperContainer($this->helpers);
+        $view->setLocator($container->viewLocator);
+        $view->setHelperContainer($container->helpers);
         return $view;
     }
 
@@ -365,8 +367,8 @@ class Europa extends Provider
      */
     public function viewLocator()
     {
-        $locator = new Locator;
-        $locator->setBasePath($this->config->paths->app);
+        $locator = new FsLocator;
+        $locator->setBasePath($this->config['paths.app']);
         return $locator;
     }
 
@@ -375,10 +377,10 @@ class Europa extends Provider
      * 
      * @return Json
      */
-    public function viewJson()
+    public function viewJson($container)
     {
-        if ($this->request->hasParam($this->config->views->jsonp->callback)) {
-            return $this->viewJsonp;
+        if ($container->request->hasParam($this->config['views.jsonp.callback'])) {
+            return $container->viewJsonp;
         }
         return new Json;
     }
@@ -388,9 +390,9 @@ class Europa extends Provider
      * 
      * @return Json
      */
-    public function viewJsonp()
+    public function viewJsonp($container)
     {
-        return new Jsonp($this->request->getParam($this->config->views->jsonp->callback));
+        return new Jsonp($container->request->getParam($this->config['views.jsonp.callback']));
     }
 
     /**

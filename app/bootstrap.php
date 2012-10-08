@@ -1,25 +1,16 @@
 <?php
 
-use Europa\Module\Manager;
+use Europa\App\Configuration;
+use Europa\Di\Container;
 
 require_once __DIR__ . '/../src/Europa/Fs/Loader.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$europa = Europa::main(['paths.root' => __DIR__ . '/..']);
-$europa->modules->register('demo');
+$europa = Container::europa();
+$europa->configure(new Configuration([
+    'modules.enabled' => ['demo'],
+    'paths.root'      => __DIR__ . '/..'
+]));
 
-foreach ($europa->modules as $module) {
-    $map = [
-        'classes' => 'loaderLocator',
-        'langs'   => 'langLocator',
-        'views'   => 'viewLocator'
-    ];
-
-    foreach ($map as $config => $locator) {
-        foreach ($europa->config->paths->$config as $path => $suffix) {
-            $europa->$locator->addPath($module->name() . '/' . $path, $suffix);
-        }
-    }
-}
-
+$europa->loader->register();
 $europa->modules->bootstrap();
