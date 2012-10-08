@@ -55,7 +55,7 @@ class Europa extends Provider
             ['prefix' => 'Europa\View\Helper\\']
         ],
         'paths.app'            => '={root}/app',
-        'paths.root'           => '..',
+        'paths.root'           => '.',
         'paths.classes'        => ['classes'     => 'php'],
         'paths.langs'          => ['langs/en-us' => 'ini'],
         'paths.views'          => ['views'       => 'php'],
@@ -88,6 +88,8 @@ class Europa extends Provider
                 $this->config->paths->root
             ));
         }
+
+        $this->loader->register();
     }
 
     /**
