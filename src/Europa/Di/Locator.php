@@ -148,7 +148,6 @@ class Locator extends Container
         $args  = [];
         
         foreach ($this->args as $type => $fn) {
-            var_dump($type);
             if ($type === self::ALL || $class->is($type)) {
                 $temp = $fn();
                 $temp = is_array($temp) ? $temp : [$temp];

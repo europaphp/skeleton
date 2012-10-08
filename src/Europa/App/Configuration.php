@@ -146,7 +146,7 @@ class Configuration extends ConfigurationAbstract
      * 
      * @return ClosureContainer
      */
-    public function helpers()
+    public function helpers($container)
     {
         $locator = new DiLocator;
 

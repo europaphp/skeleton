@@ -44,6 +44,19 @@ class Container implements ContainerInterface
     private static $instances = [];
 
     /**
+     * Since you can't infer a property and call it at the same time, you have to proxy it via __call().
+     * 
+     * @param string $name The service name.
+     * @param array  $args The service arguments. These are ignored.
+     * 
+     * @return mixed
+     */
+    public function __call($name, array $args = [])
+    {
+        return $this->__get($name);
+    }
+
+    /**
      * Registers a service.
      * 
      * @param string $name The service name.
