@@ -32,18 +32,18 @@ class Locator extends Container
     private $args = [];
     
     /**
-     * The class resolution filter for resolving dependencies.
-     * 
-     * @var ClassResolutionFilter
-     */
-    private $filter;
-    
-    /**
      * Queue.
      * 
      * @var array
      */
     private $call = [];
+
+    /**
+     * The class resolution filter for resolving dependencies.
+     * 
+     * @var ClassResolutionFilter
+     */
+    private $filter;
     
     /**
      * Sets up a new locator.
@@ -61,7 +61,22 @@ class Locator extends Container
             return parent::__get($name);
         }
 
-        return $this->createInstance($this->filter->__invoke($name));
+        if ($this->__isset($name)) {
+            $service = $this->createInstance($this->filter->__invoke($name));;
+
+            if (!$this->isTransient($name)) {
+                parent::__set($name, $service);
+            }
+
+            return $service;
+        }
+
+        $this->throwNotExists($name);
+    }
+
+    public function __isset($name)
+    {
+        return class_exists($this->filter->__invoke($name)) || parent::__isset($name);
     }
 
     /**
@@ -149,13 +164,13 @@ class Locator extends Container
         
         foreach ($this->args as $type => $fn) {
             if ($type === self::ALL || $class->is($type)) {
-                $temp = $fn();
+                $temp = $fn($this);
                 $temp = is_array($temp) ? $temp : [$temp];
                 $args = array_merge($args, $temp);
             }
         }
         
-        return $class->newInstanceArgs($args);
+        return $this->invokeQueue($class->newInstanceArgs($args));
     }
     
     /**
@@ -171,7 +186,7 @@ class Locator extends Container
         
         foreach ($this->call as $item) {
             if ($item['type'] === self::ALL || $refl->is($item['type'])) {
-                $item['func']($class);
+                $item['func']($this, $class);
             }
         }
         

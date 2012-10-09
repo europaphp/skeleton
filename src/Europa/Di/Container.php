@@ -91,19 +91,7 @@ class Container implements ContainerInterface
         if (isset($this->services[$name])) {
             $service = $this->services[$name];
         } else {
-            $message = 'The service "%s" does not exist in "%s"';
-
-            foreach (self::$instances as $other => $instance) {
-                if ($instance->__isset($name)) {
-                    $message .= ', however, a service with the same name exists in "' . $other . '".';
-                }
-            }
-
-            throw new LogicException(sprintf(
-                $message,
-                $name,
-                $this->name() ?: get_class($this) . '::[unknown]()'
-            ));
+            $this->throwNotExists($name);
         }
 
         if (isset($this->transient[$name])) {
@@ -177,12 +165,25 @@ class Container implements ContainerInterface
      * 
      * @return Container
      */
-    public function transient($names)
+    public function transient($name)
     {
-        foreach ((array) $names as $name) {
-            $this->transient[$name] = $name;
+        $this->transient[$name] = $name;
+
+        if (isset($this->cache[$name])) {
+            unset($this->cache[$name]);
         }
+
         return $this;
+    }
+
+    /**
+     * Returns whether or not the specified service is transient.
+     * 
+     * @return bool
+     */
+    public function isTransient($name)
+    {
+        return isset($this->transient[$name]);
     }
 
     /**
@@ -206,5 +207,29 @@ class Container implements ContainerInterface
         } catch (Exception $e) {
             throw new LogicException(sprintf('Could not get the container "%s" from "%s" because: %s', $name, get_called_class(), $e->getMessage()));
         }
+    }
+
+    /**
+     * Throws an exception if the dependency cannot be found.
+     * 
+     * @param string $name The dependency name.
+     * 
+     * @return void
+     */
+    protected function throwNotExists($name)
+    {
+        $message = 'The service "%s" does not exist in "%s"';
+
+        foreach (self::$instances as $other => $instance) {
+            if ($instance->__isset($name)) {
+                $message .= ', however, a service with the same name exists in "' . $other . '".';
+            }
+        }
+
+        throw new LogicException(sprintf(
+            $message,
+            $name,
+            $this->name() ?: get_class($this) . '::[unknown]()'
+        ));
     }
 }

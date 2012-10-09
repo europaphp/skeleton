@@ -22,7 +22,7 @@ class ContainerTest extends UnitAbstract
         }
     }
 
-    public function gettting()
+    public function getting()
     {
         $container        = new Container;
         $container->test1 = new ArrayObject(['test' => true]);
@@ -36,6 +36,8 @@ class ContainerTest extends UnitAbstract
 
     public function gettingUnregistered()
     {
+        $container = new Container;
+
         try {
             $container->unregisteredService;
             $this->assert(false, 'The unregistered service "unregisteredService" should throw an exception if it is not registered.');
@@ -55,5 +57,35 @@ class ContainerTest extends UnitAbstract
         } catch (Exception $e) {
             $this->assert(preg_match('/however/', $e->getMessage()), 'The exception should have notified the user that another container contains a service with the same name.');
         }
+    }
+
+    public function unsetting()
+    {
+        $container = new Container;
+        $container->test = new ArrayObject;
+        $container->test();
+
+        unset($container->test);
+
+        $this->assert(!isset($container->test), 'The test service should have been removed.');
+    }
+
+    public function transient()
+    {
+        $container = new Container;
+        $container->test = function() {
+            return new ArrayObject(['test' => false]);
+        };
+
+        $container->test['test'] = true;
+
+        $container->transient('test');
+
+        $this->assert($container->test['test'] === false, 'The instance should not have been cached.');
+    }
+
+    public function errorConstructingContainer()
+    {
+        
     }
 }
