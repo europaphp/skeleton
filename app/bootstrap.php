@@ -5,8 +5,7 @@ use Europa\Module\Manager;
 require_once __DIR__ . '/../src/Europa/Fs/Loader.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$europa = Europa::main(['paths.root' => __DIR__ . '/..']);
-$europa->loader->register();
+$europa = Europa::main();
 $europa->modules->register('demo');
 
 foreach ($europa->modules as $module) {

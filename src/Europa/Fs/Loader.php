@@ -29,6 +29,13 @@ spl_autoload_register(function($class) {
 class Loader
 {
     /**
+     * Whether or not the loader is registered as an autoloader.
+     * 
+     * @var bool
+     */
+    private $isRegistered = false;
+
+    /**
      * The locator to use for locating class files.
      * 
      * @var LocatorInterface
@@ -116,7 +123,10 @@ class Loader
      */
     public function register($prepend = false)
     {
-        spl_autoload_register(array($this, 'load'), true, $prepend);
+        if (!$this->isRegistered) {
+            spl_autoload_register(array($this, 'load'), true, $prepend);
+            $this->isRegistered = true;
+        }
         return $this;
     }
     
