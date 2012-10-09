@@ -303,7 +303,7 @@ class Configuration extends ConfigurationAbstract
     public function routerCli()
     {
         $router = new Router;
-        $router->setRoute('default', new RegexRoute('(?<controller>.+)', ':controller', ['controller' => 'help']));
+        $router['default'] = new RegexRoute('(?<controller>.+)', ':controller', ['controller' => 'help']);
         return $router;
     }
 
@@ -315,7 +315,7 @@ class Configuration extends ConfigurationAbstract
     public function routerHttp()
     {
         $router = new Router;
-        $router->setRoute('default', new RegexRoute('(?<controller>[^.?]+)?', ':controller', ['controller' => 'index']));
+        $router['default'] = new RegexRoute('(?<controller>[^.?]+)?', ':controller', ['controller' => 'index']);
         return $router;
     }
 

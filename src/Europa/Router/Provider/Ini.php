@@ -16,6 +16,13 @@ use InvalidArgumentException;
 class Ini implements ProviderInterface
 {
     /**
+     * The factory used to create a route instance.
+     * 
+     * @var mixed
+     */
+    private $factory;
+
+    /**
      * The Ini file path.
      * 
      * @var string
@@ -39,14 +46,11 @@ class Ini implements ProviderInterface
     public function __construct($file)
     {
         if (!is_file($file)) {
-            throw new InvalidArgumentException(sprintf(
-                'The file "%s" is not a valid routes file.',
-                $file
-            ));
+            throw new InvalidArgumentException(sprintf('The file "%s" is not a valid routes file.', $file));
         }
         
-        $this->file         = $file;
-        $this->routeFactory = function($name, $value) {
+        $this->file    = $file;
+        $this->factory = function($name, $value) {
             return new TokenRoute($value, ['controller' => $name]);
         };
     }
@@ -58,13 +62,13 @@ class Ini implements ProviderInterface
      * 
      * @return Ini
      */
-    public function setRouteFactory($cb)
+    public function setFactory($cb)
     {
         if (!is_callable($cb)) {
             throw new InvalidArgumentException('The given route factory is not callable.');
         }
         
-        $this->routeFactory = $cb;
+        $this->factory = $cb;
         
         return $this;
     }
@@ -74,9 +78,9 @@ class Ini implements ProviderInterface
      * 
      * @return mixed
      */
-    public function getRouteFactory()
+    public function getFactory()
     {
-        return $this->routeFactory;
+        return $this->factory;
     }
     
     /**
@@ -89,6 +93,7 @@ class Ini implements ProviderInterface
         if (!$this->routes) {
             $this->parse();
         }
+        
         return new ArrayIterator($this->routes);
     }
     
@@ -100,7 +105,7 @@ class Ini implements ProviderInterface
     private function parse()
     {
         foreach (parse_ini_file($this->file) as $name => $value) {
-            $this->routes[$name] = call_user_func($this->routeFactory, $name, $value);
+            $this->routes[$name] = call_user_func($this->factory, $name, $value);
         }
     }
 }

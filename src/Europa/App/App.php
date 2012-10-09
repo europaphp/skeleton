@@ -180,7 +180,7 @@ class App implements AppInterface
         $this->container->event->trigger(self::EVENT_ROUTE_PRE, [$this]);
         
         if ($this->container->router) {
-            $this->container->router->route($this->container->request);
+            $this->container->request->setParams(call_user_func($this->container->router, $this->container->request));
         }
         
         $this->container->event->trigger(self::EVENT_ROUTE_POST, [$this]);

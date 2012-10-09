@@ -1,9 +1,9 @@
 <?php
 
 namespace Europa\Router;
-use Closure;
-use Europa\Request\RequestInterface;
-use InvalidArgumentException;
+use ArrayAccess;
+use ArrayIterator;
+use IteratorAggregate;
 use LogicException;
 
 /**
@@ -14,15 +14,8 @@ use LogicException;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Router implements RouterInterface
+class Router implements ArrayAccess, IteratorAggregate
 {
-    /**
-     * Sets the filter the router should use.
-     * 
-     * @var Closure
-     */
-    private $filter;
-    
     /**
      * The array of routes to match.
      * 
@@ -37,46 +30,17 @@ class Router implements RouterInterface
      * 
      * @return bool
      */
-    public function route(RequestInterface $request)
+    public function __invoke($query)
     {
         foreach ($this->routes as $route) {
-            if ($result = $route->query($this->filterRequest($request))) {
-                $request->setParams($result);
-                return true;
+            $result = call_user_func($route, $query);
+
+            if ($result !== false) {
+                return $result;
             }
         }
+
         return false;
-    }
-    
-    /**
-     * Reverse engineers the specified route.
-     * 
-     * @param string $name   The name of the route to reverse engineer.
-     * @param array  $params The parameters to use when reverse engineering the route.
-     * 
-     * @return string
-     */
-    public function format($name, array $params = array())
-    {
-        return $this->getRoute($name)->format($params);
-    }
-    
-    /**
-     * Sets a filter used to turn the request into a matchable string.
-     * 
-     * @param mixed $filter The filter.
-     * 
-     * @return Route
-     */
-    public function filter($filter)
-    {
-        if (!is_callable($filter)) {
-            throw new InvalidArgumentException('The filter supplied to the router is not callable.');
-        }
-        
-        $this->filter = $filter;
-        
-        return $this;
     }
 
     /**
@@ -87,9 +51,14 @@ class Router implements RouterInterface
      * 
      * @return Router
      */
-    public function setRoute($name, RouteInterface $route)
+    public function offsetSet($name, $route)
     {
+        if (!is_callable($route)) {
+            throw new LogicException(sprintf('The route "%s" is not callable.', $name));
+        }
+
         $this->routes[$name] = $route;
+
         return $this;
     }
     
@@ -100,11 +69,12 @@ class Router implements RouterInterface
      * 
      * @return RouteInterface | null
      */
-    public function getRoute($name)
+    public function offsetGet($name)
     {
         if (isset($this->routes[$name])) {
             return $this->routes[$name];
         }
+
         throw new LogicException(sprintf('Cannot get route "%s" because it does not exist.', $name));
     }
     
@@ -115,7 +85,7 @@ class Router implements RouterInterface
      * 
      * @return bool
      */
-    public function hasRoute($name)
+    public function offsetExists($name)
     {
         return isset($this->routes[$name]);
     }
@@ -127,58 +97,22 @@ class Router implements RouterInterface
      * 
      * @return Router
      */
-    public function removeRoute($name)
+    public function offsetUnset($name)
     {
         if (isset($this->routes[$name])) {
             unset($this->routes[$name]);
-            return $this;
         }
-        throw new LogicException(sprintf('Cannot remove route "%s" because it does not exist.', $name));
-    }
-    
-    /**
-     * Sets an array or object of routes.
-     * 
-     * @param mixed $routes The routes to set.
-     * 
-     * @return Router
-     */
-    public function setRoutes($routes)
-    {
-        if (!is_array($routes) && !is_object($routes)) {
-            throw new InvalidArgumentException('The routes must either be an array or object.');
-        }
-        
-        foreach ($routes as $name => $route) {
-            $this->setRoute($name, $route);
-        }
-        
+
         return $this;
     }
-    
+
     /**
-     * Removes all routes.
+     * Returns the iterator.
      * 
-     * @return Router
+     * @return ArrayIterator
      */
-    public function removeRoutes()
+    public function getIterator()
     {
-        $this->routes = [];
-        return $this;
-    }
-    
-    /**
-     * Filters the request.
-     * 
-     * @param RequestInterface $request The request to filter.
-     * 
-     * @return string
-     */
-    private function filterRequest(RequestInterface $request)
-    {
-        if ($this->filter) {
-            return call_user_func($this->filter, $request);
-        }
-        return $request->__toString();
+        return new ArrayIterator($this->routes);
     }
 }

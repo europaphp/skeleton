@@ -10,7 +10,7 @@ namespace Europa\Router;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class TokenRoute implements RouteInterface
+class TokenRoute
 {
     /**
      * The regex route.
@@ -29,11 +29,7 @@ class TokenRoute implements RouteInterface
      */
     public function __construct($expression, array $defaults = [])
     {
-        $this->regex = new RegexRoute(
-            $this->parse($expression),
-            $expression,
-            $defaults
-        );
+        $this->regex = new RegexRoute($this->parse($expression), $expression, $defaults);
     }
     
     /**
@@ -43,23 +39,9 @@ class TokenRoute implements RouteInterface
      * 
      * @return array | false
      */
-    public function query($query)
+    public function __invoke($query)
     {
-        return $this->regex->query($query);
-    }
-    
-    /**
-     * Provides a way to reverse engineer the route using named parameters.
-     * 
-     * @param array $params The parameters to format the route with.
-     * 
-     * @return string
-     */
-    public function format(array $params = array())
-    {
-        $format = $this->regex->format($params);
-        $format = str_replace('.*', '', $format);
-        return $format;
+        return $this->regex->__invoke($query);
     }
     
     /**

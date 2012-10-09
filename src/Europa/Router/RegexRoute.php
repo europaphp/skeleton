@@ -10,7 +10,7 @@ namespace Europa\Router;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class RegexRoute implements RouteInterface
+class RegexRoute
 {
     /**
      * The result that is returned if the route is matched.
@@ -57,32 +57,16 @@ class RegexRoute implements RouteInterface
      * 
      * @return array | false
      */
-    public function query($query)
+    public function __invoke($query)
     {
-        if (preg_match('#' . $this->expression . '#', $query, $matches)) {
+        if (preg_match('#' . $this->expression . '#', (string) $query, $matches)) {
             return array_merge($this->defaults, array_filter($matches, function() use (&$matches) {
                 $val = key($matches);
                 next($matches);
                 return !is_numeric($val);
             }));
         }
+        
         return false;
-    }
-    
-    /**
-     * Provides a way to reverse engineer the route using named parameters.
-     * 
-     * @param array $params The parameters to format the route with.
-     * 
-     * @return string
-     */
-    public function format(array $params = array())
-    {
-        $parsed = $this->reverse;
-        $params = array_merge($this->defaults, $params);
-        foreach (array_merge($this->defaults, $params) as $name => $value) {
-            $parsed = str_replace(':' . $name, $value, $parsed);
-        }
-        return $parsed;
     }
 }
