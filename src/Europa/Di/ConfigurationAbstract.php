@@ -1,24 +1,40 @@
 <?php
 
 namespace Europa\Di;
+use ArrayIterator;
 use Europa\Reflection\ClassReflector;
+use IteratorAggregate;
 
-abstract class ConfigurationAbstract implements ConfigurationInterface
+abstract class ConfigurationAbstract implements ConfigurationInterface, IteratorAggregate
 {
+    private $methods;
+
     public function configure(ContainerInterface $container)
     {
-        $class = new ClassReflector($this);
+        foreach ($this as $method) {
+            $container->__set($method, function() use ($method) {
+                return call_user_func_array([$this, $method], func_get_args());
+            });
+        }
+    }
+
+    public function getIterator()
+    {
+        if ($this->methods) {
+            return $this->methods;
+        }
+
+        $class         = new ClassReflector($this);
+        $this->methods = new ArrayIterator;
 
         foreach ($class->getMethods() as $method) {
-            if ($method->isInherited()) {
+            if ($method->isInherited() || $method->isMagic()) {
                 continue;
             }
 
-            $name = $method->getName();
-            
-            $container->__set($name, function() use ($name) {
-                return call_user_func_array([$this, $name], func_get_args());
-            });
+            $this->methods[] = $method->getName();
         }
+
+        return $this->methods;
     }
 }

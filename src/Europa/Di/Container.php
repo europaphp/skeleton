@@ -67,7 +67,7 @@ class Container implements ContainerInterface
     public function __set($name, $value)
     {
         if (!is_callable($value)) {
-            $value = function() {
+            $value = function() use ($value) {
                 return $value;
             };
         }
