@@ -329,8 +329,8 @@ class Europa extends Provider
             // Specifying a suffix overrides the Accept header.
             if ($suffix = $this->request->getUri()->getSuffix()) {
                 $method = 'view' . ucfirst($suffix);
-            } elseif ($type = $this->request->accepts(array_keys($this->config->view->map->export()))) {
-                $method = 'view' . $this->config->view->map->$type;
+            } elseif ($type = $this->request->accepts(array_keys($this->config->views->map->export()))) {
+                $method = 'view' . $this->config->views->map->$type;
             }
 
             // Only render a different view if one exists.
