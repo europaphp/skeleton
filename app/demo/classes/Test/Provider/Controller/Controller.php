@@ -3,14 +3,24 @@
 namespace Test\Provider\Controller;
 use Europa\Controller\RestController;
 
-class TestNamedParamController extends RestController
+/**
+ * @filter Test\Provider\Controller\ClassFilter Args
+ */
+class Controller extends RestController
 {
     public $id;
     
     public $name;
     
     public $notRequired;
+
+    public $classFilter;
+
+    public $methodFilter;
     
+    /**
+     * @filter Test\Provider\Controller\MethodFilter Args
+     */
     public function get($id, $name, $notRequired = true)
     {
         $this->id          = $id;

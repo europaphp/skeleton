@@ -15,15 +15,86 @@ use Europa\Reflection\DocTag;
 class FilterTag extends GenericTag
 {
     /**
-     * Returns an instance of the filter.
+     * The filter class name.
      * 
-     * @param array $args The arguments, if any, to pass to the filter's constructor.
-     * 
-     * @return Europa\Controller\FilterInterface
+     * @var string
      */
-    public function getInstance(array $args = array())
+    private $class;
+
+    /**
+     * The argument string.
+     * 
+     * @var string
+     */
+    private $args;
+
+    /**
+     * Sets the class for the filter.
+     * 
+     * @param string $class The filter class.
+     * 
+     * @return FilterTag
+     */
+    public function setClass($class)
     {
-        $reflector = new ClassReflector($this->value());
-        return $reflector->newInstance();
+        $this->class = trim($class);
+        return $this;
+    }
+
+    /**
+     * Returns the filter class.
+     * 
+     * @return string
+     */
+    public function getClass()
+    {
+        return $this->class;
+    }
+
+    /**
+     * Sets the argument string.
+     * 
+     * @param string $args The argument string.
+     * 
+     * @return FilterTag
+     */
+    public function setArgumentString($args)
+    {
+        $this->args = trim($args);
+        return $this;
+    }
+
+    /**
+     * Returns the argument string.
+     * 
+     * @return string
+     */
+    public function getArgumentString()
+    {
+        return $this->args;
+    }
+
+    /**
+     * Parse the tag value.
+     * 
+     * @param string $value The tag value.
+     * 
+     * @return void
+     */
+    public function parseValue($value)
+    {
+        $parts = explode(' ', $value, 2);
+        $this->setClass($parts[0]);
+        $this->setArgumentString($parts[1]);
+    }
+
+    /**
+     * Compiles the tag value.
+     * 
+     * @return string
+     */
+    public function compileValue()
+    {
+        return $this->class . ' ' . $this->args;
     }
 }

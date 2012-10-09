@@ -14,7 +14,7 @@ use LogicException;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class ControllerAbstract implements ControllerInterface
+abstract class ControllerAbstract
 {
     /**
      * The request used to dispatch to this controller.
@@ -50,6 +50,30 @@ abstract class ControllerAbstract implements ControllerInterface
     }
 
     /**
+     * Actions the controller
+     * 
+     * @return mixed
+     */
+    public function __invoke()
+    {
+        // The method to execute.
+        $method = $this->getActionMethod();
+
+        // Ensure the method exists.
+        if (!method_exists($this, $method)) {
+            throw new LogicException(sprintf('Method "%s" is not supported.', $method));
+        }
+
+        // Apply all detected filters to the specified method.
+        $this->applyFiltersTo($method);
+
+        // The return value of the action is the view context.
+        $result = $this->executeMethod($method, $this->request->getParams());
+
+        return $result;
+    }
+
+    /**
      * Returns the request being used.
      * 
      * @return RequestInterface
@@ -73,27 +97,6 @@ abstract class ControllerAbstract implements ControllerInterface
     }
 
     /**
-     * Executes the controller's action. Both preAction and postAction hooks are invoked. If filtering is enabled and
-     * any are applied to the action, they are applied before the preAction hook.
-     * 
-     * @return mixed
-     */
-    public function action()
-    {
-        // the method to execute
-        $method = $this->getActionMethod();
-
-        // apply all detected filters to the specified method
-        $this->applyFiltersTo($method);
-
-        // the return value of the action is the view context
-        $result = $this->executeMethod($method, $this->request->getParams());
-
-        // chainable
-        return $result;
-    }
-
-    /**
      * Applies filters to the specified method.
      * 
      * @param string $method The method to apply the filters to.
@@ -110,8 +113,14 @@ abstract class ControllerAbstract implements ControllerInterface
         $method = (new MethodReflector($this, $method))->getDocBlock()->getTags('filter');
 
         foreach (array_merge($class, $method) as $filter) {
-            $filter = $filter->getInstance();
-            $filter->filter($this);
+            $class = $filter->getClass();
+
+            if (!class_exists($class)) {
+                throw new LogicException(sprintf('The filter "%s" for controller "%s" does not exist.', $class, get_class($this)));
+            }
+
+            $class = new $class;
+            $class->__invoke($filter->getArgumentString(), $this);
         }
 
         return $this;
@@ -127,17 +136,8 @@ abstract class ControllerAbstract implements ControllerInterface
      */
     private function executeMethod($method, array $params = array())
     {
-        // attempt to call the action
-        if (method_exists($this, $method)) {
-            $reflector = new MethodReflector($this, $method);
-            return $reflector->invokeArgs($this, $params);
-        }
+        $reflector = new MethodReflector($this, $method);
 
-        // attempt to catch with __call
-        if (method_exists($this, '__call')) {
-            return $this->__call($method, $params);
-        }
-
-        throw new LogicException(sprintf('Method "%s" is not supported and was not trapped in "__call()".', $method));
+        return $reflector->invokeArgs($this, $params);
     }
 }

@@ -45,17 +45,8 @@ abstract class RestController extends ControllerAbstract
     {
         $method = $this->request()->getMethod();
         
-        // check for method, fallback to "all"
-        if (!method_exists($this, $method)) {
+        if (!method_exists($this, $method) && method_exists($this, self::ALL)) {
             $method = self::ALL;
-        }
-        
-        // check for "all", throw exception if not specified
-        if (!method_exists($this, $method)) {
-            throw new LogicException(sprintf(
-                'If not using a specific request method in your RestController, you must specify a method named "%s".',
-                self::ALL
-            ));
         }
         
         return $method;

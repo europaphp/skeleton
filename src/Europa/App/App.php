@@ -252,7 +252,7 @@ class App implements AppInterface
      */
     private function callController()
     {
-        return $this->resolveController()->action();
+        return call_user_func($this->resolveController());
     }
     
     /**

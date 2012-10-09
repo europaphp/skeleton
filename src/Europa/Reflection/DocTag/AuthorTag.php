@@ -4,20 +4,20 @@ namespace Europa\Reflection\DocTag;
 use UnexpectedValueException;
 
 /**
-* Represents a docblock author tag.
-*
-* @category Reflection
-* @package  Europa
-* @author   Trey Shugart <treshugart@gmail.com>
-* @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
-*/
+ * Represents a docblock author tag.
+ *
+ * @category Reflection
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
+ */
 class AuthorTag extends GenericTag
 {
     /**
-    * Name author's name.
-    * 
-    * @var string
-    */
+     * Name author's name.
+     * 
+     * @var string
+     */
     private $name;
     
     /**
@@ -28,12 +28,12 @@ class AuthorTag extends GenericTag
     private $email;
     
     /**
-    * Set the name of the author
-    * 
-    * @param string $name Name of the author
-    * 
-    * @return void
-    */
+     * Set the name of the author
+     * 
+     * @param string $name Name of the author
+     * 
+     * @return void
+     */
     public function setName($name)
     {
         $this->name = $name;
@@ -41,10 +41,10 @@ class AuthorTag extends GenericTag
     }
     
     /**
-    * Return the name of the author
-    * 
-    * @return string
-    */
+     * Return the name of the author
+     * 
+     * @return string
+     */
     public function getName()
     {
         return $this->name;
@@ -74,12 +74,12 @@ class AuthorTag extends GenericTag
     }
     
     /**
-    * Parse the author tag
-    * 
-    * @param string Author tag
-    * 
-    * @return void
-    */
+     * Parse the tag value.
+     * 
+     * @param string $value The tag value.
+     * 
+     * @return void
+     */
     public function parseValue($value)
     {
         // split in to tag/author name parts
