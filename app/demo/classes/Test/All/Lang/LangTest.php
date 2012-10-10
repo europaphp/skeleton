@@ -12,8 +12,8 @@ class LangTest extends UnitAbstract
     {
         $lang = new Lang;
         $lang->setting = 'some set value';
-        $lang->add(['added1' => 'added value 1', 'added2' => 'added value 2']);
-        $lang->addAdapter(new Ini(__DIR__ . '/../../Provider/Lang/test.ini'));
+        $lang->import(['added1' => 'added value 1', 'added2' => 'added value 2']);
+        $lang->import(new Ini(__DIR__ . '/../../Provider/Lang/test.ini'));
 
         $this->assert($lang->getting === 'some value', 'Value should have been returned.');
         $this->assert($lang->calling1('value') === 'some value', 'Value should have been formatted using positional args.');
@@ -37,16 +37,6 @@ class LangTest extends UnitAbstract
         try {
             new Ini('somebadfile');
             $this->assert(false, 'Exception should have been thrown for bad ini file.');
-        } catch (Exception $e) {}
-    }
-
-    public function badIniAdapter()
-    {
-        $lang = new Lang;
-
-        try {
-            $lang->addAdapter('somebadadpater');
-            $this->assert(false, 'An exception should have been thrown for the non-callable adapter.');
         } catch (Exception $e) {}
     }
 

@@ -109,6 +109,10 @@ class Config implements ConfigInterface
     {
         $this->checkReadonly();
 
+        if (is_callable($config)) {
+            $config = call_user_func($config);
+        }
+
         if (is_array($config) || is_object($config)) {
             foreach ($config as $name => $value) {
                 $this->offsetSet($name, $value);

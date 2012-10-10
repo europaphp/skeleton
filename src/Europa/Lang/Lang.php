@@ -88,17 +88,23 @@ class Lang implements LangInterface
         return new ArrayIterator($this->vars);
     }
 
-    public function add(array $vars)
+    public function import($vars)
     {
-        $this->vars = array_merge($this->vars, $vars);
+        if (is_callable($vars)) {
+            $vars = call_user_func($vars);
+        }
+
+        if (is_array($vars) || is_object($vars)) {
+            foreach ($vars as $name => $value) {
+                $this->vars[$name] = $value;
+            }
+        }
+
         return $this;
     }
 
-    public function addAdapter($vars)
+    public function export()
     {
-        if (!is_callable($vars)) {
-            throw new InvalidArgumentException('The specified language adapter is not callable.');
-        }
-        return $this->add($vars());
+        return $this->vars;
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 namespace Test\All\Config;
+use Europa\Config\Adapter\Ini;
 use Europa\Config\Config;
 use Exception;
 use Testes\Test\UnitAbstract;
@@ -77,9 +78,7 @@ class ConfigTest extends UnitAbstract
         try {
             $config->test = true;
             $this->assert(false, 'Exception should have been thrown indicating that the configuration is read only.');
-        } catch (Exception $e) {
-
-        }
+        } catch (Exception $e) {}
 
         $config->readonly(false);
 
@@ -98,9 +97,7 @@ class ConfigTest extends UnitAbstract
         try {
             $config['some.nested.value.shoudnotgethere'];
             $this->assert(false, 'Option "some.nested.value" should not return an object when accessing "some.nested.value.shouldnotgethere".');
-        } catch (Exception $e) {
-
-        }
+        } catch (Exception $e) {}
     }
 
     public function references()
@@ -111,5 +108,22 @@ class ConfigTest extends UnitAbstract
         ]);
 
         $this->assert($config->referencer === 'referencing:somevalue', 'Option "referencee" was not referenced within "referencer".');
+    }
+
+    public function adapter()
+    {
+        $config = new Config;
+        $config->import(new Ini(__DIR__ . '/../../Provider/Config/test.ini'));
+
+        $this->assert($config->values->value1, 'First value should have been parsed.');
+        $this->assert($config['values.value2'], 'Second value should have been parse.d');
+    }
+
+    public function badIniFile()
+    {
+        try {
+            new Ini('somebadfile');
+            $this->assert(false, 'Exception should have been thrown for bad ini file.');
+        } catch (Exception $e) {}
     }
 }
