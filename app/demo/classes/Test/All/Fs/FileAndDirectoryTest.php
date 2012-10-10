@@ -52,14 +52,12 @@ class FileAndDirectoryTest extends UnitAbstract
             $file = Directory::create($this->getTestDir());
         } catch (Exception $e) {
             $this->assert(false, "The directory could not be created with message: {$e->getMessage()}.");
-            return;
         }
         
         try {
             $file = Directory::open($file->getPathname());
         } catch (Exception $e) {
             $this->assert(false, "The directory could not be opened with message: {$e->getMessage()}.");
-            return;
         }
         
         try {
