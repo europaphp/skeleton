@@ -2,12 +2,21 @@
 
 namespace Europa\App;
 use LogicException;
+use Europa\Config\Config;
 use Europa\Di\ContainerInterface;
+use Europa\Di\Locator;
+use Europa\Event\Manager;
+use Europa\Filter\ClassNameFilter;
+use Europa\Request\Cli as CliRequest;
+use Europa\Request\Http as HttpRequest;
 use Europa\Request\RequestInterface;
+use Europa\Request\RequestAbstract;
+use Europa\Response\Cli as CliResponse;
+use Europa\Response\Http as HttpResponse;
 use Europa\Response\ResponseInterface;
+use Europa\Router\Router;
 use Europa\Router\RouterInterface;
-use Europa\View\ViewInterface;
-use Europa\View\ViewScriptInterface;
+use Europa\View\Negotiator;
 use Exception;
 use RuntimeException;
 use UnexpectedValueException;
@@ -20,154 +29,140 @@ use UnexpectedValueException;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  http://europaphp.org/license
  */
-class App implements AppInterface
+class App
 {
-    /**
-     * The default controller key name.
-     * 
-     * @var string
-     */
-    const KEY = 'controller';
+    private $config = [
+        'controller.param'   => 'controller',
+        'controller.prefix'  => 'Controller\\',
+        'controller.suffix'  => '',
+        'events.action.pre'  => 'action.pre',
+        'events.action.post' => 'action.post',
+        'events.render.pre'  => 'render.pre',
+        'events.render.post' => 'render.post',
+        'events.route.pre'   => 'route.pre',
+        'events.route.post'  => 'route.post',
+        'events.send.pre'    => 'send.pre',
+        'events.send.post'   => 'send.post'
+    ];
 
-    /**
-     * Event that gets called before routing.
-     * 
-     * @var string
-     */
-    const EVENT_ROUTE_PRE = 'route.pre';
+    private $controllerLocator;
 
-    /**
-     * Event that gets called after routing.
-     * 
-     * @var string
-     */
-    const EVENT_ROUTE_POST = 'route.post';
+    private $event;
 
-    /**
-     * Event that gets called before actioning.
-     * 
-     * @var string
-     */
-    const EVENT_ACTION_PRE = 'action.pre';
+    private $request;
 
-    /**
-     * Event that gets called after actioning.
-     * 
-     * @var string
-     */
-    const EVENT_ACTION_POST = 'action.post';
+    private $response;
 
-    /**
-     * Event that gets called before rendering.
-     * 
-     * @var string
-     */
-    const EVENT_RENDER_PRE = 'render.pre';
+    private $router;
 
-    /**
-     * Event that gets called after rendering.
-     * 
-     * @var string
-     */
-    const EVENT_RENDER_POST = 'render.post';
-
-    /**
-     * Event that gets called before sending.
-     * 
-     * @var string
-     */
-    const EVENT_SEND_PRE = 'send.pre';
-
-    /**
-     * Event that gets called after sending.
-     * 
-     * @var string
-     */
-    const EVENT_SEND_POST = 'send.post';
-    
-    /**
-     * The controller key name in the context returned from the router.
-     * 
-     * @var string
-     */
-    private $key = self::KEY;
+    private $viewNegotiator;
     
     /**
      * Constructs a new application.
      * 
-     * @param ContainerInterface $container The container that has all of the required dependencies to run the app.
+     * @param mixed $config The configuration.
      * 
      * @return App
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct($config = [])
     {
-        $this->container = $container;
+        $this->config            = new Config($this->config, $config);
+        $this->controllerLocator = new Locator;
+        $this->event             = new Manager;
+        $this->request           = RequestAbstract::isCli() ? new CliRequest : new HttpRequest;
+        $this->response          = RequestAbstract::isCli() ? new CliResponse : new HttpResponse;
+        $this->router            = new Router;
+        $this->viewNegotiator    = new Negotiator($this->request);
+
+        $this->controllerLocator->getFilter()->add(new ClassNameFilter($this->config->controller));
     }
 
-    /**
-     * Returns the application container.
-     * 
-     * @return ContainerInterface
-     */
-    public function container()
-    {
-        return $this->container;
-    }
-    
-    /**
-     * Directly sets which controller to use on the request.
-     * 
-     * @param string $controller The controller name.
-     * 
-     * @return App
-     */
-    public function setController($controller)
-    {
-        $this->container->request->setParam($this->key, $controller);
-        return $this;
-    }
-    
-    /**
-     * Returns the name of the controller from the request.
-     * 
-     * @return string
-     */
-    public function getController()
-    {
-        return $this->container->request->getParam($this->key);
-    }
-    
-    /**
-     * Sets the controller key name in the context returned from the router.
-     * 
-     * @param string $key The controller key.
-     * 
-     * @return App
-     */
-    public function setKey($key)
-    {
-        $this->key = $key;
-        return $this;
-    }
-    
-    /**
-     * Sets the key.
-     * 
-     * @return string
-     */
-    public function getKey()
-    {
-        return $this->key;
-    }
-    
     /**
      * Runs the application.
      * 
      * @return App
      */
-    public function run()
+    public function __invoke()
     {
-        return $this->runRouter()->runResponse($this->runView($this->runController()));
+        $this->runRouter()->runResponse($this->runView($this->runController()));
+        return $this;
+    }
+
+    public function setConfig(ConfigInterface $config)
+    {
+        $this->config = $config;
+        return $this;
+    }
+
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    public function setControllerLocator(callable $controllerLocator)
+    {
+        $this->controllerLocator = $controllerLocator;
+        return $this;
+    }
+
+    public function getControllerLocator()
+    {
+        return $this->controllerLocator;
+    }
+
+    public function setEvent(ManagerInterface $event)
+    {
+        $this->event = $event;
+        return $this;
+    }
+
+    public function getEvent()
+    {
+        return $this->event;
+    }
+
+    public function setRequest(RequestInterface $request)
+    {
+        $this->request = $request;
+        return $this;
+    }
+
+    public function getRequest()
+    {
+        return $this->request;
+    }
+
+    public function setResponse(ResponseInterface $response)
+    {
+        $this->response = $response;
+        return $this;
+    }
+
+    public function getResponse()
+    {
+        return $this->response;
+    }
+
+    public function setRouter(callable $router)
+    {
+        $this->router = $router;
+        return $this;
+    }
+
+    public function getRouter()
+    {
+        return $this->router;
+    }
+
+    public function setViewNegotiator(callable $viewNegotiator)
+    {
+        $this->viewNegotiator = $viewNegotiator;
+        return $this;
+    }
+
+    public function getViewNegotiator()
+    {
+        return $this->viewNegotiator;
     }
     
     /**
@@ -176,33 +171,40 @@ class App implements AppInterface
      * @return App
      */
     private function runRouter()
-    {    
-        $this->container->event->trigger(self::EVENT_ROUTE_PRE, [$this]);
-        
-        if ($this->container->router) {
-            $this->container->request->setParams(call_user_func($this->container->router, $this->container->request));
+    {
+        $this->event->trigger($this->config->events->route->pre, [$this]);
+
+        if ($this->router) {
+            call_user_func($this->router, $this->request);
         }
         
-        $this->container->event->trigger(self::EVENT_ROUTE_POST, [$this]);
-        
+        $this->event->trigger($this->config->events->route->post, [$this, $context]);
+
         return $this;
     }
-    
+
     /**
-     * Actions the controller.
+     * Runs the controller.
      * 
      * @return array
      */
-    private function runController()
-    {    
-        $this->container->event->trigger(self::EVENT_ACTION_PRE, [$this]);
+    public function runController()
+    {
+        $this->event->trigger($this->config->events->action->pre, [$this]);
         
-        $context = $this->callController();
-        $context = $this->ensureContextArray($context);
-        
-        $this->container->event->trigger(self::EVENT_ACTION_POST, [$this, $context]);
-        
-        return $context;
+        $controller = $this->request->getParam($this->config->controller->param);
+
+        try {
+            $controller = call_user_func($this->controllerLocator, $controller);
+        } catch (Exception $e) {
+            throw new RuntimeException(sprintf('The controller "%s" could not be found in the supplied service locator.', $controller));
+        }
+
+        $controller = call_user_func($controller, $this->request->getParams());
+
+        $this->event->trigger($this->config->events->action->post, [$this, $controller]);
+
+        return $controller ?: [];
     }
     
     /**
@@ -214,15 +216,13 @@ class App implements AppInterface
      */
     private function runView(array $context)
     {
-        $rendered = null;
+        $view = call_user_func($this->viewNegotiator, $this->request);
         
-        $this->container->event->trigger(self::EVENT_RENDER_PRE, [$this, $context]);
+        $this->event->trigger($this->config->events->render->pre, [$this, $view]);
         
-        if ($this->container->view) {
-            $rendered = $this->container->response->setBody($this->container->view->render($context));
-        }
+        $rendered = $view->render($context);
         
-        $this->container->event->trigger(self::EVENT_RENDER_POST, [$this, $rendered]);
+        $this->event->trigger($this->config->events->render->post, [$this, $rendered]);
         
         return $rendered;
     }
@@ -236,70 +236,12 @@ class App implements AppInterface
      */
     private function runResponse($rendered)
     {
-        $this->container->event->trigger(self::EVENT_SEND_PRE, [$this, $rendered]);
+        $this->event->trigger($this->config->events->send->pre, [$this, $rendered]);
         
-        $this->container->response->send();
+        $this->response->setBody($rendered)->send();
         
-        $this->container->event->trigger(self::EVENT_SEND_POST, [$this, $rendered]);
+        $this->event->trigger($this->config->events->send->post, [$this, $rendered]);
         
         return $this;
-    }
-    
-    /**
-     * Calls the controller that was routed to.
-     * 
-     * @return array
-     */
-    private function callController()
-    {
-        return call_user_func($this->resolveController());
-    }
-    
-    /**
-     * Resolves the controller using the specified request.
-     * 
-     * @return array
-     */
-    private function resolveController()
-    {
-        if ($controller = $this->getController()) {
-            try {
-                return $this->container->controllers->$controller;
-            } catch (Exception $e) {
-                throw new RuntimeException(sprintf(
-                    'The controller "%s" could not be found in the container "%s".',
-                    $controller,
-                    get_class($this->container->controllers)
-                ));
-            }
-        }
-        
-        throw new LogicException(sprintf(
-            'The controller parameter "%s" was not found in the request "%s".',
-            $this->key,
-            (string) $this->container->request
-        ));
-    }
-    
-    /**
-     * Ensures an array from the context returned from the controller.
-     * 
-     * @param mixed $context The context returned from the controller.
-     * 
-     * @return array
-     */
-    private function ensureContextArray($context)
-    {
-        // ensure array
-        if (!$context) {
-            $context = [];
-        }
-        
-        // enforce array
-        if (!is_array($context)) {
-            throw new UnexpectedValueException('Controller actions must return an array.');
-        }
-        
-        return $context;
     }
 }

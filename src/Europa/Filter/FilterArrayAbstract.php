@@ -25,18 +25,13 @@ abstract class FilterArrayAbstract implements IteratorAggregate
     /**
      * Adds a filter.
      * 
-     * @param FilterInterface $filter The filter to add.
+     * @param callable $filter The filter to add.
      * 
      * @return FilterArrayAbstract
      */
-    public function add($filter)
+    public function add(callable $filter)
     {
-        if (!is_callable($filter)) {
-            throw new UnexpectedValueException('The specified filter is not callable.');
-        }
-
         $this->filters[] = $filter;
-
         return $this;
     }
 

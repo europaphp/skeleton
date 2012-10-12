@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Reflection;
+use ReflectionProperty;
 
 /**
  * Extends the base reflection class to provide further functionality such as named
@@ -11,7 +12,7 @@ namespace Europa\Reflection;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class PropertyReflector extends \ReflectionProperty implements Reflectable
+class PropertyReflector extends ReflectionProperty implements ReflectorInterface
 {
     /**
      * The cached doc string.

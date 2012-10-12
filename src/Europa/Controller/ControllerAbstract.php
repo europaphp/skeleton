@@ -1,9 +1,10 @@
 <?php
 
 namespace Europa\Controller;
+use Europa\Config\Config;
 use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
-use Europa\Request\RequestInterface;
+use Europa\Reflection\ReflectorInterface;
 use LogicException;
 
 /**
@@ -17,127 +18,106 @@ use LogicException;
 abstract class ControllerAbstract
 {
     /**
-     * The request used to dispatch to this controller.
+     * Controler configuration.
      * 
-     * @var RequestInterface
+     * @var array | Config
      */
-    private $request;
+    private $config = [
+        'action.default'   => 'all',
+        'action.param'     => 'action',
+        'filters.enable'   => true
+    ];
 
     /**
-     * Whether or not to apply filters to action.
+     * List of validators on the controller.
      * 
-     * @var bool
+     * @var array
      */
-    private $filter = false;
+    private $filters = [];
 
     /**
-     * Returns the method that the controller should call during actioning.
+     * Sets up a new controller and adds validators.
      * 
-     * @return string
-     */
-    abstract public function getActionMethod();
-
-    /**
-     * Constructs a new controller using the specified request.
-     *
-     * @param RequestInterface $request The request to use.
-     *
      * @return ControllerAbstract
      */
-    public function __construct(RequestInterface $request)
+    public function __construct($config = [])
     {
-        $this->request = $request;
-    }
+        $this->config = new Config($this->config, $config);
 
-    /**
-     * Actions the controller
-     * 
-     * @return mixed
-     */
-    public function __invoke()
-    {
-        // The method to execute.
-        $method = $this->getActionMethod();
-
-        // Ensure the method exists.
-        if (!method_exists($this, $method)) {
-            throw new LogicException(sprintf('Method "%s" is not supported.', $method));
+        foreach ($this->getFiltersFor(new ClassReflector($this)) as $filter) {
+            $this->addFilter($filter);
         }
 
-        // Apply all detected filters to the specified method.
-        $this->applyFiltersTo($method);
+        if (method_exists($this, 'init')) {
+            $this->init();
+        }
 
-        // The return value of the action is the view context.
-        $result = $this->executeMethod($method, $this->request->getParams());
-
-        return $result;
+        foreach ($this->filters as $filter) {
+            call_user_func($filter, $method);
+        }
     }
 
     /**
-     * Returns the request being used.
+     * Invokes the controller calling the action specified in the request.
      * 
-     * @return RequestInterface
+     * @param array $params The params to use.
+     * 
+     * @return array
      */
-    public function request()
+    public function __invoke(array $params = [])
     {
-        return $this->request;
+        $method = $this->config->action->param;
+        $method = isset($params[$method]) ? $params[$method] : $this->config->action->default;
+
+        if (!method_exists($this, $method)) {
+            throw new LogicException(sprintf('The action "%s" does not exist in controller "%s".', $method, get_class($this)));
+        }
+
+        $method = new MethodReflector($this, $method);
+        
+        foreach ($this->getFiltersFor($method) as $filter) {
+            call_user_func($filter, $method);
+        }
+        
+        return $method->invokeArgs($this, $params);
     }
 
     /**
-     * Switches filters on or off.
+     * Adds a filter to the controller.
      * 
-     * @param bool $switch Whether or not to enable filters.
+     * @param mixed $filter The filter to add.
      * 
      * @return ControllerAbstract
      */
-    public function filter($switch = true)
+    public function addFilter(callable $filter)
     {
-        $this->filter = $switch ? true : false;
+        $this->filters[] = $filter;
         return $this;
     }
 
     /**
-     * Applies filters to the specified method.
+     * Returns the filters for the specified reflector.
      * 
-     * @param string $method The method to apply the filters to.
+     * @param ReflectorInterface $reflector The reflector to get the filters for.
      * 
-     * @return ControllerAbstract
+     * @return array
      */
-    private function applyFiltersTo($method)
+    private function getFiltersFor(ReflectorInterface $reflector)
     {
-        if (!$this->filter) {
-            return;
-        }
+        $filters = [];
 
-        $class  = (new ClassReflector($this))->getDocBlock()->getTags('filter');
-        $method = (new MethodReflector($this, $method))->getDocBlock()->getTags('filter');
-
-        foreach (array_merge($class, $method) as $filter) {
-            $class = $filter->getClass();
+        foreach ($reflector->getDocBlock()->getTags('filter') as $filter) {
+            $parts = explode(' ', $filter->getValue(), 2);
+            $class = trim($parts[0]);
+            $value = isset($parts[1]) ? trim($parts[1]) : '';
 
             if (!class_exists($class)) {
-                throw new LogicException(sprintf('The filter "%s" for controller "%s" does not exist.', $class, get_class($this)));
+                throw new LogicException(sprintf('The filter "%s" specified in controller "%s" does not exist.', $class, get_class($this)));
             }
 
-            $class = new $class;
-            $class->__invoke($filter->getArgumentString(), $this);
+            $filters[] = new $class($value);
         }
 
-        return $this;
-    }
-
-    /**
-     * Executes the specified method.
-     * 
-     * @param string $method The method to execute.
-     * @param array  $params The parameters to pass to the method.
-     * 
-     * @return ControllerAbstract
-     */
-    private function executeMethod($method, array $params = array())
-    {
-        $reflector = new MethodReflector($this, $method);
-
-        return $reflector->invokeArgs($this, $params);
+        return $filters;
     }
 }

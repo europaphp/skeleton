@@ -1,7 +1,6 @@
 <?php
 
 namespace Europa\Fs;
-use Europa\Fs\Locator;
 
 /**
  * Default autoload registration for library files.
@@ -55,11 +54,11 @@ class Loader
     /**
      * Sets the locator.
      * 
-     * @param LocatorInterface $locator The locator to use for locating class files.
+     * @param callable $locator The locator to use for locating class files.
      * 
      * @return Loader
      */
-    public function setLocator(LocatorInterface $locator)
+    public function setLocator(callable $locator)
     {
         $this->locator = $locator;
         return $this;
@@ -68,7 +67,7 @@ class Loader
     /**
      * Returns the locator.
      * 
-     * @return LocatorInterface
+     * @return callable
      */
     public function getLocator()
     {
@@ -108,7 +107,7 @@ class Loader
      */
     public function resolve($class)
     {
-        if ($this->locator && $fullpath = $this->locator->locate($this->normalize($class))) {
+        if ($this->locator && $fullpath = call_user_func($this->locator, $this->normalize($class))) {
             return $fullpath;
         }
         return false;

@@ -22,7 +22,7 @@ class LowerCamelCaseFilter
     public function __invoke($value)
     {
         $ucc   = new UpperCamelCaseFilter;
-        $value = $ucc->filter($value);
+        $value = $ucc->__invoke($value);
         $value = lcfirst($value);
 
         return $value;

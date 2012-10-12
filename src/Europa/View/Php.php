@@ -1,8 +1,10 @@
 <?php
 
 namespace Europa\View;
-use Europa\Di\ContainerInterface;
-use Europa\Fs\LocatorInterface;
+use Europa\Config\Config;
+use Europa\Di\Locator as ServiceLocator;
+use Europa\Filter\ClassNameFilter;
+use Europa\Fs\Locator as FsLocator;
 use Exception;
 use LogicException;
 use RuntimeException;
@@ -76,6 +78,52 @@ class Php implements ViewScriptInterface
      * @var array
      */
     private $context;
+
+    /**
+     * Default view configuration.
+     * 
+     * @var array | Config
+     */
+    private $config = [
+        'helper.configs' => [
+            ['prefix' => 'Helper\\'],
+            ['prefix' => 'Europa\View\Helper\\']
+        ]
+    ];
+
+    /**
+     * Sets up the view.
+     * 
+     * @param mixed $config The configuration.
+     * 
+     * @return Php
+     */
+    public function __construct($config = [])
+    {
+        $this->config  = new Config($this->config, $config);
+        $this->locator = new FsLocator;
+        $this->helpers = new ServiceLocator;
+
+        foreach ($this->config->helper->configs as $config) {
+            $this->helpers->getFilter()->add(new ClassNameFilter($config));
+        }
+    }
+
+    /**
+     * Returns a helper.
+     * 
+     * @param string $name The helper name.
+     * 
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        try {
+            return call_user_func($this->helpers, $name);
+        } catch (Exception $e) {
+            throw new RuntimeException(sprintf('The helper "%s" could be returned with message: %s', $name, $e->getMessage()));
+        }
+    }
     
     /**
      * Normalises and sets the script to render.
@@ -129,15 +177,14 @@ class Php implements ViewScriptInterface
     {
         // locate the script if there is a locator
         if ($this->locator) {
-            $script = $this->locator->locate($this->script);
-        } else {
-            $script = is_file($this->script) ? $this->script : false;
+            $script = call_user_func($this->locator, $this->script) ?: $script;
         }
         
         // ensure the script can be found
-        if (!$script) {
+        if (!is_file($script)) {
             throw new RuntimeException(sprintf('The script "%s" could not be located.', $this->script));
         }
+
         // capture the output
         ob_start();
 
@@ -247,11 +294,11 @@ class Php implements ViewScriptInterface
     /**
      * Sets the script locator.
      * 
-     * @param LocatorInterface $locator The locator to use.
+     * @param callable $locator The locator to use.
      * 
      * @return Php
      */
-    public function setLocator(LocatorInterface $locator)
+    public function setScriptLocator(callable $locator)
     {
         $this->locator = $locator;
         return $this;
@@ -262,7 +309,7 @@ class Php implements ViewScriptInterface
      * 
      * @return LocatorInterface
      */
-    public function getLocator()
+    public function getScriptLocator()
     {
         return $this->locator;
     }
@@ -270,11 +317,11 @@ class Php implements ViewScriptInterface
     /**
      * Sets the helper container used to locate helpers.
      * 
-     * @param ContainerInterface $helpers The helper container.
+     * @param callable $helpers The helper container.
      * 
      * @return Php
      */
-    public function setHelperContainer(ContainerInterface $helpers)
+    public function setHelperContainer(callable $helpers)
     {
         $this->helpers = $helpers;
         return $this;
@@ -283,7 +330,7 @@ class Php implements ViewScriptInterface
     /**
      * Returns the helper container.
      * 
-     * @return ContainerInterface
+     * @return callable
      */
     public function getHelperContainer()
     {

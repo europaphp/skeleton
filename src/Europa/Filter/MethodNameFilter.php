@@ -11,7 +11,7 @@ use Europa\Config\Config;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class ClassNameFilter
+class MethodNameFilter
 {
     /**
      * Default configuration.
@@ -20,8 +20,7 @@ class ClassNameFilter
      */
     private $config = array(
         'prefix' => '',
-        'suffix' => '',
-        'tokens' => [DIRECTORY_SEPARATOR, '/', '_', ' ', '.']
+        'suffix' => ''
     );
     
     /**
@@ -29,7 +28,7 @@ class ClassNameFilter
      * 
      * @param mixed $config Custom filter configuration.
      * 
-     * @return ClassNameFilter
+     * @return MethodNameFilter
      */
     public function __construct($config = [])
     {
@@ -45,27 +44,11 @@ class ClassNameFilter
      */
     public function __invoke($value)
     {
-        // each part is formatted using the upper camel case filter
-        $ucc = new UpperCamelCaseFilter;
+        // Which filter is used depends on if there is a prefix.
+        $filter = $this->config['prefix'] ? new UpperCamelCaseFilter : new LowerCamelCaseFilter;
         
         // add prefix and suffix to value
-        $value = $this->config['prefix'] . $value . $this->config['suffix'];
-        
-        // ensure there aren't any leading or trailing namespace tokens
-        $value = trim($value, '\\');
-        
-        // normalize namespace separators
-        $value = str_replace($this->config['tokens']->export(), '\\', $value);
-        
-        // split into class namespaces and format each namespace part into upper camel case
-        $parts = explode('\\', $value);
-
-        foreach ($parts as &$part) {
-            $part = $ucc->__invoke($part);
-        }
-        
-        // class names always come out with a leading namespace separator
-        $value = implode('\\', $parts);
+        $value = $this->config['prefix'] . $filter->__invoke($value) . $this->config['suffix'];
 
         return $value;
     }

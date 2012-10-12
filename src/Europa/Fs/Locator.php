@@ -12,7 +12,7 @@ use LogicException;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Locator implements LocatorInterface
+class Locator
 {
     /**
      * The default file suffix.
@@ -55,6 +55,43 @@ class Locator implements LocatorInterface
      * @var bool
      */
     private $throwWhenLocating = false;
+
+    /**
+     * Searches for the specified file and returns the file path if found.
+     * 
+     * @param string $class The class to search for.
+     * 
+     * @return bool | string
+     */
+    public function __invoke($file)
+    {
+        // normalize
+        $file = str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $file);
+        $file = trim($file, DIRECTORY_SEPARATOR);
+        
+        // if it exists in the map just return it
+        if (isset($this->map[$file])) {
+            return $this->map[$file];
+        }
+        
+        // search in paths
+        foreach ($this->paths as $path => $suffixes) {
+            // if the file still isn't found, apply suffixes
+            foreach ($suffixes as $suffix) {
+                $fullpath = $path . DIRECTORY_SEPARATOR . $file . '.' . $suffix;
+                $fullpath = realpath($fullpath);
+                
+                if ($fullpath) {
+                    $this->map($file, $fullpath);
+                    return $fullpath;
+                }
+            }
+        }
+        
+        if ($this->throwWhenLocating) {
+            throw new LogicException(sprintf('Could not locate the file "%s".', $file));
+        }
+    }
 
     /**
      * Allows a base path to be supplied which all paths should be specified relative to.
@@ -149,46 +186,6 @@ class Locator implements LocatorInterface
             $this->map($map, $file);
         }
         return $this;
-    }
-    
-    /**
-     * Searches for the specified file and returns the file if found or false if not found. If the class is found, it
-     * is cached in the class map.
-     * 
-     * @param string $class The class to search for.
-     * 
-     * @return bool | string
-     */
-    public function locate($file)
-    {
-        // normalize
-        $file = str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $file);
-        $file = trim($file, DIRECTORY_SEPARATOR);
-        
-        // if it exists in the map just return it
-        if (isset($this->map[$file])) {
-            return $this->map[$file];
-        }
-        
-        // search in paths
-        foreach ($this->paths as $path => $suffixes) {
-            // if the file still isn't found, apply suffixes
-            foreach ($suffixes as $suffix) {
-                $fullpath = $path . DIRECTORY_SEPARATOR . $file . '.' . $suffix;
-                $fullpath = realpath($fullpath);
-                
-                if ($fullpath) {
-                    $this->map($file, $fullpath);
-                    return $fullpath;
-                }
-            }
-        }
-        
-        if ($this->throwWhenLocating) {
-            throw new LogicException(sprintf('Could not locate the file "%s".', $file));
-        }
-        
-        return false;
     }
     
     /**

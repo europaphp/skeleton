@@ -11,7 +11,7 @@ use Europa\Reflection\MethodReflector;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class ClassReflector extends \ReflectionClass implements Reflectable
+class ClassReflector extends \ReflectionClass implements ReflectorInterface
 {
     /**
      * The cached doc string.

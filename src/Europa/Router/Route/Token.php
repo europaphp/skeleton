@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\Router;
+namespace Europa\Router\Route;
 
 /**
  * A route class used for matching via tokens in a string.
@@ -10,7 +10,7 @@ namespace Europa\Router;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class TokenRoute
+class Token
 {
     /**
      * The regex route.
@@ -22,14 +22,15 @@ class TokenRoute
     /**
      * Constructs the route and sets required properties.
      * 
-     * @param string $expression The expression for route matching/parsing.
-     * @param array  $defaults   The default parameters associated to the route.
+     * @param string $expression   The expression for route matching/parsing.
+     * @param array  $defaults     The route defaults.
+     * @param array  $requirements The parameter requriements.
      * 
      * @return TokenRoute
      */
-    public function __construct($expression, array $defaults = [])
+    public function __construct($expression, array $defaults = [], array $requirements = [])
     {
-        $this->regex = new RegexRoute($this->parse($expression), $expression, $defaults);
+        $this->regex = new Regex($this->parse($expression), $defaults, $requirements);
     }
     
     /**
@@ -53,6 +54,10 @@ class TokenRoute
      */
     private function parse($expression)
     {
+        if ($expression === '*') {
+            return '.*';
+        }
+
         // The parameter regex
         $paramRegex   = ':([a-zA-Z][a-zA-Z0-9_]*)';
         $paramReplace = '(?<$%d>[^/]+)';

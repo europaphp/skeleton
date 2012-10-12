@@ -13,7 +13,7 @@ use ReflectionMethod;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class MethodReflector extends ReflectionMethod implements Reflectable
+class MethodReflector extends ReflectionMethod implements ReflectorInterface
 {
     /**
      * The method's declaring class' name.

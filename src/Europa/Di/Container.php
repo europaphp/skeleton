@@ -44,6 +44,18 @@ class Container implements ContainerInterface
     private static $instances = [];
 
     /**
+     * Returns an instance of the specified service.
+     * 
+     * @param string $name The name of the service to return.
+     * 
+     * @return mixed
+     */
+    public function __invoke($name)
+    {
+        return $this->__get($name);
+    }
+
+    /**
      * Since you can't infer a property and call it at the same time, you have to proxy it via __call().
      * 
      * @param string $name The service name.
@@ -53,7 +65,11 @@ class Container implements ContainerInterface
      */
     public function __call($name, array $args = [])
     {
-        return $this->__get($name);
+        if (!is_callable($service = $this->__get($name))) {
+            throw new UnexpectedValueException(sprintf('Cannot invoke service "%s" in container "%s" because it is not callable.', $name, $this->name()));
+        }
+        
+        return call_user_func_array($service, $args);
     }
 
     /**

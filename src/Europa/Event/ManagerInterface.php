@@ -15,22 +15,22 @@ interface ManagerInterface
     /**
      * Binds an event handler to the stack.
      * 
-     * @param string $name     The name of the event to bind to.
-     * @param mixed  $callback The callback to call when triggering.
+     * @param string   $name     The name of the event to bind to.
+     * @param callable $callback The callback to call when triggering.
      * 
      * @return Dispatcher
      */
-    public function bind($name, $callback);
+    public function bind($name, callable $callback);
     
     /**
      * Unbinds an event.
      * 
-     * @param string $name     The name of the event to unbind.
-     * @param mixed  $callback The specific handler to unbind, if specified.
+     * @param string   $name     The name of the event to unbind.
+     * @param callable $callback The specific handler to unbind, if specified.
      * 
      * @return bool
      */
-    public function unbind($name, $callback = null);
+    public function unbind($name, callable $callback = null);
     
     /**
      * Triggers an event stack.

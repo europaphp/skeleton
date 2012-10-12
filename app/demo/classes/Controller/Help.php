@@ -1,7 +1,7 @@
 <?php
 
 namespace Controller;
-use Europa\Controller\RestController;
+use Europa\Controller\ControllerAbstract;
 use Europa\Filter\CamelCaseSplitFilter;
 use Europa\Filter\ClassNameFilter;
 use Europa\Fs\Finder;
@@ -16,7 +16,7 @@ use LogicException;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Help extends RestController
+class Help extends ControllerAbstract
 {
     /**
      * Shows the help.

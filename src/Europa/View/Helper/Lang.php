@@ -46,11 +46,11 @@ class Lang
      * Constructs the language helper and parses the required ini file.
      * 
      * @param ViewScriptInterface $view    The view to use.
-     * @param LocatorInterface    $locator Locator for lang files.
+     * @param callable            $locator Locator for lang files.
      * 
      * @return Lang
      */
-    public function __construct(ViewScriptInterface $view, LocatorInterface $locator)
+    public function __construct(ViewScriptInterface $view, callable $locator)
     {
         $this->view    = $view;
         $this->locator = $locator;
@@ -158,7 +158,7 @@ class Lang
             return;
         }
         
-        if ($path = $this->locator->locate($script)) {
+        if ($path = call_user_func($this->locator, $script)) {
             $this->cache[$script] = parse_ini_file($path);
         } else {
             $this->cache[$script] = array();

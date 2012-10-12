@@ -1,7 +1,7 @@
 <?php $this->extend('web/layout'); ?>
 
 <h3>
-    <?php echo $helpers->lang->coverage ?>:
+    <?php echo $this->lang->coverage ?>:
     <?php if ($context->percent >= 60): ?>
     <span class="text-success"><?php echo $context->percent ?>%</span>
     <?php else: ?>
@@ -10,13 +10,13 @@
 </h3>
 
 <?php if ($context->suite->getAssertions()->getFailed()->count()): ?>
-<h3><?php echo $helpers->lang->failedTests ?></h3>
+<h3><?php echo $this->lang->failedTests ?></h3>
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
-            <th><?php echo $helpers->lang->class ?></th>
-            <th><?php echo $helpers->lang->line ?></th>
-            <th><?php echo $helpers->lang->message ?></th>
+            <th><?php echo $this->lang->class ?></th>
+            <th><?php echo $this->lang->line ?></th>
+            <th><?php echo $this->lang->message ?></th>
         </tr>
     </thead>
     <tbody>
@@ -32,13 +32,13 @@
 <?php endif ?>
 
 <?php if ($context->suite->getExceptions()->count()): ?>
-<h3><?php echo $helpers->lang->exceptions ?></h3>
+<h3><?php echo $this->lang->exceptions ?></h3>
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
-            <th><?php echo $helpers->lang->file ?></th>
-            <th><?php echo $helpers->lang->line ?></th>
-            <th><?php echo $helpers->lang->message ?></th>
+            <th><?php echo $this->lang->file ?></th>
+            <th><?php echo $this->lang->line ?></th>
+            <th><?php echo $this->lang->message ?></th>
         </tr>
     </thead>
     <tbody>
@@ -55,7 +55,7 @@
 
 <?php if ($context->untested && $context->report->getUntestedFileCount()): ?>
 
-<h3><?php echo $helpers->lang->untested ?></h3>
+<h3><?php echo $this->lang->untested ?></h3>
 
 <?php foreach ($context->report->getUntestedFiles() as $file): ?>
 <h4><?php echo $file ?></h4>

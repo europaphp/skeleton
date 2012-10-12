@@ -10,7 +10,7 @@ namespace Europa\Reflection;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) Trey Shugart http://europaphp.org/license
  */
-interface Reflectable
+interface ReflectorInterface
 {
     /**
      * Returns the appropriate doc block instance.

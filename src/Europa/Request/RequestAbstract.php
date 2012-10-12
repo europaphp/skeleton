@@ -137,7 +137,7 @@ abstract class RequestAbstract implements IteratorAggregate, RequestInterface
      */
     public function hasParam($name)
     {
-        return isset($this->params[$name]);
+        return array_key_exists($name, $this->params);
     }
     
     /**

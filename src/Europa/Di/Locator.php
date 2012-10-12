@@ -55,6 +55,13 @@ class Locator extends Container
         $this->filter = new ClassResolutionFilter;
     }
 
+    /**
+     * Returns the specified service.
+     * 
+     * @param string $name The service name.
+     * 
+     * @return mixed
+     */
     public function __get($name)
     {
         if (parent::__isset($name)) {
@@ -74,6 +81,11 @@ class Locator extends Container
         $this->throwNotExists($name);
     }
 
+    /**
+     * Returns whether or not the specified service exists.
+     * 
+     * @return bool
+     */
     public function __isset($name)
     {
         return class_exists($this->filter->__invoke($name)) || parent::__isset($name);

@@ -12,6 +12,33 @@ namespace Europa\Di;
  */
 interface ContainerInterface
 {
+    /**
+     * Returns an instance of the specified service.
+     * 
+     * @param string $name The name of the service to return.
+     * 
+     * @return mixed
+     */
+    public function __invoke($name);
+
+    /**
+     * Since you can't infer a property and call it at the same time, you have to proxy it via __call().
+     * 
+     * @param string $name The service name.
+     * @param array  $args The service arguments. These are ignored.
+     * 
+     * @return mixed
+     */
+    public function __call($name, array $args = []);
+
+    /**
+     * Registers the specified service.
+     * 
+     * @param string $name  The service name.
+     * @param mixed  $value The service.
+     * 
+     * @return void
+     */
     public function __set($name, $value);
 
     /**
@@ -32,7 +59,19 @@ interface ContainerInterface
      */
     public function __isset($name);
 
+    /**
+     * Unregisters the service.
+     * 
+     * @param string $name The service name.
+     * 
+     * @return void
+     */
     public function __unset($name);
 
+    /**
+     * Marks the service as transient.
+     * 
+     * @return ContainerInterface
+     */
     public function transient($name);
 }

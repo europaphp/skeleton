@@ -13,7 +13,8 @@ use Europa\Module\Manager as ModuleManager;
 use Europa\Request;
 use Europa\Request\RequestAbstract;
 use Europa\Response;
-use Europa\Router\RegexRoute;
+use Europa\Router\Adapter\Ini as IniRouteAdapter;
+use Europa\Router\Route\Regex;
 use Europa\Router\Router;
 use Europa\View\Json;
 use Europa\View\Jsonp;
@@ -47,18 +48,12 @@ class Configuration extends ConfigurationAbstract
      * @var array
      */
     private $config = [
-        'controllers' => [
-            ['prefix' => 'Controller\\']
-        ],
-        'helpers' => [
-            ['prefix' => 'Helper\\'],
-            ['prefix' => 'Europa\View\Helper\\']
-        ],
         'paths.app'            => '={root}/app',
         'paths.root'           => '..',
         'paths.classes'        => ['classes'     => 'php'],
         'paths.langs'          => ['langs/en-us' => 'ini'],
         'paths.views'          => ['views'       => 'php'],
+        'router.file'          => '={parent.paths.app}/demo/configs/routes.ini',
         'views.cli'            => 'cli',
         'views.web'            => 'web',
         'views.jsonp.callback' => Jsonp::CALLBACK,
@@ -97,7 +92,7 @@ class Configuration extends ConfigurationAbstract
      */
     public function app($container)
     {
-        return new App($container);
+        return new App();
     }
 
     /**
@@ -128,10 +123,10 @@ class Configuration extends ConfigurationAbstract
     public function event($container)
     {
         $event = new EventManager;
-        $event->bind('render.pre', function($app) use ($container) {
+        $event->bind('route.post', function($app, array $context) use ($container) {
             if ($container->view instanceof ViewScriptInterface) {
-                $script = $container->request->isCli() ? $this->config['views.cli'] : $this->config['views.web'];
-                $script = $script . '/' . $app->getController();
+                $script = $container->request->isCli() ? $this->config->views->cli : $this->config->views->web;
+                $script = $script . '/' . $container->router->getContext()['controller'];
                 $script = str_replace(' ', '/', $script);
 
                 $container->view->setScript($script);
@@ -303,7 +298,7 @@ class Configuration extends ConfigurationAbstract
     public function routerCli()
     {
         $router = new Router;
-        $router['default'] = new RegexRoute('(?<controller>.+)', ':controller', ['controller' => 'help']);
+        $router['default'] = new Regex('(?<controller>.+)', ':controller');
         return $router;
     }
 
@@ -315,7 +310,7 @@ class Configuration extends ConfigurationAbstract
     public function routerHttp()
     {
         $router = new Router;
-        $router['default'] = new RegexRoute('(?<controller>[^.?]+)?', ':controller', ['controller' => 'index']);
+        $router->import(new IniRouteAdapter($this->config['router.file']));
         return $router;
     }
 

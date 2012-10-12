@@ -1,3 +1,3 @@
 <?php $this->extend('cli/layout') ?>
 
-<?php echo $helpers->lang->invalidCommand($context->command) ?>
+<?php echo $this->lang->invalidCommand($context->command) ?>
