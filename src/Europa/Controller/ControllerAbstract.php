@@ -23,7 +23,7 @@ abstract class ControllerAbstract
      * @var array | Config
      */
     private $config = [
-        'action.default'   => 'all',
+        'action.default'   => 'action',
         'action.param'     => 'action',
         'filters.enable'   => true
     ];
@@ -67,7 +67,14 @@ abstract class ControllerAbstract
     public function __invoke(array $params = [])
     {
         $method = $this->config->action->param;
-        $method = isset($params[$method]) ? $params[$method] : $this->config->action->default;
+
+        if (isset($params[$method])) {
+            $method = $params[$method];
+        } elseif (method_exists($this, $this->config->action->default)) {
+            $method = $this->config->action->default;
+        } else {
+            throw new LogicException(sprintf('No action was specified and not catch-all action "%s->%s()" was specified.', get_class($this), $this->config->action->default));
+        }
 
         if (!method_exists($this, $method)) {
             throw new LogicException(sprintf('The action "%s" does not exist in controller "%s".', $method, get_class($this)));
