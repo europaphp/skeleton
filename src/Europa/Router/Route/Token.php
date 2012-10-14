@@ -60,7 +60,7 @@ class Token
 
         // The parameter regex
         $paramRegex   = ':([a-zA-Z][a-zA-Z0-9_]*)';
-        $paramReplace = '(?<$%d>[^/]+)';
+        $paramReplace = '(?<$%d>[^/]+?)';
 
         // so we can look ahead
         $len = strlen($expression);
