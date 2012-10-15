@@ -31,10 +31,18 @@ use UnexpectedValueException;
  */
 class App
 {
+    /**
+     * The application configuration.
+     * 
+     * @var array | Config
+     */
     private $config = [
-        'controller.param'   => 'controller',
-        'controller.prefix'  => 'Controller\\',
-        'controller.suffix'  => '',
+        'controllerParam'    => 'controller',
+        'controllerLocator'  => [
+            'filters' => [
+                'Europa\Filter\ClassNameFilter' => ['prefix' => 'Controller\\']
+            ]
+        ],
         'events.action.pre'  => 'action.pre',
         'events.action.post' => 'action.post',
         'events.render.pre'  => 'render.pre',
@@ -42,21 +50,58 @@ class App
         'events.route.pre'   => 'route.pre',
         'events.route.post'  => 'route.post',
         'events.send.pre'    => 'send.pre',
-        'events.send.post'   => 'send.post'
+        'events.send.post'   => 'send.post',
+        'router'             => [],
+        'viewNegotiator'     => []
     ];
 
+    /**
+     * The locator used to locate a controller.
+     * 
+     * @var callable
+     */
     private $controllerLocator;
 
+    /**
+     * The event manager.
+     * 
+     * @var ManagerInterface
+     */
     private $event;
 
+    /**
+     * The request.
+     * 
+     * @var RequestInterface
+     */
     private $request;
 
+    /**
+     * The response.
+     * 
+     * @var ResponseInterface
+     */
     private $response;
 
+    /**
+     * The router.
+     * 
+     * @var callable
+     */
     private $router;
 
+    /**
+     * The view negotiator.
+     * 
+     * @var callable
+     */
     private $viewNegotiator;
 
+    /**
+     * The request filter.
+     * 
+     * @var callable
+     */
     private $requestFilter;
     
     /**
@@ -69,15 +114,13 @@ class App
     public function __construct($config = [])
     {
         $this->config            = new Config($this->config, $config);
-        $this->controllerLocator = new Locator;
+        $this->controllerLocator = new Locator($this->config->controllerLocator);
         $this->event             = new Manager;
         $this->request           = RequestAbstract::isCli() ? new CliRequest : new HttpRequest;
         $this->response          = RequestAbstract::isCli() ? new CliResponse : new HttpResponse;
-        $this->router            = new Router;
-        $this->viewNegotiator    = new Negotiator($this->request);
+        $this->router            = new Router($this->config->router);
+        $this->viewNegotiator    = new Negotiator($this->config->viewNegotiator);
         $this->requestFilter     = [$this, 'requestFilter'];
-
-        $this->controllerLocator->getFilter()->add(new ClassNameFilter($this->config->controller));
     }
 
     /**
@@ -91,89 +134,162 @@ class App
         return $this;
     }
 
-    public function setConfig(ConfigInterface $config)
-    {
-        $this->config = $config;
-        return $this;
-    }
-
-    public function getConfig()
-    {
-        return $this->config;
-    }
-
+    /**
+     * Sets the controller locator.
+     * 
+     * @param callable $controllerLocator The locator used for finding a controller.
+     * 
+     * @return App
+     */
     public function setControllerLocator(callable $controllerLocator)
     {
         $this->controllerLocator = $controllerLocator;
         return $this;
     }
 
+    /**
+     * Returns the controller locator.
+     * 
+     * @return callable
+     */
     public function getControllerLocator()
     {
         return $this->controllerLocator;
     }
 
+    /**
+     * Sets the event manager that handles the triggering of application events.
+     * 
+     * @param ManagerInterface $event The application event manager.
+     * 
+     * @return App
+     */
     public function setEvent(ManagerInterface $event)
     {
         $this->event = $event;
         return $this;
     }
 
+    /**
+     * Returns the application event manager.
+     * 
+     * @return ManagerInterface
+     */
     public function getEvent()
     {
         return $this->event;
     }
 
+    /**
+     * Sets the application request.
+     * 
+     * @param RequestInterface $request The request to use.
+     * 
+     * @return App
+     */
     public function setRequest(RequestInterface $request)
     {
         $this->request = $request;
         return $this;
     }
 
+    /**
+     * Returns the application request.
+     * 
+     * @return RequestInterface
+     */
     public function getRequest()
     {
         return $this->request;
     }
 
+    /**
+     * Sets the application response.
+     * 
+     * @param ResponseInterface $reseponse The reseponse to use.
+     * 
+     * @return App
+     */
     public function setResponse(ResponseInterface $response)
     {
         $this->response = $response;
         return $this;
     }
 
+    /**
+     * Returns the application response.
+     * 
+     * @return ResponseInterface
+     */
     public function getResponse()
     {
         return $this->response;
     }
 
+    /**
+     * Sets the application router.
+     * 
+     * @param callable $router The router to use.
+     * 
+     * @return App
+     */
     public function setRouter(callable $router)
     {
         $this->router = $router;
         return $this;
     }
 
+    /**
+     * Returns the application router.
+     * 
+     * @return callable
+     */
     public function getRouter()
     {
         return $this->router;
     }
 
+    /**
+     * Sets the application view negotiator.
+     * 
+     * @param callable $viewNegotiator The view negotiator to use.
+     * 
+     * @return App
+     */
     public function setViewNegotiator(callable $viewNegotiator)
     {
         $this->viewNegotiator = $viewNegotiator;
         return $this;
     }
 
+    /**
+     * Returns the application view negotiator.
+     * 
+     * @return callable
+     */
     public function getViewNegotiator()
     {
         return $this->viewNegotiator;
     }
 
+    /**
+     * Sets the filter that is used to turn the application request into a string.
+     * 
+     * @param callable $requestFilter The filter to use.
+     * 
+     * @return App
+     */
     public function setRequestFilter(callable $requestFilter)
     {
         $this->requestFilter = $requestFilter;
         return $this;
     }
 
+    /**
+     * returns the request filter.
+     * 
+     * @return callable
+     */
     public function getRequestFilter()
     {
         return $this->requestFilter;
@@ -191,7 +307,8 @@ class App
         $this->event->trigger($this->config->events->route->pre, [$this]);
 
         if ($this->router) {
-            $context = call_user_func($this->router, call_user_func($this->requestFilter, $this->request));
+            $context = call_user_func($this->requestFilter, $this->request);
+            $context = call_user_func($this->router, $context);
             $context = is_array($context) ? $context : [];
         }
         
@@ -209,7 +326,7 @@ class App
     {
         $this->event->trigger($this->config->events->action->pre, [$this]);
         
-        $controller = $this->request->getParam($this->config->controller->param);
+        $controller = $this->request->getParam($this->config->controllerParam);
 
         try {
             $controller = call_user_func($this->controllerLocator, $controller);

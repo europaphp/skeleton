@@ -2,6 +2,7 @@
 
 use Europa\App\Configuration;
 use Europa\Di\Container;
+use Europa\Module\Manager;
 
 require_once __DIR__ . '/../src/Europa/Fs/Loader.php';
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -12,5 +13,6 @@ $europa->configure(new Configuration([
     'paths.root'      => __DIR__ . '/..'
 ]));
 
-$europa->loader->register();
-$europa->modules->bootstrap();
+$modules = new Manager(__DIR__);
+$modules->register('demo');
+$modules->bootstrap();

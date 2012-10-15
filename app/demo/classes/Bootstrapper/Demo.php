@@ -2,7 +2,7 @@
 
 namespace Bootstrapper;
 use Europa;
-use Europa\Bootstrapper\Provider;
+use Europa\Bootstrapper\BootstrapperAbstract;
 use Europa\Config\Config;
 use Europa\View\ViewScriptInterface;
 
@@ -14,7 +14,7 @@ use Europa\View\ViewScriptInterface;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Demo extends Provider
+class Demo extends BootstrapperAbstract
 {
     /**
      * Bootstrapper configuration.
@@ -33,7 +33,7 @@ class Demo extends Provider
      * 
      * @return Demo
      */
-    public function __contruct(array $config = [])
+    public function __construct(array $config = [])
     {
         $this->config = new Config($this->config, $config);
     }

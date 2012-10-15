@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\Fs;
+namespace Europa\Fs\Locator;
 use InvalidArgumentException;
 use LogicException;
 
@@ -41,20 +41,6 @@ class Locator
      * @var array
      */
     private $map = array();
-    
-    /**
-     * Whether or not to throw an exception when adding a path if the path does not exist.
-     * 
-     * @var bool
-     */
-    private $throwWhenAdding = true;
-    
-    /**
-     * Whether or not to throw an exception when if the file is not found when locating.
-     * 
-     * @var bool
-     */
-    private $throwWhenLocating = false;
 
     /**
      * Searches for the specified file and returns the file path if found.
@@ -66,12 +52,17 @@ class Locator
     public function __invoke($file)
     {
         // normalize
-        $file = str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $file);
+        $file = str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $file);
         $file = trim($file, DIRECTORY_SEPARATOR);
         
         // if it exists in the map just return it
         if (isset($this->map[$file])) {
             return $this->map[$file];
+        }
+
+        // first check against the base path
+        if ($fullpath = realpath($this->base . '/' . $file . '.' . self::DEFAULT_SUFFIX)) {
+            return $fullpath;
         }
         
         // search in paths
@@ -87,27 +78,24 @@ class Locator
                 }
             }
         }
-        
-        if ($this->throwWhenLocating) {
-            throw new LogicException(sprintf('Could not locate the file "%s".', $file));
-        }
     }
 
     /**
      * Allows a base path to be supplied which all paths should be specified relative to.
      * 
      * @param string $base The base path.
+     * @param bool   $test Check if the path exists.
      * 
      * @return Locator
      */
-    public function setBasePath($base)
+    public function setBasePath($base, $test = true)
     {
         $real = realpath($base);
-        
-        if (!$real) {
+
+        if ($test && !$real) {
             throw new InvalidArgumentException(sprintf('The base path "%s" does not exist.', $base));
         }
-        
+
         $this->base = $real;
         
         return $this;
@@ -121,32 +109,6 @@ class Locator
     public function getBasePath()
     {
         return $this->base;
-    }
-    
-    /**
-     * Sets whether or not to throw an exception when if the file is not found when locating.
-     * 
-     * @param bool $switch Turns throwing on or off.
-     * 
-     * @return Locator
-     */
-    public function throwWhenAdding($switch = true)
-    {
-        $this->throwWhenAdding = $switch ? true : false;
-        return $this;
-    }
-    
-    /**
-     * Sets whether or not to throw an exception when if the file is not found when locating.
-     * 
-     * @param bool $switch Turns throwing on or off.
-     * 
-     * @return Locator
-     */
-    public function throwWhenLocating($switch = true)
-    {
-        $this->throwWhenLocating = $switch ? true : false;
-        return $this;
     }
     
     /**
@@ -185,6 +147,7 @@ class Locator
         foreach ($maps as $map => $file) {
             $this->map($map, $file);
         }
+        
         return $this;
     }
     
@@ -194,29 +157,26 @@ class Locator
      * 
      * @param string $path   The path to add to the list of load paths.
      * @param mixed  $suffix The suffix, or suffixes to use for this path.
+     * @param bool   $test   Check if path exists.
      * 
      * @return Locator
      */
-    public function addPath($path, $suffix = self::DEFAULT_SUFFIX)
+    public function addPath($path, $suffix = self::DEFAULT_SUFFIX, $test = true)
     {
         // normalize the path relative to the base
-        $path = $this->normalizePath($path);
+        $real = realpath($this->base ? $this->base . DIRECTORY_SEPARATOR . $path : $path);
 
-        // make sure it exists if set
-        $realpath = $this->getRealpathAndThrowIfNotExists($path);
-
-        // if exceptions aren't being thrown then just stop here
-        if (!$realpath) {
-            return $this;
+        if ($test && !$real) {
+            throw new LogicException(sprintf('The path "%s" does not exist.', $real));
         }
 
         // ensure the path can contain multiple suffixes
-        if (!isset($this->paths[$realpath])) {
-            $this->paths[$realpath] = array();
+        if (!isset($this->paths[$real])) {
+            $this->paths[$real] = array();
         }
         
         // add it ensuring that no duplicates are added
-        $this->paths[$realpath] = array_merge($this->paths[$realpath], (array) $suffix);
+        $this->paths[$real] = array_merge($this->paths[$real], (array) $suffix);
         
         return $this;
     }
@@ -229,88 +189,17 @@ class Locator
      * 
      * @return Locator
      */
-    public function addPaths(array $paths)
+    public function addPaths(array $paths, $test = true)
     {
         foreach ($paths as $path => $suffix) {
             if (is_numeric($path)) {
                 $path   = $suffix;
                 $suffix = self::DEFAULT_SUFFIX;
             }
-            $this->addPath($path, $suffix);
-        }
-        return $this;
-    }
-    
-    /**
-     * Adds the include path to PHP's include paths.
-     * 
-     * @param string $path The path to add to PHP's include paths.
-     * 
-     * @return Locator
-     */
-    public function addIncludePath($path)
-    {
-        $path     = $this->normalizePath($path);
-        $realpath = $this->getRealpathAndThrowIfNotExists($path);
-        
-        if ($realpath) {
-            set_include_path(get_include_path() . PATH_SEPARATOR . $realpath);
-        }
-        
-        return $this;
-    }
 
-    /**
-     * Adds an array of paths to PHP include paths.
-     * 
-     * @param array $paths The paths to add to PHP's include paths.
-     * 
-     * @return Locator
-     */
-    public function addIncludePaths(array $paths)
-    {
-        foreach ($paths as $path => $suffix) {
-            if (is_numeric($path)) {
-                $path = $suffix;
-            }
-            
-            $this->addIncludePath($path);
+            $this->addPath($path, $suffix, $test);
         }
-        
-        return $this;
-    }
 
-    /**
-     * Normalizes the specified path using the base path if it was specified.
-     * 
-     * @param string $path The path to normalize.
-     * 
-     * @return string
-     */
-    private function normalizePath($path)
-    {
-        return $this->base ? $this->base . DIRECTORY_SEPARATOR . $path : $path;
-    }
-    
-    /**
-     * Returns the realpath of the passed in $path. If the path does not exist, then throw an exception.
-     * 
-     * @throws Exception If the path does not exist.
-     * 
-     * @param string $path The path to check and return the real path to.
-     * 
-     * @return bool | string
-     */
-    private function getRealpathAndThrowIfNotExists($path)
-    {
-        if ($realpath = realpath($path)) {
-            return $realpath;
-        }
-        
-        if ($this->throwWhenAdding) {
-            throw new LogicException(sprintf('The path "%s" does not exist.', $path));
-        }
-        
-        return false;
+        return $this;
     }
 }

@@ -23,6 +23,20 @@ abstract class FilterArrayAbstract implements IteratorAggregate
     private $filters = [];
 
     /**
+     * Sets up the filter array. For each item in the configuration, a filter is added and the value used as the constructor configuration.
+     * 
+     * @param mixed $config The filter array configuration.
+     * 
+     * @return FilterArrayAbstract
+     */
+    public function __construct($config = [])
+    {
+        foreach ($config as $filter => $filterConfig) {
+            $this->add(new $filter($filterConfig));
+        }
+    }
+
+    /**
      * Adds a filter.
      * 
      * @param callable $filter The filter to add.

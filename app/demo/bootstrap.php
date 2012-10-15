@@ -1,3 +1,4 @@
 <?php
 
-(new Bootstrapper\Demo)->bootstrap();
+$bootstrap = new Bootstrapper\Demo;
+$bootstrap();

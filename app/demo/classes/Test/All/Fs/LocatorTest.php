@@ -1,7 +1,7 @@
 <?php
 
 namespace Test\All\Fs;
-use Europa\Fs\Locator;
+use Europa\Fs\Locator\Locator;
 use Testes\Test\UnitAbstract;
 
 class LocatorTest extends UnitAbstract

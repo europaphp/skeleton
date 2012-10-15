@@ -1,8 +1,8 @@
 <?php
 
 namespace Europa\Bootstrapper;
-use ReflectionClass;
-use ReflectionMethod;
+use Europa\Reflection\ClassReflector;
+use Europa\Reflection\MethodReflector;
 
 /**
  * Abstraction for bootstrap classes containing bootstrapping methods.
@@ -12,16 +12,16 @@ use ReflectionMethod;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class Provider implements BootstrapperInterface
+abstract class BootstrapperAbstract
 {
     /**
      * Runs each bootstrap method.
      * 
      * @return Provider
      */
-    public function bootstrap()
+    public function __invoke()
     {
-        $that = new ReflectionClass($this);
+        $that = new ClassReflector($this);
         
         foreach ($that->getMethods() as $method) {
             if ($this->isValidMethod($method)) {
@@ -35,17 +35,13 @@ abstract class Provider implements BootstrapperInterface
     /**
      * Returns whether or not the specified method is valid.
      * 
-     * @param ReflectionMethod $method The method to check.
+     * @param MethodReflector $method The method to check.
      * 
      * @return bool
      */
-    private function isValidMethod(ReflectionMethod $method)
+    private function isValidMethod(MethodReflector $method)
     {
-        if ($method->isConstructor()) {
-            return false;
-        }
-        
-        if ($method->getName() === 'bootstrap') {
+        if ($method->isMagic()) {
             return false;
         }
         

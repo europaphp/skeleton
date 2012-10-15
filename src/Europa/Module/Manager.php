@@ -2,14 +2,13 @@
 
 namespace Europa\Module;
 use ArrayIterator;
-use Europa\Event\Manager as EventManager;
+use Europa\Fs\Loader\ClassLoader;
+use Europa\Fs\Locator\LocatorArray;
 use LogicException;
 use UnexpectedValueException;
 
 class Manager implements ManagerInterface
 {
-    private $event;
-
     private $modules = [];
 
     private $path;
@@ -20,13 +19,15 @@ class Manager implements ManagerInterface
             throw new UnexpectedValueException(sprintf('The path "%s" does not exist.', $path));
         }
 
-        $this->event = new EventManager;
+        $this->classLoader = new ClassLoader;
+        $this->langLocator = new LocatorArray;
+        $this->viewLocator = new LocatorArray;
     }
 
     public function __get($name)
     {
         if (!isset($this->modules[$name])) {
-            throw new LogicException(sprintf('The module "%s" does not exist.'));
+            throw new LogicException(sprintf('The module "%s" does not exist.', $name));
         }
         
         return $this->modules[$name];
@@ -48,35 +49,21 @@ class Manager implements ManagerInterface
             $module = new Module($this->path . '/' . $module);
         }
 
-        $this->modules[] = $module;
+        $this->modules[$module->name()] = $module;
 
         return $this;
-    }
-
-    public function setEvent(EventManager $event)
-    {
-        $this->event = $event;
-        return $this;
-    }
-
-    public function getEvent()
-    {
-        return $this->event;
     }
 
     public function bootstrap()
     {
-        $this->event->trigger('modules.bootstrap.pre');
+        $this->classLoader->register();
 
         foreach ($this->modules as $module) {
-            $this->event->trigger('module.bootstrap.pre', [$this, $module]);
-            $this->event->trigger('module.' . $module->name() . '.bootstrap.pre', [$this, $module]);
+            $this->classLoader->getLocator()->add($module->getClassLocator());
+            $this->langLocator->add($module->getLangLocator());
+            $this->viewLocator->add($module->getViewLocator());
             $module->bootstrap();
-            $this->event->trigger('module.' . $module->name() . '.bootstrap.post', [$this, $module]);
-            $this->event->trigger('module.bootstrap.post', [$this, $module]);
         }
-
-        $this->event->trigger('modules.bootstrap.post');
 
         return $this;
     }

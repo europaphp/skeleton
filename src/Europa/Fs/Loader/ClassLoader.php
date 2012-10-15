@@ -1,7 +1,7 @@
 <?php
 
-namespace Europa\Fs;
-use Europa\Fs\Locator\Locator;
+namespace Europa\Fs\Loader;
+use Europa\Fs\Locator\LocatorArray;
 
 /**
  * Default autoload registration for library files.
@@ -26,7 +26,7 @@ spl_autoload_register(function($class) {
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Loader
+class ClassLoader
 {
     /**
      * Whether or not the loader is registered as an autoloader.
@@ -49,7 +49,31 @@ class Loader
      */
     public function __construct()
     {
-        $this->locator = new Locator;
+        $this->locator = new LocatorArray;
+    }
+
+    /**
+     * Searches for a class, loads it if it is found and returns whether or not it was loaded.
+     * 
+     * The Europa install directory is searched first. If it is not found and a locator is defined, the locator is used
+     * to locate the class.
+     * 
+     * @param string $class The class to search for.
+     * 
+     * @return Loader
+     */
+    public function __invoke($class)
+    {
+        if (class_exists($class, false)) {
+            return true;
+        }
+        
+        if ($class = $this->resolve($class)) {
+            include $class;
+            return true;
+        }
+        
+        return false;
     }
     
     /**
@@ -73,30 +97,6 @@ class Loader
     public function getLocator()
     {
         return $this->locator;
-    }
-    
-    /**
-     * Searches for a class, loads it if it is found and returns whether or not it was loaded.
-     * 
-     * The Europa install directory is searched first. If it is not found and a locator is defined, the locator is used
-     * to locate the class.
-     * 
-     * @param string $class The class to search for.
-     * 
-     * @return Loader
-     */
-    public function load($class)
-    {
-        if (class_exists($class, false)) {
-            return true;
-        }
-        
-        if ($class = $this->resolve($class)) {
-            include $class;
-            return true;
-        }
-        
-        return false;
     }
     
     /**
@@ -124,7 +124,7 @@ class Loader
     public function register($prepend = false)
     {
         if (!$this->isRegistered) {
-            spl_autoload_register(array($this, 'load'), true, $prepend);
+            spl_autoload_register(array($this, '__invoke'), true, $prepend);
             $this->isRegistered = true;
         }
         return $this;

@@ -2,9 +2,9 @@
 
 namespace Europa\View;
 use Europa\Config\Config;
-use Europa\Di\Locator as ServiceLocator;
+use Europa\Di\Locator;
 use Europa\Filter\ClassNameFilter;
-use Europa\Fs\Locator as FsLocator;
+use Europa\Fs\Locator\LocatorArray;
 use Exception;
 use LogicException;
 use RuntimeException;
@@ -85,9 +85,11 @@ class Php implements ViewScriptInterface
      * @var array | Config
      */
     private $config = [
-        'helper.configs' => [
-            ['prefix' => 'Helper\\'],
-            ['prefix' => 'Europa\View\Helper\\']
+        'helperLocator' => [
+            'filters' => [
+                'Europa\Filter\ClassNameFilter' => ['prefix' => 'Helper\\'],
+                'Europa\Filter\ClassNameFilter' => ['prefix' => 'Europa\View\Helper\\']
+            ]
         ]
     ];
 
@@ -101,12 +103,8 @@ class Php implements ViewScriptInterface
     public function __construct($config = [])
     {
         $this->config  = new Config($this->config, $config);
-        $this->locator = new FsLocator;
-        $this->helpers = new ServiceLocator;
-
-        foreach ($this->config->helper->configs as $config) {
-            $this->helpers->getFilter()->add(new ClassNameFilter($config));
-        }
+        $this->locator = new LocatorArray;
+        $this->helpers = new Locator($this->config->helperLocator);
     }
 
     /**

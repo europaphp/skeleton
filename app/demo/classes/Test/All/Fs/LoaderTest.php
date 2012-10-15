@@ -1,8 +1,8 @@
 <?php
 
 namespace Test\All\Fs;
-use Europa\Fs\Loader;
-use Europa\Fs\Locator;
+use Europa\Fs\Loader\ClassLoader;
+use Europa\Fs\Locator\Locator;
 use Testes\Test\UnitAbstract;
 
 class LoaderTest extends UnitAbstract
@@ -11,29 +11,33 @@ class LoaderTest extends UnitAbstract
     
     public function setUp()
     {
-        $this->loader = new Loader;
+        $this->loader = new ClassLoader;
         $this->loader->register();
-        $this->loader->getLocator()->addPath(dirname(__FILE__) . '/../..');
+        $this->loader->getLocator()->add(function($file) {
+            return realpath(dirname(__FILE__) . '/../../' . $file . '.php');
+        });
     }
     
     public function testRegisterAutoload()
     {
         $funcs = spl_autoload_functions();
+        
         foreach ($funcs as $func) {
             if (is_array($func)
-                && $func[0] instanceof Loader
+                && $func[0] instanceof ClassLoader
                 && $func[1] === 'load'
             ) {
                 return;
             }
         }
+
         $this->assert(false, 'Unable to register autoloading.');
     }
     
     public function testLoadClass()
     {
         $this->assert(
-            $this->loader->load('Europa\Request\Http'),
+            $this->loader->__invoke('Europa\Request\Http'),
             'Unable to load class.'
         );
     }
@@ -41,7 +45,7 @@ class LoaderTest extends UnitAbstract
     public function testLoadOldStyleNamespacedClass()
     {
         $this->assert(
-            $this->loader->load('Test_Provider_Fs_TestClass'),
+            $this->loader->__invoke('Test_Provider_Fs_TestClass'),
             'Unable to load old style namespaced class.'
         );
     }

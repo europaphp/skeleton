@@ -1,38 +1,54 @@
 <?php
 
 namespace Europa\View;
+use Europa\Config\Config;
 use Europa\Request\Http;
 use Europa\Request\RequestInterface;
 
 class Negotiator
 {
     /**
-     * The name of the JSONP callback parameter in the request.
-     * 
-     * @var string
-     */
-    private $callback = 'callback';
-
-    /**
-     * Maps a request URI suffix to the method that returns its view.
-     * 
-     * @var array
-     */
-    private $suffixMap = [
-        'json' => 'resolveJson',
-        'xml'  => 'resolveXml'
-    ];
-
-    /**
      * Maps a request content type to the method that returns its view.
      * 
      * @var array
      */
-    private $typeMap = [
-        'application/json'       => 'resolveJson',
-        'application/javascript' => 'resolveJson',
-        'text/xml'               => 'resolveXml'
+    private $config = [
+        'actionParamName'        => 'action',
+        'controllerParamName'    => 'controller',
+        'jsonpCallbackParamName' => 'callback',
+        'phpView'                => [
+            'helper.filter' => []
+        ],
+        'suffixMap' => [
+            'json' => 'resolveJson',
+            'xml'  => 'resolveXml'
+        ],
+        'typeMap' => [
+            'application/json'       => 'resolveJson',
+            'application/javascript' => 'resolveJson',
+            'text/xml'               => 'resolveXml'
+        ]
     ];
+
+    /**
+     * The filter that is used to return the appropriate view script using the supplied request.
+     * 
+     * @var callable
+     */
+    private $viewScriptFilter;
+
+    /**
+     * Sets up a new negotiator.
+     * 
+     * @var mixed $config The negotiator configuration.
+     * 
+     * @return Negotiator
+     */
+    public function __construct($config = [])
+    {
+        $this->config = new Config($this->config, $config);
+        $this->viewScriptFilter = [$this, 'viewScriptFilter'];
+    }
 
     /**
      * Decides what type of view to return based on the specified request.
@@ -49,19 +65,51 @@ class Negotiator
 
             // Specifying a suffix overrides the Accept header.
             if ($suffix = $container->request->getUri()->getSuffix()) {
-                $method = $this->suffixMap[$suffix];
-            } elseif ($type = $container->request->accepts(array_keys($this->typeMap))) {
-                $method = $this->typeMap[$type];
+                $method = $this->config->suffixMap[$suffix];
+            } elseif ($type = $container->request->accepts(array_keys($this->config->typeMap->export()))) {
+                $method = $this->config->typeMap[$type];
             }
 
             // Only render a different view if one exists.
             if ($method && method_exists($this, $method)) {
-                return $this->$method($request);
+                $view = $this->$method($request);
             }
         }
 
         // Default to using a PHP view.
-        return $this->resolvePhp($request);
+        if (!$view) {
+            $view = $this->resolvePhp($request);
+        }
+
+        // Sets the view script based on the request.
+        if ($view instanceof ViewScriptInterface) {
+            $view->setScript(call_user_func($this->viewScriptFilter, $request));
+        }
+
+        return $view;
+    }
+
+    /**
+     * Sets the filter used to return the path to the view script.
+     * 
+     * @param callable $viewScriptFilter The view script filter.
+     * 
+     * @return Negotiator
+     */
+    public function setViewScriptFilter(callable $viewScriptFilter)
+    {
+        $this->viewScriptFilter = $viewScriptFilter;
+        return $this;
+    }
+
+    /**
+     * Returns the view script filter.
+     * 
+     * @return callable
+     */
+    public function getViewScriptFilter()
+    {
+        return $this->viewScriptFilter;
     }
 
     /**
@@ -89,7 +137,7 @@ class Negotiator
      */
     private function resolvePhp($request)
     {
-        return new Php;
+        return new Php($this->config->phpView);
     }
 
     /**
@@ -102,5 +150,21 @@ class Negotiator
     private function resolveXml($request)
     {
         return new Xml;
+    }
+
+    /**
+     * The default view script filter.
+     * 
+     * @param RequestInterface $request The request to use to resolve the correct view script.
+     * 
+     * @return string
+     */
+    private function viewScriptFilter(RequestInterface $request)
+    {
+        return ($request->isCli() ? 'cli' : 'web')
+            . '/'
+            . $request->getParam($this->config->controllerParamName)
+            . '/'
+            . $request->getParam($this->config->actionParamName);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Europa\Di;
 use Closure;
+use Europa\Config\Config;
 use Europa\Filter\ClassResolutionFilter;
 use Europa\Reflection\ClassReflector;
 use LogicException;
@@ -44,15 +45,27 @@ class Locator extends Container
      * @var ClassResolutionFilter
      */
     private $filter;
+
+    /**
+     * Default configuration.
+     * 
+     * @var array | Config
+     */
+    private $config = [
+        'filters' => [
+            'Europa\Filter\ClassNameFilter' => []
+        ]
+    ];
     
     /**
      * Sets up a new locator.
      * 
      * @return Locator
      */
-    public function __construct()
+    public function __construct($config = [])
     {
-        $this->filter = new ClassResolutionFilter;
+        $this->config = new Config($this->config, $config);
+        $this->filter = new ClassResolutionFilter($this->config->filters);
     }
 
     /**
