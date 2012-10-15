@@ -2,10 +2,10 @@
 
 namespace Test\All\Router;
 use Closure;
-use Europa\Router\Provider\Ini;
+use Europa\Router\Adapter\Ini;
 use Europa\Router\Router;
-use Europa\Router\RegexRoute;
-use Europa\Router\TokenRoute;
+use Europa\Router\Route\Regex;
+use Europa\Router\Route\Token;
 use Exception;
 use Testes\Test\UnitAbstract;
 
@@ -14,11 +14,11 @@ class RouterTest extends UnitAbstract
     public function manipulatingRoutes()
     {
         $router = new Router;
-        $router['test1'] = new RegexRoute('/^$/', '', ['controller' => 'index']);
-        $router['test2'] = new TokenRoute('test/:test', ['controller' => 'test']);
+        $router['test1'] = new Regex('/^$/', ['controller' => 'index']);
+        $router['test2'] = new Token('test/:test', ['controller' => 'test']);
         
-        $this->assert($router['test1'] instanceof RegexRoute, 'First route was not bound.');
-        $this->assert($router['test2'] instanceof TokenRoute, 'Second route was not bound.');
+        $this->assert($router['test1'] instanceof Regex, 'First route was not bound.');
+        $this->assert($router['test2'] instanceof Token, 'Second route was not bound.');
         
         unset($router['test1']);
         
@@ -32,11 +32,6 @@ class RouterTest extends UnitAbstract
     {
         $router = new Router;
         $routes = new Ini(__DIR__ . '/../../Provider/Router/routes.ini');
-        $routes->setFactory(function() {
-            return function($query) {
-                return preg_match('/someroute/', $query) ? true : false;
-            };
-        });
         
         foreach ($routes as $name => $route) {
             $router[$name] = $route;
@@ -49,9 +44,9 @@ class RouterTest extends UnitAbstract
         $this->assert($router('someroute'), 'Router should have matched query.');
     }
 
-    public function tokenRoutes()
+    public function Tokens()
     {
-        $route = new TokenRoute('my/route/:param1/(:param2)/(:param3)/test');
+        $route = new Token('my/route/:param1/(:param2)/(:param3)/test');
 
         $result = $route('my/route/value1/test');
         $this->assert($result && $result['param1'] === 'value1');
@@ -95,15 +90,6 @@ class RouterTest extends UnitAbstract
         try {
             new Ini('oiasdiojgoi39j3jj93o39e');
             $this->assert(false, 'The INI provider should throw an exception if the file does not exist.');
-        } catch (Exception $e) {}
-    }
-
-    public function badProviderFactory()
-    {
-        try {
-            $routes = new Ini(__DIR__ . '/../../Provider/Router/routes.ini');
-            $routes->setFactory('oiasdiojgoi39j3jj93o39e');
-            $this->assert(false, 'The INI provider should throw an exception if the factory is not valid.');
         } catch (Exception $e) {}
     }
 }

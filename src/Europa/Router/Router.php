@@ -1,7 +1,9 @@
 <?php
 
 namespace Europa\Router;
+use ArrayAccess;
 use ArrayIterator;
+use Countable;
 use Europa\Config\Config;
 use Europa\Filter\ClassNameFilter;
 use Europa\Filter\MethodNameFilter;
@@ -9,6 +11,7 @@ use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
 use Europa\Request\RequestInterface;
 use Europa\Router\Route\Token;
+use IteratorAggregate;
 use InvalidArgumentException;
 use LogicException;
 use RuntimeException;
@@ -21,7 +24,7 @@ use RuntimeException;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Router implements RouterInterface
+class Router implements ArrayAccess, Countable, IteratorAggregate
 {
     /**
      * The request filter used to turn a request into a string.
@@ -48,47 +51,21 @@ class Router implements RouterInterface
     }
     
     /**
-     * Routes the specified request.
+     * Queries the router.
      * 
-     * @param RequestInterface $request The request to route.
+     * @param string $query The query to route.
      * 
      * @return callable | void
      */
-    public function __invoke(RequestInterface $request)
+    public function __invoke($query)
     {
-        $requestString = call_user_func($this->requestFilter, $request);
-
         foreach ($this->routes as $route) {
-            if (is_array($matched = call_user_func($route, $requestString))) {
-                $request->setParams($matched);
-                return true;
+            if (is_array($matched = call_user_func($route, $query))) {
+                return $matched;
             }   
         }
 
         return false;
-    }
-
-    /**
-     * Sets the request filter.
-     * 
-     * @param callable $filter The filter.
-     * 
-     * @return Router
-     */
-    public function setRequestFilter(callable $filter)
-    {
-        $this->requestFilter = $filter;
-        return $this;
-    }
-
-    /**
-     * Returns the request filter.
-     * 
-     * @return mixed
-     */
-    public function getRequestFilter()
-    {
-        return $this->requestFilter;
     }
 
     /**
@@ -217,15 +194,5 @@ class Router implements RouterInterface
     public function getIterator()
     {
         return new ArrayIterator($this->routes);
-    }
-
-    /**
-     * The default request filter.
-     * 
-     * @return string
-     */
-    private function requestFilter(RequestInterface $request)
-    {
-        return $request->getMethod() . ' ' . $request->getUri()->getRequestPart();
     }
 }

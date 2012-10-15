@@ -51,10 +51,6 @@ abstract class ControllerAbstract
         if (method_exists($this, 'init')) {
             $this->init();
         }
-
-        foreach ($this->filters as $filter) {
-            call_user_func($filter, $method);
-        }
     }
 
     /**
@@ -80,9 +76,13 @@ abstract class ControllerAbstract
         }
 
         $action = new MethodReflector($this, $hasAction ? $action : $default);
+
+        foreach ($this->filters as $filter) {
+            call_user_func($filter, $this, $params);
+        }
         
         foreach ($this->getFiltersFor($action) as $filter) {
-            call_user_func($filter, $action);
+            call_user_func($filter, $this, $params);
         }
         
         return $action->invokeArgs($this, $params);
@@ -113,7 +113,7 @@ abstract class ControllerAbstract
         $filters = [];
 
         foreach ($reflector->getDocBlock()->getTags('filter') as $filter) {
-            $parts = explode(' ', $filter->getValue(), 2);
+            $parts = explode(' ', $filter->value(), 2);
             $class = trim($parts[0]);
             $value = isset($parts[1]) ? trim($parts[1]) : '';
 

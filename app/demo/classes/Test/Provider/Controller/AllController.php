@@ -1,11 +1,11 @@
 <?php
 
 namespace Test\Provider\Controller;
-use Europa\Controller\RestController;
+use Europa\Controller\ControllerAbstract;
 
-class AllController extends RestController
+class AllController extends ControllerAbstract
 {
-    public function all()
+    public function action()
     {
 
     }

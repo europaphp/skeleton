@@ -1,9 +1,9 @@
 <?php
 
 namespace Test\Provider\Controller;
-use Europa\Controller\RestController;
+use Europa\Controller\ControllerAbstract;
 
-class BadController extends RestController
+class BadController extends ControllerAbstract
 {
     /**
      * @filter Some\Non\Existent\Filter

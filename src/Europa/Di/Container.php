@@ -4,6 +4,7 @@ namespace Europa\Di;
 use Europa\Reflection\ClassReflector;
 use Exception;
 use LogicException;
+use UnexpectedValueException;
 
 /**
  * The application service locator and container.

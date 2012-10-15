@@ -118,7 +118,7 @@ class Http extends RequestAbstract
      */
     public function __toString()
     {
-        return $this->uri->getRequest();
+        return strtoupper($this->getMethod()) . ' ' . $this->getUri()->getRequest();
     }
     
     /**

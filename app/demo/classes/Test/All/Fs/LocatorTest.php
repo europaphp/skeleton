@@ -11,6 +11,6 @@ class LocatorTest extends UnitAbstract
         $loc = new Locator;
         $loc->setBasePath(dirname(__FILE__) . '/../..');
         $loc->addPath('Provider');
-        $this->assert($loc->locate('Fs/TestClass'), 'The locator should have found the provider test class.');
+        $this->assert($loc('Fs/TestClass'), 'The locator should have found the provider test class.');
     }
 }

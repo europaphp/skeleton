@@ -23,7 +23,7 @@ class Test extends ControllerAbstract
      * 
      * @return void
      */
-    public function all($test = 'Test', $untested = false, $analyze = null)
+    public function action($test = 'Test', $untested = false, $analyze = null)
     {
         // start covering tests
         $analyzer = new Coverage;

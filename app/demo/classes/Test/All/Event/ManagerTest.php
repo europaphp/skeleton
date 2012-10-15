@@ -54,16 +54,6 @@ class ManagerTest extends UnitAbstract
         $this->assert(!$called, 'The disptacher did not unbind the test event.');
     }
     
-    public function customEventByString()
-    {
-        $data         = new stdClass;
-        $data->called = false;
-        
-        (new Manager)->bind('test', 'Test\Provider\Event\CustomEvent')->trigger('test', [$data]);
-        
-        $this->assert($data->called, 'The manager did not trigger the custom event.');
-    }
-    
     public function customEventByInstance()
     {
         $data         = new stdClass;

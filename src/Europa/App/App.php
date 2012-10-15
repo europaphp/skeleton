@@ -56,6 +56,8 @@ class App
     private $router;
 
     private $viewNegotiator;
+
+    private $requestFilter;
     
     /**
      * Constructs a new application.
@@ -73,6 +75,7 @@ class App
         $this->response          = RequestAbstract::isCli() ? new CliResponse : new HttpResponse;
         $this->router            = new Router;
         $this->viewNegotiator    = new Negotiator($this->request);
+        $this->requestFilter     = [$this, 'requestFilter'];
 
         $this->controllerLocator->getFilter()->add(new ClassNameFilter($this->config->controller));
     }
@@ -84,7 +87,7 @@ class App
      */
     public function __invoke()
     {
-        $this->runRouter()->runResponse($this->runView($this->runController()));
+        $this->runResponse($this->runView($this->runController($this->runRouter())));
         return $this;
     }
 
@@ -164,6 +167,17 @@ class App
     {
         return $this->viewNegotiator;
     }
+
+    public function setRequestFilter(callable $requestFilter)
+    {
+        $this->requestFilter = $requestFilter;
+        return $this;
+    }
+
+    public function getRequestFilter()
+    {
+        return $this->requestFilter;
+    }
     
     /**
      * Routes the request.
@@ -172,15 +186,18 @@ class App
      */
     private function runRouter()
     {
+        $context = [];
+
         $this->event->trigger($this->config->events->route->pre, [$this]);
 
         if ($this->router) {
-            call_user_func($this->router, $this->request);
+            $context = call_user_func($this->router, call_user_func($this->requestFilter, $this->request));
+            $context = is_array($context) ? $context : [];
         }
         
         $this->event->trigger($this->config->events->route->post, [$this, $context]);
 
-        return $this;
+        return array_merge($this->request->getParams(), $context);
     }
 
     /**
@@ -188,7 +205,7 @@ class App
      * 
      * @return array
      */
-    public function runController()
+    public function runController(array $context)
     {
         $this->event->trigger($this->config->events->action->pre, [$this]);
         
@@ -243,5 +260,10 @@ class App
         $this->event->trigger($this->config->events->send->post, [$this, $rendered]);
         
         return $this;
+    }
+
+    private function requestFilter(RequestInterface $request)
+    {
+        return $request->__toString();
     }
 }

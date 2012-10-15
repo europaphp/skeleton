@@ -36,7 +36,6 @@ class DocBlock
      */
     private $map = [
         'author' => 'Europa\Reflection\DocTag\AuthorTag',
-        'filter' => 'Europa\Reflection\DocTag\FilterTag',
         'param'  => 'Europa\Reflection\DocTag\ParamTag',
         'return' => 'Europa\Reflection\DocTag\ReturnTag',
         'throws' => 'Europa\Reflection\DocTag\ThrowsTag',

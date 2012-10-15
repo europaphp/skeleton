@@ -1,12 +1,12 @@
 <?php
 
 namespace Test\Provider\Controller;
-use Europa\Controller\RestController;
+use Europa\Controller\ControllerAbstract;
 
 /**
  * @filter Test\Provider\Controller\ClassFilter Args
  */
-class Controller extends RestController
+class Controller extends ControllerAbstract
 {
     public $id;
     
