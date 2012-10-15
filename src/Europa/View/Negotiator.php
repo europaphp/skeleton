@@ -123,7 +123,7 @@ class Negotiator
      */
     private function resolveJson($request)
     {
-        if ($callback = $request->getParam($this->callback)) {
+        if ($callback = $request->getParam($this->config->jsonpCallbackParamName)) {
             return new Jsonp($callback);
         }
 
