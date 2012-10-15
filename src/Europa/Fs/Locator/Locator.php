@@ -14,12 +14,7 @@ use LogicException;
  */
 class Locator
 {
-    /**
-     * The default file suffix.
-     * 
-     * @var string
-     */
-    const DEFAULT_SUFFIX = 'php';
+    const SUFFIX = 'php';
 
     /**
      * The base path to make all paths relative to. If not supplied, it is not used.
@@ -27,6 +22,13 @@ class Locator
      * @var string
      */
     private $base;
+
+    /**
+     * The default suffix to use.
+     * 
+     * @var string
+     */
+    private $suffix = self::SUFFIX;
     
     /**
      * Contains all load paths that Europa\RouteLoader will use when searching for a file.
@@ -61,7 +63,7 @@ class Locator
         }
 
         // first check against the base path
-        if ($fullpath = realpath($this->base . '/' . $file . '.' . self::DEFAULT_SUFFIX)) {
+        if ($fullpath = realpath($this->base . '/' . $file . '.' . $this->suffix)) {
             return $fullpath;
         }
         
@@ -142,10 +144,12 @@ class Locator
      * 
      * @return Locator
      */
-    public function setMap(array $maps)
+    public function setMap($maps)
     {
-        foreach ($maps as $map => $file) {
-            $this->map($map, $file);
+        if (is_array($maps) || is_object($maps)) {
+            foreach ($maps as $map => $file) {
+                $this->map($map, $file);
+            }
         }
         
         return $this;
@@ -161,7 +165,7 @@ class Locator
      * 
      * @return Locator
      */
-    public function addPath($path, $suffix = self::DEFAULT_SUFFIX, $test = true)
+    public function addPath($path, $suffix = self::SUFFIX, $test = true)
     {
         // normalize the path relative to the base
         $real = realpath($this->base ? $this->base . DIRECTORY_SEPARATOR . $path : $path);
@@ -185,19 +189,22 @@ class Locator
      * Adds multiple paths. If specifying a suffix, the path is the key and suffix is the value. Otherwise the path can
      * be supplied as the value.
      * 
-     * @param array $paths The paths to add.
+     * @param mixed $paths The paths to add.
+     * @param bool  $test  Check if path exists.
      * 
      * @return Locator
      */
-    public function addPaths(array $paths, $test = true)
+    public function addPaths($paths, $test = true)
     {
-        foreach ($paths as $path => $suffix) {
-            if (is_numeric($path)) {
-                $path   = $suffix;
-                $suffix = self::DEFAULT_SUFFIX;
-            }
+        if (is_array($paths) || is_object($paths)) {
+            foreach ($paths as $path => $suffix) {
+                if (is_numeric($path)) {
+                    $path   = $suffix;
+                    $suffix = self::$this->suffix;
+                }
 
-            $this->addPath($path, $suffix, $test);
+                $this->addPath($path, $suffix, $test);
+            }
         }
 
         return $this;

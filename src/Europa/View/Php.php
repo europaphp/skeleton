@@ -175,7 +175,7 @@ class Php implements ViewScriptInterface
     {
         // locate the script if there is a locator
         if ($this->locator) {
-            $script = call_user_func($this->locator, $this->script) ?: $script;
+            $script = call_user_func($this->locator, $this->script) ?: $this->script;
         }
         
         // ensure the script can be found

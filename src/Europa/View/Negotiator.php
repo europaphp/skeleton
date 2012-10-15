@@ -59,14 +59,16 @@ class Negotiator
      */
     public function __invoke(RequestInterface $request)
     {
+        $view = null;
+
         // We only negotiate a content type if the request is using Http.
-        if ($container->request instanceof Http) {
+        if ($request instanceof Http) {
             $method = null;
 
             // Specifying a suffix overrides the Accept header.
-            if ($suffix = $container->request->getUri()->getSuffix()) {
+            if ($suffix = $request->getUri()->getSuffix()) {
                 $method = $this->config->suffixMap[$suffix];
-            } elseif ($type = $container->request->accepts(array_keys($this->config->typeMap->export()))) {
+            } elseif ($type = $request->accepts(array_keys($this->config->typeMap->export()))) {
                 $method = $this->config->typeMap[$type];
             }
 
@@ -161,9 +163,7 @@ class Negotiator
      */
     private function viewScriptFilter(RequestInterface $request)
     {
-        return ($request->isCli() ? 'cli' : 'web')
-            . '/'
-            . $request->getParam($this->config->controllerParamName)
+        return $request->getParam($this->config->controllerParamName)
             . '/'
             . $request->getParam($this->config->actionParamName);
     }

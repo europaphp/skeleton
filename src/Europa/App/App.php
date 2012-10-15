@@ -37,7 +37,9 @@ class App
      * @var array | Config
      */
     private $config = [
-        'controllerParam'    => 'controller',
+        'controller' => [
+            'param' => 'controller'
+        ],
         'controllerLocator'  => [
             'filters' => [
                 'Europa\Filter\ClassNameFilter' => ['prefix' => 'Controller\\']
@@ -121,6 +123,11 @@ class App
         $this->router            = new Router($this->config->router);
         $this->viewNegotiator    = new Negotiator($this->config->viewNegotiator);
         $this->requestFilter     = [$this, 'requestFilter'];
+
+        // Pass on the controller configuration.
+        $this->controllerLocator->args('Europa\Controller\ControllerAbstract', function() {
+            return [$this->config->controller];
+        });
     }
 
     /**
@@ -326,8 +333,8 @@ class App
     {
         $this->event->trigger($this->config->events->action->pre, [$this]);
         
-        $controller = $this->request->getParam($this->config->controllerParam);
-
+        $controller = $this->request->getParam($this->config->controller->param);
+        
         try {
             $controller = call_user_func($this->controllerLocator, $controller);
         } catch (Exception $e) {

@@ -12,7 +12,7 @@ class ControllerTest extends UnitAbstract
 {
     public function actioning()
     {
-        $controller = new Controller(new Http);
+        $controller = new Controller;
         $request    = new Http;
 
         $request->setParams([

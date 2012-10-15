@@ -4,7 +4,6 @@ namespace Europa\Router;
 use ArrayAccess;
 use ArrayIterator;
 use Countable;
-use Europa\Config\Config;
 use Europa\Filter\ClassNameFilter;
 use Europa\Filter\MethodNameFilter;
 use Europa\Reflection\ClassReflector;
@@ -122,7 +121,7 @@ class Router implements ArrayAccess, Countable, IteratorAggregate
     public function offsetSet($name, $route)
     {
         if (is_string($route)) {
-            $route = new Token($route, [$this->config->params->controller => $name]);
+            $route = new Token($route);
         } elseif (!is_callable($route)) {
             throw new InvalidArgumentException(sprintf('The route specified as "%s" is not callable.', $name));
         }

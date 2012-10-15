@@ -178,7 +178,7 @@ class Config implements ConfigInterface
 
     private function parseOptionValue($value)
     {
-        if (is_string($value) && $value[0] === '=') {
+        if (is_string($value) && isset($value[0]) && $value[0] === '=') {
             preg_match_all('/\{([^{]+)\}/', $value, $holders);
 
             foreach ($holders[1] as $holder) {

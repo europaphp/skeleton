@@ -12,10 +12,17 @@ class Module implements ModuleInterface
 {
     private $config = [
         'bootstrap' => 'bootstrap.php',
-        'classes'   => 'classes',
         'config'    => 'configs/config.ini',
-        'langs'     => 'langs/en-us',
-        'views'     => 'views'
+        'paths.classes' => [
+            'classes' => 'php',
+        ],
+        'paths.langs' => [
+            'langs/en-us' => 'ini'
+        ],
+        'paths.views' => [
+            'views/cli' => 'php',
+            'views/web' => 'php'
+        ]
     ];
 
     private $name;
@@ -118,18 +125,21 @@ class Module implements ModuleInterface
     private function initClassLocator()
     {
         $this->classLocator = new Locator;
-        $this->classLocator->setBasePath($this->path . '/' . $this->config->classes, true);
+        $this->classLocator->setBasePath($this->path);
+        $this->classLocator->addPaths($this->config->paths->classes);
     }
 
     private function initLangLocator()
     {
         $this->langLocator = new Locator;
-        $this->langLocator->setBasePath($this->path . '/' . $this->config->langs);
+        $this->langLocator->setBasePath($this->path);
+        $this->langLocator->addPaths($this->config->paths->langs);
     }
 
     private function initViewLocator()
     {
         $this->viewLocator = new Locator;
-        $this->viewLocator->setBasePath($this->path . '/' . $this->config->views);
+        $this->viewLocator->setBasePath($this->path);
+        $this->viewLocator->addPaths($this->config->paths->views);
     }
 }
