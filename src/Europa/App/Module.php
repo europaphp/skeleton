@@ -1,25 +1,27 @@
 <?php
 
-namespace Europa\Module;
+namespace Europa\App;
 use Europa\Config\Config;
-use Europa\Config\Adapter\Ini;
-use Europa\Config\ConfigInterface;
+use Europa\Config\Adapter\Ini as ConfigIni;
 use Europa\Fs\Locator\Locator;
 use Europa\Lang\Lang;
+use Europa\Router\Adapter\Ini as RouterIni;
+use Europa\Router\Router;
 use UnexpectedValueException;
 
 class Module implements ModuleInterface
 {
-    private $config = [
+    private $internalConfig = [
         'bootstrap' => 'bootstrap.php',
         'config'    => 'configs/config.ini',
-        'paths.classes' => [
-            'classes' => 'php',
+        'routes'    => 'configs/routes.ini',
+        'classes'   => [
+            'classes' => 'php'
         ],
-        'paths.langs' => [
+        'langs' => [
             'langs/en-us' => 'ini'
         ],
-        'paths.views' => [
+        'views' => [
             'views/cli' => 'php',
             'views/web' => 'php'
         ]
@@ -29,11 +31,13 @@ class Module implements ModuleInterface
 
     private $path;
 
-    private $moduleConfig;
+    private $config;
 
     private $classLocator;
 
     private $langLocator;
+
+    private $routes = [];
 
     private $viewLocator;
 
@@ -43,29 +47,20 @@ class Module implements ModuleInterface
             throw new UnexpectedValueException(sprintf('The path "%s" does not exist.', $path));
         }
 
-        $this->name   = basename($this->path);
-        $this->config = new Config($this->config, $config);
+        $this->name = basename($this->path);
+
+        $this->internalConfig = new Config($this->internalConfig, $config);
 
         $this->initConfig();
         $this->initClassLocator();
         $this->initLangLocator();
+        $this->initRoutes();
         $this->initViewLocator();
     }
 
-    public function name()
+    public function getName()
     {
         return $this->name;
-    }
-
-    public function path()
-    {
-        return $this->path;
-    }
-
-    public function setConfig(ConfigInterface $config)
-    {
-        $this->config = $config;
-        return $this;
     }
 
     public function getConfig()
@@ -73,21 +68,14 @@ class Module implements ModuleInterface
         return $this->config;
     }
 
-    public function setClassLocator(callable $locator)
-    {
-        $this->classLocator = $locator;
-        return $this;
-    }
-
     public function getClassLocator()
     {
         return $this->classLocator;
     }
 
-    public function setLangLocator(callable $locator)
+    public function getInternalConfig()
     {
-        $this->langLocator = $locator;
-        return $this;
+        return $this->internalConfig;
     }
 
     public function getLangLocator()
@@ -95,10 +83,9 @@ class Module implements ModuleInterface
         return $this->langLocator;
     }
 
-    public function setViewLocator(callable $locator)
+    public function getRoutes()
     {
-        $this->viewLocator = $locator;
-        return $this;
+        return $this->routes;
     }
 
     public function getViewLocator()
@@ -108,7 +95,7 @@ class Module implements ModuleInterface
 
     public function bootstrap()
     {
-        if (file_exists($path = $this->path . '/' . $this->config->bootstrap)) {
+        if (file_exists($path = $this->path . '/' . $this->internalConfig->bootstrap)) {
             require_once $path;
         }
 
@@ -117,8 +104,10 @@ class Module implements ModuleInterface
 
     private function initConfig()
     {
-        if (is_file($path = $this->path . '/' . $this->config->config)) {
-            $this->moduleConfig = new Config(new Ini($path));
+        $this->config = new Config;
+
+        if (is_file($path = $this->path . '/' . $this->internalConfig->config)) {
+            $this->config->import(new ConfigIni($path));
         }
     }
 
@@ -126,20 +115,27 @@ class Module implements ModuleInterface
     {
         $this->classLocator = new Locator;
         $this->classLocator->setBasePath($this->path);
-        $this->classLocator->addPaths($this->config->paths->classes);
+        $this->classLocator->addPaths($this->internalConfig->classes);
     }
 
     private function initLangLocator()
     {
         $this->langLocator = new Locator;
         $this->langLocator->setBasePath($this->path);
-        $this->langLocator->addPaths($this->config->paths->langs);
+        $this->langLocator->addPaths($this->internalConfig->langs);
+    }
+
+    private function initRoutes()
+    {
+        if (is_file($path = $this->path . '/' . $this->internalConfig->routes)) {
+            $this->routes = new RouterIni($path);
+        }
     }
 
     private function initViewLocator()
     {
         $this->viewLocator = new Locator;
         $this->viewLocator->setBasePath($this->path);
-        $this->viewLocator->addPaths($this->config->paths->views);
+        $this->viewLocator->addPaths($this->internalConfig->views);
     }
 }

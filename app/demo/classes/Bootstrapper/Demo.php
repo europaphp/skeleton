@@ -22,8 +22,8 @@ class Demo extends BootstrapperAbstract
      * @var Config
      */
     private $config = [
-        'errors.level' => E_ALL,
-        'errors.show'  => true
+        'error.level' => E_ALL,
+        'error.show'  => true
     ];
 
     /**
@@ -45,7 +45,7 @@ class Demo extends BootstrapperAbstract
      */
     public function errorReporting()
     {
-        ini_set('display_errors', $this->config->errors->show ? 'on' : 'off');
-        error_reporting($this->config->errors->level);
+        ini_set('display_errors', $this->config->error->show ? 'on' : 'off');
+        error_reporting($this->config->error->level);
     }
 }

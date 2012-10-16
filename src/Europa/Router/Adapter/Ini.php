@@ -2,7 +2,6 @@
 
 namespace Europa\Router\Adapter;
 use ArrayIterator;
-use Europa\Router\TokenRoute;
 use InvalidArgumentException;
 
 /**
@@ -13,7 +12,7 @@ use InvalidArgumentException;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Ini
+class Ini implements AdapterInterface
 {
     /**
      * The Ini file path.
@@ -44,5 +43,15 @@ class Ini
     public function __invoke()
     {
         return parse_ini_file($this->file);
+    }
+
+    /**
+     * Returns an iterator of routes.
+     * 
+     * @return ArrayIterator
+     */
+    public function getIterator()
+    {
+        return new ArrayIterator($this->__invoke());
     }
 }

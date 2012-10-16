@@ -21,7 +21,7 @@ use RuntimeException;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Php implements ViewScriptInterface
+class Php extends ViewScriptAbstract
 {
     /**
      * The child script that was rendered, if any.
@@ -45,13 +45,6 @@ class Php implements ViewScriptInterface
     private $extendStack = array();
     
     /**
-     * The locator to use for locating view scripts.
-     * 
-     * @var LocatorInterface
-     */
-    private $locator;
-    
-    /**
      * The child script.
      * 
      * @var string
@@ -64,13 +57,6 @@ class Php implements ViewScriptInterface
      * @var string
      */
     private $parentScript;
-    
-    /**
-     * The script to render.
-     * 
-     * @var string
-     */
-    private $script;
 
     /**
      * The context to render.
@@ -103,7 +89,6 @@ class Php implements ViewScriptInterface
     public function __construct($config = [])
     {
         $this->config  = new Config($this->config, $config);
-        $this->locator = new LocatorArray;
         $this->helpers = new Locator($this->config->helperLocator);
     }
 
@@ -119,49 +104,8 @@ class Php implements ViewScriptInterface
         try {
             return call_user_func($this->helpers, $name);
         } catch (Exception $e) {
-            throw new RuntimeException(sprintf('The helper "%s" could be returned with message: %s', $name, $e->getMessage()));
+            throw new RuntimeException(sprintf('The helper "%s" could not be returned with message: %s', $name, $e->getMessage()));
         }
-    }
-    
-    /**
-     * Normalises and sets the script to render.
-     * 
-     * @return Php
-     */
-    public function setScript($script)
-    {
-        $this->script = str_replace('\\', '/', $script);
-        return $this;
-    }
-    
-    /**
-     * Returns the set script.
-     * 
-     * @return string
-     */
-    public function getScript()
-    {
-        return $this->script;
-    }
-    
-    /**
-     * Returns the parent script.
-     * 
-     * @return string
-     */
-    public function getParentScript()
-    {
-        return $this->parentScript;
-    }
-    
-    /**
-     * Returns the child script.
-     * 
-     * @return string
-     */
-    public function getChildScript()
-    {
-        return $this->childScript;
     }
     
     /**
@@ -173,13 +117,8 @@ class Php implements ViewScriptInterface
      */
     public function render(array $context = [])
     {
-        // locate the script if there is a locator
-        if ($this->locator) {
-            $script = call_user_func($this->locator, $this->script) ?: $this->script;
-        }
-        
         // ensure the script can be found
-        if (!is_file($script)) {
+        if (!$script = $this->locateScript()) {
             throw new RuntimeException(sprintf('The script "%s" could not be located.', $this->script));
         }
 
@@ -287,29 +226,6 @@ class Php implements ViewScriptInterface
         $this->parentScript = $parent;
         
         return $this;
-    }
-    
-    /**
-     * Sets the script locator.
-     * 
-     * @param callable $locator The locator to use.
-     * 
-     * @return Php
-     */
-    public function setScriptLocator(callable $locator)
-    {
-        $this->locator = $locator;
-        return $this;
-    }
-    
-    /**
-     * Returns the script locator.
-     * 
-     * @return LocatorInterface
-     */
-    public function getScriptLocator()
-    {
-        return $this->locator;
     }
     
     /**

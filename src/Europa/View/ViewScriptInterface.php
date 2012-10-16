@@ -27,4 +27,27 @@ interface ViewScriptInterface extends ViewInterface
      * @return string
      */
     public function getScript();
+
+    /**
+     * Sets the script locator.
+     * 
+     * @param callable $scriptLocator The locator to use.
+     * 
+     * @return ViewScriptAbstract
+     */
+    public function setScriptLocator(callable $locator);
+
+    /**
+     * Returns the script locator.
+     * 
+     * @return callable
+     */
+    public function getScriptLocator();
+
+    /**
+     * Locates the view script using the set locator.
+     * 
+     * @return string
+     */
+    public function locateScript();
 }

@@ -1,12 +1,17 @@
 <?php
 
 namespace Europa\App;
+use ArrayAccess;
+use ArrayIterator;
+use IteratorAggregate;
 use LogicException;
 use Europa\Config\Config;
 use Europa\Di\ContainerInterface;
 use Europa\Di\Locator;
 use Europa\Event\Manager;
 use Europa\Filter\ClassNameFilter;
+use Europa\Fs\Loader\ClassLoader;
+use Europa\Fs\Locator\LocatorArray;
 use Europa\Request\Cli as CliRequest;
 use Europa\Request\Http as HttpRequest;
 use Europa\Request\RequestInterface;
@@ -17,52 +22,56 @@ use Europa\Response\ResponseInterface;
 use Europa\Router\Router;
 use Europa\Router\RouterInterface;
 use Europa\View\Negotiator;
+use Europa\View\ViewScriptInterface;
 use Exception;
 use RuntimeException;
 use UnexpectedValueException;
 
-/**
- * Runs the application.
- * 
- * @category App
- * @package  Europa
- * @author   Trey Shugart <treshugart@gmail.com>
- * @license  http://europaphp.org/license
- */
-class App
+class App implements AppInterface, ArrayAccess, IteratorAggregate
 {
+    const EVENT_ROUTE_PRE = 'route.pre';
+
+    const EVENT_ROUTE_POST = 'route.post';
+
+    const EVENT_ACTION_PRE = 'action.pre';
+
+    const EVENT_ACTION_POST = 'action.post';
+
+    const EVENT_RENDER_PRE = 'render.pre';
+
+    const EVENT_RENDER_POST = 'render.post';
+
+    const EVENT_SEND_PRE = 'send.pre';
+
+    const EVENT_SEND_POST = 'send.post';
+
     /**
      * The application configuration.
      * 
      * @var array | Config
      */
     private $config = [
-        'controller' => [
-            'param' => 'controller'
-        ],
-        'controllerLocator'  => [
+        'controller.default' => 'index',
+        'controller.error'   => 'error',
+        'config.controllerContainer'  => [
             'filters' => [
                 'Europa\Filter\ClassNameFilter' => ['prefix' => 'Controller\\']
             ]
         ],
-        'events.action.pre'  => 'action.pre',
-        'events.action.post' => 'action.post',
-        'events.render.pre'  => 'render.pre',
-        'events.render.post' => 'render.post',
-        'events.route.pre'   => 'route.pre',
-        'events.route.post'  => 'route.post',
-        'events.send.pre'    => 'send.pre',
-        'events.send.post'   => 'send.post',
-        'router'             => [],
-        'viewNegotiator'     => []
+        'config.router'         => [],
+        'config.viewNegotiator' => [],
+        'paths.root'            => '..',
+        'paths.app'             => '={root}/app'
     ];
+
+    private $classLoader;
 
     /**
      * The locator used to locate a controller.
      * 
      * @var callable
      */
-    private $controllerLocator;
+    private $controllerContainer;
 
     /**
      * The event manager.
@@ -70,6 +79,20 @@ class App
      * @var ManagerInterface
      */
     private $event;
+
+    /**
+     * The language file locator.
+     * 
+     * @var callable
+     */
+    private $langLocator;
+
+    /**
+     * The list of application modules.
+     * 
+     * @var array
+     */
+    private $modules = [];
 
     /**
      * The request.
@@ -93,41 +116,99 @@ class App
     private $router;
 
     /**
-     * The view negotiator.
+     * Locator used to find view scripts.
+     * 
+     * @var callable
+     */
+    private $viewLocator;
+
+    /**
+     * The view negotiator used to return the appropriate view for the given request.
      * 
      * @var callable
      */
     private $viewNegotiator;
 
     /**
-     * The request filter.
+     * The view script filter responsible for returning a default script for a `ViewScriptInterface`.
      * 
      * @var callable
      */
-    private $requestFilter;
-    
+    private $viewScriptFilter;
+
     /**
-     * Constructs a new application.
+     * Sets up a new application.
      * 
-     * @param mixed $config The configuration.
+     * @param array | object $config The application configuration.
      * 
      * @return App
      */
     public function __construct($config = [])
     {
-        $this->config            = new Config($this->config, $config);
-        $this->controllerLocator = new Locator($this->config->controllerLocator);
-        $this->event             = new Manager;
-        $this->request           = RequestAbstract::isCli() ? new CliRequest : new HttpRequest;
-        $this->response          = RequestAbstract::isCli() ? new CliResponse : new HttpResponse;
-        $this->router            = new Router($this->config->router);
-        $this->viewNegotiator    = new Negotiator($this->config->viewNegotiator);
-        $this->requestFilter     = [$this, 'requestFilter'];
+        $this->initConfig($config);
+        $this->initClassLoader();
+        $this->initControllerContainer();
+        $this->initEvent();
+        $this->initLangLocator();
+        $this->initRequest();
+        $this->initResponse();
+        $this->initRouter();
+        $this->initViewLocator();
+        $this->initViewNegotiator();
+        $this->initViewScriptFilter();
+    }
 
-        // Pass on the controller configuration.
-        $this->controllerLocator->args('Europa\Controller\ControllerAbstract', function() {
-            return [$this->config->controller];
-        });
+    /**
+     * @see self->offsetSet()
+     */
+    public function __set($name, $value)
+    {
+        $this->offsetSet($name, $value);
+    }
+
+    /**
+     * @see self->offsetGet()
+     */
+    public function __get($name)
+    {
+        return $this->offsetGet($name);
+    }
+
+    /**
+     * @see self->offsetExists()
+     */
+    public function __isset($name)
+    {
+        return $this->offsetExists($name);
+    }
+
+    /**
+     * @see self->offsetUnset()
+     */
+    public function __unset($name)
+    {
+        $this->offsetUnset($name);
+    }
+
+    /**
+     * Bootstraps the application.
+     * 
+     * @return App
+     */
+    public function bootstrap()
+    {
+        $this->classLoader->register();
+
+        foreach ($this->modules as $module) {
+            $this->classLoader->getLocator()->add($module->getClassLocator());
+            $this->langLocator->add($module->getLangLocator());
+            $this->viewLocator->add($module->getViewLocator());
+            $this->router->import($module->getRoutes());
+            
+            $module->bootstrap();
+        }
+
+        return $this;
     }
 
     /**
@@ -135,22 +216,82 @@ class App
      * 
      * @return App
      */
-    public function __invoke()
+    public function run()
     {
-        $this->runResponse($this->runView($this->runController($this->runRouter())));
-        return $this;
+        return $this->runRouter()->runResponse($this->runView($this->runController()));
+    }
+
+    /**
+     * Registers a module.
+     * 
+     * @param mixed                    $offset The module index.
+     * @param string | ModuleInterface $module The module to register.
+     * 
+     * @return App
+     */
+    public function offsetSet($offset, $module)
+    {
+        if (!$module instanceof ModuleInterface) {
+            $module = new Module($this->config->paths->app . '/' . $module);
+        }
+
+        $this->modules[$offset] = $module;
+    }
+
+    /**
+     * Returns the specified module or throws an exception if it does not exist.
+     * 
+     * @param mixed $offset The module offset.
+     * 
+     * @return ModuleInterface
+     * 
+     * @throws LogicException If the module does not exist.
+     */
+    public function offsetGet($offset)
+    {
+        if (isset($this->modules[$offset])) {
+            return $this->modules[$offset];
+        }
+
+        throw new LogicException(sprintf('The module at offset "%s" does not exist.', $offset));
+    }
+
+    /**
+     * Returns whether or not the module exists.
+     * 
+     * @param mixed $offset The module offset.
+     * 
+     * @return bool
+     */
+    public function offsetExists($offset)
+    {
+        return isset($this->modules[$offset]);
+    }
+
+    /**
+     * Removes the module if it exists.
+     * 
+     * @param mixed $offset The module offset.
+     * 
+     * @return bool
+     */
+    public function offsetUnset($offset)
+    {
+        if (isset($this->modules[$offset])) {
+            unset($this->modules[$offset]);
+        }
     }
 
     /**
      * Sets the controller locator.
      * 
-     * @param callable $controllerLocator The locator used for finding a controller.
+     * @param callable $controllerContainer The locator used for finding a controller.
      * 
      * @return App
      */
-    public function setControllerLocator(callable $controllerLocator)
+    public function setControllerContainer(callable $controllerContainer)
     {
-        $this->controllerLocator = $controllerLocator;
+        $this->controllerContainer = $controllerContainer;
         return $this;
     }
 
@@ -159,9 +300,9 @@ class App
      * 
      * @return callable
      */
-    public function getControllerLocator()
+    public function getControllerContainer()
     {
-        return $this->controllerLocator;
+        return $this->controllerContainer;
     }
 
     /**
@@ -301,6 +442,29 @@ class App
     {
         return $this->requestFilter;
     }
+
+    /**
+     * Sets the filter used to return the path to the view script.
+     * 
+     * @param callable $viewScriptFilter The view script filter.
+     * 
+     * @return Negotiator
+     */
+    public function setViewScriptFilter(callable $viewScriptFilter)
+    {
+        $this->viewScriptFilter = $viewScriptFilter;
+        return $this;
+    }
+
+    /**
+     * Returns the view script filter.
+     * 
+     * @return callable
+     */
+    public function getViewScriptFilter()
+    {
+        return $this->viewScriptFilter;
+    }
     
     /**
      * Routes the request.
@@ -309,19 +473,13 @@ class App
      */
     private function runRouter()
     {
-        $context = [];
+        $this->event->trigger(self::EVENT_ROUTE_PRE, [$this]);
 
-        $this->event->trigger($this->config->events->route->pre, [$this]);
-
-        if ($this->router) {
-            $context = call_user_func($this->requestFilter, $this->request);
-            $context = call_user_func($this->router, $context);
-            $context = is_array($context) ? $context : [];
-        }
+        call_user_func($this->router, $this->request);
         
-        $this->event->trigger($this->config->events->route->post, [$this, $context]);
+        $this->event->trigger(self::EVENT_ROUTE_POST, [$this]);
 
-        return array_merge($this->request->getParams(), $context);
+        return $this;
     }
 
     /**
@@ -329,21 +487,31 @@ class App
      * 
      * @return array
      */
-    public function runController(array $context)
+    private function runController()
     {
-        $this->event->trigger($this->config->events->action->pre, [$this]);
-        
-        $controller = $this->request->getParam($this->config->controller->param);
+        $this->event->trigger(self::EVENT_ACTION_PRE, [$this]);
+
+        $default   = $this->config->controller->default;
+        $error     = $this->config->controller->error;
+        $specified = $this->request->hasParam(self::PARAM_CONTROLLER);
+        $detected  = $specified ? $this->request->getParam(self::PARAM_CONTROLLER) : $default;
         
         try {
-            $controller = call_user_func($this->controllerLocator, $controller);
+            $controller = call_user_func($this->controllerContainer, $detected);
+            $controller = call_user_func($controller, $this->request);
         } catch (Exception $e) {
-            throw new RuntimeException(sprintf('The controller "%s" could not be found in the supplied service locator.', $controller));
+            $this->request->setParam(self::PARAM_EXCEPTION, $e);
+            $controller = call_user_func($this->controllerContainer, $error);
+            $controller = call_user_func($controller, $this->request);
+        } catch (Exception $e) {
+            if ($specified) {
+                throw new RuntimeException(sprintf('The specified controller "%s" could not be found in the application controller container. Tried using the default "%s" and error "%s" controllers, but they were not found either.', $detected, $default, $error));
+            }
+            
+            throw new RuntimeException(sprintf('No controller was found in the request or router. Additionally, no default "%s" or error "%s" controllers were found in the application controller container.', $default, $error));
         }
 
-        $controller = call_user_func($controller, $this->request->getParams());
-
-        $this->event->trigger($this->config->events->action->post, [$this, $controller]);
+        $this->event->trigger(self::EVENT_ACTION_POST, [$this, $controller]);
 
         return $controller ?: [];
     }
@@ -358,12 +526,17 @@ class App
     private function runView(array $context)
     {
         $view = call_user_func($this->viewNegotiator, $this->request);
+
+        if ($view instanceof ViewScriptInterface) {
+            $view->setScript(call_user_func($this->viewScriptFilter, $this->request));
+            $view->setScriptLocator($this->viewLocator);
+        }
         
-        $this->event->trigger($this->config->events->render->pre, [$this, $view]);
+        $this->event->trigger(self::EVENT_RENDER_PRE, [$this, $view]);
         
         $rendered = $view->render($context);
         
-        $this->event->trigger($this->config->events->render->post, [$this, $rendered]);
+        $this->event->trigger(self::EVENT_RENDER_POST, [$this, $rendered]);
         
         return $rendered;
     }
@@ -377,17 +550,139 @@ class App
      */
     private function runResponse($rendered)
     {
-        $this->event->trigger($this->config->events->send->pre, [$this, $rendered]);
+        $this->event->trigger(self::EVENT_SEND_PRE, [$this, $rendered]);
         
         $this->response->setBody($rendered)->send();
         
-        $this->event->trigger($this->config->events->send->post, [$this, $rendered]);
+        $this->event->trigger(self::EVENT_SEND_POST, [$this, $rendered]);
         
         return $this;
     }
 
-    private function requestFilter(RequestInterface $request)
+    /**
+     * Allows you to iterate over the app.
+     * 
+     * @return ArrayIterator
+     */
+    public function getIterator()
     {
-        return $request->__toString();
+        return new ArrayIterator($this->modules);
+    }
+
+    /**
+     * Sets a default class loader.
+     * 
+     * @return void
+     */
+    private function initClassLoader()
+    {
+        $this->classLoader = new ClassLoader;
+    }
+
+    /**
+     * Sets the default configuration and merges in the custom config.
+     * 
+     * @param array | object $config The custom configuration.
+     * 
+     * @return void
+     */
+    private function initConfig($config)
+    {
+        $this->config = new Config($this->config, $config);
+    }
+
+    /**
+     * Sets a default controller container.
+     * 
+     * @return void
+     */
+    private function initControllerContainer()
+    {
+        $this->controllerContainer = new Locator($this->config->config->controllerContainer);
+        $this->controllerContainer->args('Europa\Controller\ControllerAbstract', function() {
+            return [$this->config->config->controller];
+        });
+    }
+
+    /**
+     * Sets a default event manager.
+     * 
+     * @return void
+     */
+    private function initEvent()
+    {
+        $this->event = new Manager;
+    }
+
+    /**
+     * Sets a default language file locator.
+     * 
+     * @return void
+     */
+    private function initLangLocator()
+    {
+        $this->langLocator = new LocatorArray;
+    }
+
+    /**
+     * Sets a default request based on how the app was accessed.
+     * 
+     * @return void
+     */
+    private function initRequest()
+    {
+        $this->request = RequestAbstract::isCli() ? new CliRequest : new HttpRequest;
+    }
+
+    /**
+     * Sets a default response based on how the app was accessed.
+     * 
+     * @return void
+     */
+    private function initResponse()
+    {
+        $this->response = RequestAbstract::isCli() ? new CliResponse : new HttpResponse;
+    }
+
+    /**
+     * Sets a default router.
+     * 
+     * @return void
+     */
+    private function initRouter()
+    {
+        $this->router = new Router($this->config->config->router);
+    }
+
+    /**
+     * Sets a default view locator used to locate view scripts for anything implementing Europa\View\ViewScriptInterface.
+     * 
+     * @return void
+     */
+    private function initViewLocator()
+    {
+        $this->viewLocator = new LocatorArray;
+    }
+
+    /**
+     * Sets a default view negotiator that is used to return the appropriate view for the given request.
+     * 
+     * @return void
+     */
+    private function initViewNegotiator()
+    {
+        $this->viewNegotiator = new Negotiator($this->config->config->viewNegotiator);
+    }
+
+    /**
+     * Sets a default view script filter.
+     * 
+     * @return void
+     */
+    private function initViewScriptFilter()
+    {
+        $this->viewScriptFilter = function($request) {
+            return $request->getParam(AppInterface::PARAM_CONTROLLER) . '/' . $request->getParam(AppInterface::PARAM_ACTION);
+        };
     }
 }

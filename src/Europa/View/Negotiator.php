@@ -83,35 +83,7 @@ class Negotiator
             $view = $this->resolvePhp($request);
         }
 
-        // Sets the view script based on the request.
-        if ($view instanceof ViewScriptInterface) {
-            $view->setScript(call_user_func($this->viewScriptFilter, $request));
-        }
-
         return $view;
-    }
-
-    /**
-     * Sets the filter used to return the path to the view script.
-     * 
-     * @param callable $viewScriptFilter The view script filter.
-     * 
-     * @return Negotiator
-     */
-    public function setViewScriptFilter(callable $viewScriptFilter)
-    {
-        $this->viewScriptFilter = $viewScriptFilter;
-        return $this;
-    }
-
-    /**
-     * Returns the view script filter.
-     * 
-     * @return callable
-     */
-    public function getViewScriptFilter()
-    {
-        return $this->viewScriptFilter;
     }
 
     /**
@@ -152,19 +124,5 @@ class Negotiator
     private function resolveXml($request)
     {
         return new Xml;
-    }
-
-    /**
-     * The default view script filter.
-     * 
-     * @param RequestInterface $request The request to use to resolve the correct view script.
-     * 
-     * @return string
-     */
-    private function viewScriptFilter(RequestInterface $request)
-    {
-        return $request->getParam($this->config->controllerParamName)
-            . '/'
-            . $request->getParam($this->config->actionParamName);
     }
 }

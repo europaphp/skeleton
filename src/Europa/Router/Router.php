@@ -9,7 +9,7 @@ use Europa\Filter\MethodNameFilter;
 use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
 use Europa\Request\RequestInterface;
-use Europa\Router\Route\Token;
+use Europa\Router\Route\Regex;
 use IteratorAggregate;
 use InvalidArgumentException;
 use LogicException;
@@ -26,9 +26,9 @@ use RuntimeException;
 class Router implements ArrayAccess, Countable, IteratorAggregate
 {
     /**
-     * The request filter used to turn a request into a string.
+     * The filter used to turn the request into a string that can be passed to the router.
      * 
-     * @var mixed
+     * @var callable
      */
     private $requestFilter;
 
@@ -46,7 +46,9 @@ class Router implements ArrayAccess, Countable, IteratorAggregate
      */
     public function __construct()
     {
-        $this->requestFilter = [$this, 'requestFilter'];
+        $this->requestFilter = function($request) {
+            return $request->__toString();
+        };
     }
     
     /**
@@ -56,11 +58,14 @@ class Router implements ArrayAccess, Countable, IteratorAggregate
      * 
      * @return callable | void
      */
-    public function __invoke($query)
+    public function __invoke(RequestInterface $request)
     {
+        $query = call_user_func($this->requestFilter, $request);
+
         foreach ($this->routes as $route) {
             if (is_array($matched = call_user_func($route, $query))) {
-                return $matched;
+                $request->setParams($matched);
+                return true;
             }   
         }
 
@@ -76,10 +81,6 @@ class Router implements ArrayAccess, Countable, IteratorAggregate
      */
     public function import($routes)
     {
-        if (is_callable($routes)) {
-            $routes = call_user_func($routes);
-        }
-
         if (is_array($routes) || is_object($routes)) {
             foreach ($routes as $name => $route) {
                 $this->offsetSet($name, $route);
@@ -121,9 +122,13 @@ class Router implements ArrayAccess, Countable, IteratorAggregate
     public function offsetSet($name, $route)
     {
         if (is_string($route)) {
-            $route = new Token($route);
+            $route = new Regex($route);
         } elseif (!is_callable($route)) {
             throw new InvalidArgumentException(sprintf('The route specified as "%s" is not callable.', $name));
+        }
+
+        if (!$name) {
+            $name = count($this->routes);
         }
 
         $this->routes[$name] = $route;

@@ -1,10 +1,11 @@
 <?php
 
 namespace Europa\Controller;
-use Europa\Config\Config;
+use Europa\App\AppInterface;
 use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
 use Europa\Reflection\ReflectorInterface;
+use Europa\Request\RequestInterface;
 use LogicException;
 
 /**
@@ -18,15 +19,11 @@ use LogicException;
 abstract class ControllerAbstract
 {
     /**
-     * Controler configuration.
+     * The action parameter name.
      * 
-     * @var array | Config
+     * @var string
      */
-    private $config = [
-        'action.default'   => 'action',
-        'action.param'     => 'action',
-        'filters.enable'   => true
-    ];
+    const ACTION = 'action';
 
     /**
      * List of validators on the controller.
@@ -42,8 +39,6 @@ abstract class ControllerAbstract
      */
     public function __construct($config = [])
     {
-        $this->config = new Config($this->config, $config);
-
         foreach ($this->getFiltersFor(new ClassReflector($this)) as $filter) {
             $this->addFilter($filter);
         }
@@ -56,36 +51,33 @@ abstract class ControllerAbstract
     /**
      * Invokes the controller calling the action specified in the request.
      * 
-     * @param array $params The params to use.
+     * @param RequestInterface $request The request to use.
      * 
      * @return array
      */
-    public function __invoke(array $params = [])
+    public function __invoke(RequestInterface $request)
     {
-        $action  = $this->config->action->param;
-        $action  = isset($params[$action]) ? $params[$action] : null;
-        $default = $this->config->action->default;
-
-        $hasAction  = $action && method_exists($this, $action);
-        $hasDefault = $default && method_exists($this, $default);
+        $action     = $request->getParam(AppInterface::PARAM_ACTION);
+        $hasAction  = method_exists($this, $action);
+        $hasDefault = method_exists($this, self::ACTION);
 
         if (!$action && !$hasDefault) {
-            throw new LogicException(sprintf('No action was found and the default action "%s->%s()" does not exist.', get_class($this), $default));
+            throw new LogicException(sprintf('No action was found and the default action "%s->%s()" does not exist.', get_class($this), self::ACTION));
         } elseif (!$hasAction && !$hasDefault) {
-            throw new LogicException(sprintf('Both action "%s->%s()" and the default action "%s->%s()" do not exist.', get_class($this), $action, get_class($this), $default));
+            throw new LogicException(sprintf('Both action "%s->%s()" and the default action "%s->%s()" do not exist.', get_class($this), $action, get_class($this), self::ACTION));
         }
 
-        $action = new MethodReflector($this, $hasAction ? $action : $default);
+        $action = new MethodReflector($this, $hasAction ? $action : self::ACTION);
 
         foreach ($this->filters as $filter) {
-            call_user_func($filter, $this, $params);
+            call_user_func($filter, $this, $request);
         }
         
         foreach ($this->getFiltersFor($action) as $filter) {
-            call_user_func($filter, $this, $params);
+            call_user_func($filter, $this, $request);
         }
         
-        return $action->invokeArgs($this, $params);
+        return $action->invokeArgs($this, $request->getParams());
     }
 
     /**

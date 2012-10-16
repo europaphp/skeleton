@@ -31,7 +31,7 @@ class Error extends ControllerAbstract
      * 
      * @return array
      */
-    public function all()
+    public function action()
     {
         $uri = Uri::detect();
 
