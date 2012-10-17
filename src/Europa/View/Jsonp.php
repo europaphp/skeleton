@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\View;
+use Europa\Config\Config;
 
 /**
  * A view class for rendering JSONP data from bound parameters.
@@ -13,18 +14,11 @@ namespace Europa\View;
 class Jsonp extends Json
 {
     /**
-     * The default JSONP callback.
+     * The configuration
      * 
-     * @var string
+     * @var array | Config
      */
-    const CALLBACK = 'callback';
-
-    /**
-     * The callback function name to wrap the JSON data in.
-     * 
-     * @var string
-     */
-    private $callback;
+    private $config;
 
     /**
      * Sets up a new JSONP view.
@@ -33,9 +27,9 @@ class Jsonp extends Json
      * 
      * @return Jsonp
      */
-    public function __construct($callback = self::CALLBACK)
+    public function __construct($config = [])
     {
-        $this->callback = $callback;
+        $this->config = new Config($this->config, $config);
     }
 
     /**
@@ -43,7 +37,7 @@ class Jsonp extends Json
      * 
      * @return string
      */    
-    public function render(array $context = array())
+    public function __invoke(array $context = array())
     {
         return $this->callback . '(' . parent::render($context) . ')';
     }

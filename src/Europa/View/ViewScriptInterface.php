@@ -10,7 +10,7 @@ namespace Europa\View;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-interface ViewScriptInterface extends ViewInterface
+interface ViewScriptInterface
 {
     /**
      * Sets the script to be rendered.

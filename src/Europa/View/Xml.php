@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa\View;
-use Europa\View;
+use Europa\Config\Config;
 
 /**
  * A view class for rendering JSON data from bound parameters.
@@ -11,7 +11,7 @@ use Europa\View;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Xml implements ViewInterface
+class Xml
 {
     /**
      * Configuration array.
@@ -36,7 +36,7 @@ class Xml implements ViewInterface
      */
     public function __construct(array $config = [])
     {
-        $this->config = array_merge($this->config, $config);
+        $this->config = new Config($this->config, $config);
     }
     
     /**
@@ -44,15 +44,15 @@ class Xml implements ViewInterface
      * 
      * @return string
      */
-    public function render(array $context = [])
+    public function __invoke(array $context = [])
     {
         $str = '';
         
-        if ($this->config['declare']) {
+        if ($this->config->declare) {
             $str = '<?xml version="'
-                . $this->config['version']
+                . $this->config->version
                 . '" encoding="'
-                . $this->config['encoding']
+                . $this->config->encoding
                 . '" ?>'
                 . PHP_EOL;
         }
@@ -74,7 +74,7 @@ class Xml implements ViewInterface
      */
     private function renderNode($name, $content, $level = 0)
     {
-        $keys = $this->config['numericKeyName'];
+        $keys = $this->config->numericKeyName;
         
         // translate a numeric key to a replacement key
         if (is_numeric($name)) {
@@ -113,7 +113,7 @@ class Xml implements ViewInterface
      */
     private function indent($level)
     {
-        $indent = $this->config['spaces'];
+        $indent = $this->config->spaces;
         $indent = $indent ? str_repeat(' ', $indent) : "\t";
         return str_repeat($indent, $level);
     }

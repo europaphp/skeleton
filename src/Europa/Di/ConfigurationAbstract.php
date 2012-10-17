@@ -5,11 +5,11 @@ use ArrayIterator;
 use Europa\Reflection\ClassReflector;
 use IteratorAggregate;
 
-abstract class ConfigurationAbstract implements ConfigurationInterface, IteratorAggregate
+abstract class ConfigurationAbstract implements IteratorAggregate
 {
     private $methods;
 
-    public function configure(ContainerInterface $container)
+    public function __invoke(ContainerInterface $container)
     {
         foreach ($this as $method) {
             $container->__set($method, function() use ($method) {

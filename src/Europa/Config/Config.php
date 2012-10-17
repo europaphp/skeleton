@@ -2,7 +2,7 @@
 
 namespace Europa\Config;
 use ArrayIterator;
-use LogicException;
+use Europa\Exception\Exception;
 
 class Config implements ConfigInterface
 {
@@ -108,12 +108,17 @@ class Config implements ConfigInterface
     public function import($config)
     {
         $this->checkReadonly();
+        
+        if (is_string($config)) {
+            $adapter = pathinfo($config, PATHINFO_EXTENSION);
+            $adapter = 'Europa\Config\Adapter\\' . ucfirst($adapter);
 
-        if (is_callable($config)) {
-            $config = call_user_func($config);
-        }
+            if (!class_exists($adapter)) {
+                Exception::toss('The config adapter "%s" does not exist.', $adapter);
+            }
 
-        if (is_array($config) || is_object($config)) {
+            $this->import(new $adapter($config));
+        } elseif (is_array($config) || is_object($config)) {
             foreach ($config as $name => $value) {
                 $this->offsetSet($name, $value);
             }
@@ -141,6 +146,16 @@ class Config implements ConfigInterface
         return $config;
     }
 
+    public function keys()
+    {
+        return array_keys($this->config);
+    }
+
+    public function values()
+    {
+        return array_values($this->config);
+    }
+
     public function readonly($switch = true)
     {
         $this->readonly = $switch ? true : false;
@@ -158,11 +173,7 @@ class Config implements ConfigInterface
                 $config = $config->offsetGet($part);
 
                 if (!$config instanceof ConfigInterface) {
-                    throw new LogicException(sprintf(
-                        'Dot-notated configuration value part "%s" of "%s" must be a configuration object.',
-                        $part,
-                        implode('.', $names) . '.' . $name
-                    ));
+                    Exception::toss('Dot-notated configuration value part "%s" of "%s" must be a configuration object.', $part, implode('.', $names) . '.' . $name);
                 }
             }
 
@@ -194,7 +205,7 @@ class Config implements ConfigInterface
     private function checkReadonly()
     {
         if ($this->readonly) {
-            throw new LogicException('Cannot modify the configuration because it is readonly.');
+            Exception::toss('Cannot modify the configuration because it is readonly.');
         }
     }
 }

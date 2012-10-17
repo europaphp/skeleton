@@ -18,6 +18,20 @@ use Europa\Filter\CamelCaseSplitFilter;
 class Http extends ResponseAbstract implements Countable, IteratorAggregate
 {
     /**
+     * The content type header name.
+     * 
+     * @var string
+     */
+    const CONTENT_TYPE = 'Content-Type';
+
+    /**
+     * The location header name.
+     * 
+     * @var string
+     */
+    const LOCATION = 'Location';
+
+    /**
      * The HTML content type.
      *
      * @var string
@@ -30,6 +44,20 @@ class Http extends ResponseAbstract implements Countable, IteratorAggregate
      * @var string
      */
     const JSON = 'application/json';
+
+    /**
+     * The JSONP content type.
+     * 
+     * @var string
+     */
+    const JSONP = 'application/javascript';
+
+    /**
+     * The XML content type.
+     *
+     * @var string
+     */
+    const XML = 'text/xml';
     
     /**
      * The OK status code.
@@ -37,13 +65,20 @@ class Http extends ResponseAbstract implements Countable, IteratorAggregate
      * @var int
      */
     const OK = 200;
-    
+
     /**
-     * The XML content type.
-     *
-     * @var string
+     * The NOT_FOUND status code.
+     * 
+     * @var int
      */
-    const XML = 'text/xml';
+    const NOT_FOUND = 404;
+
+    /**
+     * The INTERNAL_SERVER_ERROR status code.
+     * 
+     * @var int
+     */
+    const INTERNAL_SERVER_ERROR = 500;
     
     /**
      * The camel case split filter.
@@ -65,6 +100,18 @@ class Http extends ResponseAbstract implements Countable, IteratorAggregate
      * @var int
      */
     private $status = self::OK;
+
+    /**
+     * Sets the view content type mapping.
+     * 
+     * @var array
+     */
+    private $viewContentTypeMap = [
+        'Europa\View\Json'  => self::JSON,
+        'Europa\View\Jsonp' => self::JSONP,
+        'Europa\View\Php'   => self::HTML,
+        'Europa\View\Xml'   => self::XML
+    ];
     
     /**
      * Sets up a new response object.
@@ -201,6 +248,92 @@ class Http extends ResponseAbstract implements Countable, IteratorAggregate
     {
         $this->headers = [];
         return $this;
+    }
+
+    /**
+     * Sets the content type.
+     * 
+     * @param string $type The content type.
+     * 
+     * @return Http
+     */
+    public function setContentType($type)
+    {
+        return $this->setHeader(self::CONTENT_TYPE, $type);
+    }
+
+    /**
+     * Returns the content type.
+     * 
+     * @return string
+     */
+    public function getContentType()
+    {
+        return $this->getHeader(self::CONTENT_TYPE);
+    }
+
+    /**
+     * Sets the response content type using a view.
+     * 
+     * @param mixed $view The view to use.
+     * 
+     * @return Http
+     */
+    public function setContentTypeFromView($view)
+    {
+        return $this->setContentType($this->getViewContentType($view));
+    }
+
+    /**
+     * Sets the content type that the specified view should be rendered as.
+     * 
+     * @param string $view The view class name.
+     * @param string $type The content type.
+     * 
+     * @return Http
+     */
+    public function setViewContentType($view, $type)
+    {
+        $this->viewContentTypeMap[$view] = $type;
+        return $this;
+    }
+
+    /**
+     * Returns the content type the view should be rendered as.
+     * 
+     * @return string
+     */
+    public function getViewContentType($view)
+    {
+        if (is_object($view)) {
+            if ($type = $this->getViewContentType($view)) {
+                return $type;
+            }
+        }
+
+        return self::HTML;
+    }
+
+    /**
+     * Sets the value of the "Location" header.
+     * 
+     * @param string $location The location to set.
+     * 
+     * @return Http
+     */
+    public function setLocation($location)
+    {
+        return $this->setHeader(self::LOCATION, $location);
+    }
+
+    /**
+     * Returns the value of the "Location" header.
+     * 
+     * @return string
+     */
+    public function getLocation()
+    {
+        return $this->getHeader(self::LOCATION);
     }
     
     /**

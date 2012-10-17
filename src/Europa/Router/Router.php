@@ -4,16 +4,9 @@ namespace Europa\Router;
 use ArrayAccess;
 use ArrayIterator;
 use Countable;
-use Europa\Filter\ClassNameFilter;
-use Europa\Filter\MethodNameFilter;
-use Europa\Reflection\ClassReflector;
-use Europa\Reflection\MethodReflector;
+use Europa\Exception\Exception;
 use Europa\Request\RequestInterface;
-use Europa\Router\Route\Regex;
 use IteratorAggregate;
-use InvalidArgumentException;
-use LogicException;
-use RuntimeException;
 
 /**
  * Default request router implementation.
@@ -26,30 +19,11 @@ use RuntimeException;
 class Router implements ArrayAccess, Countable, IteratorAggregate
 {
     /**
-     * The filter used to turn the request into a string that can be passed to the router.
-     * 
-     * @var callable
-     */
-    private $requestFilter;
-
-    /**
      * The array of routes to match.
      * 
      * @var array
      */
     private $routes = array();
-
-    /**
-     * Sets up the router.
-     * 
-     * @return Router
-     */
-    public function __construct()
-    {
-        $this->requestFilter = function($request) {
-            return $request->__toString();
-        };
-    }
     
     /**
      * Queries the router.
@@ -60,16 +34,11 @@ class Router implements ArrayAccess, Countable, IteratorAggregate
      */
     public function __invoke(RequestInterface $request)
     {
-        $query = call_user_func($this->requestFilter, $request);
-
-        foreach ($this->routes as $route) {
-            if (is_array($matched = call_user_func($route, $query))) {
-                $request->setParams($matched);
-                return true;
+        foreach ($this->routes as $name => $route) {
+            if ($controller = call_user_func($route, $name, $request)) {
+                return $controller;
             }   
         }
-
-        return false;
     }
 
     /**
@@ -81,7 +50,16 @@ class Router implements ArrayAccess, Countable, IteratorAggregate
      */
     public function import($routes)
     {
-        if (is_array($routes) || is_object($routes)) {
+        if (is_string($routes)) {
+            $adapter = pathinfo($routes, PATHINFO_EXTENSION);
+            $adapter = 'Europa\Router\Adapter\\' . ucfirst($adapter);
+
+            if (!class_exists($adapter)) {
+                Exception::toss('The router adapter "%s" does not exist.', $adapter);
+            }
+
+            $this->import(new $adapter($routes));
+        } elseif (is_array($routes) || is_object($routes)) {
             foreach ($routes as $name => $route) {
                 $this->offsetSet($name, $route);
             }
@@ -121,10 +99,8 @@ class Router implements ArrayAccess, Countable, IteratorAggregate
      */
     public function offsetSet($name, $route)
     {
-        if (is_string($route)) {
-            $route = new Regex($route);
-        } elseif (!is_callable($route)) {
-            throw new InvalidArgumentException(sprintf('The route specified as "%s" is not callable.', $name));
+        if (!is_callable($route)) {
+            $route = new Route($route);
         }
 
         if (!$name) {

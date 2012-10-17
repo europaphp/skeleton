@@ -1,9 +1,9 @@
 <?php
 
-use Europa\Di\Container;
-
 define('EUROPA_START_TIME', microtime());
 
-require_once __DIR__ . '/../app/bootstrap.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
-Container::europa()->app->run();
+$app   = new Europa\App\App;
+$app[] = 'demo';
+$app();

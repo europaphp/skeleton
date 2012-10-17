@@ -1,22 +1,6 @@
 <?php
 
 namespace Europa\Fs;
-use Europa\Fs\Locator\Locator;
-
-/**
- * Default autoload registration for library files.
- * 
- * @return void
- */
-spl_autoload_register(function($class) {
-    $file = str_replace(['\\', '_'], DIRECTORY_SEPARATOR, $class);
-    $file = $file . '.php';
-    $file = __DIR__ . '/../../' . $file;
-    
-    if ($real = realpath($file)) {
-        include $real;
-    }
-});
 
 /**
  * Handles class loading.
@@ -29,27 +13,36 @@ spl_autoload_register(function($class) {
 class Loader
 {
     /**
-     * Whether or not the loader is registered as an autoloader.
-     * 
-     * @var bool
-     */
-    private $isRegistered = false;
-
-    /**
      * The locator to use for locating class files.
      * 
      * @var LocatorInterface
      */
     private $locator;
-    
+
     /**
-     * Sets up the loader.
+     * Loads a class if it can find it and returns whether or not it was loaded.
+     * 
+     * @param string $class The class to search for.
      * 
      * @return Loader
      */
-    public function __construct()
+    public function __invoke($class)
     {
-        $this->locator = new Locator;
+        if (class_exists($class, false)) {
+            return true;
+        }
+        
+        if ($this->locator && $file = call_user_func($this->locator, $class . '.php')) {
+            include $file;
+            return true;
+        }
+
+        if (is_file($file = __DIR__ . '/../../' . $class . '.php')) {
+            include $file;
+            return true;
+        }
+        
+        return false;
     }
     
     /**
@@ -74,44 +67,26 @@ class Loader
     {
         return $this->locator;
     }
-    
+
     /**
-     * Searches for a class, loads it if it is found and returns whether or not it was loaded.
+     * Returns whether or not the loader has a locator.
      * 
-     * The Europa install directory is searched first. If it is not found and a locator is defined, the locator is used
-     * to locate the class.
-     * 
-     * @param string $class The class to search for.
+     * @return bool
+     */
+    public function hasLocator()
+    {
+        return isset($this->locator);
+    }
+
+    /**
+     * Removes the locator from the loader.
      * 
      * @return Loader
      */
-    public function load($class)
+    public function removeLocator()
     {
-        if (class_exists($class, false)) {
-            return true;
-        }
-        
-        if ($class = $this->resolve($class)) {
-            include $class;
-            return true;
-        }
-        
-        return false;
-    }
-    
-    /**
-     * Resolves the path to the specified class.
-     * 
-     * @param string $class The class to find.
-     * 
-     * @return mixed
-     */
-    public function resolve($class)
-    {
-        if ($this->locator && $fullpath = call_user_func($this->locator, $this->normalize($class))) {
-            return $fullpath;
-        }
-        return false;
+        $this->locator = null;
+        return $this;
     }
     
     /**
@@ -123,24 +98,7 @@ class Loader
      */
     public function register($prepend = false)
     {
-        if (!$this->isRegistered) {
-            spl_autoload_register(array($this, 'load'), true, $prepend);
-            $this->isRegistered = true;
-        }
+        spl_autoload_register(array($this, '__invoke'), true, $prepend);
         return $this;
-    }
-    
-    /**
-     * Normalizes the file.
-     * 
-     * @param string $file The file to normalize.
-     * 
-     * @return string
-     */
-    private function normalize($class)
-    {
-        $file = str_replace(array('\\', '_'), DIRECTORY_SEPARATOR, $class);
-        $file = trim($file, DIRECTORY_SEPARATOR);
-        return $file;
     }
 }

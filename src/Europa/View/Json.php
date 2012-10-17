@@ -10,14 +10,14 @@ namespace Europa\View;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Json implements ViewInterface
+class Json
 {
     /**
      * JSON encodes the parameters on the view and returns them.
      * 
      * @return string
      */    
-    public function render(array $context = array())
+    public function __invoke(array $context = array())
     {
         $render = $this->formatParamsToJsonArray($context);
         $render = json_encode($context);

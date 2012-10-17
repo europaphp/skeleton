@@ -215,7 +215,7 @@ class Http extends RequestAbstract
     }
     
     /**
-     * Returns whether or not the request accepts the passed content types.
+     * Returns the first matched type.
      * 
      * @param array $types    The types to check.
      * @param int   $maxIndex The maximum number of items to look at in order before returning false.

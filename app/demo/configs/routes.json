@@ -1,0 +1,13 @@
+{
+    "index": {
+        "uri": "",
+        "methods": ["get"],
+        "controller": "Controller\\Index"
+    },
+
+    "test": {
+        "uri": "test",
+        "methods": ["get", "cli"],
+        "controller": "Controller\\Test"
+    }
+}

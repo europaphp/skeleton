@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Di;
+use Closure;
 use Europa\Reflection\ClassReflector;
 use Exception;
 use LogicException;
@@ -83,7 +84,7 @@ class Container implements ContainerInterface
      */
     public function __set($name, $value)
     {
-        if (!is_callable($value)) {
+        if (!$value instanceof Closure) {
             $value = function() use ($value) {
                 return $value;
             };

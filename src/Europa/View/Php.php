@@ -66,33 +66,6 @@ class Php extends ViewScriptAbstract
     private $context;
 
     /**
-     * Default view configuration.
-     * 
-     * @var array | Config
-     */
-    private $config = [
-        'helperLocator' => [
-            'filters' => [
-                'Europa\Filter\ClassNameFilter' => ['prefix' => 'Helper\\'],
-                'Europa\Filter\ClassNameFilter' => ['prefix' => 'Europa\View\Helper\\']
-            ]
-        ]
-    ];
-
-    /**
-     * Sets up the view.
-     * 
-     * @param mixed $config The configuration.
-     * 
-     * @return Php
-     */
-    public function __construct($config = [])
-    {
-        $this->config  = new Config($this->config, $config);
-        $this->helpers = new Locator($this->config->helperLocator);
-    }
-
-    /**
      * Returns a helper.
      * 
      * @param string $name The helper name.
@@ -101,6 +74,10 @@ class Php extends ViewScriptAbstract
      */
     public function __get($name)
     {
+        if (!$this->helpers) {
+            throw new RuntimeException(sprintf('The helper "%s" could not be returned because no helper container was set.'));
+        }
+
         try {
             return call_user_func($this->helpers, $name);
         } catch (Exception $e) {
@@ -115,11 +92,11 @@ class Php extends ViewScriptAbstract
      * 
      * @return string
      */
-    public function render(array $context = [])
+    public function __invoke(array $context = [])
     {
         // ensure the script can be found
         if (!$script = $this->locateScript()) {
-            throw new RuntimeException(sprintf('The script "%s" could not be located.', $this->script));
+            throw new RuntimeException(sprintf('The script "%s" could not be located.', $this->getScript()));
         }
 
         // capture the output
@@ -138,10 +115,10 @@ class Php extends ViewScriptAbstract
         // handle view extensions
         if ($this->parentScript) {
             // set the script so the parent has access to what child has been rendered
-            $this->childScript = $this->script;
+            $this->childScript = $this->getScript();
 
             // then set the parent script to the current script so the current instance is shared
-            $this->script = $this->parentScript;
+            $this->setScript($this->parentScript);
 
             // reset the parent script to avoid recursion
             $this->parentScript = null;
@@ -167,12 +144,12 @@ class Php extends ViewScriptAbstract
     public function renderScript($script, array $context = array())
     {
         // capture old state
-        $oldScript = $this->script;
+        $oldScript = $this->getScript();
         $oldParent = $this->parentScript;
         $oldChild  = $this->childScript;
         
         // set new state
-        $this->script       = $script;
+        $this->setScript($script);
         $this->parentScript = null;
         $this->childScript  = null;
         
@@ -180,7 +157,7 @@ class Php extends ViewScriptAbstract
         $render = $this->render($context);
         
         // reapply old state
-        $this->script       = $oldScript;
+        $this->setScript($oldScript);
         $this->parentScript = $oldParent;
         $this->childScript  = $oldChild;
         
@@ -207,7 +184,7 @@ class Php extends ViewScriptAbstract
     public function extend($parent)
     {
         // the child is the current script
-        $child = $this->script;
+        $child = $this->getScript();
         
         // child views cannot extend themselves
         if ($parent === $child) {

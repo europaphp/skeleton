@@ -1,13 +1,11 @@
 <?php
 
 namespace Bootstrapper;
-use Europa;
 use Europa\Bootstrapper\BootstrapperAbstract;
 use Europa\Config\Config;
-use Europa\View\ViewScriptInterface;
 
 /**
- * The default application bootstrapper. Works in conjunction with Europa\App\App and Europa\App\Container.
+ * The demo bootstrapper.
  * 
  * @category App
  * @package  Europa
