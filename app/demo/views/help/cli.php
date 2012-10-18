@@ -8,8 +8,8 @@ Usage:
 
 
 <?php if ($context->params): ?>
-<?php echo $this->lang->options; ?>
-
+Options
+-------
 <?php foreach ($context->params as $name => $param): ?>
   <?php echo $this->cli->color(str_replace('$', '--', $name), 'green') . str_repeat(' ', $param['pad']); ?> <?php echo $param['description']; ?>
 
@@ -17,29 +17,27 @@ Usage:
 <?php endif; ?>
 
 <?php else: ?>
-<?php echo $this->lang->usage; ?>
-
+Usage
+-----
   <?php echo $this->cli->color('php bin/cli [command] [options]' . PHP_EOL, 'yellow'); ?>
 
-<?php echo $this->lang->seeHelp; ?>
-
+To see the available commands:
   <?php echo $this->cli->color('php bin/cli help --command [command]' . PHP_EOL, 'yellow'); ?>
 
-<?php echo $this->lang->seeAgain; ?>
-
+To see this help message again:
   <?php echo $this->cli->color('php bin/cli' . PHP_EOL, 'yellow'); ?>
   <?php echo $this->cli->color('php bin/cli help' . PHP_EOL, 'yellow'); ?>
 
-<?php echo $this->cli->color($this->lang->availableCommands . PHP_EOL, 'cyan'); ?>
-<?php echo $this->cli->color($this->lang->availableCommandsUnderline . PHP_EOL, 'cyan'); ?>
+<?php echo $this->cli->color('Available Commands' . PHP_EOL, 'cyan'); ?>
+<?php echo $this->cli->color('------------------' . PHP_EOL, 'cyan'); ?>
 
 <?php foreach ($context->commands as $command => $description): ?>
 <?php echo $this->cli->color($command, 'green'); ?> <?php echo $description; ?>
 
 <?php endforeach; ?>
 
-<?php echo $this->cli->color('*', 'cyan'); ?> <?php echo $this->lang->howToDocument; ?>
+<?php echo $this->cli->color('*', 'cyan'); ?> To document commands, just update the doc blocks of the <?php echo $this->cli->color('cli', 'cyan'); ?> action you want to document.
 
-<?php echo $this->cli->color('*', 'cyan'); ?> <?php echo $this->lang->howToAuthor; ?>
+<?php echo $this->cli->color('*', 'cyan'); ?> To author your own command, simply create a controller and give it a <?php echo $this->cli->color('cli', 'cyan'); ?> action.
 
 <?php endif; ?>

@@ -2,10 +2,8 @@
 
 namespace Europa\Di;
 use Closure;
+use Europa\Exception\Exception;
 use Europa\Reflection\ClassReflector;
-use Exception;
-use LogicException;
-use UnexpectedValueException;
 
 /**
  * The application service locator and container.
@@ -15,7 +13,7 @@ use UnexpectedValueException;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  http://europaphp.org/license
  */
-class Container implements ContainerInterface
+class ServiceContainer implements ServiceContainerInterface
 {
     /**
      * Non-transient services that have already been located and set up.
@@ -68,7 +66,7 @@ class Container implements ContainerInterface
     public function __call($name, array $args = [])
     {
         if (!is_callable($service = $this->__get($name))) {
-            throw new UnexpectedValueException(sprintf('Cannot invoke service "%s" in container "%s" because it is not callable.', $name, $this->name()));
+            Exception::toss('Cannot invoke service "%s" in container "%s" because it is not callable.', $name, $this->name());
         }
         
         return call_user_func_array($service, $args);
@@ -84,6 +82,12 @@ class Container implements ContainerInterface
      */
     public function __set($name, $value)
     {
+        if (is_string($value)) {
+            $value = function() use ($value) {
+                return new $value;
+            };
+        }
+
         if (!$value instanceof Closure) {
             $value = function() use ($value) {
                 return $value;
@@ -113,10 +117,10 @@ class Container implements ContainerInterface
         }
 
         if (isset($this->transient[$name])) {
-            return $service($this);
+            return call_user_func($service, $this);
         }
 
-        return $this->cache[$name] = $service($this);
+        return $this->cache[$name] = call_user_func($service, $this);
     }
 
     /**
@@ -156,9 +160,9 @@ class Container implements ContainerInterface
      * 
      * @return Container
      */
-    public function configure(ConfigurationInterface $configuration)
+    public function configure(callable $configuration)
     {
-        $configuration->configure($this);
+        call_user_func($configuration, $this);
         return $this;
     }
 
@@ -222,8 +226,8 @@ class Container implements ContainerInterface
         
         try {
             return self::$instances[$key] = (new ClassReflector(get_called_class()))->newInstanceArgs($args);
-        } catch (Exception $e) {
-            throw new LogicException(sprintf('Could not get the container "%s" from "%s" because: %s', $name, get_called_class(), $e->getMessage()));
+        } catch (\Exception $e) {
+            Exception::toss('Could not get the container "%s" from "%s" because: %s', $name, get_called_class(), $e->getMessage());
         }
     }
 
@@ -244,10 +248,6 @@ class Container implements ContainerInterface
             }
         }
 
-        throw new LogicException(sprintf(
-            $message,
-            $name,
-            $this->name() ?: get_class($this) . '::[unknown]()'
-        ));
+        Exception::toss($message, $name, $this->name() ?: get_class($this) . '::[unknown]()');
     }
 }

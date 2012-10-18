@@ -30,7 +30,7 @@ class Uri
      * 
      * @return Uri
      */
-    public function __construct(RouterInterface $router = null)
+    public function __construct(Router $router = null)
     {
         $this->router = $router;
     }
@@ -65,7 +65,7 @@ class Uri
     {
         $obj = Request\Uri::detect();
         
-        if ($uri && $this->router && $this->router->hasRoute($uri)) {
+        if ($uri && $this->router && $this->router->offsetExists($uri)) {
             $obj->setRequest($this->router->format($uri, $params));
         } else {
             $obj->setRequest($uri)->setParams($params);

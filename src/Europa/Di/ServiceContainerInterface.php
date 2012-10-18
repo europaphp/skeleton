@@ -10,7 +10,7 @@ namespace Europa\Di;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  http://europaphp.org/license
  */
-interface ContainerInterface
+interface ServiceContainerInterface
 {
     /**
      * Returns an instance of the specified service.
@@ -71,7 +71,14 @@ interface ContainerInterface
     /**
      * Marks the service as transient.
      * 
-     * @return ContainerInterface
+     * @return ServiceContainerInterface
      */
     public function transient($name);
+
+    /**
+     * Returns whether or not the specified service is transient.
+     * 
+     * @return bool
+     */
+    public function isTransient($name);
 }

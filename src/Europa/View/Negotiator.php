@@ -13,12 +13,7 @@ class Negotiator
      * @var array
      */
     private $config = [
-        'actionParamName'        => 'action',
-        'controllerParamName'    => 'controller',
-        'jsonpCallbackParamName' => 'callback',
-        'phpView'                => [
-            'helper.filter' => []
-        ],
+        'jsonpParam' => 'callback',
         'suffixMap' => [
             'json' => 'resolveJson',
             'xml'  => 'resolveXml'
@@ -95,7 +90,7 @@ class Negotiator
      */
     private function resolveJson($request)
     {
-        if ($callback = $request->getParam($this->config->jsonpCallbackParamName)) {
+        if ($callback = $request->getParam($this->config->jsonpParam)) {
             return new Jsonp($callback);
         }
 

@@ -12,7 +12,7 @@ class Module implements ModuleInterface
         'ns.bootstrapper' => 'Bootstrapper',
         'files.config'    => 'configs/config.json',
         'files.routes'    => 'configs/routes.json',
-        'paths.classes'   => ['classes'],
+        'paths.src'       => ['src'],
         'paths.views'     => ['views']
     ];
 
@@ -49,7 +49,7 @@ class Module implements ModuleInterface
     public function getClassPaths()
     {
         $locator = new Locator($this->path);
-        $locator->addPaths($this->config->paths->classes);
+        $locator->addPaths($this->config->paths->src);
         return $locator;
     }
 

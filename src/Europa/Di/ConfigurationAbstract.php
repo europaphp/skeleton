@@ -9,7 +9,7 @@ abstract class ConfigurationAbstract implements IteratorAggregate
 {
     private $methods;
 
-    public function __invoke(ContainerInterface $container)
+    public function __invoke(ServiceContainerInterface $container)
     {
         foreach ($this as $method) {
             $container->__set($method, function() use ($method) {

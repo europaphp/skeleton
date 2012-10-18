@@ -16,7 +16,7 @@ use UnexpectedValueException;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  http://europaphp.org/license
  */
-class Locator extends Container
+class ServiceLocator extends Container
 {
     /**
      * A token that represents any type of object.
@@ -52,20 +52,28 @@ class Locator extends Container
      * @var array | Config
      */
     private $config = [
-        'filters' => [
-            'Europa\Filter\ClassNameFilter' => []
-        ]
+        'filters' => [],
+        'args'    => [],
+        'calls'   => []
     ];
     
     /**
      * Sets up a new locator.
      * 
-     * @return Locator
+     * @return ServiceLocator
      */
     public function __construct($config = [])
     {
         $this->config = new Config($this->config, $config);
         $this->filter = new ClassResolutionFilter($this->config->filters);
+
+        foreach ($this->config->args as $type => $args) {
+            $this->args($type, $args);
+        }
+
+        foreach ($this->config->calls as $type => $call) {
+            $this->call($type, $call);
+        }
     }
 
     /**
@@ -82,7 +90,7 @@ class Locator extends Container
         }
 
         if ($this->__isset($name)) {
-            $service = $this->createInstance($this->filter->__invoke($name));;
+            $service = $this->createInstance(call_user_func($this->filter, $name));
 
             if (!$this->isTransient($name)) {
                 parent::__set($name, $service);
@@ -107,18 +115,13 @@ class Locator extends Container
     /**
      * Sets the filter to use for dependency class name resolution.
      * 
-     * @param FilterInterface $filter The filter.
+     * @param callable $filter The filter.
      * 
-     * @return Finder
+     * @return ServiceLocator
      */
-    public function setFilter($filter)
+    public function setFilter(callable $filter)
     {
-        if (!is_callable($filter)) {
-            throw new UnexpectedValueException('The provided filter is not callable.');
-        }
-
         $this->filter = $filter;
-
         return $this;
     }
     
@@ -135,16 +138,22 @@ class Locator extends Container
     /**
      * Sets the configuration for a type of instance.
      * 
-     * @param string  $type The class type.
-     * @param Closure $fn   The closure to run against the instance.
+     * @param string $type The class type.
+     * @param mixed  $fn   The closure to run against the instance.
      * 
-     * @return Locator
+     * @return ServiceLocator
      */
-    public function args($type, Closure $fn = null)
+    public function args($type, $fn = null)
     {
-        if ($type instanceof Closure) {
+        if (is_callable($type)) {
             $fn   = $type;
             $type = self::ALL;
+        }
+
+        if (!is_callable($fn)) {
+            $fn = function() use ($fn) {
+                return $fn;
+            };
         }
         
         $this->args[$type] = $fn;
@@ -155,16 +164,22 @@ class Locator extends Container
     /**
      * Queues a method for a type of instance.
      * 
-     * @param string  $type The class type.
-     * @param Closure $fn   The closure to run against the instance.
+     * @param string $type The class type.
+     * @param mixed  $fn   The closure to run against the instance.
      * 
-     * @return Locator
+     * @return ServiceLocator
      */
-    public function call($type, Closure $fn = null)
+    public function call($type, $fn = null, array $args = [])
     {
-        if ($type instanceof Closure) {
+        if (is_callable($type) {
             $fn   = $type;
             $type = self::ALL;
+        }
+
+        if (!is_callable($fn)) {
+            $fn = function($service) use ($fn) {
+                call_user_func_array([$service, $fn], $args);
+            };
         }
         
         $this->call[] = [

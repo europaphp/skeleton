@@ -5,13 +5,17 @@ use ArrayAccess;
 use ArrayIterator;
 use IteratorAggregate;
 use Europa\Config\Config;
+use Europa\Di\ServiceContainer;
+use Europa\Di\ServiceContainerInterface;
 use Europa\Exception\Exception;
 use Europa\Fs\Loader;
 use Europa\Fs\Locator;
 use Europa\Request\RequestAbstract;
 use Europa\Response\ResponseAbstract;
 use Europa\Router\Router;
+use Europa\View\HelperConfiguration;
 use Europa\View\Negotiator;
+use Europa\View\Php;
 use Europa\View\ViewScriptInterface;
 
 class App implements ArrayAccess, IteratorAggregate
@@ -45,6 +49,8 @@ class App implements ArrayAccess, IteratorAggregate
 
     private $viewLocator;
 
+    private $viewHelpers;
+
     /**
      * Sets up a new application.
      * 
@@ -54,14 +60,17 @@ class App implements ArrayAccess, IteratorAggregate
      */
     public function __construct($config = [])
     {
-        $this->config        = new Config($this->config, $config);
-        $this->loader        = new Loader;
-        $this->loaderLocator = new Locator;
-        $this->request       = RequestAbstract::detect();
-        $this->response      = ResponseAbstract::detect();
-        $this->router        = new Router;
-        $this->negotiator    = new Negotiator;
-        $this->viewLocator   = new Locator;
+        $this->container                = new ServiceContainer;
+        $this->container->config        = new Config($this->config, $config);
+        $this->container->loader        = new Loader;
+        $this->container->loaderLocator = new Locator;
+        $this->container->request       = RequestAbstract::detect();
+        $this->container->response      = ResponseAbstract::detect();
+        $this->container->router        = new Router;
+        $this->container->negotiator    = new Negotiator;
+        $this->container->viewLocator   = new Locator;
+        $this->container->viewHelpers   = new ServiceContainer;
+        $this->container->viewHelpers->configure(new HelperConfiguration($this->container), $this->container);
     }
 
     /**
@@ -71,39 +80,31 @@ class App implements ArrayAccess, IteratorAggregate
      */
     public function __invoke()
     {
-        $this->loader->register();
-        $this->loader->setLocator($this->loaderLocator);
+        $this->container->loader->register();
+        $this->container->loader->setLocator($this->container->loaderLocator);
         
         foreach ($this->modules as $module) {
-            $this->config->import($module->getConfig());
-            $this->router->import($module->getRoutes());
-            $this->loaderLocator->addPaths($module->getClassPaths());
-            $this->viewLocator->addPaths($module->getViewPaths());
+            $this->container->config->import($module->getConfig());
+            $this->container->router->import($module->getRoutes());
+            $this->container->loaderLocator->addPaths($module->getClassPaths());
+            $this->container->viewLocator->addPaths($module->getViewPaths());
             
             if (is_callable($bootstrapper = $module->getBootstrapper())) {
                 call_user_func($bootstrapper);
             }
         }
         
-        if (!$controller = call_user_func($this->router, $this->request)) {
+        if (!$controller = call_user_func($this->container->router, $this->container->request)) {
             Exception::toss('The router could not find a suitable controller for the given request.', $controller);
         }
 
-        $context = call_user_func($controller, $this->request);
-        $view    = call_user_func($this->negotiator, $this->request);
+        $context = call_user_func($controller, $this->container->request);
+        $view    = call_user_func($this->container->negotiator, $this->container->request);
 
-        if ($this->request instanceof Http && $view = $this->request->accepts($this->config->views->map->keys())) {
-            $view = new $view($this->config->views->config->$view);
-        }
+        $this->configureView($view);
 
-        if ($view instanceof ViewScriptInterface) {
-            $view->setScriptLocator($this->viewLocator);
-            $view->setScript($this->formatViewScript());
-            $view->setScriptSuffix($this->config->view->suffix);
-        }
-
-        $this->response->setBody(call_user_func($view, $context ?: []));
-        $this->response->send();
+        $this->container->response->setBody(call_user_func($view, $context ?: []));
+        $this->container->response->send();
 
         return $this;
     }
@@ -119,7 +120,7 @@ class App implements ArrayAccess, IteratorAggregate
     public function offsetSet($offset, $module)
     {
         if (!$module instanceof ModuleInterface) {
-            $module = new Module($this->config->paths->app . '/' . $module);
+            $module = new Module($this->container->config->paths->app . '/' . $module);
         }
 
         $this->modules[$offset] = $module;
@@ -180,22 +181,58 @@ class App implements ArrayAccess, IteratorAggregate
     }
 
     /**
+     * Sets the service container to use.
+     * 
+     * @param ServiceContainerInterface $container The service container.
+     * 
+     * @return App
+     */
+    public function setServiceContainer(ServiceContainerInterface $container)
+    {
+        $this->container = $container;
+        return $this;
+    }
+
+    /**
+     * Returns the service container.
+     * 
+     * @return ServiceContainerInterface
+     */
+    public function getServiceContainer()
+    {
+        return $this->container;
+    }
+
+    /**
      * Formats the view script so it can be set on a `ViewScriptInterface` object.
      * 
      * @return string
      */
     private function formatViewScript()
     {
-        $format = $this->config->view->script;
+        $format = $this->container->config->view->script;
 
         if (is_callable($format)) {
-            return call_user_func($format, $this->request);
+            return call_user_func($format, $this->container->request);
         }
 
-        foreach ($this->request->getParams() as $name => $param) {
+        foreach ($this->container->request->getParams() as $name => $param) {
             $format = str_replace(':' . $name, $param, $format);
         }
 
         return $format;
+    }
+
+    private function configureView($view)
+    {
+        if ($view instanceof ViewScriptInterface) {
+            $view->setScriptLocator($this->container->viewLocator);
+            $view->setScript($this->formatViewScript());
+            $view->setScriptSuffix($this->container->config->view->suffix);
+        }
+
+        if ($view instanceof Php) {
+            $view->setHelperServiceContainer($this->container->viewHelpers);
+        }
     }
 }

@@ -211,7 +211,7 @@ class Php extends ViewScriptAbstract
      * 
      * @return Php
      */
-    public function setHelperContainer(callable $helpers)
+    public function setHelperServiceContainer(callable $helpers)
     {
         $this->helpers = $helpers;
         return $this;
