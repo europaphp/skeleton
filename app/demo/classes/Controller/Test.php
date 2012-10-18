@@ -1,7 +1,7 @@
 <?php
 
 namespace Controller;
-use Europa\Controller\ControllerAbstract;
+use Europa\Controller\AbstractController;
 use Testes\Coverage\Coverage;
 use Testes\Finder\Finder;
 
@@ -13,8 +13,18 @@ use Testes\Finder\Finder;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Test extends ControllerAbstract
+class Test extends AbstractController
 {
+    public function cli()
+    {
+        $this->forward('all');
+    }
+
+    public function get()
+    {
+        $this->forward('all');
+    }
+
     /**
      * Runs tests.
      * 
@@ -23,7 +33,7 @@ class Test extends ControllerAbstract
      * 
      * @return void
      */
-    public function action($test = 'Test', $untested = false, $analyze = null)
+    public function all($test = 'Test', $untested = false, $analyze = null)
     {
         // start covering tests
         $analyzer = new Coverage;

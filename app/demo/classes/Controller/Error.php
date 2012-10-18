@@ -1,7 +1,7 @@
 <?php
 
 namespace Controller;
-use Europa\Controller\ControllerAbstract;
+use Europa\Controller\AbstractController;
 use Europa\Request\Uri;
 
 /**
@@ -12,7 +12,7 @@ use Europa\Request\Uri;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright(c) 2010 Trey Shugart http://europaphp.org/license
  */
-class Error extends ControllerAbstract
+class Error extends AbstractController
 {
     /**
      * Shows an error via CLI.
@@ -31,7 +31,7 @@ class Error extends ControllerAbstract
      * 
      * @return array
      */
-    public function action()
+    public function get()
     {
         $uri = Uri::detect();
 

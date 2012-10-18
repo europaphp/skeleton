@@ -8,32 +8,14 @@ use Europa\Config\Config;
 use Europa\Exception\Exception;
 use Europa\Fs\Loader;
 use Europa\Fs\Locator;
-use Europa\Request\Cli as CliRequest;
-use Europa\Request\Http as HttpRequest;
 use Europa\Request\RequestAbstract;
-use Europa\Response\Cli as CliResponse;
-use Europa\Response\Http as HttpResponse;
+use Europa\Response\ResponseAbstract;
 use Europa\Router\Router;
 use Europa\View\Negotiator;
+use Europa\View\ViewScriptInterface;
 
 class App implements ArrayAccess, IteratorAggregate
 {
-    const EVENT_ROUTE_PRE = 'route.pre';
-
-    const EVENT_ROUTE_POST = 'route.post';
-
-    const EVENT_ACTION_PRE = 'action.pre';
-
-    const EVENT_ACTION_POST = 'action.post';
-
-    const EVENT_RENDER_PRE = 'render.pre';
-
-    const EVENT_RENDER_POST = 'render.post';
-
-    const EVENT_SEND_PRE = 'send.pre';
-
-    const EVENT_SEND_POST = 'send.post';
-
     /**
      * The application configuration.
      * 
@@ -42,7 +24,9 @@ class App implements ArrayAccess, IteratorAggregate
     private $config = [
         'paths.root'   => '..',
         'paths.app'    => '={root}/app',
-        'view.default' => 'Europa\View\Php'
+        'view.default' => 'Europa\View\Php',
+        'view.script'  => ':controller/:action',
+        'view.suffix'  => 'php'
     ];
 
     private $loader;
@@ -57,7 +41,7 @@ class App implements ArrayAccess, IteratorAggregate
 
     private $router;
 
-    private $views;
+    private $negotiator;
 
     private $viewLocator;
 
@@ -73,10 +57,10 @@ class App implements ArrayAccess, IteratorAggregate
         $this->config        = new Config($this->config, $config);
         $this->loader        = new Loader;
         $this->loaderLocator = new Locator;
-        $this->request       = RequestAbstract::isCli() ? new CliRequest : new HttpRequest;
-        $this->response      = RequestAbstract::isCli() ? new CliResponse : new HttpResponse;
+        $this->request       = RequestAbstract::detect();
+        $this->response      = ResponseAbstract::detect();
         $this->router        = new Router;
-        $this->views         = new Negotiator;
+        $this->negotiator    = new Negotiator;
         $this->viewLocator   = new Locator;
     }
 
@@ -106,17 +90,20 @@ class App implements ArrayAccess, IteratorAggregate
         }
 
         $context = call_user_func($controller, $this->request);
+        $view    = call_user_func($this->negotiator, $this->request);
 
         if ($this->request instanceof Http && $view = $this->request->accepts($this->config->views->map->keys())) {
             $view = new $view($this->config->views->config->$view);
         }
 
         if ($view instanceof ViewScriptInterface) {
-            $view->setLocator($this->viewLocator);
-            $view->setScript();
+            $view->setScriptLocator($this->viewLocator);
+            $view->setScript($this->formatViewScript());
+            $view->setScriptSuffix($this->config->view->suffix);
         }
 
-        $this->response->output(call_user_func($view, $context));
+        $this->response->setBody(call_user_func($view, $context ?: []));
+        $this->response->send();
 
         return $this;
     }
@@ -190,5 +177,25 @@ class App implements ArrayAccess, IteratorAggregate
     public function getIterator()
     {
         return new ArrayIterator($this->modules);
+    }
+
+    /**
+     * Formats the view script so it can be set on a `ViewScriptInterface` object.
+     * 
+     * @return string
+     */
+    private function formatViewScript()
+    {
+        $format = $this->config->view->script;
+
+        if (is_callable($format)) {
+            return call_user_func($format, $this->request);
+        }
+
+        foreach ($this->request->getParams() as $name => $param) {
+            $format = str_replace(':' . $name, $param, $format);
+        }
+
+        return $format;
     }
 }

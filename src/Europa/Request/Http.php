@@ -11,7 +11,7 @@ use Europa\Request\Uri;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Http extends RequestAbstract
+class Http extends RequestAbstract implements HttpInterface
 {
     /**
      * The OPTIONS method.

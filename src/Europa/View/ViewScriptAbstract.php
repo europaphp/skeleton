@@ -13,6 +13,13 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
     private $script;
 
     /**
+     * The script suffix, if any.
+     * 
+     * @var string
+     */
+    private $suffix;
+
+    /**
      * The locator to use for locating view scripts.
      * 
      * @var LocatorInterface
@@ -41,6 +48,29 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
     public function getScript()
     {
         return $this->script;
+    }
+
+    /**
+     * Sets the script suffix.
+     * 
+     * @param string $suffix The script suffix.
+     * 
+     * @return string
+     */
+    public function setScriptSuffix($suffix)
+    {
+        $this->suffix = $suffix;
+        return $this;
+    }
+
+    /**
+     * Returns the view script suffix.
+     * 
+     * @return string
+     */
+    public function getScriptSuffix()
+    {
+        return $this->suffix;
     }
 
     /**
@@ -73,6 +103,20 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
      */
     public function locateScript()
     {
-        return $this->scriptLocator ? call_user_func($this->scriptLocator, $this->script) : realpath($this->script);
+        if ($this->scriptLocator) {
+            return call_user_func($this->scriptLocator, $this->formatScript());
+        } elseif (is_file($this->script)) {
+            return $this->script;
+        }
+    }
+
+    /**
+     * Returns a formatted script path including suffix.
+     * 
+     * @return string
+     */
+    public function formatScript()
+    {
+        return $this->script . ($this->script && $this->suffix ? '.' . $this->suffix : '');
     }
 }

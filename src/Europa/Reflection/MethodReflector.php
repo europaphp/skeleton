@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa\Reflection;
-use LogicException;
+use Europa\Exception\Exception;
 use ReflectionMethod;
 
 /**
@@ -101,7 +101,7 @@ class MethodReflector extends ReflectionMethod implements ReflectorInterface
      * @param bool  $caseSensitive Whether or not to make them case insensitive.
      * @param bool  $throw         Whether or not to throw exceptions if a required parameter is not defined.
      * 
-     * @throws LogicException If a required parameter is not specified.
+     * @throws Exception If a required parameter is not specified.
      * 
      * @return array The merged parameters.
      */
@@ -131,12 +131,7 @@ class MethodReflector extends ReflectionMethod implements ReflectorInterface
             } elseif ($param->isOptional()) {
                 $merged[$pos] = $param->getDefaultValue();
             } elseif ($throw) {
-                throw new LogicException(sprintf(
-                    'The required parameter "%s" for "%s::%s()" was not specified.',
-                    $param->getName(),
-                    $this->getClass()->getName(),
-                    $this->getName()
-                ));
+                Exception::toss('The required parameter "%s" for "%s::%s()" was not specified.', $param->getName(), $this->getClass()->getName(), $this->getName());
             } else {
                 $meged[$pos] = null;
             }

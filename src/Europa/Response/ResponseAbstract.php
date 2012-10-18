@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Response;
+use Europa\Request\RequestAbstract;
 
 /**
  * The abstract response.
@@ -40,5 +41,15 @@ abstract class ResponseAbstract implements ResponseInterface
     public function getBody()
     {
         return $this->body;
+    }
+
+    /**
+     * Detects the type of request that should be used.
+     * 
+     * @return RequestInterface
+     */
+    public static function detect()
+    {
+        return RequestAbstract::isCli() ? new Cli : new Http;
     }
 }

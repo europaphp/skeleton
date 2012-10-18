@@ -1,4 +1,4 @@
-<?php $this->extend('cli/layout'); ?>
+<?php $this->extend('cli'); ?>
 
 <?php if (isset($context->command)): ?>
 <?php echo $context->description . PHP_EOL; ?>

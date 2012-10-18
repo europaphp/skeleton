@@ -3,11 +3,9 @@
 namespace Europa\View;
 use Europa\Config\Config;
 use Europa\Di\Locator;
+use Europa\Exception\Exception;
 use Europa\Filter\ClassNameFilter;
 use Europa\Fs\Locator\LocatorArray;
-use Exception;
-use LogicException;
-use RuntimeException;
 
 /**
  * Class for rendering a basic PHP view script.
@@ -75,13 +73,13 @@ class Php extends ViewScriptAbstract
     public function __get($name)
     {
         if (!$this->helpers) {
-            throw new RuntimeException(sprintf('The helper "%s" could not be returned because no helper container was set.'));
+            Exception::toss('The helper "%s" could not be returned because no helper container was set.', $name);
         }
 
         try {
             return call_user_func($this->helpers, $name);
-        } catch (Exception $e) {
-            throw new RuntimeException(sprintf('The helper "%s" could not be returned with message: %s', $name, $e->getMessage()));
+        } catch (\Exception $e) {
+            Exception::toss('The helper "%s" could not be returned with message: %s', $name, $e->getMessage());
         }
     }
     
@@ -94,17 +92,18 @@ class Php extends ViewScriptAbstract
      */
     public function __invoke(array $context = [])
     {
+        // A script must be set.
+        if (!$this->getScript()) {
+            Exception::toss('No view script was specified.');
+        }
+
         // ensure the script can be found
         if (!$script = $this->locateScript()) {
-            throw new RuntimeException(sprintf('The script "%s" could not be located.', $this->getScript()));
+            Exception::toss('The script "%s" does not exist.', $this->formatScript());
         }
 
         // capture the output
         ob_start();
-
-        // set convenience variables
-        $context = new Context($context);
-        $helpers = $this->helpers;
 
         // render
         include $script;
@@ -127,7 +126,7 @@ class Php extends ViewScriptAbstract
             $this->child = $rendered;
             
             // render and return the output of the parent
-            return $this->render($context->toArray());
+            return $this->__invoke($context);
         }
         
         return $rendered;
@@ -188,7 +187,7 @@ class Php extends ViewScriptAbstract
         
         // child views cannot extend themselves
         if ($parent === $child) {
-            throw new LogicException('Child view cannot extend itself.');
+            Exception::toss('Child view cannot extend itself.');
         }
         
         // if the child has already extended a parent, don't do anything

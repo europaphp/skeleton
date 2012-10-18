@@ -1,4 +1,4 @@
-<?php $this->extend('web/layout'); ?>
+<?php $this->extend('web'); ?>
 
 <h3>
     <?php echo $this->lang->coverage ?>:

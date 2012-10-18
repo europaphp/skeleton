@@ -74,7 +74,7 @@ abstract class RequestAbstract implements IteratorAggregate, RequestInterface
     {
         return $this->removeParam($name);
     }
-    
+
     /**
      * Sets the appropriate method.
      * 
@@ -268,5 +268,15 @@ abstract class RequestAbstract implements IteratorAggregate, RequestInterface
     public static function isCli()
     {
         return PHP_SAPI === 'cli';
+    }
+
+    /**
+     * Detects the type of request that should be used.
+     * 
+     * @return RequestInterface
+     */
+    public static function detect()
+    {
+        return self::isCli() ? new Cli : new Http;
     }
 }

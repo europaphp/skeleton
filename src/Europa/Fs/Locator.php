@@ -66,7 +66,7 @@ class Locator implements IteratorAggregate
         }
 
         foreach ($this->paths as $path) {
-            if ($real = realpath($path . '/' . $file)) {
+            if (is_file($real = realpath($path . '/' . $file))) {
                 return $this->cache[$file] = $real;
             }
         }
