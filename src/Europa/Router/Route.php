@@ -13,7 +13,7 @@ class Route
     const CONTROLLER = 'controller';
 
     private $config = [
-        'request'           => '',
+        'request'           => '^$',
         'method'            => 'get',
         'format'            => ':controller/:action',
         'params'            => ['controller' => 'index', 'action' => 'get'],

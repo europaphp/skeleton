@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Request;
+use Europa\Filter\ToStringFilter;
 
 /**
  * The request class for representing a CLI request.
@@ -52,7 +53,7 @@ class Cli extends RequestAbstract implements CliInterface
      */
     public function __toString()
     {
-        return $this->getCommand();
+        return trim($this->getCommand() . ' ' . $this->getParamsAsString());
     }
     
     /**
@@ -100,6 +101,23 @@ class Cli extends RequestAbstract implements CliInterface
     public function getCommands()
     {
         return $this->commands;
+    }
+
+    /**
+     * Returns the parameters as a string.
+     * 
+     * @return string
+     */
+    public function getParamsAsString()
+    {
+        $params = '';
+
+        foreach ($this->getParams() as $name => $value) {
+            $value   = is_string($value) ? '"' . $value . '"' : call_user_func(new ToStringFilter, $value);
+            $params .= ' --' . $name . '=' . $value;
+        }
+
+        return trim($params);
     }
     
     /**

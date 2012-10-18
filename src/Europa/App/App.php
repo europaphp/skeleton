@@ -95,7 +95,7 @@ class App implements ArrayAccess, IteratorAggregate
         }
         
         if (!$controller = call_user_func($this->container->router, $this->container->request)) {
-            Exception::toss('The router could not find a suitable controller for the given request.', $controller);
+            Exception::toss('The router could not find a suitable controller for the request "%s".', $this->container->request);
         }
 
         $context = call_user_func($controller, $this->container->request);
@@ -123,7 +123,7 @@ class App implements ArrayAccess, IteratorAggregate
             $module = new Module($this->container->config->paths->app . '/' . $module);
         }
 
-        $this->modules[$offset] = $module;
+        $this->modules[$offset ?: count($this->modules)] = $module;
     }
 
     /**
@@ -223,6 +223,13 @@ class App implements ArrayAccess, IteratorAggregate
         return $format;
     }
 
+    /**
+     * Configures the specified view.
+     * 
+     * @param mixed $view The view to configure.
+     * 
+     * @return void
+     */
     private function configureView($view)
     {
         if ($view instanceof ViewScriptInterface) {

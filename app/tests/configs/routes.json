@@ -1,0 +1,19 @@
+{
+    "test-get": {
+        "request": "test",
+        "method": "get",
+        "params": {
+            "controller": "test",
+            "action": "get"
+        }
+    },
+
+    "test-cli": {
+        "request": "test",
+        "method": "cli",
+        "params": {
+            "controller": "test",
+            "action": "cli"
+        }
+    }
+}

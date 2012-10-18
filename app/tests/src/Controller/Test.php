@@ -15,14 +15,24 @@ use Testes\Finder\Finder;
  */
 class Test extends AbstractController
 {
+    /**
+     * Runs all tests via the command line.
+     * 
+     * @return array
+     */
     public function cli()
     {
-        $this->forward('all');
+        return $this->forward('all');
     }
 
+    /**
+     * Runs all tests via HTTP.
+     * 
+     * @return array
+     */
     public function get()
     {
-        $this->forward('all');
+        return $this->forward('all');
     }
 
     /**

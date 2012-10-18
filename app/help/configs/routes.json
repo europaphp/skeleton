@@ -1,0 +1,10 @@
+{
+    "help-cli": {
+        "request": "^help|\\?$",
+        "method": "cli",
+        "params": {
+            "controller": "help",
+            "action": "cli"
+        }
+    }
+}

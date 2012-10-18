@@ -62,26 +62,6 @@ class Php extends ViewScriptAbstract
      * @var array
      */
     private $context;
-
-    /**
-     * Returns a helper.
-     * 
-     * @param string $name The helper name.
-     * 
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        if (!$this->helpers) {
-            Exception::toss('The helper "%s" could not be returned because no helper container was set.', $name);
-        }
-
-        try {
-            return call_user_func($this->helpers, $name);
-        } catch (\Exception $e) {
-            Exception::toss('The helper "%s" could not be returned with message: %s', $name, $e->getMessage());
-        }
-    }
     
     /**
      * Parses the view file and returns the result.
@@ -101,6 +81,9 @@ class Php extends ViewScriptAbstract
         if (!$script = $this->locateScript()) {
             Exception::toss('The script "%s" does not exist.', $this->formatScript());
         }
+
+        // apply context
+        $this->context = $context;
 
         // capture the output
         ob_start();
@@ -130,6 +113,38 @@ class Php extends ViewScriptAbstract
         }
         
         return $rendered;
+    }
+
+    /**
+     * Returns a variable from the current context. If a variable is not specified, the whole context is returned.
+     * 
+     * @param string $name The variable name.
+     * 
+     * @return mixed
+     */
+    public function context($name)
+    {
+        if (!$name) {
+            return $this->context;
+        }
+
+        return isset($this->context[$name]) ? $this->context[$name] : null;
+    }
+
+    /**
+     * Returns the specified helper.
+     * 
+     * @param string $name The helper to return.
+     * 
+     * @return mixed
+     */
+    public function helper($name)
+    {
+        if (!$this->helpers) {
+            Exception::toss('Could not return helper "%s" because it does not exist.', $name);
+        }
+
+        return call_user_func($this->helpers, $name);
     }
     
     /**
