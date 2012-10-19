@@ -84,13 +84,16 @@ class App implements ArrayAccess, IteratorAggregate
         $this->container->loader->setLocator($this->container->loaderLocator);
         
         foreach ($this->modules as $module) {
-            $this->container->config->import($module->getConfig());
+            $name = $module->getName();
+            $conf = $module->getConfig();
+
+            $this->container->config->modules->$name->import($conf);
             $this->container->router->import($module->getRoutes());
             $this->container->loaderLocator->addPaths($module->getClassPaths());
             $this->container->viewLocator->addPaths($module->getViewPaths());
             
             if (is_callable($bootstrapper = $module->getBootstrapper())) {
-                call_user_func($bootstrapper);
+                call_user_func($bootstrapper, $conf);
             }
         }
         

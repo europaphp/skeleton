@@ -15,35 +15,13 @@ use Europa\Config\Config;
 class Demo extends BootstrapperAbstract
 {
     /**
-     * Bootstrapper configuration.
-     * 
-     * @var Config
-     */
-    private $config = [
-        'error.level' => E_ALL,
-        'error.show'  => true
-    ];
-
-    /**
-     * Sets up the bootstrapper.
-     * 
-     * @param array $config Any custom configuration to modify the behavior of the bootstrapper.
-     * 
-     * @return Demo
-     */
-    public function __construct(array $config = [])
-    {
-        $this->config = new Config($this->config, $config);
-    }
-
-    /**
      * Sets whether or not errors should be displayed and the desired error level.
      * 
      * @return void
      */
-    public function errorReporting()
+    public function errorReporting($config)
     {
-        ini_set('display_errors', $this->config->error->show ? 'on' : 'off');
-        error_reporting($this->config->error->level);
+        error_reporting(E_ALL);
+        ini_set('display_errors', $config->debug ? 'on' : 'off');
     }
 }

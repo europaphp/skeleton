@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Bootstrapper;
+use Europa\Config\Config;
 use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
 
@@ -17,15 +18,18 @@ abstract class BootstrapperAbstract
     /**
      * Runs each bootstrap method.
      * 
+     * @param mixed $conf Any configuration to pass to each method.
+     * 
      * @return Provider
      */
-    public function __invoke()
+    public function __invoke($conf = [])
     {
         $that = new ClassReflector($this);
+        $conf = new Config($conf);
         
         foreach ($that->getMethods() as $method) {
             if ($this->isValidMethod($method)) {
-                $method->invoke($this);
+                $method->invoke($this, $conf);
             }
         }
         
