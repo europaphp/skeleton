@@ -2,14 +2,14 @@
 
 <h3>
     Coverage:
-    <?php if ($context->context('percent') >= 60): ?>
-    <span class="text-success"><?php echo $context->context('percent') ?>%</span>
+    <?php if ($this->context('percent') >= 60): ?>
+    <span class="text-success"><?php echo $this->context('percent') ?>%</span>
     <?php else: ?>
-    <span class="text-error"><?php echo $context->context('percent') ?>%</span>
+    <span class="text-error"><?php echo $this->context('percent') ?>%</span>
     <?php endif ?>
 </h3>
 
-<?php if ($context->context('suite')->getAssertions()->getFailed()->count()): ?>
+<?php if ($this->context('suite')->getAssertions()->getFailed()->count()): ?>
 <h3>Failed Tests:</h3>
 <table class="table table-bordered table-striped">
     <thead>
@@ -20,7 +20,7 @@
         </tr>
     </thead>
     <tbody>
-        <?php foreach ($context->context('suite')->getAssertions()->getFailed() as $ass): ?>
+        <?php foreach ($this->context('suite')->getAssertions()->getFailed() as $ass): ?>
         <tr>
             <td><?php echo $ass->getTestClass() ?></td>
             <td><?php echo $ass->getTestLine() ?></td>
@@ -31,7 +31,7 @@
 </table>
 <?php endif ?>
 
-<?php if ($context->context('suite')->getExceptions()->count()): ?>
+<?php if ($this->context('suite')->getExceptions()->count()): ?>
 <h3>Exceptions</h3>
 <table class="table table-bordered table-striped">
     <thead>
@@ -42,7 +42,7 @@
         </tr>
     </thead>
     <tbody>
-        <?php foreach ($context->context('suite')->getExceptions() as $ex): ?>
+        <?php foreach ($this->context('suite')->getExceptions() as $ex): ?>
         <tr>
             <td><?php echo $ex->getFile() ?></td>
             <td><?php echo $ex->getLine() ?></td>
@@ -53,11 +53,11 @@
 </table>
 <?php endif ?>
 
-<?php if ($context->untested && $context->context('report')->getUntestedFileCount()): ?>
+<?php if ($this->context('untested') && $this->context('report')->getUntestedFileCount()): ?>
 
 <h3>Untested</h3>
 
-<?php foreach ($context->context('report')->getUntestedFiles() as $file): ?>
+<?php foreach ($this->context('report')->getUntestedFiles() as $file): ?>
 <h4><?php echo $file ?></h4>
 
 <table class="table">

@@ -2,10 +2,9 @@
 
 namespace Test\All\Router;
 use Closure;
-use Europa\Router\Adapter\Ini;
+use Europa\Router\Adapter\Json;
+use Europa\Router\Route;
 use Europa\Router\Router;
-use Europa\Router\Route\Regex;
-use Europa\Router\Route\Token;
 use Exception;
 use Testes\Test\UnitAbstract;
 
@@ -14,11 +13,19 @@ class RouterTest extends UnitAbstract
     public function manipulatingRoutes()
     {
         $router = new Router;
-        $router['test1'] = new Regex('/^$/', ['controller' => 'index']);
-        $router['test2'] = new Token('test/:test', ['controller' => 'test']);
         
-        $this->assert($router['test1'] instanceof Regex, 'First route was not bound.');
-        $this->assert($router['test2'] instanceof Token, 'Second route was not bound.');
+        $router['test1'] = [
+            'request' => '^$',
+            'params'  => ['controller' => 'index']
+        ];
+
+        $router['test2'] = new Route([
+            'request' => 'test/:test',
+            'params'  => ['controller' => 'test']
+        ]);
+        
+        $this->assert($router['test1'] instanceof Route, 'First route was not bound.');
+        $this->assert($router['test2'] instanceof Route, 'Second route was not bound.');
         
         unset($router['test1']);
         
@@ -28,10 +35,10 @@ class RouterTest extends UnitAbstract
         } catch (Exception $e) {}
     }
     
-    public function iniRoutes()
+    public function jsonRoutes()
     {
         $router = new Router;
-        $routes = new Ini(__DIR__ . '/../../Provider/Router/routes.ini');
+        $router->import(__DIR__ . '/../../Provider/Router/routes.json');
         
         foreach ($routes as $name => $route) {
             $router[$name] = $route;
@@ -44,37 +51,6 @@ class RouterTest extends UnitAbstract
         $this->assert($router('someroute'), 'Router should have matched query.');
     }
 
-    public function Tokens()
-    {
-        $route = new Token('my/route/:param1/(:param2)/(:param3)/test');
-
-        $result = $route('my/route/value1/test');
-        $this->assert($result && $result['param1'] === 'value1');
-
-        $result = $route('my/route/value1/value2/test');
-        $this->assert($result && $result['param1'] === 'value1' && $result['param2'] === 'value2');
-
-        $result = $route('my/route/value1/value2/value3/test');
-        $this->assert($result && $result['param1'] === 'value1' && $result['param2'] === 'value2' && $result['param3'] === 'value3');
-
-        $this->assert($route('my/route/value1/value2/value3/test.json'));
-        $this->assert(!$route('my/route/test'));
-        $this->assert(!$route('my/route/value1'));
-        $this->assert(!$route('my/route/value1/'));
-        $this->assert(!$route('my/route/value1/tes'));
-        $this->assert(!$route('my/route/value1/tests'));
-
-        // test for trailing forward slashes
-        $this->assert($route('my/route/value1/test/'));
-        $this->assert(!$route('my/route/value1/tes/'));
-        $this->assert(!$route('my/route/value1/tests/'));
-
-        // test for suffixes
-        $this->assert($route('my/route/value1/test.json'));
-        $this->assert(!$route('my/route/value1/tes.xml'));
-        $this->assert(!$route('my/route/value1/tests.html'));
-    }
-
     public function uncallableRoute()
     {
         $router = new Router;
@@ -85,10 +61,10 @@ class RouterTest extends UnitAbstract
         } catch (Exception $e) {}
     }
 
-    public function badProviderIniFile()
+    public function badProviderJsonFile()
     {
         try {
-            new Ini('oiasdiojgoi39j3jj93o39e');
+            new Json('oiasdiojgoi39j3jj93o39e');
             $this->assert(false, 'The INI provider should throw an exception if the file does not exist.');
         } catch (Exception $e) {}
     }

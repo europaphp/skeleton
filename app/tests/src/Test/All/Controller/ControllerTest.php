@@ -20,7 +20,7 @@ class ControllerTest extends UnitAbstract
             'name' => 'Trey'
         ]);
 
-        $controller();
+        $controller($request);
         
         $this->assert($controller->id === $request->id, 'Id does not match.');
         $this->assert($controller->name === $request()->name, 'Name does not match.');
@@ -31,19 +31,20 @@ class ControllerTest extends UnitAbstract
     public function badControllerActioning()
     {
         $controller = new BadController;
+        $request    = new Http;
 
         try {
-            $controller();
+            $controller($request);
             $this->assert(false, 'Exception should have been thrown because of bad filter call.');
         } catch (Exception $e) {}
 
         try {
-            $controller(['action' => 'post']);
+            $controller($request->setParam('action', 'post'));
             $this->assert(false, 'Exception should have been thrown because of undefined method "delete".');
         } catch (Exception $e) {}
 
         try {
-            $controller(['action' => 'delete']);
+            $controller($request->setParam('action', 'delete'));
             $this->assert(false, 'Exception should have been thrown because of undefined method "delete".');
         } catch (Exception $e) {}
     }
@@ -51,6 +52,6 @@ class ControllerTest extends UnitAbstract
     public function actioningAllMethod()
     {
         $controller = new AllController;
-        $controller();
+        $controller(new Http);
     }
 }

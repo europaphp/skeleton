@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\Fs\Locator;
+namespace Europa\Fs;
 
 class LocatorArray
 {

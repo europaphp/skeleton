@@ -2,19 +2,19 @@
 
 namespace Test\All\Di;
 use ArrayObject;
-use Europa\App\Configuration;
-use Europa\Di\Container;
-use Europa\Di\Locator;
+use Europa\Di\ServiceContainer;
+use Europa\Di\ServiceLocator;
 use Exception;
+use Test\Provider\Di\TestConfiguration;
 use Testes\Test\UnitAbstract;
 
-class ContainerTest extends UnitAbstract
+class ServiceContainerTest extends UnitAbstract
 {
     public function container()
     {
-        $configuration = new Configuration;
+        $configuration = new TestConfiguration;
 
-        $container = new Container;
+        $container = new ServiceContainer;
         $container->configure($configuration);
 
         foreach ($configuration as $service) {
@@ -24,7 +24,7 @@ class ContainerTest extends UnitAbstract
 
     public function getting()
     {
-        $container        = new Container;
+        $container        = new ServiceContainer;
         $container->test1 = new ArrayObject(['test' => true]);
         $container->test2 = function($container) {
             return $container->test1;
@@ -36,7 +36,7 @@ class ContainerTest extends UnitAbstract
 
     public function gettingUnregistered()
     {
-        $container = new Container;
+        $container = new ServiceContainer;
 
         try {
             $container->unregisteredService;
@@ -46,8 +46,8 @@ class ContainerTest extends UnitAbstract
 
     public function gettingUnregisteredWithOneInAnotherContainer()
     {
-        $one = Container::one();
-        $two = Container::two();
+        $one = ServiceContainer::one();
+        $two = ServiceContainer::two();
 
         $two->service = new ArrayObject;
 
@@ -61,7 +61,7 @@ class ContainerTest extends UnitAbstract
 
     public function unsetting()
     {
-        $container = new Container;
+        $container = new ServiceContainer;
         $container->test = new ArrayObject;
         $container->test();
 
@@ -72,7 +72,7 @@ class ContainerTest extends UnitAbstract
 
     public function transient()
     {
-        $container = new Container;
+        $container = new ServiceContainer;
         $container->test = function() {
             return new ArrayObject(['test' => false]);
         };

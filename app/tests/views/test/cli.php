@@ -1,10 +1,14 @@
 <?php $this->extend('cli'); ?>
 
+<?php echo $this->helper('cli')->color('Coverage:', 'yellow'); ?> <?php echo $this->helper('cli')->color($this->context('percent') . '%', $this->context('percent') >= 50 ? 'green' : 'red'); ?>
+
+
 <?php if ($this->context('suite')->getAssertions()->isPassed()): ?>
 <?php echo $this->helper('cli')->color('All tests passed!', 'green'); ?><?php else: ?>
-<?php echo $this->helper('cli')->color('Failed', 'red'); ?>
+<?php echo $this->helper('cli')->color('Failed', 'red/white'); ?>
 
-<?php echo $this->helper('cli')->color('------', 'red'); ?>
+<?php echo $this->helper('cli')->color('------', 'red/white'); ?>
+
 
 <?php foreach ($this->context('suite')->getAssertions()->getFailed() as $ass): ?>
   <?php echo $this->helper('cli')->color($ass->getTestClass(), 'red/white'); ?>:<?php echo $this->helper('cli')->color($ass->getTestLine(), 'yellow'); ?> <?php echo $ass->getMessage(); ?>
@@ -12,10 +16,8 @@
 <?php endforeach; ?>
 <?php endif; ?>
 
-
-<?php echo $this->helper('cli')->color('Coverage:', 'yellow'); ?> <?php echo $this->helper('cli')->color($this->context('percent') . '%', $this->context('percent') >= 50 ? 'green' : 'red'); ?>
-
 <?php if ($this->context('suite')->getExceptions()->count()): ?>
+
 Exceptions
 ----------
 
@@ -30,7 +32,7 @@ Exceptions
 <?php endforeach; ?>
 <?php endif; ?>
 
-<?php if ($this->untested && $this->context('report')->getUntestedFileCount()): ?>
+<?php if ($this->context('untested') && $this->context('report')->getUntestedFileCount()): ?>
 Untested Files and Lines
 ------------------------
 <?php foreach ($this->context('report')->getUntestedFiles() as $file): ?>

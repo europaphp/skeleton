@@ -18,7 +18,7 @@ class Json extends UnitAbstract
         );
         
         $this->assert(
-            $view->render($data) === '{"data":{"val1":1,"val2":2},"success":true}',
+            call_user_func($view, $data) === '{"data":{"val1":1,"val2":2},"success":true}',
             'The data was not rendered properly.'
         );
     }

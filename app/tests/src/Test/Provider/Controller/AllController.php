@@ -1,9 +1,9 @@
 <?php
 
 namespace Test\Provider\Controller;
-use Europa\Controller\ControllerAbstract;
+use Europa\Controller\AbstractController;
 
-class AllController extends ControllerAbstract
+class AllController extends AbstractController
 {
     public function action()
     {

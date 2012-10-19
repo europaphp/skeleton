@@ -1,11 +1,11 @@
 <?php
 
 namespace Test\Provider\Controller;
-use Europa\Controller\ControllerAbstract;
+use Europa\Controller\AbstractController;
 
 class ClassFilter
 {
-    public function __invoke(ControllerAbstract $controller, array $params)
+    public function __invoke(AbstractController $controller, array $params)
     {
         $controller->classFilter = $args;
     }

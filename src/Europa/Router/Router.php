@@ -125,7 +125,7 @@ class Router implements ArrayAccess, Countable, IteratorAggregate
             return $this->routes[$name];
         }
 
-        throw new LogicException(sprintf('Cannot get route "%s" because it does not exist.', $name));
+        Exception::toss('Cannot get route "%s" because it does not exist.', $name);
     }
     
     /**

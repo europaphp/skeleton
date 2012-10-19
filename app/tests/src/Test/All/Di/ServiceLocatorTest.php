@@ -1,7 +1,7 @@
 <?php
 
 namespace Test\All\Di;
-use Europa\Di\Locator;
+use Europa\Di\ServiceLocator;
 use Europa\Filter\ClassNameFilter;
 use Exception;
 use Test\Provider\Di\Test;
@@ -11,11 +11,11 @@ class LocatorTest extends UnitAbstract
 {
     public function getting()
     {
-        $locator = new Locator;
+        $locator = new ServiceLocator;
         $locator->getFilter()->add(new ClassNameFilter(['prefix' => 'Test\Provider\Di\\']));
 
         $locator->args('Test\Provider\Di\Test', function($locator) {
-            $this->assert($locator instanceof Locator, 'The locator should have been specified as the first parameter to the "args" closure.');
+            $this->assert($locator instanceof ServiceLocator, 'The service locator should have been specified as the first parameter to the "args" closure.');
             return ['test' => true];
         });
 
@@ -36,7 +36,7 @@ class LocatorTest extends UnitAbstract
         });
 
         $locator->call('Test\Provider\Di\Test', function($locator, $test) {
-            $this->assert($locator instanceof Locator, 'The locator should have been specified as the first parameter to the "call" closure.');
+            $this->assert($locator instanceof ServiceLocator, 'The service locator should have been specified as the first parameter to the "call" closure.');
             $this->assert($test instanceof Test, 'The located instance should have been specified as the second parameter to the "call" closure.');
             $test->test();
         });
@@ -57,22 +57,22 @@ class LocatorTest extends UnitAbstract
             $test->testAll();
         });
 
-        $this->assert($locator->test->callTest, 'Locator did not pass the "test" argument.');
-        $this->assert($locator->test->callTestAbstract, 'Locator did pass the "testAbstract" argument.');
-        $this->assert($locator->test->callTestInterface, 'Locator did not pass the "testInterface" argument.');
-        $this->assert($locator->test->callTestTrait, 'Locator did not pass the "testTrait" argument.');
-        $this->assert($locator->test->callTestAll, 'Locator did not pass the "testAll" argument.');
+        $this->assert($locator->test->callTest, 'Service locator did not pass the "test" argument.');
+        $this->assert($locator->test->callTestAbstract, 'Service locator did pass the "testAbstract" argument.');
+        $this->assert($locator->test->callTestInterface, 'Service locator did not pass the "testInterface" argument.');
+        $this->assert($locator->test->callTestTrait, 'Service locator did not pass the "testTrait" argument.');
+        $this->assert($locator->test->callTestAll, 'Service locator did not pass the "testAll" argument.');
 
-        $this->assert($locator->test->callTest, 'Locator did not call "test()" method.');
-        $this->assert($locator->test->callTestAbstract, 'Locator did not call "testAbstract()" method.');
-        $this->assert($locator->test->callTestInterface, 'Locator did not call "testInterface()" method.');
-        $this->assert($locator->test->callTestTrait, 'Locator did not call "testTrait()" method.');
-        $this->assert($locator->test->callTestAll, 'Locator did not call "testAll()" method.');
+        $this->assert($locator->test->callTest, 'Service locator did not call "test()" method.');
+        $this->assert($locator->test->callTestAbstract, 'Service locator did not call "testAbstract()" method.');
+        $this->assert($locator->test->callTestInterface, 'Service locator did not call "testInterface()" method.');
+        $this->assert($locator->test->callTestTrait, 'Service locator did not call "testTrait()" method.');
+        $this->assert($locator->test->callTestAll, 'Service locator did not call "testAll()" method.');
     }
 
     public function gettingUnregistered()
     {
-        $locator = new Locator;
+        $locator = new ServiceLocator;
 
         try {
             $locator->test;
@@ -84,7 +84,7 @@ class LocatorTest extends UnitAbstract
 
     public function settingFilter()
     {
-        $locator = new Locator;
+        $locator = new ServiceLocator;
         $locator->setFilter(function($value) {
             return $value . 'test';
         });

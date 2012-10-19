@@ -1,8 +1,9 @@
 <?php
 
 namespace Test\All\Fs;
-use Europa\Fs\Loader\ClassLoader;
-use Europa\Fs\Locator\Locator;
+use Europa\Fs\Loader;
+use Europa\Fs\Locator;
+use Europa\Fs\LocatorArray;
 use Testes\Test\UnitAbstract;
 
 class LoaderTest extends UnitAbstract
@@ -11,8 +12,10 @@ class LoaderTest extends UnitAbstract
     
     public function setUp()
     {
-        $this->loader = new ClassLoader;
+        $this->loader = new Loader;
         $this->loader->register();
+        $this->loader->setLocator(new LocatorArray);
+        $this->loader->getLocator()->add(new Locator);
         $this->loader->getLocator()->add(function($file) {
             return realpath(dirname(__FILE__) . '/../../' . $file . '.php');
         });
@@ -24,7 +27,7 @@ class LoaderTest extends UnitAbstract
         
         foreach ($funcs as $func) {
             if (is_array($func)
-                && $func[0] instanceof ClassLoader
+                && $func[0] instanceof Loader
                 && $func[1] === 'load'
             ) {
                 return;
