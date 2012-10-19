@@ -17,7 +17,6 @@
 <?php endif; ?>
 
 <?php if ($this->context('suite')->getExceptions()->count()): ?>
-
 Exceptions
 ----------
 
@@ -31,7 +30,6 @@ Exceptions
 
 <?php endforeach; ?>
 <?php endif; ?>
-
 <?php if ($this->context('untested') && $this->context('report')->getUntestedFileCount()): ?>
 Untested Files and Lines
 ------------------------
@@ -43,4 +41,7 @@ Untested Files and Lines
 <?php endforeach; ?>
 
 <?php endforeach; ?>
+<?php endif; ?>
+<?php if ($this->context('suite')->getAssertions()->isFailed() || $this->context('suite')->getExceptions()->count()): ?>
+<?php exit(1); ?>
 <?php endif; ?>
