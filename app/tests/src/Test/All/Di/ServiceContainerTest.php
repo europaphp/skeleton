@@ -63,7 +63,8 @@ class ServiceContainerTest extends UnitAbstract
     {
         $container = new ServiceContainer;
         $container->test = new ArrayObject;
-        $container->test();
+        
+        $this->assert($container->test instanceof ArrayObject, 'The test service should be an instance of ArrayObject.');
 
         unset($container->test);
 

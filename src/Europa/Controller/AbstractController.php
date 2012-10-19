@@ -135,7 +135,7 @@ abstract class AbstractController
     private function applyClassFilters()
     {
         foreach ($this->getFiltersFor(new ClassReflector($this)) as $filter) {
-            call_user_func($filter, $this, $request);
+            call_user_func($filter, $this);
         }
     }
 
@@ -147,7 +147,7 @@ abstract class AbstractController
     private function applyActionFilters($action)
     {
         foreach ($this->getFiltersFor(new MethodReflector($this, $action)) as $filter) {
-            call_user_func($filter, $this, $request);
+            call_user_func($filter, $this);
         }
     }
 }

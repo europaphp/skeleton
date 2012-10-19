@@ -1,11 +1,11 @@
 {
     "test1": {
-        "request": "test1/(?<test>[^/]+)"
+        "request": "test1/(?<test>[^/]+)",
         "reverse": "test1/:test"
     },
 
     "test2": {
-        "request": "test2/(?<test>[^/]+)"
+        "request": "test2/(?<test>[^/]+)",
         "reverse": "test2/:test"
     }
 }

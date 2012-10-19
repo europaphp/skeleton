@@ -21,7 +21,7 @@ class Controller extends AbstractController
     /**
      * @filter Test\Provider\Controller\MethodFilter Args
      */
-    public function get($id, $name, $notRequired = true)
+    public function test($id, $name, $notRequired = true)
     {
         $this->id          = $id;
         $this->name        = $name;

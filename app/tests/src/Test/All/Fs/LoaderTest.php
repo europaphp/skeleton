@@ -23,13 +23,8 @@ class LoaderTest extends UnitAbstract
     
     public function testRegisterAutoload()
     {
-        $funcs = spl_autoload_functions();
-        
-        foreach ($funcs as $func) {
-            if (is_array($func)
-                && $func[0] instanceof Loader
-                && $func[1] === 'load'
-            ) {
+        foreach (spl_autoload_functions() as $func) {
+            if (is_array($func) && $func[0] instanceof Loader && $func[1] === '__invoke') {
                 return;
             }
         }

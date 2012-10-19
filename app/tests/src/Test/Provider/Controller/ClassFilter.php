@@ -5,8 +5,8 @@ use Europa\Controller\AbstractController;
 
 class ClassFilter
 {
-    public function __invoke(AbstractController $controller, array $params)
+    public function __invoke(AbstractController $controller)
     {
-        $controller->classFilter = $args;
+        $controller->classFilter = true;
     }
 }

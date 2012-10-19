@@ -16,14 +16,15 @@ class ControllerTest extends UnitAbstract
         $request    = new Http;
 
         $request->setParams([
-            'id'   => 1,
-            'name' => 'Trey'
+            'action' => 'test',
+            'id'     => 1,
+            'name'   => 'Trey'
         ]);
 
         $controller($request);
         
         $this->assert($controller->id === $request->id, 'Id does not match.');
-        $this->assert($controller->name === $request()->name, 'Name does not match.');
+        $this->assert($controller->name === $request->name, 'Name does not match.');
         $this->assert($controller->classFilter, 'The controller class was not filtered.');
         $this->assert($controller->methodFilter, 'The controller method was not filtered.');
     }
@@ -47,11 +48,5 @@ class ControllerTest extends UnitAbstract
             $controller($request->setParam('action', 'delete'));
             $this->assert(false, 'Exception should have been thrown because of undefined method "delete".');
         } catch (Exception $e) {}
-    }
-
-    public function actioningAllMethod()
-    {
-        $controller = new AllController;
-        $controller(new Http);
     }
 }

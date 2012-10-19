@@ -35,20 +35,19 @@ class RouterTest extends UnitAbstract
         } catch (Exception $e) {}
     }
     
-    public function jsonRoutes()
+    public function json()
     {
         $router = new Router;
         $router->import(__DIR__ . '/../../Provider/Router/routes.json');
-        
-        foreach ($routes as $name => $route) {
-            $router[$name] = $route;
+
+        if (!$router->count()) {
+            $this->assert(false, 'No routes were imported.');
         }
         
         foreach ($router as $name => $route) {
-            $this->assert($route instanceof Closure, 'The route should be an instance of "Closure".');
+            $this->assert(is_callable($route), 'The route should be callable.');
+            $this->assert($route instanceof Route, 'The route should be an instance of "Europa\Router\Route".');
         }
-
-        $this->assert($router('someroute'), 'Router should have matched query.');
     }
 
     public function uncallableRoute()

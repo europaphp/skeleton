@@ -5,8 +5,8 @@ use Europa\Controller\AbstractController;
 
 class MethodFilter
 {
-    public function __invoke(AbstractController $controller, array $params)
+    public function __invoke(AbstractController $controller)
     {
-        $controller->methodFilter = $args;
+        $controller->methodFilter = true;
     }
 }
