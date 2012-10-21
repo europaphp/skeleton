@@ -1,6 +1,6 @@
 {
     "test-get": {
-        "request": "test",
+        "match": "test",
         "method": "get",
         "params": {
             "controller": "test",
@@ -9,7 +9,7 @@
     },
 
     "test-cli": {
-        "request": "test",
+        "match": "test",
         "method": "cli",
         "params": {
             "controller": "test",

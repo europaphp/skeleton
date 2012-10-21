@@ -13,7 +13,7 @@ class Route
     const CONTROLLER = 'controller';
 
     private $config = [
-        'request'           => '^$',
+        'match'             => '^$',
         'method'            => 'get',
         'format'            => ':controller/:action',
         'params'            => ['controller' => 'index', 'action' => 'get'],
@@ -97,7 +97,7 @@ class Route
             return false;
         }
 
-        if (!preg_match('!' . $this->config->request . '!', $request->getUri()->getRequest(), $matches)) {
+        if (!preg_match('!' . $this->config->match . '!', $request->getUri()->getRequest(), $matches)) {
             return false;
         }
 
@@ -113,7 +113,7 @@ class Route
      */
     private function handleCliRequest(CliInterface $request)
     {
-        if (!$this->config->request) {
+        if (!$this->config->match) {
             return false;
         }
 
@@ -121,7 +121,7 @@ class Route
             return false;
         }
 
-        if (!preg_match('!' . $this->config->request . '!', $request->getCommand(), $matches)) {
+        if (!preg_match('!' . $this->config->match . '!', $request->getCommand(), $matches)) {
             return false;
         }
 
