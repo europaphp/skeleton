@@ -1,6 +1,6 @@
 <?php $this->extend('cli'); ?>
 
-<?php echo $this->helper('cli')->color('Coverage:', 'yellow'); ?> <?php echo $this->helper('cli')->color($this->context('percent') . '%', $this->context('percent') >= 50 ? 'green' : 'red'); ?>
+<?php echo $this->helper('cli')->color('Coverage:', 'yellow'); ?> <?php echo $this->helper('cli')->color($this->context('percent') . '%', $this->context('percent') >= 50 ? 'green' : 'red/white'); ?>
 
 
 <?php if ($this->context('suite')->getAssertions()->isPassed()): ?>
