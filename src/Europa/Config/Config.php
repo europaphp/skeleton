@@ -117,8 +117,14 @@ class Config implements ConfigInterface
                 Exception::toss('The config adapter "%s" does not exist.', $adapter);
             }
 
-            $this->import(new $adapter($config));
-        } elseif (is_array($config) || is_object($config)) {
+            return $this->import(new $adapter($config));
+        }
+
+        if (is_callable($config)) {
+            $config = $config();
+        }
+
+        if (is_array($config) || is_object($config)) {
             foreach ($config as $name => $value) {
                 $this->offsetSet($name, $value);
             }

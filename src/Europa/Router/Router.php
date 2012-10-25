@@ -58,8 +58,14 @@ class Router implements ArrayAccess, Countable, IteratorAggregate
                 Exception::toss('The router adapter "%s" does not exist.', $adapter);
             }
 
-            $this->import(new $adapter($routes));
-        } elseif (is_array($routes) || is_object($routes)) {
+            return $this->import(new $adapter($routes));
+        }
+
+        if (is_callable($routes)) {
+            $routes = $routes();
+        }
+
+        if (is_array($routes) || is_object($routes)) {
             foreach ($routes as $name => $route) {
                 $this->offsetSet($name, $route);
             }

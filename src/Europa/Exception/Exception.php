@@ -6,7 +6,7 @@ class Exception extends \Exception
 {
     public static function toss()
     {
-        throw new static(call_user_func_array('sprintf', func_get_args()), self::code());
+        throw new static(call_user_func_array('sprintf', func_get_args()), static::code());
     }
 
     public static function code()

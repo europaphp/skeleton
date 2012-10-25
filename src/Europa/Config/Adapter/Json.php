@@ -1,10 +1,9 @@
 <?php
 
 namespace Europa\Config\Adapter;
-use ArrayIterator;
 use Europa\Exception\Exception;
 
-class Json implements AdapterInterface
+class Json
 {
     private $file;
 
@@ -18,10 +17,5 @@ class Json implements AdapterInterface
     public function __invoke()
     {
         return json_decode(file_get_contents($this->file));
-    }
-
-    public function getIterator()
-    {
-        return new ArrayIterator($this->__invoke());
     }
 }

@@ -1,10 +1,9 @@
 <?php
 
 namespace Europa\Config\Adapter;
-use ArrayIterator;
 use Europa\Exception\Exception;
 
-class Ini implements AdapterInterface
+class Ini
 {
     private $file;
 
@@ -18,10 +17,5 @@ class Ini implements AdapterInterface
     public function __invoke()
     {
         return parse_ini_file($this->file);
-    }
-
-    public function getIterator()
-    {
-        return new ArrayIterator($this->__invoke());
     }
 }
