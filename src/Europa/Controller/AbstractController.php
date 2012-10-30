@@ -18,6 +18,13 @@ use Europa\Request\RequestInterface;
 abstract class AbstractController
 {
     /**
+     * The action parameter name.
+     * 
+     * @var string
+     */
+    const ACTION = 'action';
+
+    /**
      * The doc tag name used for filters.
      * 
      * @var string
@@ -48,7 +55,7 @@ abstract class AbstractController
     public function __invoke(RequestInterface $request)
     {
         $this->request = $request;
-        return $this->invoke($request->getParam('action'));
+        return $this->invoke($request->getParam(self::ACTION));
     }
 
     /**
