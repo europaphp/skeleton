@@ -87,7 +87,9 @@ class ServiceLocator extends ServiceContainer
         }
 
         if ($this->__isset($name)) {
-            $service = $this->createInstance(call_user_func($this->filter, $name));
+            $filter  = $this->filter;
+            $service = $filter($name);
+            $service = $this->createInstance($service);
 
             if (!$this->isTransient($name)) {
                 parent::__set($name, $service);

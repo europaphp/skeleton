@@ -144,7 +144,9 @@ class Php extends ViewScriptAbstract
             Exception::toss('Could not return helper "%s" because it does not exist.', $name);
         }
 
-        return call_user_func($this->helpers, $name);
+        $helpers = $this->helpers;
+
+        return $helpers($name);
     }
     
     /**

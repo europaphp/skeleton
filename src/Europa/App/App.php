@@ -93,20 +93,23 @@ class App implements ArrayAccess, IteratorAggregate
             $this->container->viewLocator->addPaths($module->getViewPaths());
             
             if (is_callable($bootstrapper = $module->getBootstrapper())) {
-                call_user_func($bootstrapper, $conf);
+                $bootstrapper($conf);
             }
         }
+
+        $router = $this->container->router;
         
-        if (!$controller = call_user_func($this->container->router, $this->container->request)) {
+        if (!$controller = $router($this->container->request)) {
             Exception::toss('The router could not find a suitable controller for the request "%s".', $this->container->request);
         }
 
-        $context = call_user_func($controller, $this->container->request);
-        $view    = call_user_func($this->container->negotiator, $this->container->request);
+        $context = $controller($this->container->request);
+        $view    = $this->container->negotiator;
+        $view    = $view($this->container->request);
 
         $this->configureView($view);
 
-        $this->container->response->setBody(call_user_func($view, $context ?: []));
+        $this->container->response->setBody($view($context ?: []));
         $this->container->response->send();
 
         return $this;
@@ -216,7 +219,7 @@ class App implements ArrayAccess, IteratorAggregate
         $format = $this->container->config->view->script;
 
         if (is_callable($format)) {
-            return call_user_func($format, $this->container->request);
+            return $format($this->container->request);
         }
 
         foreach ($this->container->request->getParams() as $name => $param) {

@@ -137,6 +137,6 @@ class Route
      */
     private function resolveController(RequestInterface $request)
     {
-        return call_user_func(new ClassNameFilter($this->config->controller), $request->getParam(self::CONTROLLER));
+        return (new ClassNameFilter($this->config->controller))->__invoke($request->getParam(self::CONTROLLER));
     }
 }

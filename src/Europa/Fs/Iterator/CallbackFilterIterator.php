@@ -43,7 +43,7 @@ class CallbackFilterIterator extends FilterIterator
     public function accept()
     {
         foreach ($this->filters as $filter) {
-            if (call_user_func($filter, $this->current()) === false) {
+            if ($filter($this->current()) === false) {
                 return false;
             }
         }

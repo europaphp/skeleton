@@ -9,7 +9,7 @@ class LocatorArray
     public function __invoke($file)
     {
         foreach ($this->locators as $locator) {
-            if ($real = call_user_func($locator, $file)) {
+            if ($real = $locator($file)) {
                 return $real;
             }
         }
