@@ -104,7 +104,8 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
     public function locateScript()
     {
         if ($this->scriptLocator) {
-            return call_user_func($this->scriptLocator, $this->formatScript());
+            $locator = $this->scriptLocator;
+            return $locator($this->formatScript());
         } elseif (is_file($this->script)) {
             return $this->script;
         }

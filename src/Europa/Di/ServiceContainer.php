@@ -117,10 +117,10 @@ class ServiceContainer implements ServiceContainerInterface
         }
 
         if (isset($this->transient[$name])) {
-            return call_user_func($service, $this);
+            return $service($this);
         }
 
-        return $this->cache[$name] = call_user_func($service, $this);
+        return $this->cache[$name] = $service($this);
     }
 
     /**
@@ -162,7 +162,7 @@ class ServiceContainer implements ServiceContainerInterface
      */
     public function configure(callable $configuration)
     {
-        call_user_func($configuration, $this);
+        $configuration($this);
         return $this;
     }
 

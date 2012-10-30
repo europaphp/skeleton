@@ -31,8 +31,10 @@ class Loader
         if (class_exists($class, false)) {
             return true;
         }
+
+        $locator = $this->locator;
         
-        if ($this->locator && $file = call_user_func($this->locator, $class . '.php')) {
+        if ($locator && $file = $locator($class . '.php')) {
             include $file;
             return true;
         }

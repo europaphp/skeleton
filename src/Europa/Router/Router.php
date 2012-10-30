@@ -35,7 +35,7 @@ class Router implements ArrayAccess, Countable, IteratorAggregate
     public function __invoke(RequestInterface $request)
     {
         foreach ($this->routes as $name => $route) {
-            if ($controller = call_user_func($route, $name, $request)) {
+            if ($controller = $route($name, $request)) {
                 return $controller;
             }   
         }

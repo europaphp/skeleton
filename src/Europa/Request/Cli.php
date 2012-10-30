@@ -113,7 +113,7 @@ class Cli extends RequestAbstract implements CliInterface
         $params = '';
 
         foreach ($this->getParams() as $name => $value) {
-            $value   = is_string($value) ? '"' . $value . '"' : call_user_func(new ToStringFilter, $value);
+            $value   = is_string($value) ? '"' . $value . '"' : (new ToStringFilter)->__invoke($value);
             $params .= ' --' . $name . '=' . $value;
         }
 
