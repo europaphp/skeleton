@@ -1,12 +1,9 @@
 <?php
 
 namespace Europa\Di;
-use Closure;
 use Europa\Config\Config;
 use Europa\Filter\ClassResolutionFilter;
 use Europa\Reflection\ClassReflector;
-use LogicException;
-use UnexpectedValueException;
 
 /**
  * The application service locator and container.
@@ -16,7 +13,7 @@ use UnexpectedValueException;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  http://europaphp.org/license
  */
-class ServiceLocator extends Container
+class ServiceLocator extends ServiceContainer
 {
     /**
      * A token that represents any type of object.
