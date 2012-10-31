@@ -42,6 +42,31 @@ class Router implements ArrayAccess, Countable, IteratorAggregate
     }
 
     /**
+     * Formats the specified route using the specified parameters.
+     * 
+     * @param string $route  The route to format.
+     * @param array  $params The parameters to use.
+     * 
+     * @throws Exception If The route cannot be formated.
+     * 
+     * @return string
+     */
+    public function format($route, array $params = [])
+    {
+        if (!$this->offsetExists($route)) {
+            Exception::toss('The route "%s" cannot be formatted because it does not exist.', $route);
+        }
+
+        $route = $this->offsetGet($route);
+
+        if (!$route instanceof Route) {
+            Exception::toss('The route "%s" must be an instance of "Europa\Router\Route" in order to be formatted.', $route);
+        }
+
+        return $route->format($params);
+    }
+
+    /**
      * Imports a list of routes.
      * 
      * @param mixed $routes The routes to add.

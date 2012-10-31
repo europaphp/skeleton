@@ -1,10 +1,10 @@
 <?php
 
 namespace Europa\View\Helper;
-use Europa\Request;
-use Europa\Router\RouterInterface;
-use Exception;
-use LogicException;
+use Europa\Exception\Exception;
+use Europa\Request\Uri as RequestUri;
+use Europa\Router\Route;
+use Europa\Router\Router;
 
 /**
  * A helper for formatting a passed in url.
@@ -50,7 +50,7 @@ class Uri
      */
     public function current()
     {
-        return Request\Uri::detect()->__toString();
+        return RequestUri::detect()->__toString();
     }
     
     /**
@@ -63,9 +63,9 @@ class Uri
      */
     public function format($uri = null, array $params = [])
     {
-        $obj = Request\Uri::detect();
+        $obj = RequestUri::detect();
         
-        if ($uri && $this->router && $this->router->offsetExists($uri)) {
+        if ($uri && $this->router) {
             $obj->setRequest($this->router->format($uri, $params));
         } else {
             $obj->setRequest($uri)->setParams($params);
@@ -97,7 +97,7 @@ class Uri
     public function redirect($uri = null, array $params = [])
     {
         if (headers_sent()) {
-            throw new LogicException(sprintf('Cannot redirect to "%s" from the view because output has already started.', $uri));
+            Exception::toss('Cannot redirect to "%s" from the view because output has already started.', $uri);
         }
         
         (new Request\Uri($this->format($uri, $params)))->redirect();
