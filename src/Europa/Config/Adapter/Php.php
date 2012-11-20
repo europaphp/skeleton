@@ -1,17 +1,17 @@
 <?php
 
-namespace Europa\Config\Adapter;
+namespace Europa\Router\Adapter;
 use Europa\Exception\Exception;
 
 /**
- * Reads configuration options from an INI file.
+ * Reads configuration options from a PHP file.
  * 
  * @category Config
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Ini
+class Php
 {
     /**
      * The file we are reading from.
@@ -25,12 +25,12 @@ class Ini
      * 
      * @param string $file The file to read configuration options from.
      * 
-     * @return Ini
+     * @return Php
      */
     public function __construct($file)
     {
         if (!is_file($this->file = $file)) {
-            Exception::toss('The INI config file "%s" does not exist.', $file);
+            Exception::toss('The PHP configuration file "%s" does not exist.', $file);
         }
     }
 
@@ -41,6 +41,6 @@ class Ini
      */
     public function __invoke()
     {
-        return parse_ini_file($this->file);
+        return include $this->file;
     }
 }
