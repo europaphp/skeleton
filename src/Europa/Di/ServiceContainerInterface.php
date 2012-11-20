@@ -81,4 +81,24 @@ interface ServiceContainerInterface
      * @return bool
      */
     public function isTransient($name);
+
+    /**
+     * Returns whether or not the container provides the specified services listed in the given configuration class or interface.
+     * 
+     * @param string $blueprint The class or interface to check.
+     * 
+     * @return bool
+     */
+    public function provides($blueprint);
+
+    /**
+     * Throws an exception if the specified blueprint is not provided.
+     * 
+     * @param string $blueprint The class or interface to check.
+     * 
+     * @throws Europa\Exception\Exception If the blueprint is not provided.
+     * 
+     * @return ServiceContainerInterface
+     */
+    public function mustProvide($blueprint);
 }

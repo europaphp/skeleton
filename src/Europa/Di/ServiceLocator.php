@@ -6,9 +6,9 @@ use Europa\Filter\ClassResolutionFilter;
 use Europa\Reflection\ClassReflector;
 
 /**
- * The application service locator and container.
+ * A service Locator
  * 
- * @category DI
+ * @category Di
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  http://europaphp.org/license

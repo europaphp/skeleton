@@ -4,11 +4,12 @@ namespace Europa\Di;
 use Closure;
 use Europa\Exception\Exception;
 use Europa\Reflection\ClassReflector;
+use ReflectionClass;
 
 /**
- * The application service locator and container.
+ * A service container.
  * 
- * @category DI
+ * @category Di
  * @package  Europa
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  http://europaphp.org/license
@@ -82,19 +83,22 @@ class ServiceContainer implements ServiceContainerInterface
      */
     public function __set($name, $value)
     {
+        // If a string is given, it is assumed to just be a class.
         if (is_string($value)) {
             $value = function() use ($value) {
                 return new $value;
             };
         }
 
+        // Anything that is not a closure is returned by a closure.
         if (!$value instanceof Closure) {
             $value = function() use ($value) {
                 return $value;
             };
         }
 
-        $this->services[$name] = $value;
+        // Rebind the closure to the container.
+        $this->services[$name] = $value->bindTo($this);
     }
 
     /**
@@ -181,9 +185,19 @@ class ServiceContainer implements ServiceContainerInterface
     }
 
     /**
+     * The full name of the container.
+     * 
+     * @return string
+     */
+    public function fullName()
+    {
+        return $this->name() ?: get_class($this) . '::[unknown]()';
+    }
+
+    /**
      * Denotes certain services as transient.
      * 
-     * @param mixed $names The name or names of the transient services.
+     * @param mixed $names The name of the transient service.
      * 
      * @return Container
      */
@@ -206,6 +220,46 @@ class ServiceContainer implements ServiceContainerInterface
     public function isTransient($name)
     {
         return isset($this->transient[$name]);
+    }
+
+    /**
+     * Returns whether or not the container provides the specified services listed in the given configuration class or interface.
+     * 
+     * @param string $blueprint The class or interface to check.
+     * 
+     * @return bool
+     */
+    public function provides($blueprint)
+    {
+        $reflector = new ReflectionClass($blueprint);
+
+        foreach ($reflector->getMethods() as $method) {
+            $name = $method->getName();
+
+            if (!isset($this->services[$name])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Throws an exception if the specified blueprint is not provided.
+     * 
+     * @param string $blueprint The class or interface to check.
+     * 
+     * @throws Europa\Exception\Exception If the blueprint is not provided.
+     * 
+     * @return ServiceContainerInterface
+     */
+    public function mustProvide($blueprint)
+    {
+        if ($this->provides($blueprint)) {
+            return $this;
+        }
+
+        Exception::toss('The blueprint "%s" must be provided by "%s".', $blueprint, $this->fullName());
     }
 
     /**
@@ -248,6 +302,6 @@ class ServiceContainer implements ServiceContainerInterface
             }
         }
 
-        Exception::toss($message, $name, $this->name() ?: get_class($this) . '::[unknown]()');
+        Exception::toss($message, $name, $this->fullName());
     }
 }
