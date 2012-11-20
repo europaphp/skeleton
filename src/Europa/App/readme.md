@@ -19,18 +19,18 @@ Modules
 
 Modules are chunks of application code that are organised into their own directories. The default module structure is defined as follows:
 
-- module-name
-  - configs
-    - config.json
-    - routes.json
-  - src
-    - SomeNamespace
-      - SomeClass.php
-    - Controller
-      - SomeController.php
-  - views
-    - controller
-      - action.php
+* module-name
+** configs
+*** config.json
+*** routes.json
+** src
+*** SomeNamespace
+**** SomeClass.php
+*** Controller
+**** SomeController.php
+** views
+*** controller
+**** action.php
 
 Every part of this structure can be customised by providing the module with a custom configuration:
 
