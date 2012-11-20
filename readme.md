@@ -23,7 +23,9 @@ Download from Github and extract it to where you want it.
 
     composer create-project treshugart/europaphp [installation path] [branch or tag]
 
-That's really it.
+If you want to use it as a composer package, just add `treshugart/europaphp` to your `composer.json` file.
+
+There's no wanky setup page and no unnecessary bloat. That's really all there is to it.
 
 Running Tests
 -------------
