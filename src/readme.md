@@ -18,7 +18,7 @@ EuropaPHP 2's major difference to previous releases is it's focus on how the SRP
 
 ### Service Containers
 
-Another major difference is how service containers are configured. Service containers take configurations via a `configure()` method. The configuration can be anything that is `callable`, however, there is a `Europa\Di\ConfigurationAbstract` class that you can extend to organise your configurations into classes. A bug benefit to using these classes is that you can define interfaces for these configurations and then check the container if they provide that configuration or configuration interface.
+Another major difference is how service containers are configured. Service containers take configurations via a `configure()` method. The configuration can be anything that is `callable`, however, there is a `Europa\Di\ConfigurationAbstract` class that you can extend to organise your configurations into classes. A benefit to using these classes is that you can define interfaces for these configurations and then check the container if they provide that configuration or configuration interface.
 
 ### Controllers
 
