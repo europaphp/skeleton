@@ -8,10 +8,28 @@ use Europa\Request\CliInterface;
 use Europa\Request\HttpInterface;
 use Europa\Request\RequestInterface;
 
+/**
+ * Default request route implementation.
+ * 
+ * @category Router
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
+ */
 class Route
 {
+    /**
+     * The default controller parameter name.
+     * 
+     * @var string
+     */
     const CONTROLLER = 'controller';
 
+    /**
+     * The default route configuration.
+     * 
+     * @var array
+     */
     private $config = [
         'match'             => '^$',
         'method'            => 'get',
@@ -21,6 +39,13 @@ class Route
         'controller.suffix' => ''
     ];
 
+    /**
+     * Constructs and configures a new route.
+     * 
+     * @param mixed $config The route configuration.
+     * 
+     * @return Route
+     */
     public function __construct($config)
     {
         $this->config = new Config($this->config, $config);
@@ -30,6 +55,14 @@ class Route
         }
     }
 
+    /**
+     * Routes the specified request if it matches the route.
+     * 
+     * @param string           $name    The route name. This is determined by the router invoking the route.
+     * @param RequestInterface $request The request to route. This is also determined by the router invoking the route.
+     * 
+     * @return false | Object
+     */
     public function __invoke($name, RequestInterface $request)
     {
         // Guilty until proven innocent.

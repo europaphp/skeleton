@@ -4,6 +4,7 @@ namespace Europa\Router;
 use ArrayAccess;
 use ArrayIterator;
 use Countable;
+use Europa\Config\Config;
 use Europa\Exception\Exception;
 use Europa\Request\RequestInterface;
 use IteratorAggregate;
@@ -37,7 +38,7 @@ class Router implements ArrayAccess, Countable, IteratorAggregate
         foreach ($this->routes as $name => $route) {
             if ($controller = $route($name, $request)) {
                 return $controller;
-            }   
+            }
         }
     }
 
@@ -75,25 +76,8 @@ class Router implements ArrayAccess, Countable, IteratorAggregate
      */
     public function import($routes)
     {
-        if (is_string($routes)) {
-            $adapter = pathinfo($routes, PATHINFO_EXTENSION);
-            $adapter = 'Europa\Router\Adapter\\' . ucfirst($adapter);
-
-            if (!class_exists($adapter)) {
-                Exception::toss('The router adapter "%s" does not exist.', $adapter);
-            }
-
-            return $this->import(new $adapter($routes));
-        }
-
-        if (is_callable($routes)) {
-            $routes = $routes();
-        }
-
-        if (is_array($routes) || is_object($routes)) {
-            foreach ($routes as $name => $route) {
-                $this->offsetSet($name, $route);
-            }
+        foreach (new Config($routes) as $name => $route) {
+            $this->offsetSet($name, $route);
         }
 
         return $this;
