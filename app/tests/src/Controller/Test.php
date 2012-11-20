@@ -1,7 +1,7 @@
 <?php
 
 namespace Controller;
-use Europa\Controller\AbstractController;
+use Europa\Controller\ControllerAbstract;
 use Testes\Coverage\Coverage;
 use Testes\Finder\Finder;
 
@@ -13,7 +13,7 @@ use Testes\Finder\Finder;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Test extends AbstractController
+class Test extends ControllerAbstract
 {
     /**
      * Runs all tests via the command line.

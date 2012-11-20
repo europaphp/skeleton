@@ -1,7 +1,7 @@
 <?php
 
 namespace Controller;
-use Europa\Controller\AbstractController;
+use Europa\Controller\ControllerAbstract;
 
 /**
  * A default controller for a base implementation.
@@ -11,7 +11,7 @@ use Europa\Controller\AbstractController;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Index extends AbstractController
+class Index extends ControllerAbstract
 {
     public function get()
     {
