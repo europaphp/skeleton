@@ -15,7 +15,7 @@ use Europa\Request\RequestInterface;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-abstract class AbstractController
+abstract class ControllerAbstract
 {
     /**
      * The action parameter name.
