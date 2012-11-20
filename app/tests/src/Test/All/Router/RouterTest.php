@@ -59,12 +59,4 @@ class RouterTest extends UnitAbstract
             $this->assert(false, 'The router should have thrown an exception for the bad route.');
         } catch (Exception $e) {}
     }
-
-    public function badProviderJsonFile()
-    {
-        try {
-            new Json('oiasdiojgoi39j3jj93o39e');
-            $this->assert(false, 'The INI provider should throw an exception if the file does not exist.');
-        } catch (Exception $e) {}
-    }
 }

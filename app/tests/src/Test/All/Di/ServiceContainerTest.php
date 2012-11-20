@@ -17,9 +17,7 @@ class ServiceContainerTest extends UnitAbstract
         $container = new ServiceContainer;
         $container->configure($configuration);
 
-        foreach ($configuration as $service) {
-            $this->assert(isset($container->$service), sprintf('The service "%s" should exist.', $service));
-        }
+        $this->assert(isset($container->test), 'The service "test" should exist.');
     }
 
     public function getting()
