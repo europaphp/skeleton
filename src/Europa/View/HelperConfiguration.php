@@ -6,11 +6,6 @@ use Europa\Di\ServiceContainerInterface;
 
 class HelperConfiguration extends ConfigurationAbstract
 {
-    public function __construct(ServiceContainerInterface $container)
-    {
-        $this->container = $container;
-    }
-
     public function capture()
     {
         return new Helper\Capture;
@@ -36,8 +31,8 @@ class HelperConfiguration extends ConfigurationAbstract
         return new Helper\Json;
     }
 
-    public function uri()
+    public function uri(Router $router = null)
     {
-        return new Helper\Uri($this->container->router);
+        return new Helper\Uri($router);
     }
 }
