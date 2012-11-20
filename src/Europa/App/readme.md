@@ -1,243 +1,134 @@
 App
 ===
 
-The application layer serves as a component responsible for running your application.
+The application layer serves as a component responsible for eliminating unnecessary boilerplate code by bringing all of the other components together into one. It is designed to break apart your application into smaller chunks of code, or modules. In order for your application to run, you need at least one module.
 
-The Default Bootstrapper
-==============================
-
-There is a default bootstrapper that you can use to bootstrap your application instead of building your own:
+To add modules to your application, you would access the `modules` dependency and append items to it. At its most basic, all you need to specify is the module directory name:
 
     <?php
 
-    (new Europa\App\Bootstrapper)->boot($root, $config);
+    $app = new Europa\App\App;
+    $app->getServiceContainer()->modules[] = 'main';
 
-The `$root` argument specifies the root path of your application. All paths in the configuration are relative to this path.
+To run your application, all you need to do is invoke the app instance:
 
-The `$config` array is an array of configuration options that customise how the bootstrapper works. These options are:
+    $app();
 
-- `cliViewPath` The path that cli view scripts reside under.
-- `controllerFilterConfig` The controller filter configuration used to resolve controller class names.
-- `helperFilterConfig` The helper filter configuration used to resolve helper class names.
-- `jsonpCallbackKey` If a content type of JSON is requested - either by using a `.json` suffix or by using an `application/json` content type request header - and this is set in the request, a `Jsonp` view instance is used rather than `Json` and the value of this request parameter is used as the callback.
-- `classPaths` Class load paths that will be added to the `loaderLocator`.
-- `langPaths` Language paths and suffixes to supply to the language file locator.
-- `viewPaths` View paths and suffixes to supply to the view script locator.
-- `viewTypes` Mapping of content-type to view class mapping.
-- `webViewPath` The path that web view script reside under.
+Modules
+-------
 
-The Default DI Container
-------------------------
+Modules are chunks of application code that are organised into their own directories. The default module structure is defined as follows:
 
-The default DI container is a subclass of `Europa\Di\Provider` that allows you to access certain dependencies that it automatically configures for you. The constructor gets passed a `$root` parameter that tells it what the application root is as well as a configuration array to customise how some of the dependencies are set up.
+- module-name
+  - configs
+    - config.json
+    - routes.json
+  - src
+    - SomeNamespace
+      - SomeClass.php
+    - Controller
+      - SomeController.php
+  - views
+    - controller
+      - action.php
 
-    Europa\App\Container::default([$appRootPath, $configArray]);
+Every part of this structure can be customised by providing the module with a custom configuration:
 
-By simply accessing the container we want and pass it some configurations, we can ensure that the container is already set up before we access it to attempt to get any dependencies out of it. This means you can configure your container in your bootstrapping process before you access it somewhere in your business logic.
+    <?php
 
-If you want to pre-configure multiple instances of the same container, all you have to do is specify which instance you want to initialise:
+    $app->getServiceContainer()->modules[] = new Europa\App\Module('module-name', [
+        'bootstrapperNs' => 'Bootstrapper',
+        'config'         => 'configs/config.json',
+        'routes'         => 'configs/routes.json',
+        'src'            => ['src'],
+        'views'          => ['views']
+    ]);
 
-    Europa\App\Container::myContainerName([$appRootPath, $configArray]);
+### Bootstrapping
 
-Which you can access like:
-
-    Europa\App\Container::myContainerName()->someDependency->someMethod();
-
-If for some reason you need to reconfigure it, you just access it with some arguments:
-
-    Europa\App\Container::myContainerName([$newAppRootPath, $newConfigArray]);
-
-### Available Dependencies
-
-The default container gives you a bunch of dependencies that it can automatically configure and give you.
-
-#### Application Runner `Europa\App\App app`
-
-The default application runner.
-
-    $container->app->run();
-
-#### Controller Finder `Europa\Di\Finder controllers`
-
-The controller DI finder.
-
-    $container->controllers->index->action();
-
-#### Helper Finder `Europa\Di\Finder helpers`
-
-The view helper DI finder.
-
-    echo $container->helpers->js('path/to/js/file');
-
-#### Language File Locator `langLocator`
-
-The language file locator.
-
-    echo $container->langLocator->locate('web/index');
-
-#### Class Loader `loader`
-
-The class loader instance.
-
-    $container->loader->register();
-
-#### Class Loader Class File Locator `loaderLocator`
-
-The locator that locates class files for the loader.
-
-    $container->loaderLocator->addPath('path/to/class/files', 'suffix');
-
-#### Request `Europa\Request\RequestInterface request`
-
-Returns a request instance based on which interface (cli / http) you are using.
-
-    $container->request instanceof Europa\Request\Http;
-
-#### Cli Request `Europa\Request\Cli requestCli`
-
-Returns the CLI request.
-
-    $container->requestCli instanceof Europa\Request\Cli;
-
-#### Http Request `Europa\Request\Http requestHttp`
-
-Returns the HTTP request.
-
-    $container->requestHttp instanceof Europa\Request\Http;
-
-#### Response `Europa\Response\ResponseInterface response`
-
-Returns a response instance based on which interface (cli / http) you are using.
-
-    $container->response instanceof Europa\Response\Http;
-
-#### Cli Response `Europa\Response\Cli responseCli`
-
-Returns the CLI response.
-
-    $container->responseCli instanceof Europa\Response\Cli;
-
-#### Http Response `Europa\Response\Http responseHttp`
-
-Returns the HTTP response.
-
-    $container->responseHttp instanceof Europa\Response\Http;
-
-#### Router `Europa\Router\RouterInterface router`
-
-Returns a router instance based on which interface (cli / http) you are using.
-
-    $container->router->query($someCliCommandOrHttpUri);
-
-#### Cli Router `Europa\Router\Cli routerCli`
-
-Returns the CLI router.
-
-    $container->routerCli->query('some cli command')
-
-#### Http Router `Europa\Router\Http routerHttp`
-
-Returns the HTTP router.
-
-    $container->routerHttp->query('some/uri);
-
-#### View Renderer `Europa\View\ViewInterface view`
-
-Returns the appropriate view for the content type that was requested.
-
-    echo $container->view->render($context);
-
-#### PHP View Renderer `Europa\View\Php viewPhp`
-
-Returns the PHP view renderer.
-
-    echo $container->viewPhp->setScript('some/php/script')->render($context);
-
-#### PHP View Locator `Europa\Fs\Locator viewPhpLocator`
-
-Returns the PHP view locator.
-
-    echo $container->viewPhpLocator->addPath('some/other/path/to/your/views');
-
-#### JSON View Renderer `Europa\View\Json viewJson`
-
-Returns the JSON view renderer.
-
-    echo $container->viewJson->render($context);
-
-#### JSONP View Renderer `Europa\View\Jsonp viewJsonp`
-
-Returns the JSONP view renderer.
-
-    echo $container->viewJsonp('jsonpCallback')->render($context);
-
-#### XML View Renderer `Europa\View\Xml viewXml`
-
-Returns the XML view renderer.
-
-    echo $container->viewXml->render($context);
+Modules are bootstrapped using a bootstrapper class. By default, the bootstrapper is contained under the `Bootstrapper` namespace and the class name is the same name as your module, but camel-cased. This means the bootstrapper for `module-name` would be `Bootstrapper\ModuleName`.
 
 ### Configuration
 
-The following configuration options can be specified as the second argument to the default container's constructor. Any of these options relating to paths are relative to the root path specified to the container as the first argument.
+Module configuration is taken from the `configs/config.json` file. This can be changed by updating the `config` configuration option.
 
-- `controllerFilterConfig` The controller filter configuration used to resolve controller class names.
-- `helperFilterConfig` The helper filter configuration used to resolve helper class names.
-- `jsonpCallbackKey` If a content type of JSON is requested - either by using a `.json` suffix or by using an application/json` content type request header - and this is set in the request, a `Jsonp` view instance is used rather than `Json` and the value of this request parameter is used as the callback.
-- `langPaths` Language paths and suffixes to supply to the language file locator.
-- `viewPaths` View paths and suffixes to supply to the view script locator.
-- `viewTypes` Mapping of content-type to view class mapping.
+### Routes
 
-Running Your Application
-------------------------
+Routes configuration is taken from the `configs/routes.json` file. This can be changed by updating the `routes` configuration option.
 
-The `Europa\App\App` class was created so that there is an easy way to make the necessary components work together covering 99% of the use cases out there.
+### Autoload Paths
 
-The default application ties together 5 components:
+Autoload paths are taken from the `src` configuration option. This is an array of paths relative to the module install path. This defaults to `src`.
 
-- [Controller](Controller)
-- [Request](Request)
-- [Response](Response)
-- [Router](Router) (optional)
-- [View](View) (optional)
+### View Paths
 
-Each component is required by the application and passed to the constructor. This should be done using a DI container.
+By defualt views are loaded relative to the `views` path. This can be altered by changing the `views` configuration option. If you are not using views that are loaded from script files, then you may not even use this option.
 
-By default, you are provided with a class called `Europa\App\Container` which contains the necessary components to easily run your app.
+### Requiring Other Modules
+
+Sometimes one module's behavior relies on another module. If this is the case, you can tell one module to require another module. During bootstrapping, the module manager will attempt to bootstrap all dependencies before the dependant. If a required module does not exist, an exception is raised.
 
     <?php
-    
-    use Europa\App\Container;
-    
-    include 'boot.php';
-    
-    Container::get()->app->run();
 
-If you were to set up the application class manually, you would have to set up each dependency. Using a container solves this problem and provides you with each component - including the application - ready to go out of the box.
+    $modules   = new Europa\App\Modules;
+    $modules[] = 'some-module';
+    $modules[] = 'some-other-module';
 
-More information on [Dependency Injection Containers](Di).
+    $modules['some-module']->requires('some-other-module');
 
-Modifying the Application During Runtime
-----------------------------------------
+    $modules->bootstrap();
 
-The `Europa\App\App` class uses the `Europa\Util\Eventable` trait which enables events to be bound and triggered. It defines **8** events that can be used to modify the app during runtime. Each event is at least passed in the application instance as the first argument. The events in order of triggering are:
+Customizing Application Behavior
+--------------------------------
 
-- `route.pre(App $app)` Called prior to routing even if no router is bound.
-- `route.post(App $app)` Called after routing even if no router is bound.
-- `action.pre(App $app)` Called before actioning the controller.
-- `action.post(App $app, array $context)` Called after the controller is actioned. The context returned from the controller is provided.
-- `render.pre(App $app, array $context)` Called before the view is rendered and after the controller is actioned.
-- `render.post(App $app, string $rendered)` Called after the view view is rendered, but before it is sent. The rendered string from the view is provided.
-- `send.pre(App $app, string $rendered)` Called after rendering, prior to sending the response.
-- `send.post(App $app, string $rendered)` Called after sending the response.
+The default setup will be good for most people, however, Europa was originally designed for the person who likes to tinker with things. You can modify parts of the application runner by passing in configuration options to the constructor:
 
-This can be useful, for example, if you would like to add any response headers depending on which view is sent. You could bind an event to `output.pre`, detect the type of view and set appropriate headers on the response before it is sent.
+    $app = new Europa\App\App([
+        'paths.root'   => '..',
+        'paths.app'    => '={root}/app',
+        'view.default' => 'Europa\View\Php',
+        'view.script'  => ':controller/:action',
+        'view.suffix'  => 'php'
+    ]);
 
-You could also bind an event at any point before `render.post` to detect what type of response the request wants and set the view accordingly.
+Due to the nature of how the `Config` component works, you could even specify a file:
 
-Specifying the Controller Request Parameter
--------------------------------------------
+    $app = new Europa\App\App('/path/to/config/file.ini');
 
-By default, the controller is resolved using the `controller` request parameter. This can be set by the router, or directly set on the request. If you need to change this to, say, `ctrl` or something else, you do so by telling the application.
+Or closure:
 
-    Container::get()->app->setKey('ctrl');
+    $app = new Europa\App\App(function() {
+        return [ ... ];
+    });
+
+Or custom configuration class that either defines public properties or is traversable:
+
+    $app = new Europa\App\App(new My\Config);
+
+If you need to access the configuration, you can do so by getting it from the service container just like we did with the modules:
+
+    // Returns the application path.
+    $app->getServiceContainer()->config->paths->app;
+
+Application Configuration Options
+---------------------------------
+
+`paths.root`
+
+The installation path of your application. The application will attempt to auto-detect this by default by using `..`, but this means that whatever is using this value must be in a sub-directory of the installation root.
+
+`paths.app`
+
+The path to the application folder where the modules are kept. This defaults to `/your/install/path/app`.
+
+`view.default`
+
+The default view class to use. This defaults to using `Europa\View\Php`, but this may not even be necessary.
+
+`view.script`
+
+If using a view that implements `Europa\View\ViewScriptInterface`, then the `->setScript()` method will be passed this value. You can substitute request parameters by prefixing the request parameter name with a colon. For example, the default value is `:controller/:action`.
+
+`view.suffix`
+
+If using a view that implements `Europa\View\ViewScriptInterface`, then the view suffix will be set to this value. The default suffix is `php`.
