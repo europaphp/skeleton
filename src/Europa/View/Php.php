@@ -228,7 +228,7 @@ class Php extends ViewScriptAbstract
      * 
      * @return Php
      */
-    public function setHelperServiceContainer(callable $helpers)
+    public function setServiceContainer(callable $helpers)
     {
         $this->helpers = $helpers;
         return $this;
@@ -239,7 +239,7 @@ class Php extends ViewScriptAbstract
      * 
      * @return callable
      */
-    public function getHelperContainer()
+    public function getServiceContainer()
     {
         return $this->helpers;
     }

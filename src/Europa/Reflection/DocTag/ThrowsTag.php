@@ -26,6 +26,19 @@ class ThrowsTag extends GenericTag
      * @var array
      */
     private $description;
+
+    /**
+     * Sets the exception class name.
+     * 
+     * @param string $class The exception class name.
+     * 
+     * @return ThrowsTag
+     */
+    public function setException($class)
+    {
+        $this->exception = $class;
+        return $this;
+    }
     
     /**
      * Returns the name of the reference.
@@ -35,6 +48,19 @@ class ThrowsTag extends GenericTag
     public function getException()
     {
         return $this->exception;
+    }
+
+    /**
+     * Sets the exception description.
+     * 
+     * @param string $description The description to be used.
+     * 
+     * @return ThrowsTag
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+        return $this;
     }
     
     /**

@@ -21,11 +21,10 @@ class App implements AppInterface
      * @var array | Config
      */
     private $config = [
-        'paths.root'   => '..',
-        'paths.app'    => '={root}/app',
-        'view.default' => 'Europa\View\Php',
-        'view.script'  => ':controller/:action',
-        'view.suffix'  => 'php'
+        'appPath'          => '../app',
+        'defaultViewClass' => 'Europa\View\Php',
+        'viewScriptFormat' => ':controller/:action',
+        'viewSuffix'       => 'php'
     ];
 
     /**
@@ -69,6 +68,7 @@ class App implements AppInterface
             Exception::toss('The router could not find a suitable controller for the request "%s".', $this->container->request);
         }
 
+        $this->container->response->setContentTypeFromView($this->container->view);
         $this->container->response->setBody($this->container->view($controller($this->container->request) ?: []));
         $this->container->response->send();
 

@@ -112,11 +112,11 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
         if ($view instanceof ViewScriptInterface) {
             $view->setScriptLocator($this->viewLocator);
             $view->setScript($this->viewScript);
-            $view->setScriptSuffix($this->config->view->suffix);
+            $view->setScriptSuffix($this->config->viewSuffix);
         }
 
         if ($view instanceof Php) {
-            $view->setHelperServiceContainer($this->viewHelpers);
+            $view->setServiceContainer($this->viewHelpers);
         }
 
         return $view;
@@ -175,7 +175,7 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
      */
     public function viewScript()
     {
-        $format = $this->config->view->script;
+        $format = $this->config->viewScriptFormat;
 
         if (is_callable($format)) {
             return $format($this->request);

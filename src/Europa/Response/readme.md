@@ -1,34 +1,25 @@
 Response
 ========
 
-The `Response` component is similar to the `Request` component in that it implements a common interface between `Http` and `Cli`.
+The `Response` component is similar to the `Request` component in that it implements a common interface between HTTP and CLI.
 
 HTTP Responses
 --------------
 
-The `Http` response allows you to set headers without affecting header output, and output a response. Only when `output()` is called, are headers sent then the response output.
+The `Europa\Response\Http` class allows you to set headers without affecting header output, and output a response. Only when `send()` is called, are headers sent then the response output.
 
-    <?php
-    
-    use Europa\Response\Http;
-    
-    $http = new Http;
+    $http = new Europa\Response\Http;
     
     // set content type
-    $http->contentType = Http::JSON;
+    $http->contentType = Europa\Request\HttpInterface::JSON
     
     // outputs the headers then the json response
     $http->setBody('{ success: true }')->send();
 
 The `Europa\App\App` class uses this in conjunction with a `Europa\View\ViewInterface`:
 
-    <?php
-    
-    use Europa\Response\Http;
-    use Europa\View\Json;
-    
-    $http = new Http;
-    $view = new Json;
+    $http = new Europa\Response\Http;
+    $view = new Europa\View\Json;
     $json = ['success' => true];
     
     // "{ success: 'true' }"
@@ -51,3 +42,10 @@ Command line responses are super simple. They simply output the response. They e
     
     // "my response..."
     (new Cli)->setBody('my response...')->send();
+
+Detecting a Response
+--------------------
+
+You can return the appropriate response type for the current context.
+
+    Europa\Response\ResponseAbstract::detect();

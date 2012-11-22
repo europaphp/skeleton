@@ -2,8 +2,6 @@
 
 namespace Europa\Response;
 use ArrayIterator;
-use Countable;
-use IteratorAggregate;
 use Europa\Filter\CamelCaseSplitFilter;
 
 /**
@@ -15,71 +13,8 @@ use Europa\Filter\CamelCaseSplitFilter;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Http extends ResponseAbstract implements Countable, IteratorAggregate
+class Http extends ResponseAbstract implements HttpInterface
 {
-    /**
-     * The content type header name.
-     * 
-     * @var string
-     */
-    const CONTENT_TYPE = 'Content-Type';
-
-    /**
-     * The location header name.
-     * 
-     * @var string
-     */
-    const LOCATION = 'Location';
-
-    /**
-     * The HTML content type.
-     *
-     * @var string
-     */
-    const HTML = 'text/html';
-    
-    /**
-     * The JSON content type.
-     * 
-     * @var string
-     */
-    const JSON = 'application/json';
-
-    /**
-     * The JSONP content type.
-     * 
-     * @var string
-     */
-    const JSONP = 'application/javascript';
-
-    /**
-     * The XML content type.
-     *
-     * @var string
-     */
-    const XML = 'text/xml';
-    
-    /**
-     * The OK status code.
-     * 
-     * @var int
-     */
-    const OK = 200;
-
-    /**
-     * The NOT_FOUND status code.
-     * 
-     * @var int
-     */
-    const NOT_FOUND = 404;
-
-    /**
-     * The INTERNAL_SERVER_ERROR status code.
-     * 
-     * @var int
-     */
-    const INTERNAL_SERVER_ERROR = 500;
-    
     /**
      * The camel case split filter.
      * 
@@ -305,10 +240,14 @@ class Http extends ResponseAbstract implements Countable, IteratorAggregate
      */
     public function getViewContentType($view)
     {
-        if (is_object($view)) {
-            if ($type = $this->getViewContentType($view)) {
-                return $type;
-            }
+        if (!is_object($view)) {
+            Exception::toss('Cannot detect content type for a non-object.');
+        }
+
+        $view = get_class($view);
+
+        if (isset($this->viewContentTypeMap[$view])) {
+            return $this->viewContentTypeMap[$view];
         }
 
         return self::HTML;

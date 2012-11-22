@@ -1,200 +1,181 @@
-Di
-==
+Dependency Injection
+====================
 
-DI stands for [Dependency Injection](http://en.wikipedia.org/wiki/Dependency_injection). It is also known as the [Service Locator Pattern](http://en.wikipedia.org/wiki/Service_locator_pattern) or [Inversion of Control](http://en.wikipedia.org/wiki/Inversion_of_control). If you are not familiar with this, it is the act of injecting one dependency object into a dependent object. For example:
+DI stands for [Dependency Injection](http://en.wikipedia.org/wiki/Dependency_injection). It is also known as the [Service Locator Pattern](http://en.wikipedia.org/wiki/Service_locator_pattern) or [Inversion of Control](http://en.wikipedia.org/wiki/Inversion_of_control). If you are not familiar with this, it is the act of injecting one dependency object into a dependent object.
 
-    $controller = new Controller\Index(new Europa\Request\Http);
+Service Containers - which facilitate dependnecy injection and alleviate its painful usage - is the core of Europa. Since everything boils down to pre-configured objects interacting with one another, this was a no-brainer.
 
-Or:
+Service Containers
+------------------
 
-    $view = new Europa\View\Php;
-    $view->setHelpers(new Europa\Di\Finder);
+A service container is an object store that manages different configurations of objects and whether or not that object setup should be cached and reused (singleton) or re-created every time you access it (transient).
 
-This can get very tedious and difficult to maintain because of code duplication and organisation. On top of this, there is no way to dynamically configure a dependency or to replace one with another which is useful for testing amongst other things. This is where a dependency injection container comes in.
+### Separating Containers
 
-In Europa, there are three types of containers.
+The service container, in addition to managing object configurations, allows you to have separate named service container instances that may contain different object configurations.
 
-- Provider
-- Finder
-- Chain
+    use Europa\Di\ServiceContainer;
 
-In essence, they all do the same thing: configure and return an object. It's the way they do it that is different.
+    $container1 = ServiceContainer::myFirstContainer();
+    $container2 = ServiceContainer::two();
 
-Retrieving dependencies are done with `create()` and `get()`. Creating an object will always return a new one. Getting one will create if not exists and return it:
+By calling the container statically, it automatically creates an instance of itself using the name of that you used and caches it so that next time you call it by that name, it returns the one it previously set up.
 
-    <?php
-    
-    use Container\MyContainer;
-    
-    $mc = MyContainer::get();
-    
-    // accessing like a property
-    $old = $mc->someDep;
-    $new = $mc->someDep;
-    
-    // getting will cache the first one
-    var_dump($old === $new); // true
-    
-    $old = $mc->someDep();
-    $new = $mc->someDep();
-    
-    // calling will always return a new object
-    var_dump($old === $new); // false
+When separate containers are created, their objects are maintained separate from each other, even if they are configured the same way. This could essentially allow you to have one application configuration and two separate instances of it existing at one time. Practically speaking, you can use this to your advantage for unit testing purposes and other things.
 
-Providers
----------
+### Container Configurations
 
-A `Provider` is an abstract class that you extend to provide it with methods that configure and return a dependency. They are used when you don't need dynamic resolution and configuration and are more efficient than finders.
+The most useful aspect of Europa's container system is the ability to maintain configurations. Configurations are applied using the `configure()` method on a service container. The preferred way to apply a configuration is by extending the `Europa\Di\ConfigurationAbstract` class and passing a new instance of that to `configure()`.
 
     <?php
     
-    namespace Container;
-    use Europa\Di\Provider;
-    use Zend\Mail\Message;
-    use Zend\Mail\Transport\Smtp;
+    namespace My\Di;
+    use Europa\Config\Config;
+    use Europa\Di\ConfigurationAbstract;
+    use Mongo;
     
-    class MyContainer extends Provider
+    class Configuration extends ConfigurationAbstract
     {
-        /**
-         * Returns a mail transport.
-         * 
-         * @return Smtp
-         */
-        public function mailTransport()
+        public function config()
         {
-            return new Smtp;
+            return new Config('/path/to/config.json');
         }
         
-        /**
-         * Returns a mail message with the from address already populated.
-         * 
-         * @return Message
-         */
-        public function mailMessage()
+        public function mongo()
         {
-            $message = new Message;
-            $message->setFrom('you@you.com', 'Your Name');
-            return $message;
+            return new Mongo($this->config->mongo->dsn);
+        }
+        
+        public function mongodb()
+        {
+            return $this->mongo->selectDatabase($this->config->mongo->db);
         }
     }
 
-Then to use it, it's fairly straight forward:
+The above class illustrates how you may design a configuration that provides a configuration object, a mongo server connection object and a mongo database object.
 
-    use Container\MyContainer;
+You could then use this configuration and apply it to a container.
+
+    $container = Europa\Di\ServiceContainer::main()->configure(new My\Di\Configuration);
+
+Using these objects is as simple as accessing them like properties.
+
+    $results = $container->mongodb->myCollection->find([ … ]);
+
+What's nice about using this configuration is that objects are configured on an on-demand basis. This means that the code within the configuration methods aren't executed until the service is accessed for the first time saving you unnecessary CPU cycles from objects that may not be used on a given request.
+
+Since configurations are `callable` we can use a closure if we want:
     
-    $mc  = new MyContainer;
-    $msg = $mc->create('mailMessage')->setTo('someone@else.com')->setBody('Some body.');
-    $mc->get('mailTransport')->send($msg);
+    $configuration = function($container) {
+        $container->myService = new My\Service;
+    };
 
-In a more complex example, we can automate the setup of dependencies if one requires another during setup by including it in the method definition:
+    $container1->configure($configuration);
+    $container2->configure($configuration);
 
-    public function view($locator)
-    {
-        return new Php($locator);
+### Container Usage
+
+As mentioned before, services within a container can be accessed via normal object sytnax.
+
+    if (isset($container->myService)) {
+        $container->myService->doSomething();
     }
+
+If you attempt to access a service that doesn not exist, it will throw an exception indicating why. It will also tell you if it finds a service of the same name in another container.
+
+You can also register and remove services that aren't in your configurations.
+
+    $container->myService = new SomeService;
     
-    public function locator()
-    {
-        $locator = new Europa\Fs\Locator;
-        $locator->addPath('path/to/views');
-        return $locator;
-    }
+    unset($container->myService);
 
-Additionally, if you don't want the dependency set up right away, just hint it as a `Closure` and it will give you a closure that you can invoke to set up and return the dependnecy.
+Beware, services that are registerd using a configuration will be removed if they are `unset` since they are simply registered as normal.
 
-    public function view(Closure $locator)
-    {
-        return new Php($locator());
-    }
+### Passing Arguments to Configurations
 
-### Passing Arguments
+Something that may be of use - and that is also used internally in Europa - is the ability to pass parameters into a configuration method. For example, the `Europa\App\AppConfiguration` configuration requires both the default configuration and the custom configuration that was passed into the constructor for `Europa\App\App`.
 
-Arguments will be merged with the arguments as defined in the method definition.
+We may have a configuration method like so:
 
-Finders
--------
+    public function myService(array $config);
 
-Finders are for dynamic resolution and configuration. They are very useful in situations where you don't know the exact type of instance you want. For example, when you are locating a controller, you know that it is a controller. However, you don't know what namespace it is under and what type of controller it is.
+And we can pass arguments to it:
 
-    <?php
+    $configuration->setArguments('myService', $config);
 
-    use Europa\Di\Finder;
-    use Europa\Filter\ClassNameFilter;
-    use Europa\Request\Http;
-    
-    $finder = new Finder;
-    
-    // the default filter is a ClassResolutionFilter that allows you to add other filters to it
-    $finder->getFilter()->add(new ClassNameFilter([
-        'prefix' => 'Ctrl',
-        'suffix' => 'Controller'
-    ]));
-    
-    // ensure a request is passed to the constructor of all types of instances
-    $finder->config(function() {
-        return [new Http];
-    });
-    
-    // enable filters if it is a subclass of ControllerAbstract
-    $finder->queue('Europa\Controller\ControllerAbstract', function($controller) {
-        $controller->filter();
-    });
-    
-    // returns an instance of Ctrl\IndexController
-    $controller = $finder->get('index');
+If we want to pass in arguments using an array:
 
-### Dynamic Constructor Arguments
+    $configuration->setArgumentsArray('myService', [$config]);
 
-The `config()` method tells the finder to pass the return value of the specified closure to the constructor of the class when it is instantiated.
+### Marking a Service as Transient
 
-To configure all types of instances with the same arguments:
+There are two ways to mark a service as transient. The easiest way if you are using configurations is to annotate the method using a `@transient` doc tag.
 
-    $finder->config(function() {});
+    /**
+     * Returns my service.
+     * 
+     * @transient
+     * 
+     * @return My\Service
+     */
+    public function myService();
 
-To configure a specific type of instance:
+Since doc tags cascade all the way back to interfaces, you can define this on an interface that a configuration implements.
 
-    $finder->config('Object\Class\Name', function() {});
+The second way is to do it on the container itself:
 
-Not only can you specify an class name, you can specify interface names as well as trait names.
+    $container->transient('myService');
 
-### Calling Methods Dynamically
+### Using Interfaces with Configurations
 
-The `queue()` method tells the finder to call the specified closure for the given instance type.
-
-To queue a function for all types of instances:
-
-    $finder->queue(function($obj) {});
-
-To queue a function for one type of instance you type-hint the first argument:
-
-    $finder->queue('Some\Instance\Type', function($obj) {});
-
-### Passing Arguments
-
-When arguments are passed, they will be merged with and override the arguments that are specified in the config.
-
-Chains
-------
-
-A `Chain` is used when you want to link together multiple containers. It will look for the dependency in each specified container until it reaches the end of the chain. If it's not found it throws an exception just like the other containers.
+If may be useful to require that a configuration implement certain methods, thus ensuring that whatever uses that configuration will have access to the defined services. This is as simple as implementing an interface in your configuration class.
 
     <?php
     
-    use Europa\Di\Chain;
-    use Europa\Di\Finder;
-    use Container\MyContainer;
+    namespace My\Di;
     
-    $chain = new Chain;
-    $chain->add(new MyContainer);
-    $chain->add(new Finder);
+    interface ConfigurationInterface
+    {
+        /**
+         * Returns my service.
+         * 
+         * @transient
+         * 
+         * @return My\Service
+         */
+        public function myService();
+    }
+
+And implement it:
+
+    <?php
     
-    $dep = $chain->create('someDependency');
+    namespace My\Di;
+    use My\Service;
+    
+    class Configuration implements ConfigurationInterface
+    {
+        public function myService()
+        {
+            return new Service;
+        }
+    }
 
-### Passing Arguments
+The only problem with this is that once the configuration is applied, you don't know if that container will necessarily have the same definition as the interface. We can check for this:
 
-When arguments are passed, they will be handled by their respective container.
+    $container->configure(new My\Di\Configuration);
+    
+    // true
+    $container->provides('My\Di\ConfigurationInterface');
 
-Using Multiple Instances of a Container
----------------------------------------
+And we can even tell it to throw an exception if it does not provide the specified configuration or interface:
 
-There may be situations when you need to use mutiple instances of one type of container.
+    $container->mustProvide('Some\Other\Configuration');
+
+One thing to note is that you can pass either a class or interface class name as the argument to `provides()` or `mustProvide()`.
+
+### Interoperability
+
+Containers can also be interchangeable with `callable` items depending on the level of functionality you require. When you invoke a container it calls `__get()` internally and passes in the argument you pass to it.
+
+    $container('myService');

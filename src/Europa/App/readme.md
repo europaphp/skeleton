@@ -1,7 +1,7 @@
 App
 ===
 
-The application layer serves as a component responsible for eliminating unnecessary boilerplate code by bringing all of the other components together into one. It is designed to break apart your application into smaller chunks of code, or modules. In order for your application to run, you need at least one module.
+The application layer serves as a component responsible for eliminating unnecessary boilerplate code by bringing all of the necessary components for running your application together into one. It is designed to break apart your application into smaller chunks of code, or modules. In order for your application to run, you need at least one module.
 
 To add modules to your application, you would access the `modules` dependency and append items to it. At its most basic, all you need to specify is the module directory name:
 
@@ -19,18 +19,19 @@ Modules
 
 Modules are chunks of application code that are organised into their own directories. The default module structure is defined as follows:
 
-- module-name
-    - configs
-        - config.json
-        - routes.json
-    - src
-        - SomeNamespace
-            - SomeClass.php
-        - Controller
-            - SomeController.php
-    - views
-        - controller
-            - action.php
+- app
+    - module-name
+        - configs
+            - config.json
+            - routes.json
+        - src
+            - SomeNamespace
+                - SomeClass.php
+            - Controller
+                - SomeController.php
+        - views
+            - controller
+                - action.php
 
 Every part of this structure can be customised by providing the module with a custom configuration:
 
@@ -40,9 +41,11 @@ Every part of this structure can be customised by providing the module with a cu
         'bootstrapperNs' => 'Bootstrapper',
         'config'         => 'configs/config.json',
         'routes'         => 'configs/routes.json',
-        'src'            => ['src'],
-        'views'          => ['views']
+        'src'            => 'src',
+        'views'          => 'views'
     ]);
+
+By default, if you only specify a module name, the default module config shown above is used.
 
 ### Bootstrapping
 
@@ -52,17 +55,25 @@ Modules are bootstrapped using a bootstrapper class. By default, the bootstrappe
 
 Module configuration is taken from the `configs/config.json` file. This can be changed by updating the `config` configuration option.
 
+The options from this file are imported to the main configuration and organised in a namespace defined by the module name. You can access it as follows:
+
+    $app->getServiceContainer()->config->modules['module-name'];
+
 ### Routes
 
 Routes configuration is taken from the `configs/routes.json` file. This can be changed by updating the `routes` configuration option.
 
+The routes in this file are appended to the global route listing since these routes affect the application as a whole. Since that is the case, you can access the routes using the main router.
+
+    $app->getServiceContainer()->router['module-name-route'];
+
 ### Autoload Paths
 
-Autoload paths are taken from the `src` configuration option. This is an array of paths relative to the module install path. This defaults to `src`.
+Autoload paths are taken from the `src` configuration option and defaults to `src`. This can either be a string or array of paths relative to the module install path.
 
 ### View Paths
 
-By defualt views are loaded relative to the `views` path. This can be altered by changing the `views` configuration option. If you are not using views that are loaded from script files, then you may not even use this option.
+View paths are taken from the `views` configuration option and defaults to `views`. This can either be a string or array of paths relative to the module install path.
 
 ### Requiring Other Modules
 
@@ -70,7 +81,7 @@ Sometimes one module's behavior relies on another module. If this is the case, y
 
     <?php
 
-    $modules   = new Europa\App\Modules;
+    $modules   = new Europa\App\ModuleManager;
     $modules[] = 'some-module';
     $modules[] = 'some-other-module';
 
@@ -81,14 +92,13 @@ Sometimes one module's behavior relies on another module. If this is the case, y
 Customizing Application Behavior
 --------------------------------
 
-The default setup will be good for most people, however, Europa was originally designed for the person who likes to tinker with things. You can modify parts of the application runner by passing in configuration options to the constructor:
+The default setup will be good for most people, however, you can modify parts of the application runner by passing in configuration options to the constructor:
 
     $app = new Europa\App\App([
-        'paths.root'   => '..',
-        'paths.app'    => '={root}/app',
-        'view.default' => 'Europa\View\Php',
-        'view.script'  => ':controller/:action',
-        'view.suffix'  => 'php'
+        'appPath'          => '../app',
+        'defaultViewClass' => 'Europa\View\Php',
+        'viewScriptFormat' => ':controller/:action',
+        'viewSuffix'       => 'php'
     ]);
 
 Due to the nature of how the `Config` component works, you could even specify a file:
@@ -113,22 +123,18 @@ If you need to access the configuration, you can do so by getting it from the se
 Application Configuration Options
 ---------------------------------
 
-`paths.root`
+`appPath`
 
-The installation path of your application. The application will attempt to auto-detect this by default by using `..`, but this means that whatever is using this value must be in a sub-directory of the installation root.
+The path to the application folder where the modules are kept. This defaults to `../app` which means that, by default, the file running the application must be located in a sub folder of the `cwd()`. By default this is the `index.php` file in the `www` directory.
 
-`paths.app`
-
-The path to the application folder where the modules are kept. This defaults to `/your/install/path/app`.
-
-`view.default`
+`defaultViewClass`
 
 The default view class to use. This defaults to using `Europa\View\Php`, but this may not even be necessary.
 
-`view.script`
+`viewScriptFormat`
 
 If using a view that implements `Europa\View\ViewScriptInterface`, then the `->setScript()` method will be passed this value. You can substitute request parameters by prefixing the request parameter name with a colon. For example, the default value is `:controller/:action`.
 
-`view.suffix`
+`viewSuffix`
 
 If using a view that implements `Europa\View\ViewScriptInterface`, then the view suffix will be set to this value. The default suffix is `php`.

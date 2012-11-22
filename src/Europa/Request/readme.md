@@ -5,52 +5,39 @@ The request is the front door into the framework. It allows you to make both HTT
 
 All built-in requests extend `RequestAbstract`. All requests *must* implement `RequestInterface` at a bare minimum.
 
-Since requests are abstracted this way, you can make both a command line request or a web request using the same infrastructure.
+Since requests are abstracted this way, you can make both a command line request or a web request using the same controllers.
 
 HTTP Requests
 -------------
 
-HTTP requests are done using the `Http` class. By default, if the request is instantiated in an HTTP environment, then it will initialise itself to represent the current request that is being made. If we take the following request for example:
+HTTP requests are done using the `Europa\Request\Http` class. By default, if the request is instantiated in an HTTP environment, then it will initialise itself to represent the current request that is being made. If we take the following request for example:
 
-    GET http://localhost:8080/some/path?name1=value1&name2=value2#some-fragment
+    GET http://localhost:8080/some/path?name1=value1&name2=value2
 
 If you instantiated a request when this request was made, it would initialise all of this information:
-
-    <?php
     
-    use Europa\Request\Http;
-    
-    $request = new Http;
+    $request = new Europa\Request\Http;
     
     // "get"
     $request->getMethod();
     
     // "value1"
     $request->name1;
-    
-    // "some-fragment"
-    $request->getUri()->getFragment();
+
+    // "value2"
+    $request->name2;
 
 ### The Uri Class and Mocking
 
 If you need to mock a particular request, you can:
-
-    <?php
     
-    use Europa\Request\Http;
-    use Europa\Request\Uri;
-    
-    $request = new Http;
-    $request->setMethod(Http::GET);
+    $request = new Europa\Request\Http;
+    $request->setMethod('get');
     $request->setUri('http://localhost:8080/some/path?name1=value1&name2=value2#some-fragment');
 
-The `Uri` class allows you to do anything you want to it:
-
-    <?php
+The `Uri` class allows you to do pretty much anything you want to it:
     
-    use Europa\Request\Uri;
-    
-    $uri = new Uri;
+    $uri = new Europa\Request\Uri;
     
     // params
     $uri->name1 = 'value1';
@@ -76,66 +63,66 @@ The `Uri` class allows you to do anything you want to it:
     $uri->removeParams();
     
     // "http"
-    $uri->setScheme('http')->getScheme();
+    echo $uri->setScheme('http')->getScheme();
     
     // "http://"
-    $uri->getSchemePart();
+    echo $uri->getSchemePart();
     
     // "me"
-    $uri->setUsername('me')->getUsername();
+    echo $uri->setUsername('me')->getUsername();
     
     // "password"
-    $uri->setPassword('password')->getPassword();
+    echo $uri->setPassword('password')->getPassword();
     
     // "myhost.com"
-    $uri->setHost('myhost.com')->getHost();
+    echo $uri->setHost('myhost.com')->getHost();
     
     // "8080"
-    $uri->setPort(8080)->getPort();
+    echo $uri->setPort(8080)->getPort();
     
     // ":8080"
-    $uri->getPortPart();
+    echo $uri->getPortPart();
     
     // "http://me:password@myhost.com:8080"
-    $uri->getHostPart();
+    echo $uri->getHostPart();
     
     // "root"
-    $uri->setRoot('root')->getRoot();
+    echo $uri->setRoot('root')->getRoot();
     
     // "/root"
-    $uri->getRootPart();
+    echo $uri->getRootPart();
     
     // "request/uri"
-    $uri->setRequest('/request/uri/')->getRequest();
+    echo $uri->setRequest('/request/uri/')->getRequest();
     
     // "/root/request/uri"
-    $uri->getRequestPart();
+    echo $uri->getRequestPart();
     
     // "html"
-    $uri->setSuffix('html')->getSuffix();
+    echo $uri->setSuffix('html')->getSuffix();
     
     // ".html"
-    $uri->getSuffixPart();
+    echo $uri->getSuffixPart();
     
     // "name1=value1&name2=value2"
-    $uri->setQuery('?name1=value1&name2=value2')->getQuery();
+    echo $uri->setQuery('?name1=value1&name2=value2')->getQuery();
     
     // "?name1=value1&name2=value2"
-    $uri->getQueryPart();
+    echo $uri->getQueryPart();
     
     // "frag"
-    $uri->setFragment('#frag')->getFragment();
+    echo $uri->setFragment('#frag')->getFragment();
     
     // "#frag"
-    $uri->getFragmentPart();
+    echo $uri->getFragmentPart();
     
     // "http://me:password@myhost.com:8080/foot/request/uri?name1=value1&name2=value2#frag"
-    $uri->__toString();
+    echo $uri;
 
 You can also detect the current URI if one exists:
 
     // "http://me:password@myhost.com:8080/foot/request/uri?name1=value1&name2=value2#frag"
-    echo Uri::detect();
+    echo Europa\Request\Uri::detect();
 
 And redirect to it:
 
@@ -144,17 +131,13 @@ And redirect to it:
 CLI Requests
 ------------
 
-CLI requests are done using the `Cli` class. This great because, you can make a command line request and use the same code path as you would with web requests. You can even apply routers to CLI requests in the same fashion as you can with HTTP requests. Just your route expression changes. Take the following CLI request:
+CLI requests are done using the `Europa\Request\Cli` class. This great because, you can make a command line request and use the same code path as you would with web requests. You can even apply routers to CLI requests in the same fashion as you can with HTTP requests. Just your route expression changes. Take the following CLI request:
 
     www/index.php some command --name value --flag
 
 The `Cli` request then initialises itself with that information and you can use it right away:
-
-    <?php
     
-    use Europa\Request\Cli;
-    
-    $cli = new Cli;
+    $cli = new Europa\Request\Cli;
     
     // "value"
     $cli->name;
@@ -187,3 +170,10 @@ It's also easy to mock a CLI request:
     
     // via array
     $cli->setCommands(['some', 'command']);
+
+Detecting a Request
+-------------------
+
+You can return the appropriate request type for the current context.
+
+    Europa\Request\RequestAbstract::detect();

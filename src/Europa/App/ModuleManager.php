@@ -96,7 +96,7 @@ class ModuleManager implements ModuleManagerInterface
     public function offsetSet($offset, $module)
     {
         if (!$module instanceof ModuleInterface) {
-            $module = new Module($this->container->config->paths->app . '/' . $module);
+            $module = new Module($this->container->config->appPath . '/' . $module);
         }
 
         $this->modules[$offset ?: count($this->modules)] = $module;

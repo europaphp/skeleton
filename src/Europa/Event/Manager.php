@@ -75,19 +75,36 @@ class Manager implements ManagerInterface
      * Triggers an event stack.
      * 
      * @param string $name The name of the event to trigger.
-     * @param array  $data Any data to pass to the event or event stack at the time of triggering.
      * 
      * @return bool
      */
-    public function trigger($name, array $data = [])
+    public function trigger($name)
+    {
+        $args = func_get_args();
+
+        array_shift($args);
+
+        return $this->triggerArray($name, $args);
+    }
+
+    /**
+     * Triggers an event stack using an array of arguments.
+     * 
+     * @param string $name The name of the event to trigger.
+     * @param array  $args Any arguments to pass to the event or event stack at the time of triggering.
+     * 
+     * @return bool
+     */
+    public function triggerArray($name, array $args = [])
     {
         foreach ($this->getStackNamesForEvent($name) as $event) {
             foreach ($this->stack[$event] as $callback) {
-                if (call_user_func_array($callback, $data) === false) {
+                if (call_user_func_array($callback, $args) === false) {
                     return $this;
                 }
             }
         }
+
         return $this;
     }
     

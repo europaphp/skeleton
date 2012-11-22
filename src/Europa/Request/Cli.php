@@ -14,20 +14,6 @@ use Europa\Filter\ToStringFilter;
 class Cli extends RequestAbstract implements CliInterface
 {
     /**
-     * The cli request method.
-     * 
-     * @var string
-     */
-    const METHOD = 'cli';
-    
-    /**
-     * The namespace token.
-     * 
-     * @var string
-     */
-    const T_NS = ' ';
-    
-    /**
      * Keeps track of the commands that were passed in the request.
      * 
      * @var array

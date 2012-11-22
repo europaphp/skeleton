@@ -55,7 +55,9 @@ abstract class ControllerAbstract
     public function __invoke(RequestInterface $request)
     {
         $this->request = $request;
-        return $this->invoke($request->getParam(self::ACTION));
+        $context = $this->invoke($request->getParam(self::ACTION));
+        $this->request = null;
+        return $context;
     }
 
     /**
@@ -96,9 +98,6 @@ abstract class ControllerAbstract
 
         // Build a list of parameters to action the controller with.
         $params = $this->request->getParams();
-
-        // The request is always the first parameter.
-        array_unshift($params, $this->request);
 
         // Filter using @filter tags.
         $this->applyClassFilters();

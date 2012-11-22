@@ -65,24 +65,19 @@ class FunctionReflector extends ReflectionFunction implements ReflectorInterface
     }
 
     /**
-     * Instead of just calling with the arguments in their natural order, this method allows the method to be called
-     * with arguments which keys match the original method definition of names.
+     * Instead of just calling with the arguments in their natural order, this method allows the function to be called with arguments which keys match the original function definition of names.
      * 
-     * Note, that reflection can only call public members of an object, therefore, you cannot invoke protected or
-     * private methods with this method.
-     * 
-     * @param object $instance The object instance to call the method on.
-     * @param array  $args     The named arguments to merge and pass to the method.
+     * @param array $args The named arguments to merge and pass to the method.
      * 
      * @return mixed
      */
-    public function invokeArgs($instance, array $args = array())
+    public function invokeArgs(array $args = array())
     {
         // only merged named parameters if necessary
         if (func_num_args() === 2 && $this->getNumberOfParameters() > 0) {
-            return parent::invokeArgs($instance, $this->mergeNamedArgs($args));
+            return parent::invokeArgs($this->mergeNamedArgs($args));
         }
-        return $this->invoke($instance);
+        return $this->invoke();
     }
 
     /**

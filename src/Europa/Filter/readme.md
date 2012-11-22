@@ -1,30 +1,22 @@
 Filter
 ======
 
-The filter component is used by other parts of the framework but can also be used on its own. There are many filters in here that you can use, or you can define your own that can be used anywhere in the framework that expects a `FilterInterface`.
+The filter component is used by other parts of the framework but can also be used on its own. There are many filters in here that you can use, or you can define your own that can be used anywhere in the framework as long as it is `callable`.
 
 Usage
 -----
 
-All filters are used the same way. Some, such as the `ClassResulutionFilter` off other methods for adding sub-filters, etc. However, all filters are used the same way:
-
-    <?php
+All filters are `callable`:
     
-    use Europa\Filter\CamelCaseSplitFilter;
+    $filter = new Europa\Filter\CamelCaseSplitFilter;
     
-    $filter = new CamelCaseSplitFilter;
-    
-    // returns ['Camel', 'Case']
-    $filter->filter('CamelCase');
+    // ['Camel', 'Case']
+    $filter('CamelCase');
 
 List of Filters
 ---------------
 
 Below is a complete list of filters and what they do.
-
-### CallbackFilter
-
-For executing callbacks as a filter.
 
 ### CamelCaseSplitFilter
 
@@ -46,9 +38,9 @@ Extends `FilterArrayAbstract` and allows you to use multiple filters to resolve 
 
 Exists as a base class for authoring filters that can accept child filters for chaining.
 
-### FilterInterface
+### FromStringFilter
 
-Defines the most basic filter implementation.
+Converts the value from a string to a scalar data type.
 
 ### LowerCamelCaseFilter
 
@@ -57,6 +49,10 @@ Turns any string into a lower-camel-cased string such as a method name or proper
 ### MapFilter
 
 Accepts an mapping array. If the incoming value matches a key, the value is returned.
+
+### MethodNameFilter
+
+Returns a class name from the specified value.
 
 ### ToStringFilter
 

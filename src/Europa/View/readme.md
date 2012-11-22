@@ -1,57 +1,25 @@
 View
 ====
 
-Apart from controllers, the view is the other main component in EuropaPHP. It is designed to give you a common API to render data to any format by implementing `ViewInterface`.
+Apart from controllers, the view is the other main component everything revolves around in EuropaPHP. It is designed to give you a common API to render data to any format by implementing `ViewInterface`.
 
 The available views are:
 
 - Json
+- Jsonp
 - Php
 - Xml
 
-Unlink some other frameworks, views are specifically designed to be kept away from your controllers. Say for example we get a response from a controller:
-
-    <?php
-    
-    use Controller;
-    use Europa\Request\Http;
-    use Europa\View\Json;
-    use Europa\View\Php;
-    use Europa\View\Xml;
-    
-    // mock a request
-    $request = new Http;
-    $request->setMethod('get');
-    $request->setParam('id', 1);
-    
-    // action the controller and get the response
-    $context = (new User($request))->action();
-
-Now that you have a generic response, you can use a view to render that. Say the client wants JSON:
-    
-    // { ... }
-    (new Json)->render($context);
-
-You may want to take the response and make it available to clients wanting XML:
-
-    // <xml ...
-    (new Xml)->render($context);
-
-Or, you may have some view scripts written in PHP that you want to render the data with:
-
-    // <!doctype ...
-    (new Php)->setScript('/path/path/to/my/script.php')->render($context);
-
-The decoupling of the view and controller relationship helps you to write more modular and reusable code, however, it is still up to you to make that code modular.
+Unlike some other frameworks, views are specifically designed to be kept away from your controllers. Your view takes a context and renders that contenxt. Generally, a context is returned from a controller and handed off to the view to render, but you can use views as a separate component if you want to.
 
 PHP Views
 ---------
 
-The `Php` view can be as simple as shown above to use but there are some things you can do to set up automation.
+The `Europa\View\Php` class has extra functionality for executing view logic from within the view rather than relying on the controller to tell the view what to do. This includes things like accessing 
 
 ### Accessing Variables
 
-As you have seen, when you render a view, it gets passed a context. In order to access this context, you simply access a variable using the name of the context parameter you want. For example, if we are given the following context:
+As you have seen, when you render a PHP view, it gets passed a context. In order to access this context, you simply access a variable using the name of the context parameter you want. For example, if we are given the following context:
 
     [
         'param1' => 'value1',
@@ -60,7 +28,7 @@ As you have seen, when you render a view, it gets passed a context. In order to 
 
 We can access it in our views by:
 
-    <?php echo $param1; ?>: <?php echo $param2; ?>
+    <?php echo $this->context('param1'); ?>: <?php echo $this->context('param2'); ?>
 
 ### Extending Views
 
@@ -93,15 +61,10 @@ On top of extending, you can also render one view inside of another by giving th
 
 You may not want to specify the full path to your view scripts all the time or specify a suffix. To do this we'd use a `Europa\Fs\LocatorInterface`:
 
-    <?php
-    
-    use Europa\Fs\Locator;
-    use Europa\View\Php;
-    
-    $loc = new Locator;
+    $loc = new Europa\Fs\Locator;
     $loc->addPath('/path/to/views', 'phtml');
     
-    $view = new Php;
+    $view = new Europa\View\Php;
     $view->setLocator($loc);
     $view->setScript('relative/path/to/view');
     
@@ -130,9 +93,8 @@ To setup and return instances of our helpers we supply the view with a container
 
     <?php
     
-    namespace Helper;
-    use Europa\View\Php;
-    
+    namespace My\Helper;
+
     class MyHelper
     {
         private $view;
@@ -155,29 +117,41 @@ To setup and return instances of our helpers we supply the view with a container
 
 We could set it up and use it with a container like so:
 
+    // Use a service container for hanlding helper instances.
+    $helpers = new Europa\Di\ServiceContainer;
+    
+    // Register your helper
+    $helpers->myHelper = new Europa\Di\MyHelper;
+    
+    // Bind it to the view.
+    $phpView->setServiceContainer($helpers);
+
+This prevents us from using any built-in helpers, though. We can alleviate this by creating a configuration for our helpers and apply both configurations to the view's service container.
+
     <?php
     
-    use Europa\Container\Finder;
-    use Europa\Filter\ClassNameFilter;
-    use Europa\View\Php;
+    namespace My\Di\Configuration;
+    use Europa\Di\ConfigurationAbstract;
+    use My\Helper\MyHelper;
     
-    $helpers = new Finder;
-    $view    = new Php;
+    class Helpers extends ConfigurationAbstract
+    {
+        public function myHelper()
+        {
+            return new MyHelper;
+        }
+    }
+
+Now that configuration is accessible to us.
+
+    // Helper container.
+    $helpers = new Europa\Di\ServiceContainer;
     
-    // tell the view which container to use for helper resolution
-    $view->setHelpers($helpers);
+    // Default configuration.
+    $helpers->configure(new Europa\View\HelperConfiguration);
     
-    // tell it to find the helpers in the "Helper" namespace
-    $helpers->getFilter()->add(new ClassNameFilter(['prefix' => 'Helper\\']));
+    // Custom configuration.
+    $helpers->configure(new My\Di\Configuration\Helpers);
     
-    // set up the helper
-    $helpers->config('Helper\MyHelper', function() use ($view) {
-        return [$view];
-    });
-    
-    // since the helpers uses the view, we set a script on it so the helper can use it
-    $view->setScript('test/script');
-    
-    // now we can use this useless helper if we want to
-    // "test/script"
-    $view->myHelper->script();
+    // Apply it to the view.
+    $phpView->setServiceContainer($helpers);

@@ -1,48 +1,9 @@
 Reflection
 ==========
 
-The reflection component extends on PHP's build in reflection classes and offers some very useful features such as calling methods using named parameters instead of index-based parameters and docblock / doctag parsing.
+The reflection component extends on PHP's built-in reflection classes to offer some very useful features such as calling methods using named parameters instead of index-based parameters and docblock / doctag abstractions.
 
-All reflectors implement the `Reflectable` interface.
-
-For the examples, we will use the following class where it applies:
-
-    <?php
-
-    class MyClass extends MyClassAbstract implements MyInterface
-    {
-        use MyTrait;
-        
-        /**
-         * Some property.
-         * 
-         * @var string
-         */
-        private $myProperty;
-        
-        public function __construct($name, $value)
-        {
-        
-        }
-        
-        public function getValue($name)
-        {
-        
-        }
-        
-        /**
-         * Returns both values separated by a colon.
-         * 
-         * @param string $param1 The first parameter.
-         * @param string $param2 The second parameter.
-         * 
-         * @return string
-         */
-        public function myMethod($param1, $param2)
-        {
-            return $param1 . ': ' . $param2;
-        }
-    }
+All reflectors implement the `Europa\Reflection\ReflectorInterface` interface.
 
 DocBlock
 --------
@@ -99,12 +60,11 @@ The `DocBlock` component is a very large part of the Reflection component. It al
     // true
     $block->compile() === (string) $block;
 
-Currently, there is no formatting option on the doc bock when compiling.
+*Currently, there is no formatting option on the doc bock when compiling.*
 
 There are special doc tags and a generic tag used for tags where a class is not defined. The available doc tag classes are:
 
 - `AuthorTag`
-- `FilterTag`
 - `GenericTag`
 - `ParamTag`
 - `ReturnTag`
@@ -124,31 +84,35 @@ Each tag may have methods specific to that tag.
 
 ### AuthorTag
 
-- `AuthorTag` `setName(string $name)`
-- `string` `getName()`
-- `AuthorTag` `setEmail(string $email)`
-- `string` `getEmail()`
-
-### FilterTag
-
-- `getInstance()` Returns an instance of the class specified in the filter tag.
+- `AuthorTag` `setName(string $name)` Sets the author's name.
+- `string` `getName()` Returns the author's name.
+- `AuthorTag` `setEmail(string $email)` Sets the author's email.
+- `string` `getEmail()` Returns the author's email.
 
 ### ParamTag
 
-- `ParamTag` `setType(string $type)`
-- `string` `getType()`
-- `ParamTag` `setName(string $name)`
-- `string` `getName()`
-- `ParamTag` `setDescription(string $description)`
-- `string``getDescription()`
+- `ParamTag` `setType(string $type)` Sets the parameter's type.
+- `string` `getType()` Returns the parameter's type.
+- `ParamTag` `setName(string $name)` Sets the parameter's name.
+- `string` `getName()` Returns the parameter's name.
+- `ParamTag` `setDescription(string $description)` Sets the parameter's description.
+- `string``getDescription()` Returns the parameter's description.
 
 ### ReturnTag
 
-- `ReturnTag` `setTypes(array | string $type)`
-- `array` `getTypes()`
-- `ReturnTag` `setDescription(string $description)`
-- `string` `getDescription()`
-- `bool` `isValid(mixed $value)`
+- `ReturnTag` `setTypes(array | string $type)` Sets all possible return value types.
+- `array` `getTypes()` Returns return value types.
+- `ReturnTag` `setDescription(string $description)`Sets the return value description.
+- `string` `getDescription()` Returns the return value description.
+- `bool` `isValid(mixed $value)` Returns whether or not the value is valid for this return type.
+
+### ThrowsTag
+
+- `ThrowsTag` `setException($class)` Sets the exception class name.
+- `string` `getException()` Returns the exception name.
+- `ThrowsTag` `setDescription()` Sets the exception description.
+- `string` `getDescription()` Returns the exception description.
+
 
 ClassReflector
 --------------
@@ -242,8 +206,6 @@ PropertyReflector
 
 The `PropertyReflector` gives you visibility and doc block functionality.
 
-    <?php
-    
     $property = new PropertyReflector('MyClass', 'myProperty');
     
     // "private"
@@ -251,3 +213,29 @@ The `PropertyReflector` gives you visibility and doc block functionality.
     
     // true
     $property->getDocBlock()->hasTag('var');
+
+FunctionReflector
+-----------------
+
+The function reflector reflects closures and normal funcitons. It is similar to the `Europa\Reflection\MethodReflector` class in behavior and functionality, minus the class features that methods have.
+
+    $closure = function($param1, $param2) {
+        return $param1 . ': ' . $param2;
+    };
+    
+    $reflector = new Europa\Reflection\FunctionReflector($closure);
+    
+    // "key: value"
+    echo $reflector->invokeArgs([
+        'param1' => 'key',
+        'param2' => 'value'
+    ]);
+
+CallableReflector
+-----------------
+
+The callable reflector exists as a factory that decides what type of reflector should be used for the passed in `callable` item.
+
+    $reflector = Europa\Reflection\CallableReflector::detect(function() {
+        // something
+    });

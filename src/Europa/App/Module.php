@@ -25,8 +25,8 @@ class Module implements ModuleInterface
         'bootstrapperNs' => 'Bootstrapper',
         'config'         => 'configs/config.json',
         'routes'         => 'configs/routes.json',
-        'src'            => ['src'],
-        'views'          => ['views']
+        'src'            => 'src',
+        'views'          => 'views'
     ];
 
     /**
@@ -128,7 +128,7 @@ class Module implements ModuleInterface
     public function getClassPaths()
     {
         $locator = new Locator($this->path);
-        $locator->addPaths($this->config->src);
+        $locator->addPaths((array) $this->config->src);
         return $locator;
     }
 
@@ -140,7 +140,7 @@ class Module implements ModuleInterface
     public function getViewPaths()
     {
         $locator = new Locator($this->path);
-        $locator->addPaths($this->config->views);
+        $locator->addPaths((array) $this->config->views);
         return $locator;
     }
 

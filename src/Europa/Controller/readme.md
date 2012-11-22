@@ -1,55 +1,14 @@
 Controller
 ==========
 
-Controllers exist to return a renderable response. They should be thin. Very thin. They shouldn't directly access a data source, they should not know about how the view is rendering its response and they should not know what type of request was made to it. Their only concern is what parameters were passed in and how they are going to respond to that.
+Controllers exist to return a renderable response. They should be thin. Very thin. They shouldn't directly access a data source, they should not know about how the view is rendering its response and they should not have know what whether it was accessed via CLI or HTTP. Their only concern should be what parameters were passed in and how they are going to respond to that.
 
-The recommended controller for web applications (which may also contain command line actions) is the `RestController`.
-
-RESTful Controllers
--------------------
-
-A `RestController` allows you to specify methods which correspond to methods from the [HTTP 1.1. Method Definitions](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html). The allowed methods are:
-
-- `cli`, for handling command line requests
-- `connect`
-- `delete`
-- `get`
-- `head`
-- `options`
-- `patch`, not exactly in the spec, but it is allowed (and used by Github)
-- `post`
-- `put`
-- `trace`
-- `all`, catches all requests
-
-The `cli` method is used for catching all command line requests and `all` is used for catching any request where a corresponding method is not defined. All other methods directly correspond to the methods in the HTTP 1.1 Spec.
-
-A controller may look like the following:
-
-    <?php
-    
-    namespace Controller;
-    use Europa\Controller\RestController;
-    
-    class Content extends RestController
-    {
-        public function get()
-        {
-            
-        }
-        
-        public function put()
-        {
-            
-        }
-    }
+Europa comes with a default controller abstraction called `Europa\Controller\ControllerAbstract`. It enables named arguments to be passed in from the request automatically and support for `@filter` doc tags which pass the controller sequentially to whatever filter or filters you specify.
 
 Passing Arguments to a Controller Method
 ----------------------------------------
 
-Any controller that derives from `ControllerAbstract` (includes the `RestController`) allows named parameters to be specified in each method definition.
-
-For example, if you have a method with a parameter named `$id`:
+You have a method with a parameter named `$id`:
     
     public function get($id);
 
@@ -57,53 +16,88 @@ The `ControllerAbstract` will look in the supplied request for a parameter named
 
     public function put(array $content);
 
-Custom Controllers
-------------------
+Defining Filters for Your Controller
+------------------------------------
 
-At their most basic, controllers must implement `ControllerInterface`.
+A controller accepts two types of filters: Class Filters and Method Filters. Class Filters are applied to all methods in it's class and Method Filters are only applied to the method that it is bound to. Filters need only be `callable` but is easiest to put them into class form to make creating and calling them easier from doc tags.
+
+If we take the following class:
 
     <?php
     
-    namespace Controller;
-    use Europa\Controller\ControllerInterface;
-    use Europa\Request\RequestInterface;
+    namespace My\Controller;
+    Europa\Controller\ControllerAbstract;
     
-    class Index implements ControllerInterface
+    /**
+     * @filter My\Filter\Authorize
+     */
+    class Account extends ControllerAbstract
     {
-        public function __construct(RequestInterface $request)
-        {
-            
-        }
-        
-        public function action()
+        public function get()
         {
             
         }
     }
 
-Generally using `ControllerInterface` and building a controller from scratch is not necessary and if not using a `RestController`, you would use `ControllerAbstract` to create your own type of controller.
-
-For example, you can create multi-action controllers like in some other frameworks:
+The `Authorize` filter is applied to all methods in the class. You could apply this to a single action, or method by assign it directly to that method instead of the class.
 
     <?php
     
-    namespace Europa\Controller;
+    namespace My\Controller;
+    Europa\Controller\ControllerAbstract;
+    
+    class Account extends ControllerAbstract
+    {
+        /**
+         * @filter My\Filter\Authorize
+         */
+        public function get()
+        {
+            
+        }
+    }
+
+Your filter may look like this:
+
+    <?php
+    
+    namespace My\Filter;
     use Europa\Controller\ControllerAbstract;
     
-    abstract class MultiActionController extends ControllerAbstract
+    class Authorize
     {
-        const ACTION = 'index';
-        
-        public function getActionMethod()
+        public function __invoke(ControllerAbstract $controller)
         {
-            return $this->request()->getParam('action', self::ACTION) . 'Action';
+            // authorize the user
         }
     }
 
-You may ask why this is not provided. To answer that, I urge you to ask yourself the following questions:
+Accessing the Request
+---------------------
 
-- Why should PHP parse the whole file to only call a single action?
-- If I've already got the ability to have RESTful controllers, what benefits am I gaining by not using that?
-- Why would I want to facilitate logical cohesion (second worst next to coincidental) over functional cohesion (best)? See [Wikipedia](http://en.wikipedia.org/wiki/Cohesion_\(computer_science\)).
+Within an action, you may access the request by using the `request()` method.
 
-If you can come up with a valid argument, go for it.
+    $this->request->getParams();
+
+You cannot access the request from the constructor since it has not been passed in yet.
+
+Forwarding Requests to Other Actions
+------------------------------------
+
+Inside of an action, you can forward requests to other actions by using the `forward()` method.
+
+    $this->forward('myOtherAction');
+
+Forwarding will only work for actions within the same controller. It does not allow you to forward to another controller by design.
+
+Conventions
+-----------
+
+The default controller assumes a few things for you.
+
+1. The parameter in the request that defines which action should be called is `action`.
+2. The doc tag used for filters is `@filter`. You can use as many filters as you want.
+3. Filters are invoked after construction, but before invokation.
+4. Request parameters can automatically be passed in as action parameters by name just by defining them in your action method definition.
+5. You can write your own controllers as long as they are `callable`. The request is always passed in as the only argument.
+6. You may define a constructor if you like to set up the controller since the abstract class does not define one.

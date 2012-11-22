@@ -2,8 +2,79 @@
 
 namespace Europa\Request;
 
+/**
+ * Blueprint for HTTP requests.
+ * 
+ * @category Request
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
+ */
 interface HttpInterface extends RequestInterface
 {
+    /**
+     * The OPTIONS method.
+     * 
+     * @var string
+     */
+    const OPTIONS = 'options';
+    
+    /**
+     * The GET method.
+     * 
+     * @var string
+     */
+    const GET = 'get';
+    
+    /**
+     * The HEAD method.
+     * 
+     * @var string
+     */
+    const HEAD = 'head';
+    
+    /**
+     * The POST method.
+     * 
+     * @var string
+     */
+    const POST = 'post';
+    
+    /**
+     * The PUT method.
+     * 
+     * @var string
+     */
+    const PUT = 'put';
+    
+    /**
+     * The DELETE method.
+     * 
+     * @var string
+     */
+    const DELETE = 'delete';
+    
+    /**
+     * The TRACE method.
+     * 
+     * @var string
+     */
+    const TRACE = 'trace';
+    
+    /**
+     * The CONNECT method.
+     * 
+     * @var string
+     */
+    const CONNECT = 'connect';
+    
+    /**
+     * The PATCH method.
+     * 
+     * @var string
+     */
+    const PATCH = 'patch';
+
     /**
      * Returns the request method for the request.
      *

@@ -26,15 +26,30 @@ Base filesystem object used by `Directory` and `File`.
 Loader
 ------
 
-The loader component is the class loader implementation used for autoloading. It requires a locator for locating class files.
+The loader component is the class loader implementation used for autoloading.
 
-    <?php
-    
-    use Europa\Fs\Loader;
-    
-    $loader = new Loader;
-    $loader->getLocator()->addPath('/base/path/to/classes');
+    $loader = new Europa\Fs\Loader;
     $loader->register();
+
+You can also manually load class files with it:
+
+    $loaded = $loader('My\Class\File');
+
+If you want to find classes in a directory other than the Europa install path, you must use a locator  that contains a list of paths that you want to use.
+
+    $loader->setLocator(new Europa\Fs\Locator);
+    $loader->getLocator()->addPaths([
+        '/path/to/one/dir',
+        '/path/to/another/dir'
+    ]);
+
+If you add a locator, it will look in the defined paths before looking in the default install path.
+
+The allows anything that is `callable`:
+
+    $loader->setLocator(function($class) {
+        return '/path/to/classes/' . str_replace('\\', DIRECTORY_SEPARATOR, $class);
+    });
 
 Locator
 -------
@@ -57,11 +72,9 @@ The following code could be applied:
     $locator->addPath('/some/path2', 'ini');
     
     // /some/path1/file1.ini
-    $locator->locate('sub/file1');
+    $locator('sub/file1');
     
     // false
-    $locator->locate('sub/file2');
+    $locator('sub/file2');
 
 The locator is very useful for situations where you may have multiple paths that you need to locate a file with a conventional name from such as module or plugin systems.
-
-Since the locator is used in multiple parts of the system, it implements the `LocatorInterface`. This means anywhere that needs a locator, you can also write your own if you need to. This can be handy if you need to locate a file on the network and cache it locally before its path is returned.
