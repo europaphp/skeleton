@@ -125,7 +125,7 @@ Application Configuration Options
 
 `appPath`
 
-The path to the application folder where the modules are kept. This defaults to `../app` which means that, by default, the file running the application must be located in a sub folder of the `cwd()`. By default this is the `index.php` file in the `www` directory.
+The path to the application folder where the modules are kept. This defaults to `../app` which means that, by default, the file running the application must also be the `cwd()`.
 
 `defaultViewClass`
 
