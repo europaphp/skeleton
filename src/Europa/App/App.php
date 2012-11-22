@@ -4,6 +4,7 @@ namespace Europa\App;
 use Europa\Di\ServiceContainer;
 use Europa\Di\ServiceContainerInterface;
 use Europa\Exception\Exception;
+use Europa\Response\HttpResponseInterface;
 
 /**
  * Default application runner implementation.
@@ -68,7 +69,10 @@ class App implements AppInterface
             Exception::toss('The router could not find a suitable controller for the request "%s".', $this->container->request);
         }
 
-        $this->container->response->setContentTypeFromView($this->container->view);
+        if ($this->container->response instanceof HttpResponseInterface) {
+            $this->container->response->setContentTypeFromView($this->container->view);
+        }
+
         $this->container->response->setBody($this->container->view($controller($this->container->request) ?: []));
         $this->container->response->send();
 

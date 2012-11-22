@@ -17,7 +17,7 @@ class ManagerTest extends UnitAbstract
             $called = $bool;
         });
         
-        $manager->trigger('test', [true]);
+        $manager->trigger('test', true);
 
         $this->assert($called, 'The manager did not trigger the custom event.');
     }
@@ -35,7 +35,7 @@ class ManagerTest extends UnitAbstract
             $called[1] = $bool;
         });
         
-        $manager->trigger('test', [true]);
+        $manager->trigger('test', true);
         
         $this->assert($called[0] && $called[1], 'The manager did not trigger both events.');
     }
@@ -56,10 +56,13 @@ class ManagerTest extends UnitAbstract
     
     public function customEventByInstance()
     {
+        $manager = new Manager;
+
         $data         = new stdClass;
         $data->called = false;
         
-        (new Manager)->bind('test', new CustomEvent)->trigger('test', [$data]);
+        $manager->bind('test', new CustomEvent)->trigger('test', $data);
+        $manager->bind('test', new CustomEvent)->triggerArray('test', [$data]);
         
         $this->assert($data->called, 'The manager did not trigger the custom event.');
     }

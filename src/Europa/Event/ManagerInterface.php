@@ -21,7 +21,7 @@ interface ManagerInterface
      * @return Dispatcher
      */
     public function bind($name, callable $callback);
-    
+
     /**
      * Unbinds an event.
      * 
@@ -31,14 +31,23 @@ interface ManagerInterface
      * @return bool
      */
     public function unbind($name, callable $callback = null);
-    
+
     /**
      * Triggers an event stack.
      * 
-     * @param stirng $name The name of the event to trigger.
-     * @param array  $data Any data to pass to the event or event stack at the time of triggering.
+     * @param string $name The name of the event to trigger.
      * 
      * @return bool
      */
-    public function trigger($name, array $data = []);
+    public function trigger($name);
+
+    /**
+     * Triggers an event stack using an array of arguments.
+     * 
+     * @param string $name The name of the event to trigger.
+     * @param array  $args Any arguments to pass to the event or event stack at the time of triggering.
+     * 
+     * @return bool
+     */
+    public function triggerArray($name, array $args = []);
 }

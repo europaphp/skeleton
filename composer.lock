@@ -6,16 +6,16 @@
     "packages-dev": [
         {
             "name": "treshugart/testes",
-            "version": "1.0.3",
+            "version": "1.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/treshugart/Testes.git",
-                "reference": "1.0.3"
+                "reference": "1.0.4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/treshugart/Testes/archive/1.0.3.zip",
-                "reference": "1.0.3",
+                "url": "https://github.com/treshugart/Testes/archive/1.0.4.zip",
+                "reference": "1.0.4",
                 "shasum": ""
             },
             "require": {
@@ -24,7 +24,7 @@
             "require-dev": {
                 "ext-xdebug": "*"
             },
-            "time": "2012-11-16 01:53:49",
+            "time": "2012-11-22 05:50:38",
             "type": "library",
             "installation-source": "dist",
             "autoload": {

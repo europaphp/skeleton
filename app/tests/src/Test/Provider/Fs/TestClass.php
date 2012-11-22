@@ -1,6 +1,8 @@
 <?php
 
-class Test_Provider_Fs_TestClass
+namespace Test\Provider\Fs;
+
+class TestClass
 {
     
 }

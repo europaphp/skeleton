@@ -39,12 +39,4 @@ class LoaderTest extends UnitAbstract
             'Unable to load class.'
         );
     }
-    
-    public function testLoadOldStyleNamespacedClass()
-    {
-        $this->assert(
-            $this->loader->__invoke('Test_Provider_Fs_TestClass'),
-            'Unable to load old style namespaced class.'
-        );
-    }
 }
