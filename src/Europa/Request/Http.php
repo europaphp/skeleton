@@ -344,9 +344,15 @@ class Http extends RequestAbstract
      */
     private function initDefaultParams()
     {
+        if ($input = file_get_contents('php://input', 'r')) {
+            parse_str($input, $input);
+            $this->setParams($input);
+        }
+
         if (isset($_REQUEST)) {
             $this->setParams($_REQUEST);
         }
+
         return $this;
     }
     
