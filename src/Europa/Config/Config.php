@@ -23,6 +23,13 @@ class Config implements ConfigInterface
     private $config = [];
 
     /**
+     * The filter used to turn values from strings into their original type.
+     * 
+     * @var FromStringFilter
+     */
+    private $fromStringFilter;
+
+    /**
      * Whether or not the object is readonly.
      * 
      * @var bool
@@ -37,6 +44,8 @@ class Config implements ConfigInterface
      */
     public function __construct()
     {
+        $this->fromStringFilter = new FromStringFilter;
+
         foreach (func_get_args() as $config) {
             $this->import($config);
         }
@@ -331,21 +340,40 @@ class Config implements ConfigInterface
      */
     private function parseOptionValue($value)
     {
+        // If the value is a string and it has at least one character.
         if (is_string($value) && isset($value[0])) {
+            // The "=" token indicates that the value should be evaluated using other config variables.
             if ($value[0] === '=') {
+                // Find each placeholder
                 preg_match_all('/\{([^{]+)\}/', $value, $holders);
 
+                // Determines whether or not we should cast the resulting value.
+                $isString = false;
+
+                // Replace each placeholder with the found config variable.
                 foreach ($holders[1] as $holder) {
-                    $value = str_replace('{' . $holder . '}', $this->offsetGet($holder), $value);
+                    $holderValue = $this->offsetGet($holder);
+                    $value       = str_replace('{' . $holder . '}', $holderValue, $value);
+
+                    // If we haven't flagged it as a string and the holder value is a string, flag it, so that it is not casted.
+                    if (!$isString && is_string($holderValue)) {
+                        $isString = true;
+                    }
                 }
 
+                // Remove the evaluation token.
                 $value = substr($value, 1);
+
+                // If the value was evaluated with all non-string characters, we cast it.
+                if (!$isString) {
+                    $value = $this->fromStringFilter->__invoke($value);
+                }
             } elseif ($value[0] === '\\' && $value[1] === '=') {
                 $value = substr($value, 1);
             }
         }
 
-        return (new FromStringFilter)->__invoke($value);
+        return $value;
     }
 
     /**

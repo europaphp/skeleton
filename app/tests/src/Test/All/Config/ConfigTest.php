@@ -110,6 +110,38 @@ class ConfigTest extends UnitAbstract
         $this->assert($config->referencer === 'referencing:somevalue', 'Option "referencee" was not referenced within "referencer".');
     }
 
+    public function castingReferences()
+    {
+        $config = new Config([
+            'float'      => 1.1,
+            'referencer' => '={float}'
+        ]);
+
+        $this->assert($config->referencer === 1.1, 'Value referencing the float should result as a float.');
+    }
+
+    public function castingMultipleNonStringReferences()
+    {
+        $config = new Config([
+            'int1'       => 1,
+            'int2'       => 2,
+            'referencer' => '={int1}.{int2}'
+        ]);
+
+        $this->assert($config->referencer === 1.2);
+    }
+
+    public function castingMultipleReferencesContainintAString()
+    {
+        $config = new Config([
+            'float'      => 1.1,
+            'string'     => 'somestring',
+            'referencer' => '={string}_{float}'
+        ]);
+
+        $this->assert($config->referencer === 'somestring_1.1');
+    }
+
     public function adapter()
     {
         $config = new Config;
