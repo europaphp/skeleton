@@ -281,9 +281,15 @@ class Http extends RequestAbstract implements HttpInterface
      */
     private function initDefaultParams()
     {
+        if ($input = file_get_contents('php://input', 'r')) {
+            parse_str($input, $input);
+            $this->setParams($input);
+        }
+
         if (isset($_REQUEST)) {
             $this->setParams($_REQUEST);
         }
+
         return $this;
     }
     
@@ -295,12 +301,15 @@ class Http extends RequestAbstract implements HttpInterface
     private function initDefaultMethod()
     {
         $method = static::GET;
+        
         if (isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
             $method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
         } elseif (isset($_SERVER['REQUEST_METHOD'])) {
             $method = $_SERVER['REQUEST_METHOD'];
         }
+
         $this->setMethod(strtolower($method));
+
         return $this;
     }
     
@@ -321,6 +330,7 @@ class Http extends RequestAbstract implements HttpInterface
                 $this->setHeader($name, $value);
             }
         }
+
         return $this;
     }
     
@@ -332,6 +342,7 @@ class Http extends RequestAbstract implements HttpInterface
     private function initDefaultIp()
     {
         $ip = null;
+
         if (isset($_SERVER['HTTP_TRUE_CLIENT_IP'])) {
             $ip = $_SERVER['HTTP_TRUE_CLIENT_IP'];
         } elseif (isset($_SERVER['X_FORWARDED_FOR'])) {
@@ -342,6 +353,7 @@ class Http extends RequestAbstract implements HttpInterface
         } elseif (isset($_SERVER['REMOTE_ADDR'])) {
             $ip = $_SERVER['REMOTE_ADDR'];
         }
+
         return $this->setIp($ip);
     }
 }
