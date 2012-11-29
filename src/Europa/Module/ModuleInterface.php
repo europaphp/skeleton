@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\App;
+namespace Europa\Module;
 
 /**
  * Handles the management of a single module.

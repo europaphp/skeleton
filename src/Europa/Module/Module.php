@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\App;
+namespace Europa\Module;
 use Europa\Config\Config;
 use Europa\Exception\Exception;
 use Europa\Filter\UpperCamelCaseFilter;

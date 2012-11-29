@@ -63,11 +63,11 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
     /**
      * Returns the module manager.
      * 
-     * @return ModuleManager
+     * @return Manager
      */
     public function modules()
     {
-        return new ModuleManager($this);
+        return new Manager($this);
     }
 
     /**

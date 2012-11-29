@@ -1,12 +1,12 @@
 <?php
 
-namespace Europa\App;
+namespace Europa\Module;
 use ArrayAccess;
 use Countable;
 use Europa\Di\ServiceContainerInterface;
 use IteratorAggregate;
 
-interface ModuleManagerInterface extends ArrayAccess, Countable, IteratorAggregate
+interface ManagerInterface extends ArrayAccess, Countable, IteratorAggregate
 {
     /**
      * Bootstraps all of the modules.

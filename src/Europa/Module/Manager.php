@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\App;
+namespace Europa\Module;
 use Europa\Di\ServiceContainerInterface;
 
 /**
@@ -11,7 +11,7 @@ use Europa\Di\ServiceContainerInterface;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class ModuleManager implements ModuleManagerInterface
+class Manager implements ManagerInterface
 {
     /**
      * The service container used for dependnecies.
@@ -36,7 +36,7 @@ class ModuleManager implements ModuleManagerInterface
      */
     public function __construct(ServiceContainerInterface $container)
     {
-        $this->container = $container->mustProvide('Europa\App\ModuleConfigurationInterface');;
+        $this->container = $container->mustProvide('Europa\Module\ManagerConfigurationInterface');;
     }
 
     /**

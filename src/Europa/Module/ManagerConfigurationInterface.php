@@ -1,8 +1,8 @@
 <?php
 
-namespace Europa\App;
+namespace Europa\Module;
 
-interface ModuleConfigurationInterface
+interface ManagerConfigurationInterface
 {
     /**
      * Returns the application configuration object.

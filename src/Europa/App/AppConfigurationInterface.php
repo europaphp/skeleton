@@ -1,8 +1,9 @@
 <?php
 
 namespace Europa\App;
+use Europa\Module\ManagerConfigurationInterface;
 
-interface AppConfigurationInterface extends ModuleConfigurationInterface
+interface AppConfigurationInterface extends ManagerConfigurationInterface
 {
     /**
      * Returns the loader responsible for auto-loading class files.
