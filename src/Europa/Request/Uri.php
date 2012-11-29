@@ -692,6 +692,7 @@ class Uri
         $uri->setRoot(static::detectRoot());
         $uri->setRequest(static::detectRequest());
         $uri->setQuery(static::detectQuery());
+
         return $uri;
     }
     
@@ -707,6 +708,7 @@ class Uri
         } elseif (isset($_SERVER['HTTP_HOST'])) {
             return 'http';
         }
+
         return null;
     }
     
@@ -721,8 +723,10 @@ class Uri
             $host = $_SERVER['HTTP_HOST'];
             $host = explode(':', $host, 2);
             $host = $host[0];
+
             return $host;
         }
+
         return null;
     }
     
@@ -733,9 +737,10 @@ class Uri
      */
     public static function detectPort()
     {
-        if (isset($_SERVER['SERVER_PORT'])) {
-            return $_SERVER['SERVER_PORT'];
+        if (isset($_SERVER['REMOTE_PORT'])) {
+            return $_SERVER['REMOTE_PORT'];
         }
+
         return null;
     }
     
@@ -749,9 +754,11 @@ class Uri
         if (!isset($_SERVER['SCRIPT_NAME'])) {
             return null;
         }
+
         $root = $_SERVER['SCRIPT_NAME'];
         $root = dirname($root);
         $root = trim($root, '/');
+
         return $root;
     }
     
@@ -788,6 +795,7 @@ class Uri
         if (isset($_SERVER['QUERY_STRING'])) {
             return $_SERVER['QUERY_STRING'];
         }
+        
         return null;
     }
 
