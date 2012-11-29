@@ -8,7 +8,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 $app = new Europa\App\App(['appPath' => __DIR__ . '/../app']);
 
 // Register modules.
-$app->getServiceContainer()->modules->registerAll([
+$app->getServiceContainer()->modules->register([
     'demo',
     'help',
     'tests'

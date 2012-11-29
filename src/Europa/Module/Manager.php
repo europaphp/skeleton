@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Module;
+use Europa\Config\Config;
 use Europa\Di\ServiceContainerInterface;
 
 /**
@@ -32,11 +33,32 @@ class Manager implements ManagerInterface
      * 
      * @param ServiceContainerInterface $container The container to use for setting up modules.
      * 
-     * @return ModuleManager
+     * @return Manager
      */
     public function __construct(ServiceContainerInterface $container)
     {
-        $this->container = $container->mustProvide('Europa\Module\ManagerConfigurationInterface');;
+        $this->setServiceContainer($container);
+    }
+
+    /**
+     * Sets the service container the manager should use.
+     * 
+     * @return Manager
+     */
+    public function setServiceContainer(ServiceContainerInterface $container)
+    {
+        $this->container = $container->mustProvide('Europa\Module\ManagerConfigurationInterface');
+        return $this;
+    }
+
+    /**
+     * Returns the service container bound to the module manager.
+     * 
+     * @return ServiceContainerInterface
+     */
+    public function getServiceContainer()
+    {
+        return $this->container;
     }
 
     /**
@@ -47,39 +69,23 @@ class Manager implements ManagerInterface
     public function bootstrap()
     {
         foreach ($this->modules as $module) {
-            foreach ($module->getRequired() as $dep) {
-                $this->offsetGet($dep)->bootstrap();
-            }
-
-            $name = $module->getName();
-            $conf = $module->getConfig();
-
-            $this->container->config->modules->$name->import($conf);
-            $this->container->router->import($module->getRoutes());
-            $this->container->loaderLocator->addPaths($module->getClassPaths());
-            $this->container->viewLocator->addPaths($module->getViewPaths());
-            
-            if (is_callable($bootstrapper = $module->getBootstrapper())) {
-                $bootstrapper($conf);
-            }
+            $module($this);
         }
         
         return $this;
     }
 
     /**
-     * Adds multiple modules at once.
+     * Registers a list of modules. Can be anything that can be passed to Europa\Config\Config::import().
      * 
      * @param mixed $modules The modules to add.
      * 
-     * @return ModuleManager
+     * @return Manager
      */
-    public function registerAll($modules)
+    public function register($modules)
     {
-        if (is_array($modules) || is_object($modules)) {
-            foreach ($modules as $offset => $module) {
-                $this->offsetSet($offset, $module);
-            }
+        foreach (new Config($modules) as $name => $module) {
+            $this->offsetSet($name, $module);
         }
 
         return $this;
@@ -88,18 +94,25 @@ class Manager implements ManagerInterface
     /**
      * Registers a module.
      * 
-     * @param mixed                    $offset The module index.
-     * @param string | ModuleInterface $module The module to register.
+     * @param mixed $offset The module index.
+     * @param mixed $module The module to register.
      * 
      * @return App
      */
     public function offsetSet($offset, $module)
     {
-        if (!$module instanceof ModuleInterface) {
-            $module = new Module($this->container->config->appPath . '/' . $module);
+        if (is_string($module)) {
+            $offset = $module;
+            $module = [];
         }
 
-        $this->modules[$offset ?: count($this->modules)] = $module;
+        if (!is_callable($module)) {
+            $module = new Module($this->container->config->appPath . '/' . $offset, $module);
+        }
+
+        $this->modules[$offset] = $module;
+
+        return $this;
     }
 
     /**
@@ -144,6 +157,8 @@ class Manager implements ManagerInterface
         if (isset($this->modules[$offset])) {
             unset($this->modules[$offset]);
         }
+
+        return $this;
     }
 
     /**
