@@ -2,6 +2,7 @@
 
 namespace Europa\View;
 use Europa\Config\Config;
+use Europa\Filter\ToStringFilter;
 
 /**
  * A view class for rendering JSON data from bound parameters.
@@ -23,9 +24,17 @@ class Xml
         'encoding'       => 'UTF-8',
         'indent'         => true,
         'numericKeyName' => 'item',
+        'rootNode'       => 'xml',
         'spaces'         => 2,
         'version'        => '1.0'
     ];
+
+    /**
+     * The filter used to turn an item value into a string.
+     * 
+     * @var ToStringFilter
+     */
+    private $toStringFilter;
     
     /**
      * Sets up the XML view renderer.
@@ -36,7 +45,8 @@ class Xml
      */
     public function __construct(array $config = [])
     {
-        $this->config = new Config($this->config, $config);
+        $this->config         = new Config($this->config, $config);
+        $this->toStringFilter = new ToStringFilter;
     }
     
     /**
@@ -48,19 +58,27 @@ class Xml
     {
         $str = '';
         
+        // Build the XML declaration if enabled.
         if ($this->config->declare) {
             $str = '<?xml version="'
-                . $this->config->version
+                . $this->toStringFilter->__invoke($this->config->version)
                 . '" encoding="'
                 . $this->config->encoding
                 . '" ?>'
                 . PHP_EOL;
         }
+
+        // Render a root node if given a name.
+        if ($this->config->rootNode) {
+            $context = [$this->config->rootNode => $context];
+        }
         
+        // Render the XML tree.
         foreach ($context as $name => $content) {
             $str .= $this->renderNode($name, $content);
         }
         
+        // Remove whitespace before returning.
         return trim($str);
     }
     
@@ -85,17 +103,21 @@ class Xml
             }
         }
         
+        // indent the node
         $ind = $this->indent($level);
         $str = $ind . "<{$name}>";
         
+        // render child nodes if the value is traversable
         if (is_array($content) || is_object($content)) {
             $str .= PHP_EOL;
+
             foreach ($content as $k => $v) {
                 $str .= $this->renderNode($k, $v, $level + 1);
             }
+
             $str .= $ind;
         } else {
-            $str .= $content;
+            $str .= $this->toStringFilter->__invoke($content);
         }
         
         $str .= "</{$name}>";
