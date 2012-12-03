@@ -281,7 +281,7 @@ class Http extends RequestAbstract implements HttpInterface
      */
     private function initDefaultParams()
     {
-        if ($input = file_get_contents('php://input', 'r')) {
+        if ($input = file_get_contents('php://input')) {
             parse_str($input, $input);
             $this->setParams($input);
         }
