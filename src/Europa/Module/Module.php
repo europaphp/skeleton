@@ -102,7 +102,7 @@ class Module
 
         // If the bootstrapper class exists, invoke it.
         if (class_exists($bootstrapper = $this->getBootstrapperClassName(), true)) {
-            (new $bootstrapper)->__invoke();
+            (new $bootstrapper)->__invoke($container);
         }
 
         return $this;

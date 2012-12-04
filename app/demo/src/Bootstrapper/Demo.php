@@ -2,7 +2,6 @@
 
 namespace Bootstrapper;
 use Europa\Bootstrapper\BootstrapperAbstract;
-use Europa\Config\Config;
 
 /**
  * The demo bootstrapper.

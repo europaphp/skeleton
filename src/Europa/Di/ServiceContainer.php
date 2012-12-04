@@ -263,6 +263,19 @@ class ServiceContainer implements ServiceContainerInterface
     }
 
     /**
+     * Saves the container as the specified name.
+     * 
+     * @param string $name The container name.
+     * 
+     * @return ServiceContainer
+     */
+    public function save($name)
+    {
+        self::$instances[self::generateKey($name)] = $this;
+        return $this;
+    }
+
+    /**
      * Statically configures and returns the container of the specified name.
      * 
      * @param string $name The name of the container to return.
@@ -272,7 +285,7 @@ class ServiceContainer implements ServiceContainerInterface
      */
     public static function __callStatic($name, array $args = [])
     {
-        $key = get_called_class() . '::' . $name . '()';
+        $key = self::generateKey($name);
 
         if (!$args && isset(self::$instances[$key])) {
             return self::$instances[$key];
@@ -303,5 +316,17 @@ class ServiceContainer implements ServiceContainerInterface
         }
 
         Exception::toss($message, $name, $this->fullName());
+    }
+
+    /**
+     * Generates a key for the current container.
+     * 
+     * @param string $name The name to use to generate a key.
+     * 
+     * @return string
+     */
+    public static function generateKey($name)
+    {
+        return get_called_class() . '::' . $name . '()';
     }
 }

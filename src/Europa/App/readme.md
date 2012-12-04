@@ -138,3 +138,20 @@ If using a view that implements `Europa\View\ViewScriptInterface`, then the `->s
 `viewSuffix`
 
 If using a view that implements `Europa\View\ViewScriptInterface`, then the view suffix will be set to this value. The default suffix is `php`.
+
+Application Events
+------------------
+
+During the course of invoking your application some events will be triggered that you can bind handlers to.
+
+`route`
+
+Triggered prior to routing to a controller.
+
+`action`
+
+Triggered prior to actioning the controller.
+
+`render`
+
+Triggered prior to rendering the view with the context returned from the action.

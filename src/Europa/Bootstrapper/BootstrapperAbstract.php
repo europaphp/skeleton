@@ -18,18 +18,15 @@ abstract class BootstrapperAbstract
     /**
      * Runs each bootstrap method.
      * 
-     * @param mixed $conf Any configuration to pass to each method.
-     * 
      * @return Provider
      */
-    public function __invoke($conf = [])
+    public function __invoke()
     {
         $that = new ClassReflector($this);
-        $conf = new Config($conf);
         
         foreach ($that->getMethods() as $method) {
             if ($this->isValidMethod($method)) {
-                $method->invoke($this, $conf);
+                $method->invokeArgs($this, func_get_args());
             }
         }
         
