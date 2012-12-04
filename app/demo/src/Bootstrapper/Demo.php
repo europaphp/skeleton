@@ -18,9 +18,9 @@ class Demo extends BootstrapperAbstract
      * 
      * @return void
      */
-    public function errorReporting($config)
+    public function errorReporting($container)
     {
         error_reporting(E_ALL);
-        ini_set('display_errors', $config->debug ? 'on' : 'off');
+        ini_set('display_errors', $container->config->debug ? 'on' : 'off');
     }
 }

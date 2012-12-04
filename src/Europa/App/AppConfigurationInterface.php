@@ -3,8 +3,33 @@
 namespace Europa\App;
 use Europa\Module\ManagerConfigurationInterface;
 
+/**
+ * The default Application service configuration blueprint.
+ * 
+ * @category App
+ * @package  Europa
+ * @author   Trey Shugart <treshugart@gmail.com>
+ * @license  http://europaphp.org/license
+ */
 interface AppConfigurationInterface extends ManagerConfigurationInterface
 {
+    /**
+     * Returns the application configuration object.
+     * 
+     * @param mixed $defaults The default configuration.
+     * @param mixed $config   The configuration to use.
+     * 
+     * @return Europa\Config\Config
+     */
+    public function config($defaults, $config);
+
+    /**
+     * Returns the application event manager.
+     * 
+     * @return Europa\Event\Manager
+     */
+    public function event();
+
     /**
      * Returns the loader responsible for auto-loading class files.
      * 

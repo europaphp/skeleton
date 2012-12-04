@@ -4,9 +4,10 @@ namespace Europa\App;
 use Europa\Config\Config;
 use Europa\Di\ConfigurationAbstract;
 use Europa\Di\ServiceContainer;
+use Europa\Event\Manager as EventManager;
 use Europa\Fs\Loader;
 use Europa\Fs\Locator;
-use Europa\Module\Manager;
+use Europa\Module\Manager as ModuleManager;
 use Europa\Request\RequestAbstract;
 use Europa\Response\ResponseAbstract;
 use Europa\Router\Router;
@@ -36,6 +37,16 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
     public function config($defaults, $config)
     {
         return new Config($defaults, $config);
+    }
+    
+    /**
+     * Returns the application event manager.
+     * 
+     * @return Europa\Event\Manager
+     */
+    public function event()
+    {
+        return new EventManager;
     }
 
     /**
@@ -67,7 +78,7 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
      */
     public function modules()
     {
-        return new Manager($this);
+        return new ModuleManager($this);
     }
 
     /**
