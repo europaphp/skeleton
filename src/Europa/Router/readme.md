@@ -25,7 +25,7 @@ You can also pass in a closure.
 
 Another way is to pass in a route configuration. It will automatically instantiate a `Europa\Router\Route` object and pass the configuration to it.
 
-    $router['my-route'] = 
+    $router['my-route'] = [
         'match'             => '^$',
         'method'            => 'get',
         'format'            => ':controller/:action',
