@@ -55,9 +55,25 @@ abstract class ControllerAbstract
     public function __invoke(RequestInterface $request)
     {
         $this->request = $request;
+
         $context = $this->invoke($request->getParam(self::ACTION));
+
         $this->request = null;
+
         return $context;
+    }
+
+    /**
+     * Turns filtering on and off.
+     * 
+     * @param bool $switch Whether or not to filter.
+     * 
+     * @return ControllerAbstract
+     */
+    public function filter($switch = true)
+    {
+        $this->filter = $switch ?: false;
+        return $this;
     }
 
     /**
@@ -77,7 +93,7 @@ abstract class ControllerAbstract
      * 
      * @return AbstractController
      */
-    protected function forward($to)
+    public function forward($to)
     {
         return $this->invoke($to);
     }
@@ -100,11 +116,16 @@ abstract class ControllerAbstract
         $params = $this->request->getParams();
 
         // Filter using @filter tags.
-        $this->applyClassFilters();
-        $this->applyActionFilters($action);
+        if ($this->filter) {
+            $this->applyClassFilters();
+            $this->applyActionFilters($action);
+        }
         
         // Return result from action.
-        return (new MethodReflector($this, $action))->invokeArgs($this, $this->request->getParams());
+        return (new MethodReflector($this, $action))->invokeArgs(
+            $this,
+            $this->request->getParams()
+        );
     }
 
     /**
@@ -124,7 +145,7 @@ abstract class ControllerAbstract
             $value = isset($parts[1]) ? trim($parts[1]) : '';
 
             if (!class_exists($class)) {
-                throw new LogicException(sprintf('The filter "%s" specified in controller "%s" does not exist.', $class, get_class($this)));
+                Exception::toss('The filter "%s" specified in controller "%s" does not exist.', $class, get_class($this));
             }
 
             $filters[] = new $class($value);
