@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Module;
+use ArrayAccess;
 use Europa\Config\Config;
 use Europa\Config\ConfigInterface;
 use Europa\Exception\Exception;
@@ -16,14 +17,14 @@ use Europa\Fs\Locator;
  * @author   Trey Shugart <treshugart@gmail.com>
  * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
  */
-class Module
+class Module implements ArrayAccess
 {
     /**
      * The module configuration.
      * 
      * @var array
      */
-    private $config = [
+    private $classConfig = [
         'config'             => 'configs/config.json',
         'routes'             => 'configs/routes.json',
         'src'                => 'src',
@@ -35,6 +36,13 @@ class Module
         'bootstrapperPrefix' => 'Bootstrapper\\',
         'bootstrapperSuffix' => ''
     ];
+
+    /**
+     * The module config.
+     * 
+     * @var ConfigInterface
+     */
+    private $moduleConfig;
 
     /**
      * The module name.
@@ -71,8 +79,18 @@ class Module
             Exception::toss('The module path "%s" does not exist.', $path);
         }
 
-        $this->name   = basename($this->path);
-        $this->config = new Config($this->config, $config);
+        // The name of the directory the module is in.
+        $this->name = basename($this->path);
+
+        // The class configuration.
+        $this->classConfig = new Config($this->classConfig, $config);
+
+        // The specified module config can either be a path or a config object.
+        if ($this->classConfig->config instanceof ConfigInterface) {
+            $this->moduleConfig = $this->classConfig->config;
+        } elseif ($path = realpath($this->path . '/' . $this->classConfig->config)) {
+            $this->moduleConfig = new Config($path);
+        }
     }
 
     /**
@@ -88,23 +106,70 @@ class Module
         $this->validate($manager);
 
         // Bootstrap all dependency modules first.
-        foreach ($this->config->requiredModules as $module) {
+        foreach ($this->classConfig->requiredModules as $module) {
             $manager->offsetGet($module)->bootstrap($manager);
         }
 
         // The service container used by the manager and application components.
         // We update this to make changes to the application as a whole.
         $container = $manager->getServiceContainer();
-        $this->applyConfig($container->config);
         $this->applyRoutes($container->router);
         $this->applyClassPaths($container->loaderLocator);
         $this->applyViewPaths($container->viewLocator);
 
         // If the bootstrapper class exists, invoke it.
         if (class_exists($bootstrapper = $this->getBootstrapperClassName(), true)) {
-            (new $bootstrapper)->__invoke($container);
+            (new $bootstrapper)->__invoke($this, $manager);
         }
 
+        return $this;
+    }
+
+    /**
+     * Allows runtime modification of module config.
+     * 
+     * @param string $name  The option name.
+     * @param mixed  $value The option value.
+     */
+    public function offsetSet($name, $value)
+    {
+        Exception::toss('Module configuration cannot be set after instantiation.');
+    }
+
+    /**
+     * Returns a module config option.
+     * 
+     * @param string $name The option name.
+     * 
+     * @return mixed
+     */
+    public function offsetGet($name)
+    {
+        return $this->moduleConfig->offsetGet($name);
+    }
+
+    /**
+     * Returns whether or not a module config option is set.
+     * 
+     * @param string $name The option name.
+     * 
+     * @return bool
+     */
+    public function offsetExists($name)
+    {
+        return $this->moduleConfig->offsetExists($name);
+    }
+
+    /**
+     * Removes a module config option.
+     * 
+     * @param string $name The option name.
+     * 
+     * @return mixed
+     */
+    public function offsetUnset($name)
+    {
+        $this->moduleConfig->offsetUnset($name);
         return $this;
     }
 
@@ -132,7 +197,7 @@ class Module
      */
     private function validateModules(ManagerInterface $manager)
     {
-        foreach ($this->config->requiredModules as $module) {
+        foreach ($this->classConfig->requiredModules as $module) {
             if (!$manager->offsetExists($module)) {
                 Exception::toss('The module "%s" is required by the module "%s".', $module, $this->name);
             }
@@ -146,7 +211,7 @@ class Module
      */
     private function validateExtensions()
     {
-        foreach ($this->config->requiredExtensions as $extension) {
+        foreach ($this->classConfig->requiredExtensions as $extension) {
             if (!extension_loaded($extension)) {
                 Exception::toss('The extension "%s" is required by the module "%s".', $extension, $this->name);
             }
@@ -160,7 +225,7 @@ class Module
      */
     private function validateClasses()
     {
-        foreach ($this->config->requiredClasses as $class) {
+        foreach ($this->classConfig->requiredClasses as $class) {
             if (!class_exists($class, true)) {
                 Exception::toss('The class "%s" is required by the module "%s".', $class, $this->name);
             }
@@ -174,24 +239,10 @@ class Module
      */
     private function validateFunctions()
     {
-        foreach ($this->config->requiredFunctions as $function) {
+        foreach ($this->classConfig->requiredFunctions as $function) {
             if (!function_exists($function)) {
                 Exception::toss('The function "%s" is required by the module "%s".', $function, $this->name);
             }
-        }
-    }
-
-    /**
-     * Updates the application configuration to include a configuration object for the module. The module configuration can be access by using the same name as the module from the top level configuration.
-     * 
-     * @param ConfigInterface $config The config to modify.
-     * 
-     * @return void
-     */
-    private function applyConfig(ConfigInterface $config)
-    {
-        if ($options = realpath($this->path . '/' . $this->config->config)) {
-            $config->offsetGet($this->name)->import($options);
         }
     }
 
@@ -204,7 +255,7 @@ class Module
      */
     private function applyRoutes(Router $router)
     {
-        if ($options = realpath($this->path . '/' . $this->config->routes)) {
+        if ($options = realpath($this->path . '/' . $this->classConfig->routes)) {
             $router->import($options);
         }
     }
@@ -219,7 +270,7 @@ class Module
     private function applyClassPaths(Locator $locator)
     {
         $paths = new Locator($this->path);
-        $paths->addPaths((array) $this->config->src);
+        $paths->addPaths((array) $this->classConfig->src);
         $locator->addPaths($paths);
     }
 
@@ -233,7 +284,7 @@ class Module
     private function applyViewPaths(Locator $locator)
     {
         $paths = new Locator($this->path);
-        $paths->addPaths((array) $this->config->views);
+        $paths->addPaths((array) $this->classConfig->views);
         $locator->addPaths($paths);
     }
 
@@ -244,8 +295,8 @@ class Module
      */
     private function getBootstrapperClassName()
     {
-        return $this->config->bootstrapperPrefix
+        return $this->classConfig->bootstrapperPrefix
             . (new UpperCamelCaseFilter)->__invoke($this->name)
-            . $this->config->bootstrapperSuffix;
+            . $this->classConfig->bootstrapperSuffix;
     }
 }

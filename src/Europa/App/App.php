@@ -57,7 +57,8 @@ class App implements AppInterface
      * @var array | Config
      */
     private $config = [
-        'container'        => 'europa',
+        'containerName'    => 'main',
+        'modules'          => ['main' => []],
         'appPath'          => '../app',
         'defaultViewClass' => 'Europa\View\Php',
         'viewScriptFormat' => ':controller/:action',
@@ -89,7 +90,12 @@ class App implements AppInterface
         $this->container->configure($configuration);
         
         // Save the container as the one specified in the configuration.
-        $this->container->save($this->container->config->container);
+        $this->container->save($this->container->config->containerName);
+        
+        // Register all modules specified in the configuration.
+        foreach ($this->container->config->modules as $name => $module) {
+            $this->container->modules->offsetSet($name, $module);
+        }
     }
 
     /**

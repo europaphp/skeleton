@@ -76,22 +76,6 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Registers a list of modules. Can be anything that can be passed to Europa\Config\Config::import().
-     * 
-     * @param mixed $modules The modules to add.
-     * 
-     * @return Manager
-     */
-    public function register($modules)
-    {
-        foreach (new Config($modules) as $name => $module) {
-            $this->offsetSet($name, $module);
-        }
-
-        return $this;
-    }
-
-    /**
      * Registers a module.
      * 
      * @param mixed $offset The module index.
