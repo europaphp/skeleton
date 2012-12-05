@@ -32,6 +32,13 @@ abstract class ControllerAbstract
     const FILTER = 'filter';
 
     /**
+     * Whether or not filters are enabled or disabled.
+     * 
+     * @var bool
+     */
+    private $filter = true;
+
+    /**
      * List of validators on the controller.
      * 
      * @var array
@@ -107,25 +114,20 @@ abstract class ControllerAbstract
      */
     private function invoke($action)
     {
-        // Ensure the action exists.
         if (!method_exists($this, $action)) {
             Exception::toss('The action "%s" is not defined in the controller "%s".', $action, get_class($this));
         }
 
-        // Build a list of parameters to action the controller with.
+        $class  = new ClassReflector($this);
+        $method = $class->getMethod($action);
         $params = $this->request->getParams();
 
-        // Filter using @filter tags.
         if ($this->filter) {
-            $this->applyClassFilters();
-            $this->applyActionFilters($action);
+            $this->applyClassFilters($class, $method);
+            $this->applyActionFilters($class, $method);
         }
         
-        // Return result from action.
-        return (new MethodReflector($this, $action))->invokeArgs(
-            $this,
-            $this->request->getParams()
-        );
+        return $method->invokeArgs($this, $this->request->getParams());
     }
 
     /**
@@ -159,10 +161,10 @@ abstract class ControllerAbstract
      * 
      * @return void
      */
-    private function applyClassFilters()
+    private function applyClassFilters($class, $method)
     {
-        foreach ($this->getFiltersFor(new ClassReflector($this)) as $filter) {
-            $filter($this);
+        foreach ($this->getFiltersFor($class) as $filter) {
+            $filter($this, $class, $method);
         }
     }
 
@@ -171,10 +173,10 @@ abstract class ControllerAbstract
      * 
      * @return void
      */
-    private function applyActionFilters($action)
+    private function applyActionFilters($class, $method)
     {
-        foreach ($this->getFiltersFor(new MethodReflector($this, $action)) as $filter) {
-            $filter($this);
+        foreach ($this->getFiltersFor($method) as $filter) {
+            $filter($this, $class, $method);
         }
     }
 }
