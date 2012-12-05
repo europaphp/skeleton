@@ -16,7 +16,7 @@ class ConfigTest extends UnitAbstract
             ['test2' => true]
         );
         
-        $this->assert($config->test1 && $config->test2 && $config->test3, 'Configuration should have all 3 test values.');
+        $this->assert($config->test1 && $config->test2, 'Configuration should have overridden the first array.');
     }
 
     public function accessingMagicAndArrayAccess()
@@ -91,19 +91,14 @@ class ConfigTest extends UnitAbstract
 
     public function nestedPartNotConfigObject()
     {
-        $config = new Config;
-        $config['some.nested.value'] = true;
-
-        try {
-            $config['some.nested.value.shoudnotgethere'];
-            $this->assert(false, 'Option "some.nested.value" should not return an object when accessing "some.nested.value.shouldnotgethere".');
-        } catch (Exception $e) {}
+        $config = new Config(['some.nested.value' => true]);
+        $this->assert(!$config['some.nested.value.shoudnotgethere'], 'When accessing a nested level that does not exist, it should not return anything.');
     }
 
     public function references()
     {
         $config = new Config([
-            'referencer' => '=referencing:{referencee}',
+            'referencer' => 'referencing:{$this->referencee}',
             'referencee' => 'somevalue'
         ]);
 
@@ -114,10 +109,10 @@ class ConfigTest extends UnitAbstract
     {
         $config = new Config([
             'float'      => 1.1,
-            'referencer' => '={float}'
+            'referencer' => '{$this->float}'
         ]);
 
-        $this->assert($config->referencer === 1.1, 'Value referencing the float should result as a float.');
+        $this->assert($config->referencer === '1.1', 'Value referencing the float should result as a float.');
     }
 
     public function castingMultipleNonStringReferences()
@@ -125,10 +120,10 @@ class ConfigTest extends UnitAbstract
         $config = new Config([
             'int1'       => 1,
             'int2'       => 2,
-            'referencer' => '={int1}.{int2}'
+            'referencer' => '{$this->int1}.{$this->int2}'
         ]);
 
-        $this->assert($config->referencer === 1.2);
+        $this->assert($config->referencer === '1.2');
     }
 
     public function castingMultipleReferencesContainintAString()
@@ -136,7 +131,7 @@ class ConfigTest extends UnitAbstract
         $config = new Config([
             'float'      => 1.1,
             'string'     => 'somestring',
-            'referencer' => '={string}_{float}'
+            'referencer' => '{$this->string}_{$this->float}'
         ]);
 
         $this->assert($config->referencer === 'somestring_1.1');

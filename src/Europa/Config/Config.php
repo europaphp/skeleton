@@ -23,11 +23,11 @@ class Config implements ConfigInterface
     private $config = [];
 
     /**
-     * The filter used to turn values from strings into their original type.
+     * The parent configuration object.
      * 
-     * @var FromStringFilter
+     * @var ConfigInterface
      */
-    private $fromStringFilter;
+    private $parent;
 
     /**
      * Whether or not the object is readonly.
@@ -37,6 +37,13 @@ class Config implements ConfigInterface
     private $readonly = false;
 
     /**
+     * Whether or not to evaluate each value as PHP to reference other strings.
+     * 
+     * @var bool
+     */
+    private $evaluate = true;
+
+    /**
      * Sets up a new config object. Each argument is imported in the order it is specified. This means, latter
      * arguments overwrite former arguments if there are any conflicts.
      * 
@@ -44,8 +51,6 @@ class Config implements ConfigInterface
      */
     public function __construct()
     {
-        $this->fromStringFilter = new FromStringFilter;
-
         foreach (func_get_args() as $config) {
             $this->import($config);
         }
@@ -112,17 +117,24 @@ class Config implements ConfigInterface
     {
         $this->checkReadonly();
 
-        $name  = $name ?: count($this->config);
-        $parts = $this->parseOptionName($name);
-        
-        if ($parts['nested']) {
-            $parts['config']->offsetSet($parts['name'], $value);
-        } else {
-            if (is_array($value) || is_object($value)) {
-                $value = new static($value);
-            }
+        if ($value instanceof ConfigInterface) {
+            $value->setParent($this);
+        } elseif (is_array($value) || is_object($value)) {
+            $value = new static($value);
+        }
 
-            $this->config[$name] = $value;
+        extract($this->parseOptionName($name));
+
+        $config = $this;
+
+        foreach ($first as $name) {
+            $config = $config->createIfNotExists($name);
+        }
+
+        if ($first) {
+            $config->offsetSet($last, $value);
+        } else {
+            $this->config[$last] = $value;
         }
 
         return $this;
@@ -137,19 +149,15 @@ class Config implements ConfigInterface
      */
     public function offsetGet($name)
     {
-        $parts = $this->parseOptionName($name);
-
-        if ($parts['nested']) {
-            $value = $parts['config']->offsetGet($parts['name']);
-        } elseif (array_key_exists($name, $this->config)) {
-            $value = $this->config[$name];
-        } else {
-            $value = $this->config[$name] = new static(['parent' => $this]);
+        if (array_key_exists($name, $this->config)) {
+            return $this->parseOptionValue($this->config[$name]);
         }
 
-        $value = $this->parseOptionValue($value);
+        extract($this->parseOptionName($name));
 
-        return $value;
+        if ($config) {
+            return $this->parseOptionValue($config->offsetGet($last));
+        }
     }
 
     /**
@@ -161,8 +169,15 @@ class Config implements ConfigInterface
      */
     public function offsetExists($name)
     {
-        $parts = $this->parseOptionName($name);
-        return $parts['nested'] ? $parts['config']->offsetExists($parts['name']) : isset($this->config[$name]);
+        if (array_key_exists($name, $this->config)) {
+            return true;
+        }
+
+        extract($this->parseOptionName($name));
+
+        if ($config) {
+            return $config->offsetExists($last);
+        }
     }
 
     /**
@@ -176,12 +191,14 @@ class Config implements ConfigInterface
     {
         $this->checkReadonly();
 
-        $parts = $this->parseOptionName($name);
-
-        if ($parts['nested']) {
-            $parts['config']->offsetUnset($parts['name']);
-        } elseif (isset($this->config[$name])) {
+        if (array_key_exists($name, $this->config)) {
             unset($this->config[$name]);
+        }
+
+        extract($this->parseOptionName($name));
+
+        if ($config) {
+            $config->offsetUnset($last);
         }
 
         return $this;
@@ -217,7 +234,7 @@ class Config implements ConfigInterface
     public function import($config)
     {
         $this->checkReadonly();
-        
+
         if (is_string($config)) {
             $adapter = pathinfo($config, PATHINFO_EXTENSION);
             $adapter = 'Europa\Config\Adapter\\' . ucfirst($adapter);
@@ -252,11 +269,7 @@ class Config implements ConfigInterface
         $config = [];
         
         foreach ($this->config as $name => $value) {
-            if ($name === 'parent') {
-                continue;
-            }
-
-            if ($value instanceof static) {
+            if ($value instanceof ConfigInterface) {
                 $config[$name] = $value->export();
             } else {
                 $config[$name] = $this->offsetGet($name);
@@ -264,6 +277,62 @@ class Config implements ConfigInterface
         }
 
         return $config;
+    }
+
+    /**
+     * Sets the parent of this object.
+     * 
+     * @param ConfigInterface $config The config parent.
+     * 
+     * @return Config
+     */
+    public function setParent(ConfigInterface $config)
+    {
+        $this->parent = $config;
+        return $this;
+    }
+
+    /**
+     * Returns the parent configuration.
+     * 
+     * @return ConfigInterface | null
+     */
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    /**
+     * Returns the root config object which can be the current object.
+     * 
+     * @return ConfigInterface | null
+     */
+    public function getRootParent()
+    {
+        $config = $this->getParent();
+
+        while ($parent = $config->getParent()) {
+            $config = $parent;
+        }
+
+        return $config;
+    }
+
+    /**
+     * Creates the specified key if it doesn't exist with a new config object and returns it.
+     * 
+     * @param string $name The key name.
+     * 
+     * @return ConfigInterface
+     */
+    public function createIfNotExists($name)
+    {
+        if (!isset($this->config[$name]) || !$this->config[$name] instanceof ConfigInterface) {
+            $this->config[$name] = new static;
+            $this->config[$name]->setParent($this);
+        }
+
+        return $this->config[$name];
     }
 
     /**
@@ -295,7 +364,20 @@ class Config implements ConfigInterface
      */
     public function readonly($switch = true)
     {
-        $this->readonly = $switch ? true : false;
+        $this->readonly = $switch ?: false;
+        return $this;
+    }
+
+    /**
+     * Whether or not we should evaluate values.
+     * 
+     * @param bool $switch `True` evaluates values. `False` doesn't.
+     * 
+     * @return Config
+     */
+    public function evaluate($switch = true)
+    {
+        $this->evaluate = $switch ?: false;
         return $this;
     }
 
@@ -308,31 +390,33 @@ class Config implements ConfigInterface
      */
     private function parseOptionName($name)
     {
-        if (strpos($name, '.') !== false) {
-            $names  = explode('.', $name);
-            $name   = array_pop($names);
-            $config = $this;
+        $all    = explode('.', $name);
+        $first  = $all;
+        $last   = array_pop($first);
+        $config = $this;
 
-            foreach ($names as $part) {
-                $config = $config->offsetGet($part);
-
-                if (!$config instanceof ConfigInterface) {
-                    Exception::toss('Dot-notated configuration value part "%s" of "%s" must be a configuration object.', $part, implode('.', $names) . '.' . $name);
-                }
+        foreach ($first as $name) {
+            if ($config instanceof ConfigInterface) {
+                $config = $config->offsetGet($name);
+            } else {
+                break;
             }
-
-            return [
-                'name'   => $name,
-                'config' => $config,
-                'nested' => true
-            ];
         }
 
-        return ['nested' => false];
+        if ($config === $this || !$config instanceof ConfigInterface) {
+            $config = false;
+        }
+
+        return [
+            'first'  => $first,
+            'last'   => $last,
+            'all'    => $all,
+            'config' => $config
+        ];
     }
 
     /**
-     * Parses the option value and allows the referencing of other options.
+     * Evaluates the value as a PHP string.
      * 
      * @param mixed $value The value to parse.
      * 
@@ -340,37 +424,10 @@ class Config implements ConfigInterface
      */
     private function parseOptionValue($value)
     {
-        // If the value is a string and it has at least one character.
-        if (is_string($value) && isset($value[0])) {
-            // The "=" token indicates that the value should be evaluated using other config variables.
-            if ($value[0] === '=') {
-                // Find each placeholder
-                preg_match_all('/\{([^{]+)\}/', $value, $holders);
-
-                // Determines whether or not we should cast the resulting value.
-                $isString = false;
-
-                // Replace each placeholder with the found config variable.
-                foreach ($holders[1] as $holder) {
-                    $holderValue = $this->offsetGet($holder);
-                    $value       = str_replace('{' . $holder . '}', $holderValue, $value);
-
-                    // If we haven't flagged it as a string and the holder value is a string, flag it, so that it is not casted.
-                    if (!$isString && is_string($holderValue)) {
-                        $isString = true;
-                    }
-                }
-
-                // Remove the evaluation token.
-                $value = substr($value, 1);
-
-                // If the value was evaluated with all non-string characters, we cast it.
-                if (!$isString) {
-                    $value = $this->fromStringFilter->__invoke($value);
-                }
-            } elseif ($value[0] === '\\' && $value[1] === '=') {
-                $value = substr($value, 1);
-            }
+        if ($this->evaluate && is_string($value)) {
+            $value = str_replace('"', '\"', $value);
+            $value = str_replace('\\', '\\\\', $value);
+            $value = eval('return "' . $value . '";');
         }
 
         return $value;

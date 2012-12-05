@@ -67,4 +67,27 @@ interface ConfigInterface extends ArrayAccess, Countable, IteratorAggregate
      * @return array
      */
     public function export();
+
+    /**
+     * Sets the parent of this object.
+     * 
+     * @param ConfigInterface $config The config parent.
+     * 
+     * @return Config
+     */
+    public function setParent(ConfigInterface $config);
+
+    /**
+     * Returns the parent configuration.
+     * 
+     * @return ConfigInterface | null
+     */
+    public function getParent();
+
+    /**
+     * Returns the root config object which can be the current object.
+     * 
+     * @return ConfigInterface | null
+     */
+    public function getRootParent();
 }
