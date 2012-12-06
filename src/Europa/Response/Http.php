@@ -305,13 +305,17 @@ class Http extends ResponseAbstract implements HttpInterface
      */
     public function send()
     {
+        $body = $this->getBody();
+
         http_response_code($this->status);
+
+        $this->headers['Content-Length'] = strlen($body);
         
         foreach ($this->headers as $name => $value) {
             header($name . ': ' . $value);
         }
         
-        echo $this->getBody();
+        echo $body;
     }
     
     /**
