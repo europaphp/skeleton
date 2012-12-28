@@ -1,21 +1,21 @@
 {
-    "hash": "9a2dd928ea304372dec7520750e1379e",
+    "hash": "26c67645a5571b99e069c31ddcb52ded",
     "packages": [
 
     ],
     "packages-dev": [
         {
             "name": "treshugart/testes",
-            "version": "1.0.4",
+            "version": "1.0.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/treshugart/Testes.git",
-                "reference": "1.0.4"
+                "reference": "5326c38694f5d709b1e09cb45132d96674453ab2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/treshugart/Testes/archive/1.0.4.zip",
-                "reference": "1.0.4",
+                "url": "https://github.com/treshugart/Testes/archive/5326c38694f5d709b1e09cb45132d96674453ab2.zip",
+                "reference": "5326c38694f5d709b1e09cb45132d96674453ab2",
                 "shasum": ""
             },
             "require": {
@@ -24,14 +24,15 @@
             "require-dev": {
                 "ext-xdebug": "*"
             },
-            "time": "2012-11-22 05:50:38",
+            "time": "2012-12-28 20:59:21",
             "type": "library",
-            "installation-source": "dist",
+            "installation-source": "source",
             "autoload": {
                 "psr-0": {
                     "Testes": "src"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -61,7 +62,7 @@
 
     ],
     "minimum-stability": "stable",
-    "stability-flags": [
-
-    ]
+    "stability-flags": {
+        "treshugart/testes": 20
+    }
 }

@@ -16,9 +16,6 @@ class LoaderTest extends UnitAbstract
         $this->loader->register();
         $this->loader->setLocator(new LocatorArray);
         $this->loader->getLocator()->add(new Locator);
-        $this->loader->getLocator()->add(function($file) {
-            return realpath(dirname(__FILE__) . '/../../' . $file . '.php');
-        });
     }
     
     public function testRegisterAutoload()

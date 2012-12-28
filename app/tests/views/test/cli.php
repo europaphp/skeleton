@@ -1,46 +1,71 @@
-<?php $this->extend('cli'); ?>
+<?php
 
-<?php echo $this->helper('cli')->color('Coverage:', 'yellow'); ?> <?php echo $this->helper('cli')->color($this->context('percent') . '%', $this->context('percent') >= 50 ? 'green' : 'red/white'); ?>
+$percent  = $this->context('percent');
+$report   = $this->context('report');
+$suite    = $this->context('suite');
+$untested = $this->context('untested');
 
+echo PHP_EOL . sprintf('Ran %d test%s.', count($suite), count($suite) === 1 ? '' : 's') . PHP_EOL;
+echo PHP_EOL . 'Coverage: ' . $report->getPercentTested() . '%' . PHP_EOL . PHP_EOL;
 
-<?php if ($this->context('suite')->getAssertions()->isPassed() && !$this->context('suite')->getExceptions()->count()): ?>
-<?php echo $this->helper('cli')->color('All tests passed!', 'green'); ?>
-<?php else: ?>
-<?php echo $this->helper('cli')->color('Failed', 'red/white'); ?>
+if ($suite->isPassed()) {
+    echo $this->helper('cli')->color('Passed!', 'green');
+} else {
+    echo $this->helper('cli')->color('Failed!', 'red/white');
+}
 
-<?php echo $this->helper('cli')->color('------', 'red/white'); ?>
+echo PHP_EOL . PHP_EOL;
 
-<?php foreach ($this->context('suite')->getAssertions()->getFailed() as $ass): ?>
-  <?php echo $this->helper('cli')->color($ass->getTestClass(), 'red/white'); ?>:<?php echo $this->helper('cli')->color($ass->getTestLine(), 'yellow'); ?> <?php echo $ass->getMessage(); ?>
+if (count($assertions = $suite->getAssertions()->getFailed())) {
+    echo 'Assertions' . PHP_EOL;
+    echo '----------' . PHP_EOL;
 
-<?php endforeach; ?>
-<?php endif; ?>
+    foreach ($assertions as $ass) {
+        echo '  ' . $ass->getTestClass() . ':' . $ass->getTestLine() . ' ' . $ass->getMessage() . PHP_EOL;
+    }
 
-<?php if ($this->context('suite')->getExceptions()->count()): ?>
-Exceptions
-----------
-<?php foreach ($this->context('suite')->getExceptions() as $e): ?>
-  <?php echo $this->helper('cli')->color($e->getFile(), 'red/white'); ?>:<?php echo $this->helper('cli')->color($e->getLine(), 'yellow'); ?> <?php echo $e->getMessage(); ?>
+    echo PHP_EOL;
+}
 
-  <?php foreach ($e->getTrace() as $trace): ?>
-  <?php echo (isset($trace['class']) ? $this->helper('cli')->color($trace['class'] . $trace['type'], 'cyan') : '') . $this->helper('cli')->color($trace['function'], 'cyan'); ?> <?php echo $this->helper('cli')->color('in', 'green'); ?> <?php echo isset($trace['file']) ? $this->helper('cli')->color(str_replace(realpath(__DIR__ . '/../../..'), '', $trace['file']) . ':' . $trace['line'], 'yellow') : $this->helper('cli')->color('unknown', 'red/white'); ?>
+if (count($exceptions = $suite->getExceptions())) {
+    echo 'Exceptions' . PHP_EOL;
+    echo '----------' . PHP_EOL;
 
-  <?php endforeach; ?>
+    foreach ($exceptions as $exc) {
+        echo '  ' . $exc->getFile() . ':' . $exc->getLine() . ' ' . $exc->getMessage() . PHP_EOL;
+    }
 
-<?php endforeach; ?>
-<?php endif; ?>
-<?php if ($this->context('untested') && $this->context('report')->getUntestedFileCount()): ?>
-Untested Files and Lines
-------------------------
-<?php foreach ($this->context('report')->getUntestedFiles() as $file): ?>
-<?php echo $this->helper('cli')->color($file, 'cyan'); ?>
+    echo PHP_EOL;
+}
 
-  <?php foreach ($file->getUntestedLines() as $line): ?>
-  <?php echo $this->helper('cli')->color($line->getNumber(), 'yellow'); ?>: <?php echo $line; ?>
-  <?php endforeach; ?>
+if (count($benchmarks = $suite->getBenchmarks())) {
+    echo 'Benchmarks' . PHP_EOL;
+    echo '----------' . PHP_EOL;
 
-<?php endforeach; ?>
-<?php endif; ?>
-<?php if ($this->context('suite')->getAssertions()->isFailed() || $this->context('suite')->getExceptions()->count()): ?>
-<?php exit(1); ?>
-<?php endif; ?>
+    foreach ($benchmarks as $name => $bench) {
+        echo '  ' . $name . ': ' . round($bench->getTime(), 3) . PHP_EOL;
+    }
+
+    echo PHP_EOL;
+}
+
+if ($untested && $report->getUntestedFileCount()) {
+    echo 'Untested Files and Lines' . PHP_EOL;
+    echo '------------------------' . PHP_EOL;
+
+    foreach ($report->getUntestedFiles() as $file) {
+        echo PHP_EOL . $this->helper('cli')->color($file, 'cyan');
+
+        foreach ($file->getUntestedLines() as $line) {
+            echo PHP_EOL . '  ';
+            echo $this->helper('cli')->color($line->getNumber() . ': ', 'yellow');
+            echo rtrim($line);
+        }
+    }
+
+    echo PHP_EOL . PHP_EOL;
+}
+
+if ($suite->isFailed()) {
+    exit(1);
+}
