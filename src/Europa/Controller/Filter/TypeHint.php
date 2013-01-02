@@ -6,26 +6,8 @@ use Europa\Controller\ControllerAbstract;
 use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
 
-/**
- * Ensure that type-hinted parameters are given a type.
- * 
- * @category   ControllerFilters
- * @package    Europa
- * @subpackage Controller
- * @author     Trey Shugart <treshugart@gmail.com>
- * @license    Copyright (c) 2011 Trey Shugart http://europaphp.org/license
- */
 class TypeHint
 {
-    /**
-     * Ensure that type-hinted parameters are given a type.
-     * 
-     * @param ControllerAbstract $controller The controller to filter.
-     * @param ClassReflector     $class      The class reflector.
-     * @param MethodReflector    $method     The method reflector.
-     * 
-     * @return void
-     */
     public function __invoke(ControllerAbstract $controller, $class, $method)
     {
         $request = $controller->request();

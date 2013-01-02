@@ -8,10 +8,5 @@ use IteratorAggregate;
 
 interface ManagerInterface extends ArrayAccess, Countable, IteratorAggregate
 {
-    /**
-     * Bootstraps all of the modules.
-     * 
-     * @return ModuleManagerInterface
-     */
     public function bootstrap();
 }

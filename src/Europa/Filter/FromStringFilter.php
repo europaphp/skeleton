@@ -2,23 +2,8 @@
 
 namespace Europa\Filter;
 
-/**
- * Converts the value from a string to a scalar data type.
- * 
- * @category Filters
- * @package  Europa
- * @author   Trey Shugart <treshugart@gmail.com>
- * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
- */
 class FromStringFilter
 {
-    /**
-     * Filters the value and returns the filtered value.
-     * 
-     * @param mixed $value The value to filter.
-     * 
-     * @return mixed
-     */
     public function __invoke($value)
     {
         if ($value === 'true') {

@@ -1,29 +1,28 @@
 <?php
 
 namespace Controller;
+use Europa\App\App;
 use Europa\Controller\ControllerAbstract;
 use Europa\Filter\CamelCaseSplitFilter;
 use Europa\Filter\ClassNameFilter;
 use Europa\Fs\Finder;
 use Europa\Reflection\ClassReflector;
 use LogicException;
+use SplFileInfo;
 
-/**
- * Generates help information.
- * 
- * @category Controllers
- * @package  Europa
- * @author   Trey Shugart <treshugart@gmail.com>
- * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
- */
 class Help extends ControllerAbstract
 {
+    private $config;
+
+    public function __construct()
+    {
+        $this->config = App::get()->getServiceContainer()->modules['help']->config();
+    }
+
     /**
-     * Shows the help.
+     * Shows the available commands or documentation for a specific command.
      * 
-     * @param string $command The command to show the help for. If not specified, the generic help is shown.
-     * 
-     * @return array
+     * @param string $command The command to show the help for. If not specified, this help is shown.
      */
     public function cli($command = null)
     {
@@ -33,123 +32,135 @@ class Help extends ControllerAbstract
         
         return $this->getAllCommands();
     }
-    
-    /**
-     * Returns the help information for the specified command.
-     *
-     * @return array
-     */
+
     private function getCommand($command)
     {
-        $filter = new ClassNameFilter;
-        $class  = $filter->__invoke($command);
-        $class  = __NAMESPACE__ . '\\' . $class;
+        $class  = $this->getClassFromCommand($command);
         $class  = new ClassReflector($class);
+        $params = $this->getCommandParams($command);
+        $params = $this->sortCommandParams($params);
+        
+        return [
+            'command'     => $command,
+            'description' => $class->getMethod($this->config['action'])->getDocBlock()->getDescription(),
+            'params'      => $params
+        ];
+    }
 
-        if ($class->hasMethod('cli')) {
-            $method = $class->getMethod('cli');
-        } elseif ($class->hasMethod('all')) {
-            $method = $class->getMethod('all');
+    private function getAllCommands()
+    {
+        $classes  = $this->getClassNames();
+        $classes  = $this->sortClassNames($classes);
+        $commands = $this->getCommands($classes);
+        
+        return [
+            'commands' => $commands
+        ];
+    }
+
+    private function getClassNames()
+    {
+        $finder = new Finder;
+        $finder->in(__DIR__ . '/../../../../' . $this->config['searchIn']);
+        $finder->is('/\.php$/');
+
+        $classes = [];
+
+        foreach ($finder as $file) {
+            $class = $this->formatClassNameFromFile($file);
+
+            if (!class_exists($class)) {
+                continue;
+            }
+            
+            $command = str_replace($this->config['namespace'], '', $class);
+            $command = str_replace(['\\', '_'], ' ', $command);
+            $command = strtolower($command);
+            $command = trim($command);
+            
+            $classes[$class] = $command;
+        }
+
+        return $classes;
+    }
+
+    private function sortClassNames(array $classes)
+    {
+        ksort($classes);
+        return $classes;
+    }
+
+    private function getCommands(array $classes)
+    {
+        $commands = [];
+
+        foreach ($classes as $class => $command) {
+            $class = new ClassReflector($class);
+            $name  = $class->getName();
+            
+            if ($class->hasMethod($this->config['action'])) {
+                $method = $class->getMethod($this->config['action']);
+            } else {
+                continue;
+            }
+
+            $commands[$command] = $method->getDocBlock()->getDescription();
+        }
+
+        return $commands;
+    }
+
+    private function getCommandParams($command)
+    {
+        $class = $this->getClassFromCommand($command);
+        $class = new ClassReflector($class);
+
+        if ($class->hasMethod($this->config['action'])) {
+            $method = $class->getMethod($this->config['action']);
         } else {
             throw new LogicException(sprintf('The command "%s" is not valid.', $command));
         }
 
-        $block   = $method->getDocBlock();
-        $params  = [];
-        $longest = 0;
-        
-        // gather parameter information
+        $block  = $method->getDocBlock();
+        $params = [];
+
         if ($block->hasTag('param')) {
             foreach ($block->getTags('param') as $param) {
-                $name    = $param->getName();
-                $nameLen = strlen($name);
-                
-                if ($nameLen > $longest) {
-                    $longest = $nameLen;
-                }
-                
-                $params[$name] = [
+                $params[$param->getName()] = [
                     'type'        => $param->getType(),
                     'description' => $param->getDescription()
                 ];
             }
         }
-        
-        // sort by name
-        ksort($params);
-        
-        // set padding for parameters
-        foreach ($params as $name => $param) {
-            $params[$name]['pad'] = $longest - strlen($name);
-        }
-        
-        return [
-            'command'     => $command,
-            'description' => $block->getDescription(),
-            'params'      => $params
-        ];
+
+        return $params;
     }
-    
-    /**
-     * Returns all available commands in alphabetical order.
-     * 
-     * @return array
-     */
-    private function getAllCommands()
+
+    private function sortCommandParams(array $params)
     {
-        $filter = new CamelCaseSplitFilter;
-        $finder = new Finder;
-        $finder->in(__DIR__);
-        $finder->is('/\.php$/');
-        
-        $classes = [];
-        $longest = 0;
-        
-        // format class names from each file name and sort them
-        foreach ($finder->getFsIterator() as $file) {
-            $class = $file->getFilename();
-            $class = str_replace(__DIR__, '', $file->getPath()) . '\\' . $class;
-            $class = str_replace(DIRECTORY_SEPARATOR, '\\', $class);
-            $class = trim($class, '\\');
-            
-            $classLen = strlen($class);
-            if ($longest < $classLen) {
-                $longest = $classLen;
-            }
-            
-            $command = str_replace('\\', ' ', $class);
-            $command = $filter->__invoke($command);
-            $command = implode('-', $command);
-            $command = str_replace(' -', ' ', $command);
-            $command = strtolower($command);
-            $command = trim($command, '-');
-            
-            $classes[$class] = $command;
-            
-            ksort($classes);
-        }
-        
-        // format the commands array for the view
-        foreach ($classes as $class => $command) {
-            $refl = __NAMESPACE__ . '\\' . $class;
-            $refl = new ClassReflector($refl);
-            $name = $refl->getName();
-            
-            // only show "cli" and "all" methods
-            if ($refl->hasMethod('cli')) {
-                $method = $refl->getMethod('cli');
-            } elseif ($refl->hasMethod('all')) {
-                $method = $refl->getMethod('all');
-            } else {
-                continue;
-            }
-            
-            $command            = str_pad($command, $longest, ' ', STR_PAD_LEFT);
-            $commands[$command] = $method->getDocBlock()->getDescription();;
-        }
-        
-        return [
-            'commands' => $commands
-        ];
+        ksort($params);
+        return $params;
+    }
+
+    private function getClassFromCommand($command)
+    {
+        $filter = new ClassNameFilter;
+        $class  = $filter->__invoke($command);
+        $class  = __NAMESPACE__ . '\\' . $class;
+
+        return $class;
+    }
+
+    private function formatClassNameFromFile(SplFileInfo $file)
+    {
+        $namespace = $this->config['namespace'];
+
+        $class = str_replace(DIRECTORY_SEPARATOR, '\\', $file->getRealpath());
+        $class = str_replace('.php', '', $class);
+        $class = explode("\\{$namespace}\\", $class, 2);
+        $class = "\\{$namespace}\\{$class[1]}";
+        $class = trim($class, '\\');
+
+        return $class;
     }
 }

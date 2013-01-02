@@ -3,42 +3,14 @@
 namespace Europa\Request;
 use Europa\Request\Uri;
 
-/**
- * The request class representing an HTTP request.
- * 
- * @category Request
- * @package  Europa
- * @author   Trey Shugart <treshugart@gmail.com>
- * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
- */
 class Http extends RequestAbstract implements HttpInterface
 {
-    /**
-     * The request headers.
-     * 
-     * @var array
-     */
     private $headers = array();
     
-    /**
-     * The URI object.
-     * 
-     * @var Uri
-     */
     private $uri;
     
-    /**
-     * The ip address of the client request.
-     * 
-     * @var string
-     */
     private $ip;
     
-    /**
-     * Sets any defaults that may need setting.
-     * 
-     * @return Http
-     */
     public function __construct()
     {
         $this->initDefaultUri();
@@ -48,37 +20,17 @@ class Http extends RequestAbstract implements HttpInterface
         $this->initDefaultIp();
     }
     
-    /**
-     * Converts the request to a string representation.
-     * 
-     * @return string
-     */
     public function __toString()
     {
         return strtoupper($this->getMethod()) . ' ' . $this->getUri()->getRequestPart() . $this->getUri()->getQueryPart();
     }
     
-    /**
-     * Sets a header.
-     * 
-     * @param string $name  The name of the header.
-     * @param mixed  $value The value of the header.
-     * 
-     * @return Http
-     */
     public function setHeader($name, $value)
     {
         $this->headers[$name] = $value;
         return $this;
     }
     
-    /**
-     * Returns the value of a single request header or null if not found.
-     * 
-     * @param string $name The name of the request header to retrieve.
-     * 
-     * @return string
-     */
     public function getHeader($name)
     {
         if ($this->hasHeader($name)) {
@@ -87,25 +39,11 @@ class Http extends RequestAbstract implements HttpInterface
         return null;
     }
     
-    /**
-     * Returns whether or not the specified header exists.
-     * 
-     * @param string $name The name of the header.
-     * 
-     * @return bool
-     */
     public function hasHeader($name)
     {
         return isset($this->headers[$name]);
     }
     
-    /**
-     * Removes the specified header.
-     * 
-     * @param string $name The name of the header.
-     * 
-     * @return Http
-     */
     public function removeHeader($name)
     {
         if ($this->hasHeader($name)) {
@@ -114,51 +52,23 @@ class Http extends RequestAbstract implements HttpInterface
         return $this;
     }
     
-    /**
-     * Bulk-sets headers.
-     * 
-     * @param array $headers The headers to set.
-     * 
-     * @return Http
-     */
     public function setHeaders(array $headers)
     {
         $this->headers = $headers;
         return $this;
     }
     
-    /**
-     * Returns all of the request headers as an array.
-     * 
-     * The header names are formatted to appear as normal, not all uppercase
-     * as in the $_SERVER super-global.
-     * 
-     * @return array
-     */
     public function getHeaders()
     {
         return $this->headers;
     }
     
-    /**
-     * Removes all headers.
-     * 
-     * @return Http
-     */
     public function removeHeaders()
     {
         $this->headers = array();
         return $this;
     }
     
-    /**
-     * Returns the first matched type.
-     * 
-     * @param array $types    The types to check.
-     * @param int   $maxIndex The maximum number of items to look at in order before returning false.
-     * 
-     * @return bool
-     */
     public function accepts($types, $max = null)
     {
         $accepts = $this->getAcceptedContentTypes();
@@ -175,24 +85,11 @@ class Http extends RequestAbstract implements HttpInterface
         return false;
     }
     
-    /**
-     * Sets the accepted content types.
-     * 
-     * @param array $types The types to accept.
-     * 
-     * @return Http
-     */
     public function setAcceptedContentTypes(array $types)
     {
         return $this->setHeader('Accept', implode(',', $types));
     }
     
-    /**
-     * Returns the content types specified in the Accept request header. Each
-     * value is trimmed for consistency, but no further formatting occurs.
-     * 
-     * @return array
-     */
     public function getAcceptedContentTypes()
     {
         $accept = $this->getHeader('Accept');
@@ -201,84 +98,44 @@ class Http extends RequestAbstract implements HttpInterface
         return $accept;
     }
     
-    /**
-     * Clears the accept header.
-     * 
-     * @return Http
-     */
     public function removeAcceptedContentTypes()
     {
         return $this->removeHeader('Accept');
     }
     
-    /**
-     * Sets the request URI.
-     * 
-     * @param Uri $uri The URI to set.
-     * 
-     * @return Http;
-     */
     public function setUri($uri)
     {
         $this->uri = new Uri($uri);
         return $this;
     }
     
-    /**
-     * Returns the request URI.
-     * 
-     * @return Uri
-     */
     public function getUri()
     {
         return $this->uri;
     }
     
-    /**
-     * Sets the ip address of the request.
-     */
     public function setIp($ip)
     {
         $this->ip = $ip;
         return $this;
     }
     
-    /**
-     * Returns the user's real IP address based on the available environment variables.
-     * 
-     * @return string
-     */
     public function getIp()
     {
         return $this->ip;
     }
     
-    /**
-     * Returns whether or not an XMLHTTPRequest was made.
-     * 
-     * @return bool
-     */
     public function isXmlHttp()
     {
         return isset($_SERVER['HTTP_X_REQUESTED_WITH'])
             && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
     
-    /**
-     * Initializes the default URI for the HTTP request.
-     * 
-     * @return Http
-     */
     private function initDefaultUri()
     {
         return $this->setUri(Uri::detect());
     }
     
-    /**
-     * Initializes the default parameters for the http request.
-     * 
-     * @return Http
-     */
     private function initDefaultParams()
     {
         if ($input = file_get_contents('php://input')) {
@@ -293,11 +150,6 @@ class Http extends RequestAbstract implements HttpInterface
         return $this;
     }
     
-    /**
-     * Initializes the default method for the http request.
-     * 
-     * @return Http
-     */
     private function initDefaultMethod()
     {
         $method = static::GET;
@@ -313,11 +165,6 @@ class Http extends RequestAbstract implements HttpInterface
         return $this;
     }
     
-    /**
-     * Initializes the default headers.
-     * 
-     * @return Http
-     */
     private function initDefaultHeaders()
     {
         foreach ($_SERVER as $name => $value) {
@@ -334,11 +181,6 @@ class Http extends RequestAbstract implements HttpInterface
         return $this;
     }
     
-    /**
-     * Initializes the default ip address.
-     * 
-     * @return Http
-     */
     private function initDefaultIp()
     {
         $ip = null;

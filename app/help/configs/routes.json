@@ -1,6 +1,6 @@
 {
     "help-cli": {
-        "match": "^help|\\?$",
+        "match": "^help$",
         "method": "cli",
         "params": {
             "controller": "help",

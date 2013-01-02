@@ -6,30 +6,10 @@ use IteratorAggregate;
 use LogicException;
 use RuntimeException;
 
-/**
- * An object that represents a single directory.
- * 
- * @category Directory
- * @package  Europa
- * @author   Trey Shugart <treshugart@gmail.com>
- * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
- */
 class Directory extends Item implements IteratorAggregate, Countable
 {
-    /**
-     * The default file mask.
-     * 
-     * @var int
-     */
     const MASK = 0777;
     
-    /**
-     * Opens the directory an constructs the parent info object.
-     * 
-     * @param string $path The path to open.
-     * 
-     * @return Directory
-     */
     public function __construct($path)
     {
         $path     = (string) $path;
@@ -46,31 +26,16 @@ class Directory extends Item implements IteratorAggregate, Countable
         }
     }
     
-    /**
-     * Outputs the pathname of the directory.
-     * 
-     * @return string
-     */
     public function __toString()
     {
         return $this->current()->getPathname();
     }
     
-    /**
-     * Returns the number of items in the current directory.
-     * 
-     * @return int
-     */
     public function count()
     {
         return $this->getIterator()->count();
     }
     
-    /**
-     * Returns a finder instance representing the current directory.
-     * 
-     * @return Finder
-     */
     public function getIterator()
     {
         $finder = new Finder;
@@ -78,14 +43,6 @@ class Directory extends Item implements IteratorAggregate, Countable
         return $finder;
     }
     
-    /**
-     * Merges the current directory to the destination directory and leaves the current directory alone.
-     * 
-     * @param Directory $destination   The destination directory.
-     * @param bool                 $fileOverwrite Whether or not to overwrite destination files.
-     * 
-     * @return Directory
-     */
     public function copy(Directory $destination, $fileOverwrite = true)
     {
         $self = $this->getPathname();
@@ -118,15 +75,6 @@ class Directory extends Item implements IteratorAggregate, Countable
         return $this;
     }
     
-    /**
-     * Moves the current directory to the destination directory, deletes the
-     * current directory and returns the destination.
-     * 
-     * @param Directory $destination   The destination directory.
-     * @param bool                 $fileOverwrite Whether or not to overwrite destination files.
-     * 
-     * @return Directory
-     */
     public function move(Directory $destination, $fileOverwrite = true)
     {
         $this->copy($destination, $fileOverwrite);
@@ -134,13 +82,6 @@ class Directory extends Item implements IteratorAggregate, Countable
         return $destination;
     }
     
-    /**
-     * Renames the current directory and returns it.
-     * 
-     * @param string $newName The new name of the directory.
-     * 
-     * @return Directory
-     */
     public function rename($newName)
     {
         $oldPath = $this->getPathname();
@@ -151,12 +92,6 @@ class Directory extends Item implements IteratorAggregate, Countable
         return self::open($newPath);
     }
     
-    /**
-     * Deletes the current directory and all of it's contents. Throws an exception if the directory couldn't be
-     * removed.
-     * 
-     * @return void
-     */
     public function delete()
     {
         // first empty the directory
@@ -168,11 +103,6 @@ class Directory extends Item implements IteratorAggregate, Countable
         }
     }
     
-    /**
-     * Empties the current directory.
-     * 
-     * @return Directory
-     */
     public function clear()
     {
         foreach ($this->getIterator() as $item) {
@@ -181,11 +111,6 @@ class Directory extends Item implements IteratorAggregate, Countable
         return $this;
     }
     
-    /**
-     * Returns the size taken up by the folder in bytes.
-     * 
-     * @return int
-     */
     public function size()
     {
         $size = 0;
@@ -195,24 +120,11 @@ class Directory extends Item implements IteratorAggregate, Countable
         return $size;
     }
     
-    /**
-     * Returns whether or not the current directory is empty.
-     * 
-     * @return bool
-     */
     public function isEmpty()
     {
         return $this->getIterator()->count() === 0;
     }
     
-    /**
-     * Searches for matching text inside each file using the pattern and returns each file containing matching text in
-     * a flat array.
-     * 
-     * @param string $regex The pattern to match.
-     * 
-     * @return array
-     */
     public function searchIn($regex)
     {
         return $this->getIterator()->filter(function($item, $regex) {
@@ -220,15 +132,6 @@ class Directory extends Item implements IteratorAggregate, Countable
         }, array($regex));
     }
     
-    /**
-     * Searches in each file for the matching pattern and replaces it with the replacement pattern. Returns an array
-     * file/count if matching files were found or false if no matching files were found.
-     * 
-     * @param string $regex       The pattern to match.
-     * @param string $replacement The replacement pattern.
-     * 
-     * @return array
-     */
     public function searchAndReplace($regex, $replacement)
     {
         $items = array();
@@ -241,13 +144,6 @@ class Directory extends Item implements IteratorAggregate, Countable
         return $items;
     }
     
-    /**
-     * Opens the specified directory. An exception is thrown if the directory doesn't exist.
-     * 
-     * @param string $path The path to the directory.
-     * 
-     * @return Directory
-     */
     public static function open($path)
     {
         if (!is_dir($path)) {
@@ -256,15 +152,6 @@ class Directory extends Item implements IteratorAggregate, Countable
         return new static($path);
     }
     
-    /**
-     * Creates the specified directory using the specified mask. An exception is thrown if the directory already
-     * exists.
-     * 
-     * @param string $path The path to the directory.
-     * @param int    $mask The octal mask of the directory.
-     * 
-     * @return Directory
-     */
     public static function create($path, $mask = self::MASK)
     {
         if (is_dir($path)) {
@@ -282,14 +169,6 @@ class Directory extends Item implements IteratorAggregate, Countable
         return static::open($path);
     }
     
-    /**
-     * If the directory does not exist it is created and returned. Otherwise it is opened and returned.
-     * 
-     * @param string $path The path to the directory.
-     * @param int    $mask The octal mask of the directory.
-     * 
-     * @return Directory
-     */
     public static function createIfNotExists($path, $mask = self::MASK)
     {
         if (is_dir($path)) {
@@ -298,14 +177,6 @@ class Directory extends Item implements IteratorAggregate, Countable
         return static::create($path, $mask);
     }
     
-    /**
-     * Creates the specified directory. If the directory already exists, it is overwritten by the new directory.
-     * 
-     * @param string $path The path to the directory.
-     * @param int    $mask The octal mask of the directory.
-     * 
-     * @return Directory
-     */
     public static function overwrite($path, $mask = self::MASK)
     {
         if (is_dir($path)) {

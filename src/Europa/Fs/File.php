@@ -4,73 +4,31 @@ namespace Europa\Fs;
 use LogicException;
 use RuntimeException;
 
-/**
- * An object that represents a single file.
- * 
- * @category Directory
- * @package  Europa
- * @author   Trey Shugart <treshugart@gmail.com>
- * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
- */
 class File extends Item
 {
-    /**
-     * The default file mask.
-     * 
-     * @var int
-     */
     const MASK = 0777;
     
-    /**
-     * Returns the file contents instead of the file path.
-     * 
-     * @return string
-     */
     public function __toString()
     {
         return $this->getContents();
     }
     
-    /**
-     * Sets the contents of the file.
-     * 
-     * @param string $contents The contents to set to the file.
-     * 
-     * @return File
-     */
     public function setContents($contents)
     {
         file_put_contents($this->getPathname(), $contents);
         return static::open($this->getPathname());
     }
     
-    /**
-     * Retrieves the contents of the file.
-     * 
-     * @return string
-     */
     public function getContents()
     {
         return file_get_contents($this->getPathname());
     }
     
-    /**
-     * Chunks the current file into base64 encoded chunks and returns them as an array.
-     * 
-     * @param int $maxSize The maximum size for each block.
-     * 
-     * @return array
-     */
     public function chunk($maxSize = 1024)
     {
         return str_split(file_get_contents($this->getPathname()), $maxSize);
     }
     
-    /**
-     * Deletes the current file. Throws an exception if the file couldn't be deleted.
-     * 
-     * @return void
-     */
     public function delete()
     {
         if (!@unlink($this->getPathname())) {
@@ -81,14 +39,6 @@ class File extends Item
         return $this;
     }
     
-    /**
-     * Copies the file to the destination directory.
-     * 
-     * @param Directory $destination The destination directory.
-     * @param bool      $overwrite   Whether or not to overwrite the destination file if it exists.
-     * 
-     * @return File
-     */
     public function copy(Directory $destination, $overwrite = true)
     {
         $source      = $this->getPathname();
@@ -107,14 +57,6 @@ class File extends Item
         return new static($destination);
     }
     
-    /**
-     * Moves the current file to the specified directory.
-     * 
-     * @param Directory $destination The destination directory.
-     * @param bool      $overwrite   Whether or not to overwrite the destination file if it exists.
-     * 
-     * @return File
-     */
     public function move(Directory $destination, $overwrite = true)
     {
         $destination = $this->copy($destination, $overwrite);
@@ -122,13 +64,6 @@ class File extends Item
         return $destination;
     }
     
-    /**
-     * Renames the current file to the new file and returns the new file.
-     * 
-     * @param string $newName The name to rename the current file to.
-     * 
-     * @return File
-     */
     public function rename($newPath)
     {
         $oldPath = $this->getPathname();
@@ -140,26 +75,11 @@ class File extends Item
         return new static($newPath);
     }
     
-    /**
-     * Returns whether or not the current file exists in the specified direcory.
-     * 
-     * @param Directory $dir The directory to check in.
-     * 
-     * @return bool
-     */
     public function existsIn(Directory $dir)
     {
         return $dir->hasFile($this);
     }
     
-    /**
-     * Searches the current file for the matching pattern and returns the matches. The index is the line the match was
-     * found on and the value is the array of matches.
-     * 
-     * @param string $regex The pattern to match.
-     * 
-     * @return array
-     */
     public function find($regex)
     {
         preg_match_all($regex, file_get_contents($this->getPathname()), $matches, PREG_SET_ORDER);
@@ -178,15 +98,6 @@ class File extends Item
         return [];
     }
     
-    /**
-     * Searches the current file for the matching pattern and replaces it with
-     * the replacement and returns the number of items that were replaced.
-     * 
-     * @param string $regex       The pattern to match.
-     * @param string $replacement The replacement pattern.
-     * 
-     * @return int
-     */
     public function findAndReplace($regex, $replacement)
     {
         $pathname = $this->getPathname();
@@ -196,46 +107,21 @@ class File extends Item
         return $count;
     }
     
-    /**
-     * Returns whether or not the file contains the specified pattern.
-     * 
-     * @param string $pattern The pattern to match.
-     * 
-     * @return bool
-     */
     public function contains($pattern)
     {
         return count($this->find($pattern)) > 0;
     }
 
-    /**
-     * Returns the file name without extension.
-     * 
-     * @return string
-     */
     public function getFilename()
     {
         return $this->getInfo('filename');
     }
 
-    /**
-     * Extensions are only available in PHP 5.3.6. This is a workaround for that.
-     * 
-     * @return string
-     */
     public function getExtension()
     {
         return $this->getInfo('extension');
     }
 
-    /**
-     * Returns information about the particular file. If a key is specified, it returns only that information. If the
-     * information does not exist, it returns false.
-     * 
-     * @param string $key The information to retrieve from the file.
-     * 
-     * @return mixed
-     */
     public function getInfo($key = null)
     {
         $info = pathinfo($this->getRealpath());
@@ -249,13 +135,6 @@ class File extends Item
         return $info;
     }
     
-    /**
-     * Opens the specified file. If the file doesn't exist an exception is thrown.
-     * 
-     * @param string $file The file to open.
-     * 
-     * @return Directory
-     */
     public static function open($file)
     {
         if (!is_file($file)) {
@@ -264,14 +143,6 @@ class File extends Item
         return new static($file);
     }
     
-    /**
-     * Creates the specified file. If the file already exists, an exception is thrown.
-     * 
-     * @param string $file The file to create.
-     * @param int    $mask The octal mask of the file.
-     * 
-     * @return File
-     */
     public static function create($file, $mask = self::MASK)
     {
         // the file must not exist
@@ -297,14 +168,6 @@ class File extends Item
         return static::open($file);
     }
     
-    /**
-     * Creates the file if it doesn't exist and opens it if it does.
-     * 
-     * @param string $file The file to overwrite.
-     * @param int    $mask The octal mask of the file.
-     * 
-     * @return File
-     */
     public static function createIfNotExists($file, $mask = self::MASK)
     {
         if (is_file($path)) {
@@ -313,14 +176,6 @@ class File extends Item
         return static::create($path, $mask);
     }
     
-    /**
-     * Overwrites the specified file.
-     * 
-     * @param string $file The file to overwrite.
-     * @param int    $mask The octal mask of the file.
-     * 
-     * @return File
-     */
     public static function overwrite($file, $mask = self::MASK)
     {
         if (is_file($file)) {

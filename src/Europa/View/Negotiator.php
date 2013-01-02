@@ -7,11 +7,6 @@ use Europa\Request\RequestInterface;
 
 class Negotiator
 {
-    /**
-     * Maps a request content type to the method that returns its view.
-     * 
-     * @var array
-     */
     private $config = [
         'jsonpParam' => 'callback',
         'suffixMap' => [
@@ -25,33 +20,14 @@ class Negotiator
         ]
     ];
 
-    /**
-     * The filter that is used to return the appropriate view script using the supplied request.
-     * 
-     * @var callable
-     */
     private $viewScriptFilter;
 
-    /**
-     * Sets up a new negotiator.
-     * 
-     * @var mixed $config The negotiator configuration.
-     * 
-     * @return Negotiator
-     */
     public function __construct($config = [])
     {
         $this->config = new Config($this->config, $config);
         $this->viewScriptFilter = [$this, 'viewScriptFilter'];
     }
 
-    /**
-     * Decides what type of view to return based on the specified request.
-     * 
-     * @param RequestInterface $request The request to use.
-     * 
-     * @return ViewInterface
-     */
     public function __invoke(RequestInterface $request)
     {
         $view = null;
@@ -81,13 +57,6 @@ class Negotiator
         return $view;
     }
 
-    /**
-     * Returns a `Json` or `Jsonp` view.
-     * 
-     * @param RequestInterface $request The request to use.
-     * 
-     * @return Json | Jsonp
-     */
     private function resolveJson($request)
     {
         if ($callback = $request->getParam($this->config->jsonpParam)) {
@@ -97,25 +66,11 @@ class Negotiator
         return new Json;
     }
 
-    /**
-     * Returns the `Php` view.
-     * 
-     * @param RequestInterface $request The request to use.
-     * 
-     * @return Php
-     */
     private function resolvePhp($request)
     {
         return new Php($this->config->phpView);
     }
 
-    /**
-     * Returns the `Xml` view.
-     * 
-     * @param RequestInterface $request The request to use.
-     * 
-     * @return Xml
-     */
     private function resolveXml($request)
     {
         return new Xml;

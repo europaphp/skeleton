@@ -9,21 +9,8 @@ use Europa\Filter\UpperCamelCaseFilter;
 use Europa\Router\Router;
 use Europa\Fs\Locator;
 
-/**
- * Handles the management of a single module.
- * 
- * @category App
- * @package  Europa
- * @author   Trey Shugart <treshugart@gmail.com>
- * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
- */
 class Module implements ArrayAccess
 {
-    /**
-     * The module configuration.
-     * 
-     * @var array
-     */
     private $classConfig = [
         'config'             => 'configs/config.json',
         'routes'             => 'configs/routes.json',
@@ -37,42 +24,14 @@ class Module implements ArrayAccess
         'bootstrapperSuffix' => ''
     ];
 
-    /**
-     * The module config.
-     * 
-     * @var ConfigInterface
-     */
     private $moduleConfig;
 
-    /**
-     * The module name.
-     * 
-     * @var string
-     */
     private $name;
 
-    /**
-     * The module installation path.
-     * 
-     * @var string
-     */
     private $path;
 
-    /**
-     * List of required modules.
-     * 
-     * @var array
-     */
     private $required = [];
 
-    /**
-     * Sets up a new module.
-     * 
-     * @param string $path   The path to the module installation directory.
-     * @param array  $config The module component configuration.
-     * 
-     * @return Module
-     */
     public function __construct($path, $config = [])
     {
         if (!$this->path = realpath($path)) {
@@ -93,13 +52,6 @@ class Module implements ArrayAccess
         }
     }
 
-    /**
-     * Bootstraps the module.
-     * 
-     * @param ManagerInterface $manager The manager that is managing this module.
-     * 
-     * @return Module
-     */
     public function __invoke(ManagerInterface $manager)
     {
         // Ensure all requirements are met.
@@ -125,61 +77,33 @@ class Module implements ArrayAccess
         return $this;
     }
 
-    /**
-     * Allows runtime modification of module config.
-     * 
-     * @param string $name  The option name.
-     * @param mixed  $value The option value.
-     */
-    public function offsetSet($name, $value)
+    public function config()
     {
-        Exception::toss('Module configuration cannot be set after instantiation.');
+        return $this->moduleConfig;
     }
 
-    /**
-     * Returns a module config option.
-     * 
-     * @param string $name The option name.
-     * 
-     * @return mixed
-     */
+    public function offsetSet($name, $value)
+    {
+        $this->moduleConfig->offsetSet($name, $value);
+        return $this;
+    }
+
     public function offsetGet($name)
     {
         return $this->moduleConfig->offsetGet($name);
     }
 
-    /**
-     * Returns whether or not a module config option is set.
-     * 
-     * @param string $name The option name.
-     * 
-     * @return bool
-     */
     public function offsetExists($name)
     {
         return $this->moduleConfig->offsetExists($name);
     }
 
-    /**
-     * Removes a module config option.
-     * 
-     * @param string $name The option name.
-     * 
-     * @return mixed
-     */
     public function offsetUnset($name)
     {
         $this->moduleConfig->offsetUnset($name);
         return $this;
     }
 
-    /**
-     * Ensures that the module requirements are met.
-     * 
-     * @param ManagerInterface $manager The manager that is managing this module.
-     * 
-     * @return void
-     */
     private function validate(ManagerInterface $manager)
     {
         $this->validateModules($manager);
@@ -188,13 +112,6 @@ class Module implements ArrayAccess
         $this->validateFunctions();
     }
 
-    /**
-     * Ensures that all required modules exist in the manager.
-     * 
-     * @param ManagerInterface $manager The manager that is managing this module.
-     * 
-     * @return void
-     */
     private function validateModules(ManagerInterface $manager)
     {
         foreach ($this->classConfig->requiredModules as $module) {
@@ -204,11 +121,6 @@ class Module implements ArrayAccess
         }
     }
 
-    /**
-     * Ensures that all required extensions are loaded.
-     * 
-     * @return void
-     */
     private function validateExtensions()
     {
         foreach ($this->classConfig->requiredExtensions as $extension) {
@@ -218,11 +130,6 @@ class Module implements ArrayAccess
         }
     }
 
-    /**
-     * Ensures that all required classes are available.
-     * 
-     * @return void
-     */
     private function validateClasses()
     {
         foreach ($this->classConfig->requiredClasses as $class) {
@@ -232,11 +139,6 @@ class Module implements ArrayAccess
         }
     }
 
-    /**
-     * Ensures that all required functions are available.
-     * 
-     * @return void
-     */
     private function validateFunctions()
     {
         foreach ($this->classConfig->requiredFunctions as $function) {
@@ -246,13 +148,6 @@ class Module implements ArrayAccess
         }
     }
 
-    /**
-     * Updates the application routes.
-     * 
-     * @param Router $router The router to modify.
-     * 
-     * @return void
-     */
     private function applyRoutes(Router $router)
     {
         if ($options = realpath($this->path . '/' . $this->classConfig->routes)) {
@@ -260,13 +155,6 @@ class Module implements ArrayAccess
         }
     }
 
-    /**
-     * Updates the application class paths.
-     * 
-     * @param Locator $locator The locator to modify.
-     * 
-     * @return void
-     */
     private function applyClassPaths(Locator $locator)
     {
         $paths = new Locator($this->path);
@@ -274,13 +162,6 @@ class Module implements ArrayAccess
         $locator->addPaths($paths);
     }
 
-    /**
-     * Updates the application view paths.
-     * 
-     * @param Locator $locator The locator to modify.
-     * 
-     * @return void
-     */
     private function applyViewPaths(Locator $locator)
     {
         $paths = new Locator($this->path);
@@ -288,11 +169,6 @@ class Module implements ArrayAccess
         $locator->addPaths($paths);
     }
 
-    /**
-     * Returns the class name for a bootstrapper class corresponding to this module.
-     * 
-     * @return string
-     */
     private function getBootstrapperClassName()
     {
         return $this->classConfig->bootstrapperPrefix

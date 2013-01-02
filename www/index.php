@@ -9,4 +9,5 @@ $app = new Europa\App\App([
     'modules' => ['main', 'help', 'tests']
 ]);
 
+$app->save();
 $app();

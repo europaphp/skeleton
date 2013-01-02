@@ -5,13 +5,6 @@ use Europa\Exception\Exception;
 
 class CallableReflector
 {
-    /**
-     * Detects how the callable item should be reflected.
-     * 
-     * @param callable $callable The item to reflect.
-     * 
-     * @return FunctionReflector | MethodReflector | ClassReflector
-     */
     public static function detect(callable $callable)
     {
         if ($callable instanceof Closure || function_exists($callable)) {

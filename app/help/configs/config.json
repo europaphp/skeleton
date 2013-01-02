@@ -1,0 +1,5 @@
+{
+    "searchIn": "app/*/src/Controller",
+    "namespace": "Controller",
+    "action": "cli"
+}

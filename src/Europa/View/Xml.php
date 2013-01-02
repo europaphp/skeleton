@@ -4,21 +4,8 @@ namespace Europa\View;
 use Europa\Config\Config;
 use Europa\Filter\ToStringFilter;
 
-/**
- * A view class for rendering JSON data from bound parameters.
- * 
- * @category Views
- * @package  Europa
- * @author   Trey Shugart <treshugart@gmail.com>
- * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
- */
 class Xml
 {
-    /**
-     * Configuration array.
-     * 
-     * @var array
-     */
     private $config = [
         'declare'        => true,
         'encoding'       => 'UTF-8',
@@ -29,31 +16,14 @@ class Xml
         'version'        => '1.0'
     ];
 
-    /**
-     * The filter used to turn an item value into a string.
-     * 
-     * @var ToStringFilter
-     */
     private $toStringFilter;
     
-    /**
-     * Sets up the XML view renderer.
-     * 
-     * @param string $config The configuration array.
-     * 
-     * @return Xml
-     */
     public function __construct(array $config = [])
     {
         $this->config         = new Config($this->config, $config);
         $this->toStringFilter = new ToStringFilter;
     }
     
-    /**
-     * JSON encodes the parameters on the view and returns them.
-     * 
-     * @return string
-     */
     public function __invoke(array $context = [])
     {
         $str = '';
@@ -82,14 +52,6 @@ class Xml
         return trim($str);
     }
     
-    /**
-     * Renders a particular node.
-     * 
-     * @param string $name    The node name.
-     * @param string $content The node content.
-     * 
-     * @return string
-     */
     private function renderNode($name, $content, $level = 0)
     {
         $keys = $this->config->numericKeyName;
@@ -126,13 +88,6 @@ class Xml
         return $str;
     }
     
-    /**
-     * Indents the XML using the specified configuration settings.
-     * 
-     * @param int $level The level to indent to.
-     * 
-     * @return string
-     */
     private function indent($level)
     {
         $indent = $this->config->spaces;

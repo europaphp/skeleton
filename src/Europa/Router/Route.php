@@ -8,28 +8,10 @@ use Europa\Request\CliInterface;
 use Europa\Request\HttpInterface;
 use Europa\Request\RequestInterface;
 
-/**
- * Default request route implementation.
- * 
- * @category Router
- * @package  Europa
- * @author   Trey Shugart <treshugart@gmail.com>
- * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
- */
 class Route
 {
-    /**
-     * The default controller parameter name.
-     * 
-     * @var string
-     */
     const CONTROLLER = 'controller';
 
-    /**
-     * The default route configuration.
-     * 
-     * @var array
-     */
     private $config = [
         'match'             => '^$',
         'method'            => 'get',
@@ -39,13 +21,6 @@ class Route
         'controller.suffix' => ''
     ];
 
-    /**
-     * Constructs and configures a new route.
-     * 
-     * @param mixed $config The route configuration.
-     * 
-     * @return Route
-     */
     public function __construct($config)
     {
         $this->config = new Config($this->config, $config);
@@ -55,14 +30,6 @@ class Route
         }
     }
 
-    /**
-     * Routes the specified request if it matches the route.
-     * 
-     * @param string           $name    The route name. This is determined by the router invoking the route.
-     * @param RequestInterface $request The request to route. This is also determined by the router invoking the route.
-     * 
-     * @return false | Object
-     */
     public function __invoke($name, RequestInterface $request)
     {
         // Guilty until proven innocent.
@@ -98,13 +65,6 @@ class Route
         return new $controller;
     }
 
-    /**
-     * Allows the route to be reverse engineered. Good if you don't want to have to re-write your URLs if you update your routes.
-     * 
-     * @param array $params The parameters to format with.
-     * 
-     * @return string.
-     */
     public function format(array $params = [])
     {
         $uri    = $this->config->format;
@@ -117,13 +77,6 @@ class Route
         return $uri;
     }
 
-    /**
-     * Handles a request using the HTTP interface.
-     * 
-     * @param RequestInterface $request The request being matched.
-     * 
-     * @return array | false
-     */
     private function handleHttpRequest(HttpInterface $request)
     {
         if ($this->config->method !== $request->getMethod()) {
@@ -137,13 +90,6 @@ class Route
         return $matches;
     }
 
-    /**
-     * Handles a request using the CLI interface.
-     * 
-     * @param RequestInterface $request The request being matched.
-     * 
-     * @return array | false
-     */
     private function handleCliRequest(CliInterface $request)
     {
         if (!$this->config->match) {
@@ -161,13 +107,6 @@ class Route
         return $matches;
     }
 
-    /**
-     * Formats a controller name from the request if no "controller" configuration option is specified.
-     * 
-     * @param RequestInterface $request The request to resolve the controller from if none is specified in the config.
-     * 
-     * @return string
-     */
     private function resolveController(RequestInterface $request)
     {
         return (new ClassNameFilter($this->config->controller))->__invoke($request->getParam(self::CONTROLLER));

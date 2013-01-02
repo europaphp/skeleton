@@ -3,83 +3,34 @@
 namespace Europa\Reflection\DocTag;
 use UnexpectedValueException;
 
-/**
-* Represents a DocBlock return tag.
-*
-* @category Reflection
-* @package  Europa
-* @author   Trey Shugart <treshugart@gmail.com>
-* @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
-*/
 class ReturnTag extends GenericTag
 {
-    /**
-     * List of possible return type
-     *
-     * @var array
-     */
     private $types = array();
 
-    /**
-     * Description of the return value
-     * 
-     * @var string
-     */
     private $description;
 
-    /**
-     * Set the type of the return tag
-     * 
-     * @param array $types Type of the return tag
-     * 
-     * @return ReturnTag
-     */
     public function setTypes(array $types)
     {
         $this->types = $types;
         return $this;
     }
 
-    /**
-     * Get the type of the parameter
-     * 
-     * @return array
-     */
     public function getTypes()
     {
         return $this->types;
     }
 
-    /**
-     * Set the description of the parameter
-     * 
-     * @param string $description Description of the parameter
-     * 
-     * @return ReturnTag
-     */
     public function setDescription($description)
     {
         $this->description = $description;
         return $this;
     }
 
-    /**
-     * Return the description of the parameter
-     * 
-     * @return string
-     */
     public function getDescription()
     {
         return $this->description;
     }
     
-    /**
-     * Checks the $value and returns whether or not it is valid when compared to the method return types.
-     * 
-     * @param mixed $value The value to check against $types.
-     * 
-     * @return bool
-     */
     public function isValid($value)
     {
         // get the type of the value
@@ -120,13 +71,6 @@ class ReturnTag extends GenericTag
         return false;
     }
     
-    /**
-     * Parses the tag value.
-     * 
-     * @param string $value The tag value.
-     * 
-     * @return void
-     */
     public function parseValue($value)
     {
         // a doc string must be specified
@@ -149,11 +93,6 @@ class ReturnTag extends GenericTag
         }
     }
     
-    /**
-     * Compiles the tag value.
-     * 
-     * @return string
-     */
     public function compileValue()
     {
         return implode(' | ', $this->types) . ' ' . $this->description;

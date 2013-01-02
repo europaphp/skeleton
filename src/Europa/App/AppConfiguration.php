@@ -16,44 +16,18 @@ use Europa\View\Negotiator;
 use Europa\View\Php;
 use Europa\View\ViewScriptInterface;
 
-/**
- * The default Application service configuration.
- * 
- * @category App
- * @package  Europa
- * @author   Trey Shugart <treshugart@gmail.com>
- * @license  http://europaphp.org/license
- */
 class AppConfiguration extends ConfigurationAbstract implements AppConfigurationInterface
 {
-    /**
-     * Returns the application configuration object.
-     * 
-     * @param mixed $defaults The default configuration.
-     * @param mixed $config   The configuration to use.
-     * 
-     * @return Config
-     */
     public function config($defaults, $config)
     {
         return new Config($defaults, $config);
     }
-    
-    /**
-     * Returns the application event manager.
-     * 
-     * @return Europa\Event\Manager
-     */
+
     public function event()
     {
         return new EventManager;
     }
 
-    /**
-     * Returns the loader responsible for auto-loading class files.
-     * 
-     * @return Loader
-     */
     public function loader()
     {
         $loader = new Loader;
@@ -61,61 +35,31 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
         return $loader;
     }
 
-    /**
-     * Returns the locator responsible for finding class files.
-     * 
-     * @return Locator
-     */
     public function loaderLocator()
     {
         return new Locator;
     }
 
-    /**
-     * Returns the module manager.
-     * 
-     * @return Manager
-     */
     public function modules()
     {
         return new ModuleManager($this);
     }
 
-    /**
-     * Returns the request.
-     * 
-     * @return Europa\Request\RequestInterface
-     */
     public function request()
     {
         return RequestAbstract::detect();
     }
 
-    /**
-     * Returns the response.
-     * 
-     * @return Europa\Response\ResponseInterface
-     */
     public function response()
     {
         return ResponseAbstract::detect();
     }
 
-    /**
-     * Returns the router that routes the request to a controller.
-     * 
-     * @return Router
-     */
     public function router()
     {
         return new Router;
     }
 
-    /**
-     * Returns the view responsible for rendering the response.
-     * 
-     * @return Europa\View\ViewInterface
-     */
     public function view()
     {
         $view = $this->viewNegotiator($this->request);
@@ -123,7 +67,7 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
         if ($view instanceof ViewScriptInterface) {
             $view->setScriptLocator($this->viewLocator);
             $view->setScript($this->viewScript);
-            $view->setScriptSuffix($this->config->viewSuffix);
+            $view->setScriptSuffix($this->config['viewSuffix']);
         }
 
         if ($view instanceof Php) {
@@ -133,11 +77,6 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
         return $view;
     }
 
-    /**
-     * Returns the helper configuration.
-     * 
-     * @return HelperConfiguration
-     */
     public function viewHelperConfiguration()
     {
         $helperConfiguration = new HelperConfiguration;
@@ -145,11 +84,6 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
         return $helperConfiguration;
     }
 
-    /**
-     * Returns a container responsible for handling view helpers.
-     * 
-     * @return ServiceContainer
-     */
     public function viewHelpers()
     {
         $helpers = new ServiceContainer;
@@ -157,36 +91,22 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
         return $helpers;
     }
 
-    /**
-     * Returns the locator responsible for finding view scripts.
-     * 
-     * @return Locator
-     */
     public function viewLocator()
     {
         return new Locator;
     }
 
-    /**
-     * Returns the view negotiator responsible for determining what type of view to render.
-     * 
-     * @return Negotiator
-     */
     public function viewNegotiator()
     {
         return new Negotiator;
     }
 
     /**
-     * Formats the view script so it can be set on a `ViewScriptInterface` object.
-     * 
      * @transient
-     * 
-     * @return string
      */
     public function viewScript()
     {
-        $format = $this->config->viewScriptFormat;
+        $format = $this->config['viewScriptFormat'];
 
         if (is_callable($format)) {
             return $format($this->request);

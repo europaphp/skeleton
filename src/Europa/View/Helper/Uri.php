@@ -6,61 +6,25 @@ use Europa\Request\Uri as RequestUri;
 use Europa\Router\Route;
 use Europa\Router\Router;
 
-/**
- * A helper for formatting a passed in url.
- * 
- * @category Helpers
- * @package  Europa
- * @author   Trey Shugart <treshugart@gmail.com>
- * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
- */
 class Uri
 {
-    /**
-     * The router to use.
-     * 
-     * @var RouterInterface
-     */
     private $router;
     
-    /**
-     * Constructs the URI helper with the given router if specified.
-     * 
-     * @param RouterInterface $router The router to use.
-     * 
-     * @return Uri
-     */
     public function __construct(Router $router = null)
     {
         $this->router = $router;
     }
     
-    /**
-     * @see self::current()
-     */
     public function __toString()
     {
         return $this->current();
     }
     
-    /**
-     * Returns the current URI.
-     * 
-     * @return string
-     */
     public function current()
     {
         return RequestUri::detect()->__toString();
     }
     
-    /**
-     * Instantiates the url formatter and sets properties.
-     * 
-     * @param string $uri    The URI to normalise.
-     * @param array  $params Parameters to apply to the URI.
-     * 
-     * @return Uri
-     */
     public function format($uri = null, array $params = [])
     {
         $obj = RequestUri::detect();
@@ -74,26 +38,11 @@ class Uri
         return (string) $obj;
     }
 
-    /**
-     * Returns whether the specified URI is the current URI.
-     * 
-     * @param string $uri    The URI to check.
-     * @param array  $params Any params to use during the check.
-     * 
-     * @return bool
-     */
     public function is($uri, array $params = [])
     {
         return $this->current() === $this->format($uri, $params);
     }
     
-    /**
-     * Redirects to the specified URL. Since views use output buffering headers should still be able to be sent.
-     * 
-     * @param string $uri The URI to redirect to.
-     * 
-     * @return void
-     */
     public function redirect($uri = null, array $params = [])
     {
         if (headers_sent()) {

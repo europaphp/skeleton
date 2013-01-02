@@ -3,46 +3,19 @@
 namespace Europa\Filter;
 use Europa\Config\Config;
 
-/**
- * Returns a class name from the specified value.
- * 
- * @category Filters
- * @package  Europa
- * @author   Trey Shugart <treshugart@gmail.com>
- * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
- */
 class ClassNameFilter
 {
-    /**
-     * Default configuration.
-     * 
-     * @var array
-     */
     private $config = array(
         'prefix' => '',
         'suffix' => '',
         'tokens' => [DIRECTORY_SEPARATOR, '/', '_', ' ', '.']
     );
     
-    /**
-     * Sets up the class name filter.
-     * 
-     * @param mixed $config Custom filter configuration.
-     * 
-     * @return ClassNameFilter
-     */
     public function __construct($config = [])
     {
         $this->config = new Config($this->config, $config);
     }
     
-    /**
-     * Filters the value and returns the filtered value.
-     * 
-     * @param mixed $value The value to filter.
-     * 
-     * @return mixed
-     */
     public function __invoke($value)
     {
         // each part is formatted using the upper camel case filter

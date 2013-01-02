@@ -3,28 +3,10 @@
 namespace Europa\View\Helper;
 use Europa\Request\Uri as UriObject;
 
-/**
- * The helper used to format script tags.
- * 
- * @category Helpers
- * @package  Europa
- * @author   Trey Shugart <treshugart@gmail.com>
- * @license  Copyright (c) 2011 Trey Shugart http://europaphp.org/license
- */
 class Js
 {
-    /**
-     * The default suffix.
-     * 
-     * @var string
-     */
     const SUFFIX = '.js';
     
-    /**
-     * Formats the link URI.
-     * 
-     * @return string
-     */
     public function compile($path, $xhtml = false)
     {
         $uri   = new UriObject($path . self::SUFFIX);
