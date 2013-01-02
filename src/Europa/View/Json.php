@@ -4,6 +4,13 @@ namespace Europa\View;
 
 class Json
 {
+    public function __invoke(array $context = array())
+    {
+        $render = $this->formatParamsToJsonArray($context);
+        $render = json_encode($context);
+        return $render;
+    }
+    
     private function formatParamsToJsonArray($data)
     {
         $array = array();

@@ -6,7 +6,7 @@ class CamelCaseSplitFilter
 {
     public function __invoke($value)
     {
-        $parts = [];
+        $parts = [''];
 
         foreach (str_split($value) as $char) {
             $lower = strtolower($char);
@@ -18,6 +18,6 @@ class CamelCaseSplitFilter
             }
         }
 
-        return $parts;
+        return array_filter($parts);
     }
 }

@@ -16,6 +16,7 @@ class CamelCaseSplitFilterTest extends UnitAbstract
     public function basic()
     {
         $split = $this->filter->__invoke('testSplit');
+        
         $this->assert(
             $split[0] === 'test' && $split[1] === 'Split',
             'Word was not split correctly.'
