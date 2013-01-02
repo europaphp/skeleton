@@ -12,14 +12,15 @@ class Loader
             return true;
         }
 
+        $file    = str_replace(['\\', '_'], DIRECTORY_SEPARATOR, $class);
         $locator = $this->locator;
         
-        if ($locator && $file = $locator($class . '.php')) {
+        if ($locator && $file = $locator($file . '.php')) {
             include $file;
             return true;
         }
 
-        if (is_file($file = __DIR__ . '/../../' . $class . '.php')) {
+        if (is_file($file = __DIR__ . '/../../' . $file . '.php')) {
             include $file;
             return true;
         }
