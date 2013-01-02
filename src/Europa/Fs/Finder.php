@@ -140,7 +140,7 @@ class Finder implements IteratorAggregate
     
     public function in($path)
     {
-        if ($real = realpath($path)) {
+        if (is_dir($real = realpath($path))) {
             $this->dirs[] = $real;
         } elseif (strpos($path, self::WILDCARD)) {
             $paths = explode(self::WILDCARD, $path, 2);
@@ -150,9 +150,7 @@ class Finder implements IteratorAggregate
                     continue;
                 }
 
-                if ($item->isDir()) {
-                    $this->in($item->getRealpath() . $paths[1]);
-                }
+                $this->in($item->getRealpath() . $paths[1]);
             }
         }
 
@@ -161,7 +159,7 @@ class Finder implements IteratorAggregate
 
     public function notIn($path)
     {
-        if ($real = realpath($path)) {
+        if (is_dir($real = realpath($path))) {
             $this->notDirs[] = $real;
         } elseif (strpos($path, self::WILDCARD)) {
             $paths = explode(self::WILDCARD, $path, 2);
@@ -171,9 +169,7 @@ class Finder implements IteratorAggregate
                     continue;
                 }
 
-                if ($item->isDir()) {
-                    $this->notIn($item->getRealpath() . $paths[1]);
-                }
+                $this->notIn($item->getRealpath() . $paths[1]);
             }
         }
 
@@ -258,14 +254,16 @@ class Finder implements IteratorAggregate
             $iterator = $iterator;
         } elseif ($iterator instanceof Traversable || is_array($iterator)) {
             $traversable = new ArrayIterator();
+
             foreach ($iterator as $item) {
                 $traversable->append($item instanceof SplFileInfo ? $item : new SplFileInfo($item));
             }
+
             $iterator = $traversable;
         } else {
-            throw new InvalidArgumentException('The specified traversable item cannot be applied to the finder.');
+            $iterator = new ArrayIterator([new SplFileInfo($iterator)]);
         }
         
-        return FsIteratorIterator($iterator);
+        return new FsIterator($iterator);
     }
 }
