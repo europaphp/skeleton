@@ -20,7 +20,7 @@ class Loader
             return true;
         }
 
-        if (is_file($file = __DIR__ . '/../../' . $file . '.php')) {
+        if (is_file($file = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . $file . '.php')) {
             include $file;
             return true;
         }
