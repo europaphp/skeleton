@@ -2,6 +2,7 @@
 
 namespace Europa\Module;
 use Europa\Config\Config;
+use Europa\Exception\Exception;
 use Europa\Di\ServiceContainerInterface;
 
 class Manager implements ManagerInterface
@@ -57,7 +58,7 @@ class Manager implements ManagerInterface
             return $this->modules[$offset];
         }
 
-        Exception::toss('The module at offset "%s" does not exist.', $offset);
+        Exception::toss('The module "%s" does not exist.', $offset);
     }
 
     public function offsetExists($offset)
