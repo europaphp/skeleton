@@ -10,59 +10,63 @@ use Europa\Request\RequestInterface;
 
 class Route
 {
-    const CONTROLLER = 'controller';
+    const DEFAULT_CONTROLLER = 'index';
+
+    const DEFAULT_ACTION = 'get';
+
+    const MATCHER_CONTAINS = 'contains';
+
+    const MATCHER_EXACT = 'exact';
+
+    const MATCHER_REGEX = 'regex';
+
+    const PARAM_CONTROLLER = 'controller';
+
+    const PARAM_ACTION = 'action';
 
     private $config = [
-        'match'             => '^$',
-        'method'            => 'get',
-        'format'            => ':controller/:action',
-        'params'            => ['controller' => 'index', 'action' => 'get'],
-        'controller.prefix' => 'Controller\\',
-        'controller.suffix' => ''
+        'matcher'          => self::MATCHER_REGEX,
+        'pattern'          => '',
+        'format'           => ':controller/:action',
+        'controller'       => self::DEFAULT_CONTROLLER,
+        'action'           => self::DEFAULT_ACTION,
+        'controllerPrefix' => 'Controller\\',
+        'controllerSuffix' => ''
+    ];
+
+    private static $matchers = [
+        self::MATCHER_CONTAINS => ['Europa\Router\Route', 'matchContains'],
+        self::MATCHER_EXACT    => ['Europa\Router\Route', 'matchExact'],
+        self::MATCHER_REGEX    => ['Europa\Router\Route', 'matchRegex']
+    ];
+
+    private static $translators = [
+        'Europa\Request\Cli'  => ['Europa\Router\Route', 'translateCli'],
+        'Europa\Request\Http' => ['Europa\Router\Route', 'translateHttp']
     ];
 
     public function __construct($config)
     {
         $this->config = new Config($this->config, $config);
-
-        if (!$this->config->controller) {
-            Exception::toss('The route "%s" did not provide a controller class name.', $this->config->expression);
-        }
     }
 
     public function __invoke($name, RequestInterface $request)
     {
-        // Guilty until proven innocent.
-        $matches = false;
+        $matches = $this->match($request);
 
-        // Allow both HTTP and CLI requests to be routed.
-        if ($request instanceof HttpInterface) {
-            $matches = $this->handleHttpRequest($request);
-        } elseif ($request instanceof CliInterface) {
-            $matches = $this->handleCliRequest($request);
-        }
-
-        // If nothing was matched, the route failed.
-        if (!$matches) {
+        if ($matches === false) {
             return false;
         }
 
-        // The first match is the whole request; we don't use this.
-        array_shift($matches);
-
-        // Set defaults and matches from the route expression.
-        $request->setParams($this->config->params);
+        $request->setParam(self::PARAM_CONTROLLER, $this->config->controller);
+        $request->setParam(self::PARAM_ACTION, $this->config->action);
         $request->setParams($matches);
 
-        // A specified controller class overrides the "controller" parameter in the request.
-        $controller = $this->resolveController($request);
-        
-        // Ensure the controller exists.
-        if (!class_exists($controller)) {
-            Exception::toss('The controller class "%s" given for route "%s" does not exist.', $controller, $name);
+        if (class_exists($controller = $this->resolve($request))) {
+            return new $controller;
         }
 
-        return new $controller;
+        Exception::toss('The controller class "%s" given for route "%s" does not exist.', $controller, $name);
     }
 
     public function format(array $params = [])
@@ -77,38 +81,119 @@ class Route
         return $uri;
     }
 
-    private function handleHttpRequest(HttpInterface $request)
+    private function match(RequestInterface $request)
     {
-        if ($this->config->method !== $request->getMethod()) {
-            return false;
-        }
-
-        if (!preg_match('!' . $this->config->match . '!', $request->getUri()->getRequest(), $matches)) {
-            return false;
-        }
-
-        return $matches;
+        $request = $this->translate($request);
+        $matcher = $this->getMatcher($this->config->matcher);
+        return $matcher($this->config->pattern, $request);
     }
 
-    private function handleCliRequest(CliInterface $request)
+    private function translate(RequestInterface $request)
     {
-        if (!$this->config->match) {
-            return false;
-        }
-
-        if ($this->config->method !== 'cli') {
-            return false;
-        }
-
-        if (!preg_match('!' . $this->config->match . '!', $request->getCommand(), $matches)) {
-            return false;
-        }
-
-        return $matches;
+        $translator = $this->getTranslator(get_class($request));
+        return strtolower($translator($request));
     }
 
-    private function resolveController(RequestInterface $request)
+    private function resolve(RequestInterface $request)
     {
-        return (new ClassNameFilter($this->config->controller))->__invoke($request->getParam(self::CONTROLLER));
+        $filter = new ClassNameFilter([
+            'prefix' => $this->config->controllerPrefix,
+            'suffix' => $this->config->controllerSuffix
+        ]);
+
+        return $filter->__invoke($request->getParam(self::PARAM_CONTROLLER));
+    }
+
+    private static function matchRegex($pattern, $query)
+    {
+        if (!$pattern) {
+            return false;
+        }
+
+        $matched = @preg_match('!^' . $pattern . '$!i', $query, $matches);
+
+        if ($matched === false) {
+            Exception::toss('The route pattern "%s" is not valid.', $pattern);
+        }
+
+        if ($matched) {
+            array_shift($matches);
+            return $matches;
+        }
+
+        return false;
+    }
+
+    private static function matchContains($pattern, $query)
+    {
+        return stripos($query, $pattern) ? [] : false;
+    }
+
+    private static function matchExact($pattern, $query)
+    {
+        return strtolower($pattern) === $query ? [] : false;
+    }
+
+    private static function translateCli(CliInterface $request)
+    {
+        return $request->getCommand();
+    }
+
+    private static function translateHttp(HttpInterface $request)
+    {
+        return $request->getMethod() . ' ' . $request->getUri()->getRequest();
+    }
+
+    public static function setMatcher($option, callable $matcher)
+    {
+        self::$matchers[$option] = $matcher;
+        return $this;
+    }
+
+    public static function getMatcher($option)
+    {
+        if (isset(self::$matchers[$option])) {
+            return self::$matchers[$option];
+        }
+
+        Exception::toss('There is no matcher for configuration option "%s".', $option);
+    }
+
+    public static function hasMatcher($option)
+    {
+        return isset(self::$matchers[$option]);
+    }
+
+    public static function removeMatcher($option)
+    {
+        if (isset(self::$matchers[$option])) {
+            unset(self::$matchers[$option]);
+        }
+    }
+
+    public static function setTranslator($className, callable $transformer)
+    {
+        self::$translators[$className] = $transformer;
+    }
+
+    public static function getTranslator($className)
+    {
+        if (isset(self::$translators[$className])) {
+            return self::$translators[$className];
+        }
+
+        Exception::toss('There is no request translator for a request class of "%s".', $className);
+    }
+
+    public static function hasTranslator($className)
+    {
+        return isset(self::$translators[$className]);
+    }
+
+    public static function removeTranslator($className)
+    {
+        if (isset(self::$translators[$className])) {
+            unset(self::$translators[$className]);
+        }
     }
 }

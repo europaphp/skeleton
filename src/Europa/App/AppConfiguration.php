@@ -62,7 +62,8 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
 
     public function view()
     {
-        $view = $this->viewNegotiator($this->request);
+        $view = $this->viewNegotiator;
+        $view = $view($this->request);
 
         if ($view instanceof ViewScriptInterface) {
             $view->setScriptLocator($this->viewLocator);

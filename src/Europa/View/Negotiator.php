@@ -9,7 +9,8 @@ class Negotiator
 {
     private $config = [
         'jsonpParam' => 'callback',
-        'suffixMap' => [
+        'xmlConfig'  => [],
+        'suffixMap'   => [
             'json' => 'resolveJson',
             'xml'  => 'resolveXml'
         ],
@@ -73,6 +74,6 @@ class Negotiator
 
     private function resolveXml($request)
     {
-        return new Xml;
+        return new Xml($this->config->xmlConfig);
     }
 }

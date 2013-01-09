@@ -8,6 +8,8 @@ use Europa\Response\HttpResponseInterface;
 
 class App implements AppInterface
 {
+    const DEFAULT_MODULE = 'main';
+
     const DEFAULT_INSTANCE = 'default';
 
     const EVENT_ROUTE = 'route';
@@ -21,9 +23,9 @@ class App implements AppInterface
     const EVENT_DONE = 'done';
 
     private $config = [
-        'containerName'    => 'main',
-        'modules'          => ['main' => []],
-        'appPath'          => '../app',
+        'basePath'         => null,
+        'appPath'          => '{$this->basePath}/app',
+        'modules'          => [self::DEFAULT_MODULE],
         'defaultViewClass' => 'Europa\View\Php',
         'viewScriptFormat' => ':controller/:action',
         'viewSuffix'       => 'php'
@@ -40,7 +42,10 @@ class App implements AppInterface
 
         $this->container = new ServiceContainer;
         $this->container->configure($configuration);
-        $this->container->save($this->container->config['containerName']);
+
+        if (!$this->container->config->basePath) {
+            Exception::toss('The app configuration value "basePath" must be specified.');
+        }
 
         foreach ($this->container->config['modules'] as $name => $module) {
             $this->container->modules->offsetSet($name, $module);
@@ -52,14 +57,16 @@ class App implements AppInterface
         return $this->container->modules->offsetGet($name);
     }
 
-    public function __invoke()
+    public function __invoke($return = false)
     {
         $this->container->loader->register();
         $this->container->loader->setLocator($this->container->loaderLocator);
         $this->container->modules->bootstrap($this->container);
         $this->container->event->trigger(self::EVENT_ROUTE, $this);
 
-        if (!$controller = $this->container->router($this->container->request)) {
+        $router = $this->container->router;
+        
+        if (!$controller = $router($this->container->request)) {
             Exception::toss('The router could not find a suitable controller for the request "%s".', $this->container->request);
         }
 
@@ -73,14 +80,19 @@ class App implements AppInterface
             $this->container->response->setContentTypeFromView($this->container->view);
         }
 
-        $rendered = $this->container->view($context ?: []);
+        $rendered = $this->container->view;
+        $rendered = $rendered($context ?: []);
 
         $this->container->response->setBody($rendered);
         $this->container->event->trigger(self::EVENT_SEND, $this, $rendered);
-        $this->container->response->send();
+
+        if (!$return) {
+            $this->container->response->send();
+        }
+        
         $this->container->event->trigger(self::EVENT_DONE, $this);
 
-        return $this;
+        return $return ? $rendered : $this;
     }
 
     public function setServiceContainer(ServiceContainerInterface $container)

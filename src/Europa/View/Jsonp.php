@@ -5,11 +5,11 @@ use Europa\Config\Config;
 
 class Jsonp extends Json
 {
-    private $config;
+    private $callback;
 
-    public function __construct($config = [])
+    public function __construct($callback)
     {
-        $this->config = new Config($this->config, $config);
+        $this->callback = $callback;
     }
   
     public function __invoke(array $context = array())

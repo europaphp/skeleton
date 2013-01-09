@@ -59,7 +59,7 @@ class Module implements ArrayAccess
 
         // Bootstrap all dependency modules first.
         foreach ($this->classConfig->requiredModules as $module) {
-            $manager->offsetGet($module)->bootstrap($manager);
+            $manager->offsetGet($module)->__invoke($manager);
         }
 
         // The service container used by the manager and application components.

@@ -23,11 +23,11 @@ class ServiceContainer implements ServiceContainerInterface
 
     public function __call($name, array $args = [])
     {
-        if (!is_callable($service = $this->__get($name))) {
-            Exception::toss('Cannot invoke service "%s" in container "%s" because it is not callable.', $name, $this->name());
+        if (isset($this->services[$name])) {
+            return call_user_func_array($this->services[$name], $args);
         }
         
-        return call_user_func_array($service, $args);
+        Exception::toss('Cannot invoke service "%s" in container "%s" because it does not exist.', $name, $this->name());
     }
 
     public function __set($name, $value)
