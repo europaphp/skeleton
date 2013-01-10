@@ -7,6 +7,16 @@ class Json
 {
     private $file;
 
+    private $errorMessages = [
+        'No errors occurred.',
+        'Maximum stack depth exceeded.',
+        'Underflow or the modes mismatch.',
+        'Unexpected control character found.',
+        'Syntax error.',
+        'Malformed UTF-8 characters, possibly incorrectly encoded.',
+        'Unknown error.'
+    ];
+
     public function __construct($file)
     {
         if (!is_file($this->file = $file)) {
@@ -16,6 +26,12 @@ class Json
 
     public function __invoke()
     {
-        return json_decode(file_get_contents($this->file));
+        $decoded = json_decode(file_get_contents($this->file));
+
+        if ($error = json_last_error()) {
+            Exception::toss('The JSON file "%s" was unable to be parsed with message: ' . $this->errorMessages[$error], $this->file);
+        }
+
+        return $decoded;
     }
 }
