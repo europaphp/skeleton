@@ -6,7 +6,7 @@ use Europa\Config\Config;
 class Json
 {
     private $config = [
-        'assoc' => true
+        'options' => 0
     ];
 
     public function __construct($config = [])
@@ -17,7 +17,7 @@ class Json
     public function __invoke(array $context = array())
     {
         $render = $this->formatParamsToJsonArray($context);
-        $render = json_encode($context, $this->config->assoc);
+        $render = json_encode($context, $this->config->options);
         return $render;
     }
     
