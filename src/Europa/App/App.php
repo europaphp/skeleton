@@ -43,8 +43,8 @@ class App implements AppInterface
         $this->container = new ServiceContainer;
         $this->container->configure($configuration);
 
-        if (!$this->container->config->basePath) {
-            Exception::toss('The app configuration value "basePath" must be specified.');
+        if (!$this->container->config['basePath']) {
+            $this->container->config['basePath'] = $this->getDefaultBasePath();
         }
 
         foreach ($this->container->config['modules'] as $name => $module) {
@@ -119,5 +119,13 @@ class App implements AppInterface
         }
 
         return self::$instances[$name];
+    }
+
+    private function getDefaultBasePath()
+    {
+        $script = dirname($_SERVER['PHP_SELF']);
+        $script = $script === '/' ? '.' : $script;
+
+        return realpath($script . '/..');
     }
 }
