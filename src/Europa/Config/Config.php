@@ -7,6 +7,10 @@ use Europa\Filter\FromStringFilter;
 
 class Config implements ConfigInterface
 {
+    const REGEX_VALID_NAME = '[a-zA-Z_][a-zA-Z0-9_.]*';
+
+    const RESERVED_NAME_PARENT = '_parent';
+
     private $config = [];
 
     private $parent;
@@ -46,10 +50,12 @@ class Config implements ConfigInterface
     {
         $this->checkReadonly();
 
+        if (is_array($value) || is_object($value)) {
+            $value = new static($value);
+        }
+
         if ($value instanceof ConfigInterface) {
             $value->setParent($this);
-        } elseif (is_array($value) || is_object($value)) {
-            $value = new static($value);
         }
 
         extract($this->parseOptionName($name));
@@ -75,6 +81,10 @@ class Config implements ConfigInterface
             return $this->parseOptionValue($this->config[$name]);
         }
 
+        if ($name === self::RESERVED_NAME_PARENT) {
+            return $this->getParent();
+        }
+
         extract($this->parseOptionName($name));
 
         if ($config) {
@@ -86,6 +96,10 @@ class Config implements ConfigInterface
     {
         if (array_key_exists($name, $this->config)) {
             return true;
+        }
+
+        if ($name === self::RESERVED_NAME_PARENT) {
+            return isset($this->parent);
         }
 
         extract($this->parseOptionName($name));
@@ -248,13 +262,27 @@ class Config implements ConfigInterface
 
     private function parseOptionValue($value)
     {
-        if ($this->evaluate && is_string($value)) {
-            $value = str_replace('"', '\"', $value);
-            $value = str_replace('\\', '\\\\', $value);
-            $value = eval('return "' . $value . '";');
+        if ($this->evaluate && $this->isParsable($value)) {
+            $value = eval('return "' . $this->convertValueToPhp($value) . '";');
         }
 
         return $value;
+    }
+
+    private function isParsable($value)
+    {
+        return is_string($value) && strpos($value, '{') !== false && strpos($value, '}') !== false;
+    }
+
+    private function convertValueToPhp($value)
+    {
+        $value = str_replace('"', '\"', $value);
+        $value = str_replace('\\', '\\\\', $value);
+        return preg_replace_callback('/\{' . self::REGEX_VALID_NAME . '\}/', function($replace) {
+            $replace = $replace[0];
+            $replace = str_replace('.', '->', $replace);
+            return str_replace('{', '{$this->', $replace);
+        }, $value);
     }
 
     private function checkReadonly()
