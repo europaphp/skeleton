@@ -104,46 +104,6 @@ class Route
         return $filter->__invoke($request->getParam(self::PARAM_CONTROLLER));
     }
 
-    private static function matchRegex($pattern, $query)
-    {
-        if (!$pattern) {
-            return false;
-        }
-
-        $matched = @preg_match('!^' . $pattern . '$!i', $query, $matches);
-
-        if ($matched === false) {
-            Exception::toss('The route pattern "%s" is not valid.', $pattern);
-        }
-
-        if ($matched) {
-            array_shift($matches);
-            return $matches;
-        }
-
-        return false;
-    }
-
-    private static function matchContains($pattern, $query)
-    {
-        return stripos($query, $pattern) ? [] : false;
-    }
-
-    private static function matchExact($pattern, $query)
-    {
-        return strtolower($pattern) === $query ? [] : false;
-    }
-
-    private static function translateCli(CliInterface $request)
-    {
-        return $request->getCommand();
-    }
-
-    private static function translateHttp(HttpInterface $request)
-    {
-        return $request->getMethod() . ' ' . $request->getUri()->getRequest();
-    }
-
     public static function setMatcher($option, callable $matcher)
     {
         self::$matchers[$option] = $matcher;
@@ -195,5 +155,61 @@ class Route
         if (isset(self::$translators[$className])) {
             unset(self::$translators[$className]);
         }
+    }
+
+    private static function matchRegex($pattern, $query)
+    {
+        if (!$pattern) {
+            return false;
+        }
+
+        $matched = @preg_match('!^' . $pattern . '$!i', $query, $matches);
+
+        if ($matched === false) {
+            Exception::toss('The route pattern "%s" is not valid with message: ' . error_get_last()['message'], $pattern);
+        }
+
+        if ($matched) {
+            return self::filterMatches($matches);
+        }
+
+        return false;
+    }
+
+    private static function matchContains($pattern, $query)
+    {
+        return stripos($query, $pattern) ? [] : false;
+    }
+
+    private static function matchExact($pattern, $query)
+    {
+        return strtolower($pattern) === $query ? [] : false;
+    }
+
+    private static function translateCli(CliInterface $request)
+    {
+        return $request->getCommand();
+    }
+
+    private static function translateHttp(HttpInterface $request)
+    {
+        return $request->getMethod() . ' ' . $request->getUri()->getRequest();
+    }
+
+    private static function filterMatches(array $matches)
+    {
+        $remove = [];
+
+        foreach ($matches as $index => $match) {
+            if (is_numeric($index)) {
+                $remove[] = $index;
+            }
+        }
+
+        foreach ($remove as $index) {
+            unset($matches[$index]);
+        }
+
+        return $matches;
     }
 }
