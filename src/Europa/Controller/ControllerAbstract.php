@@ -49,7 +49,11 @@ abstract class ControllerAbstract
     private function invoke($action)
     {
         if (!method_exists($this, $action)) {
-            Exception::toss('The action "%s" is not defined in the controller "%s".', $action, get_class($this));
+            if (method_exists($this, '__call')) {
+                return $this->__call($action, $this->request()->getParams());
+            } else {
+                Exception::toss('The action "%s" is not defined in the controller "%s" and "__call" was not defined to catch it.', $action, get_class($this));
+            }
         }
 
         $class  = new ClassReflector($this);
