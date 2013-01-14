@@ -1,19 +1,10 @@
 {
     "test-get": {
-        "match": "test",
-        "method": "get",
-        "params": {
-            "controller": "test",
-            "action": "get"
-        }
+        "pattern": "(?<action>GET) (?<controller>test)"
     },
 
     "test-cli": {
-        "match": "test",
-        "method": "cli",
-        "params": {
-            "controller": "test",
-            "action": "cli"
-        }
+        "pattern": "(?<controller>test)",
+        "action": "cli"
     }
 }

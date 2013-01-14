@@ -1,18 +1,56 @@
 App
 ===
 
-The application layer serves as a component responsible for eliminating unnecessary boilerplate code by bringing all of the necessary components for running your application together into one. It is designed to break apart your application into smaller chunks of code, or modules. In order for your application to run, you need at least one module.
+The application layer serves as a component responsible for eliminating unnecessary boilerplate code by bringing all of the necessary components for running your application together into one. It is designed to break apart your application into smaller chunks of code, or modules.
 
-To add modules to your application, you would access the `modules` dependency and append items to it. At its most basic, all you need to specify is the module directory name:
-
-    <?php
+First, we create an instance of your application:
 
     $app = new Europa\App\App;
-    $app->getServiceContainer()->modules[] = 'main';
 
-To run your application, all you need to do is invoke the app instance:
+For your application to run, you need to add at least one module. By default a module named `main` is added. To run your application, all you need to do is invoke the app instance:
 
     $app();
+
+Your application can also be configured pretty easily by passing a configuration array to the constructor:
+
+    $app = new Europa\App\App([
+        'basePath'         => null,
+        'appPath'          => '{basePath}/app',
+        'modules'          => [Europa\App\App::DEFAULT_MODULE],
+        'defaultViewClass' => 'Europa\View\Php',
+        'viewScriptFormat' => ':controller/:action',
+        'viewSuffix'       => 'php'
+    ]);
+
+Since the `App` component uses `Europa\Config\Config`, you can pass a path to a file if you so desire:
+
+    $app = new Europa\App\App('my/app/config.json');
+
+Up to you. The following configuration options are used:
+
+#### basePath
+
+The `basePath` option tells your application what directory it is in. By default this is calculated to being the parent directory of the script that is running the application if the `basePath` is set to a falsy value.
+
+#### appPath
+
+The `appPath` option tells the application where to look for its modules.
+
+#### modules
+
+The modules specified in the `modules` option are added after the application is instantiated. This is just a shortcut to manually adding modules to the application after it is instantiated.
+
+#### defaultViewClass
+
+Specifies the view class to use if a content type cannot be negotiated with the request. This defaults to using PHP views.
+
+#### viewScriptFormat
+
+Specifies the format in which a view script is resolved. Parameters are taken from the request to replace placeholders in the option value, so you can use any available request parameter. This defaults to `:controller/:action`.
+
+#### viewSuffix
+
+The default suffix to use for rendering a view script. Defaults to `php`.
 
 Modules
 -------
@@ -20,7 +58,7 @@ Modules
 Modules are chunks of application code that are organised into their own directories. The default module structure is defined as follows:
 
 - app
-    - module-name
+    - main
         - configs
             - config.json
             - routes.json
@@ -37,27 +75,94 @@ Every part of this structure can be customised by providing the module with a cu
 
     <?php
 
-    $app->getServiceContainer()->modules[] = new Europa\App\Module('module-name', [
-        'bootstrapperNs' => 'Bootstrapper',
-        'config'         => 'configs/config.json',
-        'routes'         => 'configs/routes.json',
-        'src'            => 'src',
-        'views'          => 'views'
+    $myModule = new Europa\App\Module('module-name', [
+        'bootstrapperPrefix' => 'Bootstrapper\\',
+        'bootstrapperSuffix' => '',
+        'config'             => 'configs/config.json',
+        'routes'             => 'configs/routes.json',
+        'srcPaths'           => 'src',
+        'viewPaths'          => 'views',
+        'requiredModules'    => [],
+        'requiredExtensions' => [],
+        'requiredClasses'    => [],
+        'requiredFunctions'  => []
     ]);
 
-By default, if you only specify a module name, the default module config shown above is used.
+There are a few different ways to add your module to the application instance. The easiest, if you are using the default module configuration is to pass it as part of the application configuration. Failing this, you can append it using only its name:
+
+    $app[] = 'module-name';
+
+You can add it by name and pass it a configuration:
+
+    $app['module-name'] = [
+        // config
+    ];
+    
+    $app['module-name'] = 'path/to/config.json';
+
+Or you can add the instance:
+
+    $app[] = new Europa\App\Module('module-name', 'path/to/config.json');
+
+#### bootstrapperPrefix
+
+By default, the bootsrapper class for the module is derived from a classname format of the module name. For example, `module-name` would become `ModuleName`. The prefix is prepended to this in order to allow the namespacing of module bootstrappers.
+
+#### bootstrapperSuffix
+
+Specifies the suffix to append to the module bootstrapper classname during resolution.
+
+#### config
+
+Specifies the user-configuration for the module. This can be anything that the `Europa\Config\Config` component can take in its constructor such as a raw array of configuration values. By default, this is a relative path to the module JSON configuration file.
+
+#### routes
+
+The module routes that get applied to the main router. This value can be anything that can be passed to `Europa\Router\Router->import()` such as a PHP array of routes. By default, this is a relative path to a routes JSON file.
+
+#### srcPaths
+
+The path, or paths, relative to the module directory that class files are autoloaded from. Defaults to `src`.
+
+#### viewPaths
+
+The path, or paths, relative to the module directory that view files are loaded from. Defaults to `views`.
+
+#### requiredModules
+
+Specifies the modules that this module requires in order to function. These modules are checked for existence and bootstrapped prior to bootstrapping the dependent module. If the required modules cannot be resolved, an exception is raised.
+
+#### requiredExtensions
+
+You can specify if your module requires any extensions in order to function. If any of the specified extensions are not found, an exception is raised.
+
+#### requiredClasses
+
+Like extensions, you can also require that some classes exist in order for your module to function. If they are not found… you get the point.
+
+#### requiredFunctions
+
+Aaaand like classes, you can require some functions be defined. Exceptions are thrown, etc.
 
 ### Bootstrapping
 
-Modules are bootstrapped using a bootstrapper class. By default, the bootstrapper is contained under the `Bootstrapper` namespace and the class name is the same name as your module, but camel-cased. This means the bootstrapper for `module-name` would be `Bootstrapper\ModuleName`.
+Modules are bootstrapped using a bootstrapper class. By default, the bootstrapper is contained under the `Bootstrapper` namespace and the class name is the same name as your module, but camel-capped. This means the bootstrapper for `module-name` would be `Bootstrapper\ModuleName`.
+
+For more information on how bootstrappers work, see the documentation for the `Europa\Bootstrapper` component.
 
 ### Configuration
 
 Module configuration is taken from the `configs/config.json` file. This can be changed by updating the `config` configuration option.
 
-The options from this file are imported to the main configuration and organised in a namespace defined by the module name. You can access it as follows:
+The options from this file are imported to the main configuration and organised in a namespace defined by the module name. No doubt you will need to access the configuration on your module.
 
-    $app->getServiceContainer()->config->modules['module-name'];
+You can get a single value from your module:
+
+    $app['module-name']['my-config-option'];
+
+Or you can get the whole config object:
+
+    $app['module-name']->config();
 
 ### Routes
 
@@ -69,89 +174,61 @@ The routes in this file are appended to the global route listing since these rou
 
 ### Autoload Paths
 
-Autoload paths are taken from the `src` configuration option and defaults to `src`. This can either be a string or array of paths relative to the module install path.
+Autoload paths are taken from the `srcPaths` configuration option and defaults to `src`. This can either be a string or array of paths relative to the module install path.
 
 ### View Paths
 
-View paths are taken from the `views` configuration option and defaults to `views`. This can either be a string or array of paths relative to the module install path.
-
-### Requiring Other Modules
-
-Sometimes one module's behavior relies on another module. If this is the case, you can tell one module to require another module. During bootstrapping, the module manager will attempt to bootstrap all dependencies before the dependant. If a required module does not exist, an exception is raised.
-
-    <?php
-
-    $modules   = new Europa\App\ModuleManager;
-    $modules[] = 'some-module';
-    $modules[] = 'some-other-module';
-
-    $modules['some-module']->requires('some-other-module');
-
-    $modules->bootstrap();
-
-Customizing Application Behavior
---------------------------------
-
-The default setup will be good for most people, however, you can modify parts of the application runner by passing in configuration options to the constructor:
-
-    $app = new Europa\App\App([
-        'appPath'          => '../app',
-        'defaultViewClass' => 'Europa\View\Php',
-        'viewScriptFormat' => ':controller/:action',
-        'viewSuffix'       => 'php'
-    ]);
-
-Due to the nature of how the `Config` component works, you could even specify a file:
-
-    $app = new Europa\App\App('/path/to/config/file.ini');
-
-Or closure:
-
-    $app = new Europa\App\App(function() {
-        return [ ... ];
-    });
-
-Or custom configuration class that either defines public properties or is traversable:
-
-    $app = new Europa\App\App(new My\Config);
-
-If you need to access the configuration, you can do so by getting it from the service container just like we did with the modules:
-
-    // Returns the application path.
-    $app->getServiceContainer()->config->paths->app;
-
-Application Configuration Options
----------------------------------
-
-`appPath`
-
-The path to the application folder where the modules are kept. This defaults to `../app` which means that, by default, the file running the application must also be the `cwd()`.
-
-`defaultViewClass`
-
-The default view class to use. This defaults to using `Europa\View\Php`, but this may not even be necessary.
-
-`viewScriptFormat`
-
-If using a view that implements `Europa\View\ViewScriptInterface`, then the `->setScript()` method will be passed this value. You can substitute request parameters by prefixing the request parameter name with a colon. For example, the default value is `:controller/:action`.
-
-`viewSuffix`
-
-If using a view that implements `Europa\View\ViewScriptInterface`, then the view suffix will be set to this value. The default suffix is `php`.
+View paths are taken from the `viewPaths` configuration option and defaults to `views`. This can either be a string or array of paths relative to the module install path.
 
 Application Events
 ------------------
 
 During the course of invoking your application some events will be triggered that you can bind handlers to.
 
-`route`
+#### route
 
-Triggered prior to routing to a controller.
+Triggered prior to routing to a controller. The application instance is passed as the only argument to the event handler.
 
-`action`
+#### action
 
-Triggered prior to actioning the controller.
+Triggered prior to actioning the controller. The application instance is passed as the first argument to the event handler and the controller as the second.
 
-`render`
+#### render
 
-Triggered prior to rendering the view with the context returned from the action.
+Triggered prior to rendering the view with the context returned from the action. The application instance is passed as the first argument and the context returned from the controller is the second.
+
+#### send
+
+Triggered prior to sending the response. The application instance is passed as the first argument and the rendered response as the second.
+
+#### done
+
+Triggered just before the dispatching completes. The application instance is the only passed argument.
+
+Saving and Accessing Your Application Instance
+----------------------------------------------
+
+Since your application instance is the gateway to your application, it is likely that you'll need to access it quite often. You can save it for later use by calling the `save()` method and optionally passing it a name.
+
+    $app->save();
+
+Now you can get it later even when `$app` is out of scope:
+
+    $app = Europa\App\App::get();
+
+There may be cases where you have to access it by a specific name, or want to have multiple instances that are accessible. You can just pass a name you want to use:
+
+    $app->save('my-instance');
+
+And use the same name later:
+
+    Europa\App\App::get('my-instance');
+
+Application Services
+--------------------
+
+The application instance uses a service container to get everything it needs to run your app. This defaults to using an instance of `Europa\Di\ServiceContainer` configured with `Europa\App\AppConfiguration`. You can use any instance of `Europa\Di\ServiceContainer` as long as it provides the services defined by `Europa\App\AppConfigurationInterface`.
+
+You can use the `setServiceContainer()` and `getServiceContainer()` methods on the application instance to do your dirty work if so desired.
+
+If you are writing your own configuration, you can extend the base configuration or write your own. Either way, the app instance will make sure that the services defined in `Europa\App\AppConfigurationInterface` are provided.

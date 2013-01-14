@@ -1,10 +1,7 @@
 {
     "help-cli": {
-        "match": "^help$",
-        "method": "cli",
-        "params": {
-            "controller": "help",
-            "action": "cli"
-        }
+        "pattern": "(help|\\?)",
+        "controller": "help",
+        "action": "cli"
     }
 }

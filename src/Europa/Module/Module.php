@@ -14,8 +14,8 @@ class Module implements ArrayAccess
     private $classConfig = [
         'config'             => 'configs/config.json',
         'routes'             => 'configs/routes.json',
-        'src'                => 'src',
-        'views'              => 'views',
+        'srcPaths'           => 'src',
+        'viewPaths'          => 'views',
         'requiredModules'    => [],
         'requiredExtensions' => [],
         'requiredClasses'    => [],
@@ -158,14 +158,14 @@ class Module implements ArrayAccess
     private function applyClassPaths(Locator $locator)
     {
         $paths = new Locator($this->path);
-        $paths->addPaths((array) $this->classConfig->src);
+        $paths->addPaths((array) $this->classConfig->srcPaths);
         $locator->addPaths($paths);
     }
 
     private function applyViewPaths(Locator $locator)
     {
         $paths = new Locator($this->path);
-        $paths->addPaths((array) $this->classConfig->views);
+        $paths->addPaths((array) $this->classConfig->viewPaths);
         $locator->addPaths($paths);
     }
 

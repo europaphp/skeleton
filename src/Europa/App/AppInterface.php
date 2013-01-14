@@ -1,9 +1,12 @@
 <?php
 
 namespace Europa\App;
+use ArrayAccess;
+use Countable;
+use IteratorAggregate;
 use Europa\Di\ServiceContainerInterface;
 
-interface AppInterface
+interface AppInterface extends ArrayAccess, Countable, IteratorAggregate
 {
     public function __invoke();
 

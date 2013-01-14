@@ -52,11 +52,6 @@ class App implements AppInterface
         }
     }
 
-    public function __get($name)
-    {
-        return $this->container->modules->offsetGet($name);
-    }
-
     public function __invoke($return = false)
     {
         $this->container->loader->register();
@@ -95,6 +90,26 @@ class App implements AppInterface
         return $return ? $rendered : $this;
     }
 
+    public function __set($name, $service)
+    {
+        $this->container->__set($name, $service);
+    }
+
+    public function __get($name)
+    {
+        return $this->container->__get($name);
+    }
+
+    public function __isset($name)
+    {
+        return $this->container->__isset($name);
+    }
+
+    public function __unset($name)
+    {
+        $this->container->__unset($name);
+    }
+
     public function setServiceContainer(ServiceContainerInterface $container)
     {
         $this->container = $container->mustProvide('Europa\App\AppConfigurationInterface');
@@ -110,6 +125,38 @@ class App implements AppInterface
     {
         self::$instances[$name] = $this;
         return $this;
+    }
+
+    public function offsetSet($name, $module)
+    {
+        $this->container->modules->offsetSet($name, $module);
+        return $this;
+    }
+
+    public function offsetGet($name)
+    {
+        return $this->container->modules->offsetGet($name);
+    }
+
+    public function offsetExists($name)
+    {
+        return $this->container->modules->offsetExists($name);
+    }
+
+    public function offsetUnset($name)
+    {
+        $this->container->modules->offsetUnset($name);
+        return $this;
+    }
+
+    public function count()
+    {
+        return $this->container->modules->count();
+    }
+
+    public function getIterator()
+    {
+        return $this->container->modules->getIterator();
     }
 
     public static function get($name = self::DEFAULT_INSTANCE)

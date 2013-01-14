@@ -1,3 +1,6 @@
 {
-    "index": {}
+    "index": {
+        "pattern": "(?<action>GET) (index)?",
+        "controller": "index"
+    }
 }
