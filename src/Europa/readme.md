@@ -1,7 +1,7 @@
 Components
 ==========
 
-Each component is functionally organised into their own namespaces.
+Each component is functionally separted into their own namespaces.
 
 App
 ---
@@ -11,7 +11,7 @@ High-level components useful in application setup and dispatching. Allows for th
 Bootstrapper
 ------------
 
-Abstraction for creating classes that define methods that bootstrap your application. Doing this creates a conventional, self-documenting and maintainable way of setting up your application.@and
+Abstraction for creating classes that define methods that bootstrap your application. Doing this creates a conventional, self-documenting and maintainable way of setting up your application.
 
 Config
 ------
@@ -36,17 +36,17 @@ Simple event management using string event names and `callable` event handlers.
 Exception
 ---------
 
-Abstraction to make formatting messages and throwing exceptions much easier.
+Abstraction that allows easy extension, formatting of messages using `sprintf` and easy usage.
 
 Filter
 ------
 
-Suite of filters used throughout the framework from string conversion to camel-casing.
+Suite of filters used throughout the framework ranging from conversion to strings to camel-casing.
 
 Fs
 --
 
-File system abstractions from non-specific finding and relative path location to file manipulation and class autoloading.
+File system abstractions finding, relative location, file / directory manipulation and class loading.
 
 Reflection
 ----------
@@ -61,12 +61,12 @@ Abstracts both CLI and HTTP requests into a common interface which allows for ea
 Response
 --------
 
-Similar to the request object, each type of request has its own type of response both for the sake of convention, simplicity and maintainability. An HTTP response abstracts header setting and output.
+Similar to the request object, each type of request has its own type of response both for the sake of convention, simplicity and maintainability.
 
 Router
 ------
 
-Routers take a request and match it against a subject. If a match is found, the request is modified according to matches in the subject.
+Routers take a request and return an invokable controller.
 
 View
 ----

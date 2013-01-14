@@ -70,7 +70,7 @@ The router has been completely overhauled to make it easier to define your appli
 
 ### Effortless Content Negotiation
 
-The `View` component now ships with a `Negotiator` that will return - based on the request that is passed in - a certain view class appropriate to handle the request given request. The negotiator is configurable to a point and is `callable`, so substituting your own is very easy.
+The `View` component now ships with a `Negotiator` that will return - based on the request that is passed in - a certain view class appropriate to handle the given request. The negotiator is configurable to a point and is `callable`, so substituting your own is very easy.
 
 ### Application Abstraction
 
