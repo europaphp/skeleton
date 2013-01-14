@@ -8,7 +8,7 @@
     <body>
         <div class="container">
             <div class="page-header">
-                <h1>EuropaPHP <small>Rendered in <?php echo round(microtime() - EUROPA_START_TIME, 3) ?></small></h1>
+                <h1>EuropaPHP</h1>
             </div>
             <?php echo $this->renderChild(); ?>
     </body>

@@ -6,20 +6,23 @@ class Loader
 {
     private $locator;
 
+    private $namespaceTokens = ['_', '\\'];
+
     public function __invoke($class)
     {
         if (class_exists($class, false)) {
             return true;
         }
 
-        $locator = $this->locator;
+        $locator   = $this->locator;
+        $formatted = str_replace($this->namespaceTokens, DIRECTORY_SEPARATOR, $class);
         
-        if ($locator && $file = $locator($class . '.php')) {
+        if ($locator && $file = $locator($formatted . '.php')) {
             include $file;
             return true;
         }
 
-        if (is_file($file = '/../../' . $class . '.php')) {
+        if (is_file($file = __DIR__ . '/../../' . $formatted . '.php')) {
             include $file;
             return true;
         }
