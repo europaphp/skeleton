@@ -38,7 +38,7 @@ The `appPath` option tells the application where to look for its modules.
 
 #### modules
 
-The modules specified in the `modules` option are added after the application is instantiated. This is just a shortcut to manually adding modules to the application after it is instantiated. Your values can either be a string or array. If it is a string, the key is ignored and the value is used as the module name and the default configuration is used. If your value is an array, your key is used as the module name and the array value is used as the module configuration.
+The modules specified in the `modules` option are added after the application is instantiated. This is just a shortcut to manually adding modules. Your values can either be a string or array. If it is a string, the key is ignored and the value is used as the module name and the default configuration is used. If your value is an array, your key is used as the module name and the array value is used as the module configuration.
 
 #### defaultViewClass
 
