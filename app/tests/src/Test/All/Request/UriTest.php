@@ -134,11 +134,11 @@ class UriTest extends UnitAbstract
         
         // make sure the proper initial values are parsed
         $this->assert($uri->getSuffix() === 'php', 'The suffix should be "php".');
-        $this->assert($uri->getRequest() === 'test.php', 'The request should be "test.php".');
+        $this->assert($uri->getRequest() === 'test', 'The request should be "test.php".');
         
         // reset the suffix and make sure it was replaced
         $uri->setSuffix('html');
         $this->assert($uri->getSuffix() === 'html', 'The suffix should have been changed to "html".');
-        $this->assert($uri->getRequest() === 'test.html', 'The request should have been changed to "test.html".');
+        $this->assert($uri->getRequest() === 'test', 'The request should have been changed to "test.html".');
     }
 }
