@@ -99,7 +99,7 @@ class Php extends ViewScriptAbstract
         $this->childScript  = null;
         
         // capture rendered script
-        $render = $this->render($context);
+        $render = $this->__invoke($context);
         
         // reapply old state
         $this->setScript($oldScript);
