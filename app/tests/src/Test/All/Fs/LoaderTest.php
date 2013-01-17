@@ -28,12 +28,12 @@ class LoaderTest extends UnitAbstract
 
         $this->assert(false, 'Unable to register autoloading.');
     }
-    
-    public function testLoadClass()
+
+    public function classLoading()
     {
         $this->assert(
             $this->loader->__invoke('Europa\Request\Http'),
-            'Unable to load class.'
+            'The class "Europa\Request\Http" could not be loaded.'
         );
     }
 }

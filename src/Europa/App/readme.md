@@ -38,7 +38,7 @@ The `appPath` option tells the application where to look for its modules.
 
 #### modules
 
-The modules specified in the `modules` option are added after the application is instantiated. This is just a shortcut to manually adding modules to the application after it is instantiated.
+The modules specified in the `modules` option are added after the application is instantiated. This is just a shortcut to manually adding modules. Your values can either be a string or array. If it is a string, the key is ignored and the value is used as the module name and the default configuration is used. If your value is an array, your key is used as the module name and the array value is used as the module configuration.
 
 #### defaultViewClass
 
@@ -183,7 +183,11 @@ View paths are taken from the `viewPaths` configuration option and defaults to `
 Application Events
 ------------------
 
-During the course of invoking your application some events will be triggered that you can bind handlers to.
+During the course of invoking your application some events will be triggered that you can bind handlers to. To bind handlers to the application service, you use the service container bound to it:
+
+    $app->event->bind('route', function() {
+        // do something
+    });
 
 #### route
 
@@ -224,11 +228,16 @@ And use the same name later:
 
     Europa\App\App::get('my-instance');
 
-Application Services
---------------------
+Accessing Services in the Container
+-----------------------------------
+
+Although you can use `getServiceContainer()` to access the applicaiton service container, if you only need to get a service from the container you can simply access the service you want as a property on the application instance.
+
+    $app->router === $app->getServiceContainer()->router;
+
+Overriding Application Services
+-------------------------------
 
 The application instance uses a service container to get everything it needs to run your app. This defaults to using an instance of `Europa\Di\ServiceContainer` configured with `Europa\App\AppConfiguration`. You can use any instance of `Europa\Di\ServiceContainer` as long as it provides the services defined by `Europa\App\AppConfigurationInterface`.
-
-You can use the `setServiceContainer()` and `getServiceContainer()` methods on the application instance to do your dirty work if so desired.
 
 If you are writing your own configuration, you can extend the base configuration or write your own. Either way, the app instance will make sure that the services defined in `Europa\App\AppConfigurationInterface` are provided.

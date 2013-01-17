@@ -10,8 +10,33 @@ Why Another PHP Framework?
 
 EuropaPHP is the manifestation of the shortcomings of other PHP frameworks with a strong focus on scalability, standards, the view/controller relationship and dependency injection. It is specifically designed to be paired with your favourite libraries and it will seamlessly integrate with anything.
 
-What's New
-----------
+Installation
+------------
+
+There are a couple ways to install Europa.
+
+### Source
+
+Download from Github and extract it to where you want it.
+
+### Composer
+
+    composer create-project treshugart/europaphp [installation path] [branch or tag]
+
+If you want to use it as a composer package, just add `treshugart/europaphp` to your `composer.json` file.
+
+Getting Started
+---------------
+
+Everything is already all set up for you in a sample module called `main`. To get an overview of how everything fits together, the default conventions and how to customize your app, see the readme in the `Europa\App` component directory.
+
+Documentation
+-------------
+
+To check out the documentation, just go into the `src` directory. Each directory has a `readme` that corresponds to it. To update the documentation, fork, pull-request, rinse, repeat.
+
+Key Features
+------------
 
 There's a lot of new stuff. For a more in depth look, check out each component's readme.
 
@@ -45,28 +70,11 @@ The router has been completely overhauled to make it easier to define your appli
 
 ### Effortless Content Negotiation
 
-The `View` component now ships with a `Negotiator` that will return - based on the request that is passed in - a certain view class appropriate to handle the request given request. The negotiator is configurable to a point and is `callable`, so substituting your own is very easy.
+The `View` component now ships with a `Negotiator` that will return - based on the request that is passed in - a certain view class appropriate to handle the given request. The negotiator is configurable to a point and is `callable`, so substituting your own is very easy.
 
 ### Application Abstraction
 
 The `App` component was added to provide a way of eliminating as much boilerplate code as possible while still giving you as much flexibility as possible. It takes a single service container that it uses to grab it's dependencies from. This service container must provide `Europa\App\AppConfigurationInterface` or be configured with `Europa\App\AppConfiguration`. This means that you can substitute dependencies into it's container if need be to alter it in any way shape or form. It comes with good defaults so you probably won't have to do anything. Additionally, it accepts configuration options in its constructor to control smaller things like paths and naming conventions.
-
-Installation
-------------
-
-There are a couple ways to install Europa.
-
-### Source
-
-Download from Github and extract it to where you want it.
-
-### Composer
-
-    composer create-project treshugart/europaphp [installation path] [branch or tag]
-
-If you want to use it as a composer package, just add `treshugart/europaphp` to your `composer.json` file.
-
-There's no wanky setup page and no unnecessary bloat - simple.
 
 Running Tests
 -------------
@@ -81,11 +89,6 @@ Command Line Usage
 To checkout available commands, run:
 
     php www/index.php ?
-
-Documentation
--------------
-
-To check out the documentation, just go into the `src` directory. Each directory has a `readme` that corresponds to it. To update the documentation, fork, pull-request, rinse, repeat.
 
 Contributing
 ------------
