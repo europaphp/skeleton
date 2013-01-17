@@ -236,12 +236,12 @@ class Uri
 
     public function getRequest()
     {
-        return $this->request ? $this->request . $this->getSuffixPart() : '';
+        return $this->request ? $this->request : '';
     }
     
     public function getRequestPart()
     {
-        return $this->request ? '/' . $this->getRequest() : '';
+        return $this->request ? '/' . $this->getRequest() . $this->getSuffixPart() : '';
     }
 
     public function setSuffix($suffix)
