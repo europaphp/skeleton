@@ -12,7 +12,7 @@ class CallableReflector
         }
 
         if (is_array($callable)) {
-            return new MethodReflector($callable[0], $callable[1])
+            return new MethodReflector($callable[0], $callable[1]);
         }
 
         if (is_object($callable)) {
