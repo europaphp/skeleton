@@ -4,7 +4,7 @@ namespace Europa\App;
 use Europa\Di\ServiceContainer;
 use Europa\Di\ServiceContainerInterface;
 use Europa\Exception\Exception;
-use Europa\Response\HttpResponseInterface;
+use Europa\Response\HttpInterface;
 
 class App implements AppInterface
 {
@@ -71,7 +71,7 @@ class App implements AppInterface
 
         $this->container->event->trigger(self::EVENT_RENDER, $this, $context);
 
-        if ($this->container->response instanceof HttpResponseInterface) {
+        if ($this->container->response instanceof HttpInterface) {
             $this->container->response->setContentTypeFromView($this->container->view);
         }
 
