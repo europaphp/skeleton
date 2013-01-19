@@ -7,8 +7,8 @@ class CallableReflector
 {
     public static function detect(callable $callable)
     {
-        if ($callable instanceof Closure || function_exists($callable)) {
-            return new ReflectionFunction($callable);
+        if ($callable instanceof \Closure || function_exists($callable)) {
+            return new \ReflectionFunction($callable);
         }
 
         if (is_array($callable)) {
