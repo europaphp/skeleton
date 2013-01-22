@@ -165,7 +165,7 @@ class Module implements ArrayAccess
     private function applyViewPaths(Locator $locator)
     {
         $paths = new Locator($this->path);
-        $paths->addPaths((array) $this->classConfig->viewPaths);
+        $paths->addPaths((array) $this->classConfig->viewPaths, false);
         $locator->addPaths($paths);
     }
 
