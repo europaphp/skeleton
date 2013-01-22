@@ -30,25 +30,21 @@ class Module implements ArrayAccess
 
     private $path;
 
-    private $required = [];
-
     public function __construct($path, $config = [])
     {
         if (!$this->path = realpath($path)) {
             Exception::toss('The module path "%s" does not exist.', $path);
         }
 
-        // The name of the directory the module is in.
-        $this->name = basename($this->path);
-
-        // The class configuration.
+        $this->name        = basename($this->path);
         $this->classConfig = new Config($this->classConfig, $config);
 
-        // The specified module config can either be a path or a config object.
         if ($this->classConfig->config instanceof ConfigInterface) {
             $this->moduleConfig = $this->classConfig->config;
         } elseif ($path = realpath($this->path . '/' . $this->classConfig->config)) {
             $this->moduleConfig = new Config($path);
+        } else {
+            $this->moduleConfig = new Config;
         }
     }
 
@@ -75,6 +71,21 @@ class Module implements ArrayAccess
         }
 
         return $this;
+    }
+
+    public function __toString()
+    {
+        return $this->name();
+    }
+
+    public function name()
+    {
+        return $this->name;
+    }
+
+    public function path()
+    {
+        return $this->path;
     }
 
     public function config()
