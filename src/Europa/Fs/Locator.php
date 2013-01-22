@@ -49,24 +49,24 @@ class Locator implements IteratorAggregate
         return $this->root;
     }
     
-    public function addPath($path)
+    public function addPath($path, $check = true)
     {
         $path = $this->root ? $this->root . '/' . $path : $path;
         
-        if (!$real = realpath($path)) {
+        if ($real = realpath($path)) {
+            $this->paths[] = $real;
+        } elseif ($check) {
             Exception::toss('The path "%s" does not exist.', $path);
         }
-
-        $this->paths[] = $real;
 
         return $this;
     }
 
-    public function addPaths($paths)
+    public function addPaths($paths, $check = true)
     {
         if (is_array($paths) || is_object($paths)) {
             foreach ($paths as $path) {
-                $this->addPath($path);
+                $this->addPath($path, $check);
             }
         }
 
