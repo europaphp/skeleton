@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Module;
+use ArrayIterator;
 use Europa\Config\Config;
 use Europa\Exception\Exception;
 use Europa\Di\ServiceContainerInterface;
