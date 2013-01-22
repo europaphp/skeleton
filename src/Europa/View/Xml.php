@@ -18,7 +18,7 @@ class Xml
 
     private $toStringFilter;
     
-    public function __construct(array $config = [])
+    public function __construct($config = [])
     {
         $this->config         = new Config($this->config, $config);
         $this->toStringFilter = new ToStringFilter;
