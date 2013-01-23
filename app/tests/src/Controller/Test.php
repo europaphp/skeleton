@@ -1,21 +1,20 @@
 <?php
 
 namespace Controller;
+use Europa\App\App;
 use Europa\Controller\ControllerAbstract;
 use Europa\Fs\Finder as FsFinder;
 use Testes\Coverage\Coverage;
 use Testes\Finder\Finder;
+use Testes\Suite\Suite;
 
 class Test extends ControllerAbstract
 {
-    const DEFAULT_ANALYZE_PATH = 'src/Europa';
-
     /**
      * Runs all unit tests.
      * 
      * @param string $test     The test suite to run. Defaults to "Test".
      * @param bool   $untested Whether or not to display untested LOC.
-     * @param bool   $analyze  A specific path to analyze against the tests. Helpful for only analyzing against a specific component.
      */
     public function cli()
     {
@@ -27,25 +26,25 @@ class Test extends ControllerAbstract
         return $this->forward('all');
     }
 
-    public function all($test = 'Test', $untested = false, $analyze = null)
+    public function all($test = null, $untested = false, $analyze = null)
     {
-        $analyzer = new Coverage;
-        $analyzer->start();
-
-        $suite = new Finder(__DIR__ . '/..', $test);
-        $suite = $suite->run();
-
-        $analyzer = $analyzer->stop();
-        $analyze  = realpath(__DIR__ . '/../../../../' . ($analyze ?: self::DEFAULT_ANALYZE_PATH));
-
+        $suite  = new Suite;
+        $cover  = new Coverage;
         $finder = new FsFinder;
-        $finder->is('/\.php$/');
 
-        if (is_dir($analyze)) {
-            $finder->in($analyze);
-        } else {
-            $finder->append($analyze);
+        $finder->is('/\.php$/');
+        $finder->in(__DIR__ . '/../../../' . $analyze);
+        $cover->start();
+
+        foreach (App::get() as $name => $module) {
+            $path  = __DIR__ . '/../../../';
+            $path .= $name . '/';
+            $path .= App::get()->modules['tests']['path'];
+
+            $suite->addTests(new Finder($path, $test));
         }
+
+        $analyzer = $cover->stop();
 
         foreach ($finder as $file) {
             $analyzer->addFile($file->getRealpath());
