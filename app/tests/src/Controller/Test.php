@@ -44,6 +44,8 @@ class Test extends ControllerAbstract
             $suite->addTests(new Finder($path, $test));
         }
 
+        $suite->run();
+
         $analyzer = $cover->stop();
 
         foreach ($finder as $file) {
