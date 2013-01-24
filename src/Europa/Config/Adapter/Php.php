@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\Router\Adapter;
+namespace Europa\Config\Adapter;
 use Europa\Exception\Exception;
 
 class Php

@@ -8,6 +8,13 @@ use Testes\Test\UnitAbstract;
 
 class ConfigTest extends UnitAbstract
 {
+    private $path;
+
+    public function setUp()
+    {
+        $this->path = __DIR__ . '/../../Provider/Config/';
+    }
+
     public function constructor()
     {
         $config = new Config(
@@ -140,7 +147,7 @@ class ConfigTest extends UnitAbstract
     public function adapter()
     {
         $config = new Config;
-        $config->import(new Ini(__DIR__ . '/../../Provider/Config/test.ini'));
+        $config->import(new Ini($this->path . 'test.ini'));
 
         $this->assert($config->values->value1, 'First value should have been parsed.');
         $this->assert($config['values.value2'], 'Second value should have been parse.d');
@@ -152,5 +159,26 @@ class ConfigTest extends UnitAbstract
             new Ini('somebadfile');
             $this->assert(false, 'Exception should have been thrown for bad ini file.');
         } catch (Exception $e) {}
+    }
+
+    public function phpFile()
+    {
+        $config = new Config($this->path . 'test.php');
+
+        $this->assert($config->test, 'PHP file not parsed.');
+    }
+
+    public function jsonFile()
+    {
+        $config = new Config($this->path . 'test.json');
+
+        $this->assert($config->test, 'JSON file not parsed.');
+    }
+
+    public function yamlFile()
+    {
+        $config = new Config($this->path . 'test.yaml');
+
+        $this->assert($config->test, 'YAML file not parsed.');
     }
 }
