@@ -175,10 +175,17 @@ class ConfigTest extends UnitAbstract
         $this->assert($config->test, 'JSON file not parsed.');
     }
 
+    public function ymlFile()
+    {
+        $config = new Config($this->path . 'test.yml');
+
+        $this->assert($config->test, 'YAML .yml file not parsed.');
+    }
+
     public function yamlFile()
     {
         $config = new Config($this->path . 'test.yaml');
 
-        $this->assert($config->test, 'YAML file not parsed.');
+        $this->assert($config->test, 'YAML .yaml file not parsed.');
     }
 }
