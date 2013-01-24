@@ -15,6 +15,7 @@ class Test extends ControllerAbstract
      * 
      * @param string $test     The test suite to run. Defaults to "Test".
      * @param bool   $untested Whether or not to display untested LOC.
+     * @param string $analyze  The path, relative to the base path, to analyze. If not specified, all modules are analyzed.
      */
     public function cli()
     {
