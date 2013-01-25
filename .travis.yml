@@ -3,6 +3,8 @@ language: php
 php:
   - 5.4
 
-before_script: composer install --dev
+before_script:
+  - pecl install yaml
+  - composer install --dev
 
 script: php www/index.php test
