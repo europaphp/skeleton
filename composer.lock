@@ -1,5 +1,5 @@
 {
-    "hash": "26c67645a5571b99e069c31ddcb52ded",
+    "hash": "c0f8dad712a775d57cd8e477ccff6dfd",
     "packages": [
 
     ],
@@ -10,12 +10,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/treshugart/Testes.git",
-                "reference": "5326c38694f5d709b1e09cb45132d96674453ab2"
+                "reference": "206a6a8fecc6cee8a34db10b123bb5193632e728"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/treshugart/Testes/archive/5326c38694f5d709b1e09cb45132d96674453ab2.zip",
-                "reference": "5326c38694f5d709b1e09cb45132d96674453ab2",
+                "url": "https://github.com/treshugart/Testes/archive/206a6a8fecc6cee8a34db10b123bb5193632e728.zip",
+                "reference": "206a6a8fecc6cee8a34db10b123bb5193632e728",
                 "shasum": ""
             },
             "require": {
@@ -24,9 +24,8 @@
             "require-dev": {
                 "ext-xdebug": "*"
             },
-            "time": "2012-12-28 20:59:21",
+            "time": "2013-01-23 01:06:13",
             "type": "library",
-            "installation-source": "source",
             "autoload": {
                 "psr-0": {
                     "Testes": "src"
