@@ -4,10 +4,7 @@ php:
   - 5.4
 
 before_script:
-  - spawn pecl install yaml
-  - expect "Please provide the prefix of libyaml installation [autodetect] :"
-  - send "\r"
-  - expect eof
+  - printf "\r" | pecl install yaml
   - composer selfupdate
   - composer install --dev
 
