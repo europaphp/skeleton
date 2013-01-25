@@ -5,6 +5,7 @@ php:
 
 before_script:
   - pecl install yaml
+  - composer selfupdate
   - composer install --dev
 
 script: php www/index.php test
