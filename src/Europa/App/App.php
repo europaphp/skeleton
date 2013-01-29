@@ -37,57 +37,21 @@ class App implements AppInterface
 
     public function __construct($config = [])
     {
-        $configuration = new AppConfiguration;
-        $configuration->setArguments('config', $this->config, $config);
-
-        $this->container = new ServiceContainer;
-        $this->container->configure($configuration);
-
-        if (!$this->container->config['basePath']) {
-            $this->container->config['basePath'] = $this->getDefaultBasePath();
-        }
-
-        foreach ($this->container->config['modules'] as $name => $module) {
-            $this->container->modules->offsetSet($name, $module);
-        }
+        $this->initContainer($config);
+        $this->initBasePath();
+        $this->initModules();
     }
 
     public function __invoke($return = false)
     {
         $this->container->loader->register();
-        $this->container->loader->setLocator($this->container->loaderLocator);
-        $this->container->modules->bootstrap($this->container);
-        $this->container->event->trigger(self::EVENT_ROUTE, $this);
-
-        $router = $this->container->router;
+        $this->container->modules->bootstrap();
         
-        if (!$controller = $router($this->container->request)) {
-            Exception::toss('The router could not find a suitable controller for the request "%s".', $this->container->request);
-        }
+        $controller = $this->resolveController();
+        $context    = $this->actionController($controller);
+        $rendered   = $this->renderView($context);
 
-        $this->container->event->trigger(self::EVENT_ACTION, $this, $controller);
-
-        $context = $controller($this->container->request);
-
-        $this->container->event->trigger(self::EVENT_RENDER, $this, $context);
-
-        if ($this->container->response instanceof HttpInterface) {
-            $this->container->response->setContentTypeFromView($this->container->view);
-        }
-
-        $rendered = $this->container->view;
-        $rendered = $rendered($context ?: []);
-
-        $this->container->response->setBody($rendered);
-        $this->container->event->trigger(self::EVENT_SEND, $this, $rendered);
-
-        if (!$return) {
-            $this->container->response->send();
-        }
-        
-        $this->container->event->trigger(self::EVENT_DONE, $this);
-
-        return $return ? $rendered : $this;
+        return $this->runResponse($rendered, $return);
     }
 
     public function __set($name, $service)
@@ -174,5 +138,76 @@ class App implements AppInterface
         $script = $script === '/' ? '.' : $script;
 
         return realpath($script . '/..');
+    }
+
+    private function initContainer($config)
+    {
+        $configuration = new AppConfiguration;
+        $configuration->setArguments('config', $this->config, $config);
+
+        $this->container = new ServiceContainer;
+        $this->container->configure($configuration);
+    }
+
+    private function initBasePath()
+    {
+        if (!$this->container->config['basePath']) {
+            $this->container->config['basePath'] = $this->getDefaultBasePath();
+        }
+    }
+
+    private function initModules()
+    {
+        foreach ($this->container->config['modules'] as $name => $module) {
+            $this->container->modules->offsetSet($name, $module);
+        }
+    }
+
+    private function resolveController()
+    {
+        $this->container->event->trigger(self::EVENT_ROUTE, $this);
+
+        $router = $this->container->router;
+        
+        if (!$controller = $router($this->container->request)) {
+            Exception::toss('The router could not find a suitable controller for the request "%s".', $this->container->request);
+        }
+
+        return $controller;
+    }
+
+    private function actionController(callable $controller)
+    {
+        $this->container->event->trigger(self::EVENT_ACTION, $this, $controller);
+
+        return $controller($this->container->request);
+    }
+
+    private function renderView(array $context)
+    {
+        $this->container->event->trigger(self::EVENT_RENDER, $this, $context);
+
+        if ($this->container->response instanceof HttpInterface) {
+            $this->container->response->setContentTypeFromView($this->container->view);
+        }
+
+        $rendered = $this->container->view;
+        $rendered = $rendered($context ?: []);
+
+        return $rendered;
+    }
+
+    private function runResponse($rendered, $return)
+    {
+        $this->container->response->setBody($rendered);
+        $this->container->event->trigger(self::EVENT_SEND, $this, $rendered);
+
+        if (!$return) {
+            $this->container->response->send();
+        }
+        
+        $this->container->event->trigger(self::EVENT_DONE, $this);
+
+        return $return ? $rendered : $this;
     }
 }
