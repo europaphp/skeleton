@@ -11,7 +11,7 @@ use Europa\Fs\Locator;
 
 class Module implements ArrayAccess
 {
-    private $classConfig = [
+    private $config = [
         'config'             => 'configs/config.json',
         'routes'             => 'configs/routes.json',
         'srcPaths'           => 'src',
@@ -24,8 +24,6 @@ class Module implements ArrayAccess
         'bootstrapperSuffix' => ''
     ];
 
-    private $moduleConfig;
-
     private $name;
 
     private $path;
@@ -36,15 +34,11 @@ class Module implements ArrayAccess
             Exception::toss('The module path "%s" does not exist.', $path);
         }
 
-        $this->name        = basename($this->path);
-        $this->classConfig = new Config($this->classConfig, $config);
+        $this->name   = basename($this->path);
+        $this->config = new Config($this->config, $config);
 
-        if ($this->classConfig->config instanceof ConfigInterface) {
-            $this->moduleConfig = $this->classConfig->config;
-        } elseif ($path = realpath($this->path . '/' . $this->classConfig->config)) {
-            $this->moduleConfig = new Config($path);
-        } else {
-            $this->moduleConfig = new Config;
+        if ($path = realpath($this->path . '/' . $this->config->config)) {
+            $this->config->import($path);
         }
     }
 
@@ -54,7 +48,7 @@ class Module implements ArrayAccess
         $this->validate($manager);
 
         // Bootstrap all dependency modules first.
-        foreach ($this->classConfig->requiredModules as $module) {
+        foreach ($this->config->requiredModules as $module) {
             $manager->offsetGet($module)->__invoke($manager);
         }
 
@@ -90,28 +84,28 @@ class Module implements ArrayAccess
 
     public function config()
     {
-        return $this->moduleConfig;
+        return $this->config;
     }
 
     public function offsetSet($name, $value)
     {
-        $this->moduleConfig->offsetSet($name, $value);
+        $this->config->offsetSet($name, $value);
         return $this;
     }
 
     public function offsetGet($name)
     {
-        return $this->moduleConfig->offsetGet($name);
+        return $this->config->offsetGet($name);
     }
 
     public function offsetExists($name)
     {
-        return $this->moduleConfig->offsetExists($name);
+        return $this->config->offsetExists($name);
     }
 
     public function offsetUnset($name)
     {
-        $this->moduleConfig->offsetUnset($name);
+        $this->config->offsetUnset($name);
         return $this;
     }
 
@@ -125,7 +119,7 @@ class Module implements ArrayAccess
 
     private function validateModules(ManagerInterface $manager)
     {
-        foreach ($this->classConfig->requiredModules as $module) {
+        foreach ($this->config->requiredModules as $module) {
             if (!$manager->offsetExists($module)) {
                 Exception::toss('The module "%s" is required by the module "%s".', $module, $this->name);
             }
@@ -134,7 +128,7 @@ class Module implements ArrayAccess
 
     private function validateExtensions()
     {
-        foreach ($this->classConfig->requiredExtensions as $extension) {
+        foreach ($this->config->requiredExtensions as $extension) {
             if (!extension_loaded($extension)) {
                 Exception::toss('The extension "%s" is required by the module "%s".', $extension, $this->name);
             }
@@ -143,7 +137,7 @@ class Module implements ArrayAccess
 
     private function validateClasses()
     {
-        foreach ($this->classConfig->requiredClasses as $class) {
+        foreach ($this->config->requiredClasses as $class) {
             if (!class_exists($class, true)) {
                 Exception::toss('The class "%s" is required by the module "%s".', $class, $this->name);
             }
@@ -152,7 +146,7 @@ class Module implements ArrayAccess
 
     private function validateFunctions()
     {
-        foreach ($this->classConfig->requiredFunctions as $function) {
+        foreach ($this->config->requiredFunctions as $function) {
             if (!function_exists($function)) {
                 Exception::toss('The function "%s" is required by the module "%s".', $function, $this->name);
             }
@@ -161,7 +155,7 @@ class Module implements ArrayAccess
 
     private function applyRoutes(Router $router)
     {
-        if ($options = realpath($this->path . '/' . $this->classConfig->routes)) {
+        if ($options = realpath($this->path . '/' . $this->config->routes)) {
             $router->import($options);
         }
     }
@@ -169,21 +163,21 @@ class Module implements ArrayAccess
     private function applyClassPaths(Locator $locator)
     {
         $paths = new Locator($this->path);
-        $paths->addPaths((array) $this->classConfig->srcPaths);
+        $paths->addPaths((array) $this->config->srcPaths);
         $locator->addPaths($paths);
     }
 
     private function applyViewPaths(Locator $locator)
     {
         $paths = new Locator($this->path);
-        $paths->addPaths((array) $this->classConfig->viewPaths, false);
+        $paths->addPaths((array) $this->config->viewPaths, false);
         $locator->addPaths($paths);
     }
 
     private function getBootstrapperClassName()
     {
-        return $this->classConfig->bootstrapperPrefix
+        return $this->config->bootstrapperPrefix
             . (new UpperCamelCaseFilter)->__invoke($this->name)
-            . $this->classConfig->bootstrapperSuffix;
+            . $this->config->bootstrapperSuffix;
     }
 }
