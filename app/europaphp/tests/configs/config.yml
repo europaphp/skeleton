@@ -3,4 +3,4 @@ path: src
 requiredModules:
   europaphp/main: 0.1.*
 requiredExtensions:
-  xdebug: 2.1.*
+  xdebug: 2.2.*
