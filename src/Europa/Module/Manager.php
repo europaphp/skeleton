@@ -8,7 +8,11 @@ use Europa\Di\ServiceContainerInterface;
 
 class Manager implements ManagerInterface
 {
+    private $bootstrappedModules = [];
+
     private $container;
+
+    private $isBootstrapped = false;
 
     private $modules = [];
 
@@ -32,20 +36,29 @@ class Manager implements ManagerInterface
     {
         foreach ($this->modules as $module) {
             $module($this);
+
+            $this->bootstrappedModules[] = $module;
         }
+
+        $this->isBootstrapped = true;
         
         return $this;
     }
 
+    public function isBootstrapped()
+    {
+        return $this->isBootstrapped;
+    }
+
+    public function isModuleBootstrapped($module)
+    {
+        return in_array($module, $this->bootstrappedModules, true);
+    }
+
     public function offsetSet($offset, $module)
     {
-        if (is_string($module)) {
-            $offset = $module;
-            $module = [];
-        }
-
         if (!is_callable($module)) {
-            $module = new Module($this->container->config->appPath . '/' . $offset, $module);
+            Exception::toss('The module "%s" must be callable. Type of "%s" given.', $offset, gettype($module));
         }
 
         $this->modules[$offset] = $module;

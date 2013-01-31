@@ -3,9 +3,10 @@
 namespace Europa\Config;
 use ArrayAccess;
 use Countable;
-use IteratorAggregate;
+use Iterator;
+use Serializable;
 
-interface ConfigInterface extends ArrayAccess, Countable, IteratorAggregate
+interface ConfigInterface extends ArrayAccess, Countable, Iterator, Serializable
 {
     public function __set($name, $value);
 

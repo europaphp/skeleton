@@ -7,9 +7,15 @@ use Europa\Filter\FromStringFilter;
 
 class Config implements ConfigInterface
 {
+    const ADAPTER_FROM_NS = '\Adapter\From\\';
+
+    const ADAPTER_TO_NS = '\Adapter\To\\';
+
     const REGEX_VALID_NAME = '[a-zA-Z_][a-zA-Z0-9_.]*';
 
     const RESERVED_NAME_PARENT = '_parent';
+
+    const RESERVED_NAME_ROOT = '_root';
 
     private $config = [];
 
@@ -24,6 +30,11 @@ class Config implements ConfigInterface
         foreach (func_get_args() as $config) {
             $this->import($config);
         }
+    }
+
+    public function __toString()
+    {
+        return $this->serialize();
     }
 
     public function __set($name, $value)
@@ -51,26 +62,14 @@ class Config implements ConfigInterface
         $this->checkReadonly();
 
         if (is_array($value) || is_object($value)) {
-            $value = new static($value);
-        }
-
-        if ($value instanceof ConfigInterface) {
+            if (!$value instanceof ConfigInterface) {
+                $value = new static($value);
+            }
+            
             $value->setParent($this);
         }
 
-        extract($this->parseOptionName($name));
-
-        $config = $this;
-
-        foreach ($first as $name) {
-            $config = $config->createIfNotExists($name);
-        }
-
-        if ($first) {
-            $config->offsetSet($last, $value);
-        } else {
-            $this->config[$last] = $value;
-        }
+        $this->config[$name] = $value;
 
         return $this;
     }
@@ -85,10 +84,8 @@ class Config implements ConfigInterface
             return $this->getParent();
         }
 
-        extract($this->parseOptionName($name));
-
-        if ($config) {
-            return $this->parseOptionValue($config->offsetGet($last));
+        if ($name === self::RESERVED_NAME_ROOT) {
+            return $this->getRootParent();
         }
     }
 
@@ -98,14 +95,8 @@ class Config implements ConfigInterface
             return true;
         }
 
-        if ($name === self::RESERVED_NAME_PARENT) {
+        if ($name === self::RESERVED_NAME_PARENT || $name === self::RESERVED_NAME_ROOT) {
             return isset($this->parent);
-        }
-
-        extract($this->parseOptionName($name));
-
-        if ($config) {
-            return $config->offsetExists($last);
         }
     }
 
@@ -116,14 +107,6 @@ class Config implements ConfigInterface
         if (array_key_exists($name, $this->config)) {
             unset($this->config[$name]);
         }
-
-        extract($this->parseOptionName($name));
-
-        if ($config) {
-            $config->offsetUnset($last);
-        }
-
-        return $this;
     }
 
     public function count()
@@ -131,44 +114,75 @@ class Config implements ConfigInterface
         return count($this->config);
     }
 
-    public function getIterator()
+    public function current()
     {
-        return new ArrayIterator($this->config);
+        return $this->parseOptionValue(current($this->config));
     }
 
-    public function import($config)
+    public function key()
+    {
+        return key($this->config);
+    }
+
+    public function next()
+    {
+        next($this->config);
+    }
+
+    public function rewind()
+    {
+        reset($this->config);
+    }
+
+    public function valid()
+    {
+        return key($this->config) !== null;
+    }
+
+    public function serialize()
+    {
+        return serialize($this->config);
+    }
+
+    public function unserialize($data)
+    {
+        $this->config = unserialize($data);
+    }
+
+    public function import($config, $adapter = null)
     {
         $this->checkReadonly();
 
         if (is_string($config)) {
-            $adapter = pathinfo($config, PATHINFO_EXTENSION);
-            $adapter = 'Europa\Config\Adapter\\' . ucfirst($adapter);
-
-            if (!class_exists($adapter)) {
-                Exception::toss('The config adapter "%s" does not exist.', $adapter);
-            }
-
-            $config = new $adapter($config);
+            $config = $this->parseConfigFromString($config, $adapter);
         }
 
         if (is_callable($config)) {
             $config = $config();
         }
 
+        if ($config instanceof ConfigInterface) {
+            $config = $config->raw();
+        }
+
         if (is_array($config) || is_object($config)) {
             foreach ($config as $name => $value) {
-                $this->offsetSet($name, $value);
+                if (isset($this->config[$name]) && $this->config[$name] instanceof ConfigInterface) {
+                    $this->config[$name]->import($value);
+                } else {
+                    $this->offsetSet($name, $value);
+                }
             }
         }
 
         return $this;
     }
 
-    public function export()
+    public function export($adapter = null)
     {
         $config = [];
         
-        foreach ($this->config as $name => $value) {
+        foreach ($this as $name => $value) {
             if ($value instanceof ConfigInterface) {
                 $config[$name] = $value->export();
             } else {
@@ -176,7 +190,28 @@ class Config implements ConfigInterface
             }
         }
 
+        if (is_string($adapter)) {
+            $adapter = __NAMESPACE__ . self::ADAPTER_TO_NS . ucfirst($adapter);
+            $adapter = new $adapter;
+        }
+
+        if (is_callable($adapter)) {
+            $config = $adapter($config);
+        }
+
         return $config;
+    }
+
+    public function raw()
+    {
+        return $this->config;
+    }
+
+    public function clear()
+    {
+        $this->checkReadonly();
+        $this->config = [];
+        return $this;
     }
 
     public function setParent(ConfigInterface $config)
@@ -201,16 +236,6 @@ class Config implements ConfigInterface
         return $config;
     }
 
-    public function createIfNotExists($name)
-    {
-        if (!isset($this->config[$name]) || !$this->config[$name] instanceof ConfigInterface) {
-            $this->config[$name] = new static;
-            $this->config[$name]->setParent($this);
-        }
-
-        return $this->config[$name];
-    }
-
     public function keys()
     {
         return array_keys($this->config);
@@ -233,37 +258,18 @@ class Config implements ConfigInterface
         return $this;
     }
 
-    private function parseOptionName($name)
-    {
-        $all    = explode('.', $name);
-        $first  = $all;
-        $last   = array_pop($first);
-        $config = $this;
-
-        foreach ($first as $name) {
-            if ($config instanceof ConfigInterface) {
-                $config = $config->offsetGet($name);
-            } else {
-                break;
-            }
-        }
-
-        if ($config === $this || !$config instanceof ConfigInterface) {
-            $config = false;
-        }
-
-        return [
-            'first'  => $first,
-            'last'   => $last,
-            'all'    => $all,
-            'config' => $config
-        ];
-    }
-
     private function parseOptionValue($value)
     {
         if ($this->evaluate && $this->isParsable($value)) {
-            $value = eval('return "' . $this->convertValueToPhp($value) . '";');
+            ob_start();
+            
+            $parsed = eval('return "' . $this->convertValueToPhp($value) . '";');
+            
+            if ($error = ob_get_clean()) {
+                Exception::toss('Unable to parse configuration value "%s"', $value, $error);
+            }
+
+            return $parsed;
         }
 
         return $value;
@@ -290,5 +296,32 @@ class Config implements ConfigInterface
         if ($this->readonly) {
             Exception::toss('Cannot modify the configuration because it is readonly.');
         }
+    }
+
+    private function parseConfigFromString($config, $adapter)
+    {
+        if (!$adapter) {
+            if (is_file($config)) {
+                $adapter = $this->autodetectAdapterFromFile($config);
+                $config  = file_get_contents($config);
+            } else {
+                Exception::toss('Could not autodetect the adapter to import "%s".', $config);
+            }
+        }
+
+        $adapter = __NAMESPACE__ . self::ADAPTER_FROM_NS . ucfirst($adapter);
+
+        if (!class_exists($adapter)) {
+            Exception::toss('Could not import "%s" because the config adapter "%s" does not exist.', $config, $adapter);
+        }
+
+        $adapter = new $adapter;
+
+        return $adapter($config);
+    }
+
+    private function autodetectAdapterFromFile($config)
+    {
+        return pathinfo($config, PATHINFO_EXTENSION);
     }
 }

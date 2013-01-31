@@ -5,8 +5,6 @@ use Europa\Module\ManagerConfigurationInterface;
 
 interface AppConfigurationInterface extends ManagerConfigurationInterface
 {
-    public function config($defaults, $config);
-
     public function event();
 
     public function loader();
