@@ -1,7 +1,6 @@
 <?php
 
 namespace Europa\Bootstrapper;
-use Europa\Config\Config;
 use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
 
