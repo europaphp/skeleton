@@ -34,11 +34,11 @@ class Test extends ControllerAbstract
         $finder = new FsFinder;
 
         $finder->is('/\.php$/');
-        $finder->in(__DIR__ . '/../../../' . $analyze);
+        $finder->in(__DIR__ . '/../../../../' . $analyze);
         $cover->start();
 
         foreach (App::get() as $name => $module) {
-            $path  = __DIR__ . '/../../../';
+            $path  = __DIR__ . '/../../../../';
             $path .= $name . '/';
             $path .= App::get()['europaphp/tests']['path'];
 

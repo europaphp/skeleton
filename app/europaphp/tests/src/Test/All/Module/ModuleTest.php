@@ -33,7 +33,7 @@ class ModuleTest extends UnitAbstract
         ]);
 
         try {
-            $module($this->manager);
+            $module->bootstrap($this->manager);
             $this->assert(false, 'The module should have thrown an exception.');
         } catch (Exception $e) {
             
@@ -47,7 +47,7 @@ class ModuleTest extends UnitAbstract
         ]);
 
         try {
-            $module($this->manager);
+            $module->bootstrap($this->manager);
             $this->assert(false, 'The module should have thrown an exception.');
         } catch (Exception $e) {
             
@@ -61,7 +61,7 @@ class ModuleTest extends UnitAbstract
         ]);
 
         try {
-            $module($this->manager);
+            $module->bootstrap($this->manager);
             $this->assert(false, 'The module should have thrown an exception.');
         } catch (Exception $e) {
             
@@ -75,7 +75,7 @@ class ModuleTest extends UnitAbstract
         ]);
 
         try {
-            $module($this->manager);
+            $module->bootstrap($this->manager);
             $this->assert(false, 'The module should have thrown an exception.');
         } catch (Exception $e) {
             
