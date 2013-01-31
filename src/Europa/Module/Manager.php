@@ -35,8 +35,8 @@ class Manager implements ManagerInterface
     public function bootstrap()
     {
         foreach ($this->modules as $module) {
-            $module($this);
-
+            $module->bootstrap($this);
+            
             $this->bootstrappedModules[] = $module;
         }
 
@@ -57,8 +57,8 @@ class Manager implements ManagerInterface
 
     public function offsetSet($offset, $module)
     {
-        if (!is_callable($module)) {
-            Exception::toss('The module "%s" must be callable. Type of "%s" given.', $offset, gettype($module));
+        if (!$module instanceof ModuleInterface) {
+            Exception::toss('The module "%s" must be implement Europa\Module\ModuleInterface.', $offset);
         }
 
         $this->modules[$offset] = $module;

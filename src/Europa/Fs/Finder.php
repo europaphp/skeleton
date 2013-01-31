@@ -145,6 +145,10 @@ class Finder implements IteratorAggregate
         } elseif (strpos($path, self::WILDCARD)) {
             $paths = explode(self::WILDCARD, $path, 2);
 
+            if (!is_dir($paths[0])) {
+                return $this;
+            }
+
             foreach (new DirectoryIterator($paths[0]) as $item) {
                 if ($item->isDot()) {
                     continue;

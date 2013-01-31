@@ -40,7 +40,7 @@ class Test extends ControllerAbstract
         foreach (App::get() as $name => $module) {
             $path  = __DIR__ . '/../../../';
             $path .= $name . '/';
-            $path .= App::get()->modules['tests']['path'];
+            $path .= App::get()['europaphp/tests']['path'];
 
             $suite->addTests(new Finder($path, $test));
         }

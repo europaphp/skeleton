@@ -6,12 +6,15 @@ use Europa\Config\Config;
 use Europa\Config\ConfigInterface;
 use Europa\Exception\Exception;
 use Europa\Filter\UpperCamelCaseFilter;
-use Europa\Router\Router;
 use Europa\Fs\Locator;
+use Europa\Router\Router;
+use Europa\Version\SemVer;
+use ReflectionExtension;
 
-class Module implements ArrayAccess
+class Module implements ArrayAccess, ModuleInterface
 {
     private $config = [
+        'version'            => '0',
         'configs'            => ['configs/config.yml'],
         'routes'             => ['configs/routes.yml'],
         'srcPaths'           => ['src'],
@@ -28,13 +31,20 @@ class Module implements ArrayAccess
 
     private $path;
 
+    private $version;
+
     public function __construct($path, $config = [])
     {
         $this->initPathAndName($path);
         $this->initConfig($config);
     }
 
-    public function __invoke(ManagerInterface $manager)
+    public function __toString()
+    {
+        return $this->name();
+    }
+
+    public function bootstrap(ManagerInterface $manager)
     {
         $this->applyConfigs($manager);
         $this->validateManager($manager);
@@ -42,14 +52,14 @@ class Module implements ArrayAccess
         $this->applyRoutes($manager);
         $this->applyClassPaths($manager);
         $this->applyViewPaths($manager);
-        $this->bootstrap($manager);
+        $this->invokeBootstrapper($manager);
         
         return $this;
     }
 
-    public function __toString()
+    public function config()
     {
-        return $this->name();
+        return $this->config;
     }
 
     public function name()
@@ -62,9 +72,9 @@ class Module implements ArrayAccess
         return $this->path;
     }
 
-    public function config()
+    public function version()
     {
-        return $this->config;
+        return $this->config->version;
     }
 
     public function offsetSet($name, $value)
@@ -99,18 +109,51 @@ class Module implements ArrayAccess
 
     private function validateModules(ManagerInterface $manager)
     {
-        foreach ($this->config->requiredModules as $module) {
+        foreach ($this->config->requiredModules as $module => $version) {
             if (!$manager->offsetExists($module)) {
-                Exception::toss('The module "%s" is required by the module "%s".', $module, $this->name);
+                Exception::toss(
+                    'The module "%s" is required by the module "%s".',
+                    $module,
+                    $this->name
+                );
+            }
+
+            $version = new SemVer($version);
+
+            if (!$version->is($manager->offsetGet($module)->version())) {
+                Exception::toss(
+                    'The module "%s", currently at version "%s", is required to be at version "%s" by the module "%s".',
+                    $module,
+                    $manager->offsetGet($module)->version(),
+                    $version,
+                    $this->name
+                );
             }
         }
     }
 
     private function validateExtensions()
     {
-        foreach ($this->config->requiredExtensions as $extension) {
+        foreach ($this->config->requiredExtensions as $extension => $version) {
             if (!extension_loaded($extension)) {
-                Exception::toss('The extension "%s" is required by the module "%s".', $extension, $this->name);
+                Exception::toss(
+                    'The extension "%s" is not loaded and is required by the module "%s".',
+                    $extension,
+                    $this->name
+                );
+            }
+
+            $extension = new ReflectionExtension($extension);
+            $version   = new SemVer($version);
+
+            if (!$version->is($extension->getVersion())) {
+                Exception::toss(
+                    'The extension "%s", curretly at version "%s", is required to be at version "%s" by the module "%s".',
+                    $extension->getName(),
+                    $extension->getVersion(),
+                    $version,
+                    $this->name
+                );
             }
         }
     }
@@ -135,11 +178,11 @@ class Module implements ArrayAccess
 
     private function bootstrapDependencies(ManagerInterface $manager)
     {
-        foreach ($this->config->requiredModules as $module) {
+        foreach ($this->config->requiredModules as $module => $version) {
             $module = $manager->offsetGet($module);
 
             if (!$manager->isModuleBootstrapped($module)) {
-                $module($manager);
+                $module->bootstrap($manager);
             }
         }
     }
@@ -147,12 +190,6 @@ class Module implements ArrayAccess
     private function applyConfigs(ManagerInterface $manager)
     {
         $manager->getServiceContainer()->config->modules[$this->name] = $this->config;
-
-        foreach ($this->config->configs as $k => $config) {
-            if ($path = realpath($this->path . '/' . $config)) {
-                $this->config->import($path);
-            }
-        }
     }
 
     private function applyRoutes(ManagerInterface $manager)
@@ -180,7 +217,7 @@ class Module implements ArrayAccess
         $manager->getServiceContainer()->viewLocator->addPaths($paths);
     }
 
-    private function bootstrap(ManagerInterface $manager)
+    private function invokeBootstrapper(ManagerInterface $manager)
     {
         if (class_exists($bootstrapper = $this->getBootstrapperClassName(), true)) {
             (new $bootstrapper)->__invoke($this, $manager);
@@ -206,5 +243,11 @@ class Module implements ArrayAccess
     private function initConfig($config)
     {
         $this->config = new Config($this->config, $config);
+
+        foreach ($this->config->configs as $k => $config) {
+            if ($path = realpath($this->path . '/' . $config)) {
+                $this->config->import($path);
+            }
+        }
     }
 }

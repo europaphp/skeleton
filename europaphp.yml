@@ -1,4 +1,4 @@
 modules:
-  help:
-  main:
-  tests:
+  europaphp/help:
+  europaphp/main:
+  europaphp/tests:

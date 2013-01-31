@@ -16,7 +16,7 @@ class Help extends ControllerAbstract
 
     public function __construct()
     {
-        $this->config = App::get()->getServiceContainer()->modules['help']->config();
+        $this->config = App::get()['europaphp/help']->config();
     }
 
     /**
@@ -61,7 +61,7 @@ class Help extends ControllerAbstract
     private function getClassNames()
     {
         $finder = new Finder;
-        $finder->in(__DIR__ . '/../../../../' . $this->config['searchIn']);
+        $finder->in(__DIR__ . '/../../../../../' . $this->config['searchIn']);
         $finder->is('/\.php$/');
 
         $classes = [];
