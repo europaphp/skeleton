@@ -12,10 +12,10 @@ use Europa\Fs\Locator;
 class Module implements ArrayAccess
 {
     private $config = [
-        'config'             => 'configs/config.json',
-        'routes'             => 'configs/routes.json',
-        'srcPaths'           => 'src',
-        'viewPaths'          => 'views',
+        'configs'            => ['configs/config.yml'],
+        'routes'             => ['configs/routes.yml'],
+        'srcPaths'           => ['src'],
+        'viewPaths'          => ['views'],
         'requiredModules'    => [],
         'requiredExtensions' => [],
         'requiredClasses'    => [],
@@ -30,40 +30,20 @@ class Module implements ArrayAccess
 
     public function __construct($path, $config = [])
     {
-        if (!$this->path = realpath($path)) {
-            Exception::toss('The module path "%s" does not exist.', $path);
-        }
-
-        $this->name   = basename($this->path);
-        $this->config = new Config($this->config, $config);
-
-        if ($path = realpath($this->path . '/' . $this->config->config)) {
-            $this->config->import($path);
-        }
+        $this->initPathAndName($path);
+        $this->initConfig($config);
     }
 
     public function __invoke(ManagerInterface $manager)
     {
-        // Ensure all requirements are met.
-        $this->validate($manager);
-
-        // Bootstrap all dependency modules first.
-        foreach ($this->config->requiredModules as $module) {
-            $manager->offsetGet($module)->__invoke($manager);
-        }
-
-        // The service container used by the manager and application components.
-        // We update this to make changes to the application as a whole.
-        $container = $manager->getServiceContainer();
-        $this->applyRoutes($container->router);
-        $this->applyClassPaths($container->loaderLocator);
-        $this->applyViewPaths($container->viewLocator);
-
-        // If the bootstrapper class exists, invoke it.
-        if (class_exists($bootstrapper = $this->getBootstrapperClassName(), true)) {
-            (new $bootstrapper)->__invoke($this, $manager);
-        }
-
+        $this->applyConfigs($manager);
+        $this->validateManager($manager);
+        $this->bootstrapDependencies($manager);
+        $this->applyRoutes($manager);
+        $this->applyClassPaths($manager);
+        $this->applyViewPaths($manager);
+        $this->bootstrap($manager);
+        
         return $this;
     }
 
@@ -109,7 +89,7 @@ class Module implements ArrayAccess
         return $this;
     }
 
-    private function validate(ManagerInterface $manager)
+    private function validateManager(ManagerInterface $manager)
     {
         $this->validateModules($manager);
         $this->validateExtensions();
@@ -153,25 +133,58 @@ class Module implements ArrayAccess
         }
     }
 
-    private function applyRoutes(Router $router)
+    private function bootstrapDependencies(ManagerInterface $manager)
     {
-        if ($options = realpath($this->path . '/' . $this->config->routes)) {
-            $router->import($options);
+        foreach ($this->config->requiredModules as $module) {
+            $module = $manager->offsetGet($module);
+
+            if (!$manager->isModuleBootstrapped($module)) {
+                $module($manager);
+            }
         }
     }
 
-    private function applyClassPaths(Locator $locator)
+    private function applyConfigs(ManagerInterface $manager)
     {
-        $paths = new Locator($this->path);
-        $paths->addPaths((array) $this->config->srcPaths);
-        $locator->addPaths($paths);
+        $manager->getServiceContainer()->config->modules[$this->name] = $this->config;
+
+        foreach ($this->config->configs as $k => $config) {
+            if ($path = realpath($this->path . '/' . $config)) {
+                $this->config->import($path);
+            }
+        }
     }
 
-    private function applyViewPaths(Locator $locator)
+    private function applyRoutes(ManagerInterface $manager)
+    {
+        $router = $manager->getServiceContainer()->router;
+
+        foreach ($this->config->routes as $routes) {
+            if ($options = realpath($this->path . '/' . $routes)) {
+                $router->import($options);
+            }
+        }
+    }
+
+    private function applyClassPaths(ManagerInterface $manager)
     {
         $paths = new Locator($this->path);
-        $paths->addPaths((array) $this->config->viewPaths, false);
-        $locator->addPaths($paths);
+        $paths->addPaths($this->config->srcPaths);
+        $manager->getServiceContainer()->loaderLocator->addPaths($paths);
+    }
+
+    private function applyViewPaths(ManagerInterface $manager)
+    {
+        $paths = new Locator($this->path);
+        $paths->addPaths($this->config->viewPaths, false);
+        $manager->getServiceContainer()->viewLocator->addPaths($paths);
+    }
+
+    private function bootstrap(ManagerInterface $manager)
+    {
+        if (class_exists($bootstrapper = $this->getBootstrapperClassName(), true)) {
+            (new $bootstrapper)->__invoke($this, $manager);
+        }
     }
 
     private function getBootstrapperClassName()
@@ -179,5 +192,19 @@ class Module implements ArrayAccess
         return $this->config->bootstrapperPrefix
             . (new UpperCamelCaseFilter)->__invoke($this->name)
             . $this->config->bootstrapperSuffix;
+    }
+
+    private function initPathAndName($path)
+    {
+        if (!$this->path = realpath($path)) {
+            Exception::toss('The module path "%s" does not exist.', $path);
+        }
+
+        $this->name = basename($this->path);
+    }
+
+    private function initConfig($config)
+    {
+        $this->config = new Config($this->config, $config);
     }
 }

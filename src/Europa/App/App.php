@@ -1,9 +1,11 @@
 <?php
 
 namespace Europa\App;
+use Europa\Config\Config;
 use Europa\Di\ServiceContainer;
 use Europa\Di\ServiceContainerInterface;
 use Europa\Exception\Exception;
+use Europa\Module\Module;
 use Europa\Response\HttpInterface;
 
 class App implements AppInterface
@@ -23,12 +25,13 @@ class App implements AppInterface
     const EVENT_DONE = 'done';
 
     private $config = [
-        'basePath'         => null,
-        'appPath'          => '{basePath}/app',
-        'modules'          => [self::DEFAULT_MODULE],
-        'defaultViewClass' => 'Europa\View\Php',
-        'viewScriptFormat' => ':controller/:action',
-        'viewSuffix'       => 'php'
+        'basePath'            => null,
+        'appPath'             => '{basePath}/app',
+        'modules'             => ['main' => []],
+        'defaultModuleConfig' => [],
+        'defaultViewClass'    => 'Europa\View\Php',
+        'viewScriptFormat'    => ':controller/:action',
+        'viewSuffix'          => 'php'
     ];
 
     private $container;
@@ -37,7 +40,7 @@ class App implements AppInterface
 
     public function __construct($config = [])
     {
-        $this->initContainer($config);
+        $this->initConfig($config);
         $this->initBasePath();
         $this->initModules();
     }
@@ -140,7 +143,7 @@ class App implements AppInterface
         return realpath($script . '/..');
     }
 
-    private function initContainer($config)
+    private function initConfig($config)
     {
         $configuration = new AppConfiguration;
         $configuration->setArguments('config', $this->config, $config);
@@ -158,8 +161,15 @@ class App implements AppInterface
 
     private function initModules()
     {
-        foreach ($this->container->config['modules'] as $name => $module) {
-            $this->container->modules->offsetSet($name, $module);
+        foreach ($this->container->config['modules'] as $name => $config) {
+            try {
+                $this->modules->offsetSet($name, new Module(
+                    $this->container->config['appPath'] . '/' . $name,
+                    new Config($this->container->config['defaultModuleConfig'], $config)
+                ));
+            } catch (Exception $e) {
+                Exception::toss('Could not initialize module "%s" from the application config because: %s', $name, $e->getMessage());
+            }
         }
     }
 

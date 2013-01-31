@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\Config\Adapter;
+namespace Europa\Config\Adapter\To;
 
 class Yaml extends Yml
 {
