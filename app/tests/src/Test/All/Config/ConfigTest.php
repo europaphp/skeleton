@@ -1,7 +1,6 @@
 <?php
 
 namespace Test\All\Config;
-use Europa\Config\Adapter\Ini;
 use Europa\Config\Config;
 use Exception;
 use Testes\Test\UnitAbstract;
@@ -29,11 +28,11 @@ class ConfigTest extends UnitAbstract
     public function accessingMagicAndArrayAccess()
     {
         $config = new Config([
-            'some.nested.value' => true
+            'some' => ['nested' => ['value' => true]]
         ]);
 
         $this->assert($config->some->nested->value, 'Using "some->nested->value" does not work.');
-        $this->assert($config['some.nested.value'], 'Using "some.nested.value" does not work.');
+        $this->assert($config['some']['nested']['value'], 'Using "some.nested.value" does not work.');
 
         unset($config->some->nested->value);
 
@@ -60,21 +59,13 @@ class ConfigTest extends UnitAbstract
 
     public function exporting()
     {
-        $config = new Config([
+        $original = [
             'some.test.array' => ['some' => 'value']
-        ]);
-
-        $compare = [
-            'some' => [
-                'test' => [
-                    'array' => [
-                        'some' => 'value'
-                    ]
-                ]
-            ]
         ];
 
-        $this->assert($config->export() === $compare, 'Arrays do not match.');
+        $config = new Config($original);
+
+        $this->assert($config->export() === $original, 'Arrays do not match.');
     }
 
     public function readonly()
@@ -105,7 +96,7 @@ class ConfigTest extends UnitAbstract
     public function references()
     {
         $config = new Config([
-            'referencer' => 'referencing:{$this->referencee}',
+            'referencer' => 'referencing:{referencee}',
             'referencee' => 'somevalue'
         ]);
 
@@ -116,7 +107,7 @@ class ConfigTest extends UnitAbstract
     {
         $config = new Config([
             'float'      => 1.1,
-            'referencer' => '{$this->float}'
+            'referencer' => '{float}'
         ]);
 
         $this->assert($config->referencer === '1.1', 'Value referencing the float should result as a float.');
@@ -127,10 +118,25 @@ class ConfigTest extends UnitAbstract
         $config = new Config([
             'int1'       => 1,
             'int2'       => 2,
-            'referencer' => '{$this->int1}.{$this->int2}'
+            'referencer' => '{int1}.{int2}'
         ]);
 
         $this->assert($config->referencer === '1.2');
+    }
+
+    public function parentAccess()
+    {
+        $config = new Config([
+            'value'  => 'test',
+            'nested' => [
+                'value'  => 'test{_parent.value}',
+                'nested' => [
+                    'value' => 'test{_parent._parent.value}{_root.value}'
+                ]
+            ]
+        ]);
+
+        $this->assert($config->nested->nested->value === 'testtesttest');
     }
 
     public function castingMultipleReferencesContainintAString()
@@ -142,30 +148,6 @@ class ConfigTest extends UnitAbstract
         ]);
 
         $this->assert($config->referencer === 'somestring_1.1');
-    }
-
-    public function adapter()
-    {
-        $config = new Config;
-        $config->import(new Ini($this->path . 'test.ini'));
-
-        $this->assert($config->values->value1, 'First value should have been parsed.');
-        $this->assert($config['values.value2'], 'Second value should have been parse.d');
-    }
-
-    public function badIniFile()
-    {
-        try {
-            new Ini('somebadfile');
-            $this->assert(false, 'Exception should have been thrown for bad ini file.');
-        } catch (Exception $e) {}
-    }
-
-    public function phpFile()
-    {
-        $config = new Config($this->path . 'test.php');
-
-        $this->assert($config->test, 'PHP file not parsed.');
     }
 
     public function jsonFile()

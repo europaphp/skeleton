@@ -1,0 +1,6 @@
+test-get:
+  pattern: (?<action>GET) (?<controller>test)
+
+test-cli:
+  pattern: (?<controller>test)
+  action: cli

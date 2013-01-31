@@ -1,0 +1,4 @@
+help-cli:
+  pattern: (help|\?)
+  controller: help
+  action: cli
