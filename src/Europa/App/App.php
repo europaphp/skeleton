@@ -193,8 +193,10 @@ class App implements AppInterface
         return $controller($this->container->request);
     }
 
-    private function renderView(array $context)
+    private function renderView($context)
     {
+        $context = $context ?: [];
+
         $this->container->event->trigger(self::EVENT_RENDER, $this, $context);
 
         if ($this->container->response instanceof HttpInterface) {
@@ -202,7 +204,7 @@ class App implements AppInterface
         }
 
         $rendered = $this->container->view;
-        $rendered = $rendered($context ?: []);
+        $rendered = $rendered($context);
 
         return $rendered;
     }
