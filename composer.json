@@ -26,5 +26,8 @@
     "require-dev": {
         "ext-xdebug": "2.1.*",
         "treshugart/testes": "1.0.x-dev"
+    },
+    "conflict": {
+        "treshugart/europaphp": "*"
     }
 }
