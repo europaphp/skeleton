@@ -26,8 +26,9 @@ class App implements AppInterface
 
     private $config = [
         'basePath'            => null,
-        'appPath'             => '{basePath}/app',
+        'appPath'             => '{basePath}',
         'modules'             => [],
+        'moduleAliases'       => [],
         'defaultModuleConfig' => [],
         'defaultViewClass'    => 'Europa\View\Php',
         'viewScriptFormat'    => ':controller/:action',

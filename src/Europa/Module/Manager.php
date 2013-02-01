@@ -8,6 +8,8 @@ use Europa\Di\ServiceContainerInterface;
 
 class Manager implements ManagerInterface
 {
+    private $aliases = [];
+
     private $bootstrappedModules = [];
 
     private $container;
@@ -30,6 +32,12 @@ class Manager implements ManagerInterface
     public function getServiceContainer()
     {
         return $this->container;
+    }
+
+    public function alias($alias, $module)
+    {
+        $this->aliases[$alias] = $module;
+        return $this;
     }
 
     public function bootstrap()
@@ -57,6 +65,10 @@ class Manager implements ManagerInterface
 
     public function offsetSet($offset, $module)
     {
+        if (isset($this->aliases[$offset])) {
+            $offset = $this->aliases[$offset];
+        }
+
         if (!$module instanceof ModuleInterface) {
             Exception::toss('The module "%s" must be implement Europa\Module\ModuleInterface.', $offset);
         }

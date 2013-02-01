@@ -19,6 +19,9 @@
     "require": {
         "php": "5.4.*"
     },
+    "require-dev": {
+        "europaphp/module-tests": "dev-master"
+    },
     "replace": {
         "treshugart/europaphp": "*"
     },
