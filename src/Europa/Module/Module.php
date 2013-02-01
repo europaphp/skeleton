@@ -14,6 +14,7 @@ use ReflectionExtension;
 class Module implements ArrayAccess, ModuleInterface
 {
     private $config = [
+        'name'               => null,
         'version'            => '0',
         'configs'            => ['configs/config.yml'],
         'routes'             => ['configs/routes.yml'],
@@ -27,16 +28,13 @@ class Module implements ArrayAccess, ModuleInterface
         'bootstrapperSuffix' => ''
     ];
 
-    private $name;
-
     private $path;
-
-    private $version;
 
     public function __construct($path, $config = [])
     {
         $this->initPathAndName($path);
         $this->initConfig($config);
+        $this->validateConfig();
     }
 
     public function __toString()
@@ -64,7 +62,7 @@ class Module implements ArrayAccess, ModuleInterface
 
     public function name()
     {
-        return $this->name;
+        return $this->config->name;
     }
 
     public function path()
@@ -248,6 +246,34 @@ class Module implements ArrayAccess, ModuleInterface
             if ($path = realpath($this->path . '/' . $config)) {
                 $this->config->import($path);
             }
+        }
+    }
+
+    private function validateConfig()
+    {
+        $this->validateConfigName();
+    }
+
+    private function validateConfigName()
+    {
+        $name = $this->config->name;
+
+        if (!$name) {
+            Exception::toss('You must specify a "name" in your module confuration.');
+        }
+
+        $parts = explode('/', $name);
+
+        if (count($parts) !== 2) {
+            Exception::toss('Module name must be in the format of "vendor/module-name".');
+        }
+
+        if (!$parts[0]) {
+            Exception::toss('The vendor part of the module name "%s" cannot be empty.', $name);
+        }
+
+        if (!$parts[1]) {
+            Exception::toss('The module-name part of the module name "%s" cannot be empty.', $name);
         }
     }
 }

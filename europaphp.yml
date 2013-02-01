@@ -1,4 +1,4 @@
 modules:
-  europaphp/help:
-  europaphp/main:
-  europaphp/tests:
+  vendor/europaphp/module-help:
+  vendor/europaphp/module-main:
+  vendor/europaphp/module-tests:

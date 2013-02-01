@@ -17,10 +17,11 @@
         }
     },
     "require": {
-        "php": "5.4.*"
-    },
-    "require-dev": {
-        "europaphp/module-tests": "dev-master"
+        "php": "5.4.*",
+        "europaphp/module-help": "dev-master",
+        "europaphp/module-main": "dev-master",
+        "europaphp/module-tests": "dev-master",
+        "treshugart/testes": "1.0.x-dev"
     },
     "replace": {
         "treshugart/europaphp": "*"

@@ -78,7 +78,7 @@ class Php extends ViewScriptAbstract
     public function helper($name)
     {
         if (!$this->helpers) {
-            Exception::toss('Could not return helper "%s" because it does not exist.', $name);
+            Exception::toss('Could not return helper "%s" because a helper container was not specified.', $name);
         }
 
         $helpers = $this->helpers;

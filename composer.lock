@@ -1,9 +1,137 @@
 {
-    "hash": "c0f8dad712a775d57cd8e477ccff6dfd",
+    "hash": "6b39a4c2caf992f79c0483c791356d75",
     "packages": [
-
+        {
+            "name": "europaphp/module-help",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "http://github.com/europaphp/module-help",
+                "reference": "fdf0d7de64a87fb2ec05e2c5815ef2d6611aba1c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/module-help/zipball/fdf0d7de64a87fb2ec05e2c5815ef2d6611aba1c",
+                "reference": "fdf0d7de64a87fb2ec05e2c5815ef2d6611aba1c",
+                "shasum": ""
+            },
+            "require": {
+                "europaphp/module-main": "dev-master"
+            },
+            "time": "2013-02-01 02:27:58",
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Controller": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "Command Line Help Module for EuropaPHP 2",
+            "keywords": [
+                "cli",
+                "help",
+                "man"
+            ]
+        },
+        {
+            "name": "europaphp/module-main",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "http://github.com/europaphp/module-main",
+                "reference": "67acee47b59808061572ac16e3c51d1e452b658b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/module-main/zipball/67acee47b59808061572ac16e3c51d1e452b658b",
+                "reference": "67acee47b59808061572ac16e3c51d1e452b658b",
+                "shasum": ""
+            },
+            "require": {
+                "europaphp/europaphp": "2.2.*"
+            },
+            "time": "2013-02-01 01:54:49",
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Bootstrapper": "src",
+                    "Controller": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "Main module dependency for some other modules.",
+            "keywords": [
+                "default",
+                "main"
+            ]
+        }
     ],
     "packages-dev": [
+        {
+            "name": "europaphp/module-tests",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "http://github.com/europaphp/module-tests",
+                "reference": "33ec83582d0a9aa202b178d591e0d7d3ab59494f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/module-tests/zipball/33ec83582d0a9aa202b178d591e0d7d3ab59494f",
+                "reference": "33ec83582d0a9aa202b178d591e0d7d3ab59494f",
+                "shasum": ""
+            },
+            "require": {
+                "europaphp/module-main": "dev-master"
+            },
+            "time": "2013-02-01 04:35:43",
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Controller": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "Tests and test runner for EuropaPHP.",
+            "keywords": [
+                "cli",
+                "help",
+                "man"
+            ]
+        },
         {
             "name": "treshugart/testes",
             "version": "1.0.x-dev",
@@ -62,6 +190,9 @@
     ],
     "minimum-stability": "stable",
     "stability-flags": {
+        "europaphp/module-help": 20,
+        "europaphp/module-main": 20,
+        "europaphp/module-tests": 20,
         "treshugart/testes": 20
     }
 }
