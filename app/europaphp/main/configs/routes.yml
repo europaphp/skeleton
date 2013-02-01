@@ -1,3 +1,0 @@
-index:
-  pattern: (?<action>GET) (index)?
-  controller: index

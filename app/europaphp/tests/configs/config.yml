@@ -1,6 +1,0 @@
-version: 0.1.0
-path: src
-requiredModules:
-  europaphp/main: 0.1.*
-requiredExtensions:
-  xdebug: 2.2.*
