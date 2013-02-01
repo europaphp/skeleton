@@ -17,17 +17,12 @@
         }
     },
     "require": {
-        "php": "5.4.*",
-        "ext-yaml": "1.1.*",
-        "europaphp/module-help": "0.1.*",
-        "europaphp/module-main": "0.1.*",
-        "europaphp/module-tests": "0.1.*"
-    },
-    "require-dev": {
-        "ext-xdebug": "2.1.*",
-        "treshugart/testes": "1.0.x-dev"
+        "php": "5.4.*"
     },
     "replace": {
         "treshugart/europaphp": "*"
+    },
+    "suggest": {
+        "ext-yaml": "Recommended for using YAML-based configuration files."
     }
 }
