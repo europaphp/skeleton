@@ -1,5 +1,5 @@
 {
-    "hash": "6b39a4c2caf992f79c0483c791356d75",
+    "hash": "29c24a4c65587767506c188dc382e71b",
     "packages": [
         {
             "name": "europaphp/module-help",
@@ -7,18 +7,18 @@
             "source": {
                 "type": "git",
                 "url": "http://github.com/europaphp/module-help",
-                "reference": "fdf0d7de64a87fb2ec05e2c5815ef2d6611aba1c"
+                "reference": "e21c1d47c8e10edc877367e3e1d3f43a1ce04919"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-help/zipball/fdf0d7de64a87fb2ec05e2c5815ef2d6611aba1c",
-                "reference": "fdf0d7de64a87fb2ec05e2c5815ef2d6611aba1c",
+                "url": "https://api.github.com/repos/europaphp/module-help/zipball/e21c1d47c8e10edc877367e3e1d3f43a1ce04919",
+                "reference": "e21c1d47c8e10edc877367e3e1d3f43a1ce04919",
                 "shasum": ""
             },
             "require": {
                 "europaphp/module-main": "dev-master"
             },
-            "time": "2013-02-01 02:27:58",
+            "time": "2013-02-01 08:06:44",
             "type": "library",
             "autoload": {
                 "psr-0": {
@@ -50,18 +50,18 @@
             "source": {
                 "type": "git",
                 "url": "http://github.com/europaphp/module-main",
-                "reference": "67acee47b59808061572ac16e3c51d1e452b658b"
+                "reference": "c401cce7c4b2293cf5c38325dbd4b81c767b7cc1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-main/zipball/67acee47b59808061572ac16e3c51d1e452b658b",
-                "reference": "67acee47b59808061572ac16e3c51d1e452b658b",
+                "url": "https://api.github.com/repos/europaphp/module-main/zipball/c401cce7c4b2293cf5c38325dbd4b81c767b7cc1",
+                "reference": "c401cce7c4b2293cf5c38325dbd4b81c767b7cc1",
                 "shasum": ""
             },
             "require": {
                 "europaphp/europaphp": "2.2.*"
             },
-            "time": "2013-02-01 01:54:49",
+            "time": "2013-02-01 08:07:06",
             "type": "library",
             "autoload": {
                 "psr-0": {
@@ -86,27 +86,25 @@
                 "default",
                 "main"
             ]
-        }
-    ],
-    "packages-dev": [
+        },
         {
             "name": "europaphp/module-tests",
             "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "http://github.com/europaphp/module-tests",
-                "reference": "33ec83582d0a9aa202b178d591e0d7d3ab59494f"
+                "reference": "b02a6ec22f0847a98cc65b67e6d5578473c4d444"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-tests/zipball/33ec83582d0a9aa202b178d591e0d7d3ab59494f",
-                "reference": "33ec83582d0a9aa202b178d591e0d7d3ab59494f",
+                "url": "https://api.github.com/repos/europaphp/module-tests/zipball/b02a6ec22f0847a98cc65b67e6d5578473c4d444",
+                "reference": "b02a6ec22f0847a98cc65b67e6d5578473c4d444",
                 "shasum": ""
             },
             "require": {
                 "europaphp/module-main": "dev-master"
             },
-            "time": "2013-02-01 04:35:43",
+            "time": "2013-02-01 08:07:58",
             "type": "library",
             "autoload": {
                 "psr-0": {
@@ -184,6 +182,9 @@
                 "driven"
             ]
         }
+    ],
+    "packages-dev": [
+
     ],
     "aliases": [
 

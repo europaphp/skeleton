@@ -8,4 +8,4 @@ before_script:
   - composer selfupdate
   - composer install --dev
 
-script: php www/index.php test
+script: php www/index.php test europa

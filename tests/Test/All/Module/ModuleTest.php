@@ -29,6 +29,7 @@ class ModuleTest extends UnitAbstract
     public function requiringOtherModules()
     {
         $module = new Module($this->modulePath, [
+            'name'            => 'test/module',
             'requiredModules' => ['non-existent-module']
         ]);
 
@@ -43,6 +44,7 @@ class ModuleTest extends UnitAbstract
     public function requiringExtensions()
     {
         $module = new Module($this->modulePath, [
+            'name'            => 'test/module',
             'requiredExtensions' => ['non-existent-extension']
         ]);
 
@@ -57,6 +59,7 @@ class ModuleTest extends UnitAbstract
     public function requiringClasses()
     {
         $module = new Module($this->modulePath, [
+            'name'            => 'test/module',
             'requiredExtensions' => ['NonExistentClass']
         ]);
 
@@ -71,6 +74,7 @@ class ModuleTest extends UnitAbstract
     public function requiringFunctions()
     {
         $module = new Module($this->modulePath, [
+            'name'            => 'test/module',
             'requiredFunctions' => ['non_existent_function']
         ]);
 
