@@ -163,18 +163,20 @@ class App implements AppInterface
 
     private function initModules()
     {
-        foreach ($this->container->config['modules'] as $name => $config) {
-            $config = new Config(
+        foreach ($this->container->config['modules'] as $name => $configOverride) {
+            $defaultConfig = new Config(
                 $this->container->config['defaultModuleConfig'],
-                $config,
-                $this->container->config['moduleConfigs'][$name]
+                $this->container->config['defaultModuleConfigs'][$name]
             );
 
             try {
-                $this->modules->offsetSet($name, new Module(
+                $module = new Module(
                     $this->container->config['appPath'] . '/' . $name,
-                    $config
-                ));
+                    $defaultConfig
+                );
+
+                $module->config()->import($configOverride);
+                $this->modules->offsetSet($name, $module);
             } catch (Exception $e) {
                 Exception::toss('Could not initialize module "%s" from the application config because: %s', $name, $e->getMessage());
             }
