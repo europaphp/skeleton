@@ -10,11 +10,7 @@ class Manager implements ManagerInterface
 {
     private $aliases = [];
 
-    private $bootstrappedModules = [];
-
     private $container;
-
-    private $isBootstrapped = false;
 
     private $modules = [];
 
@@ -37,24 +33,12 @@ class Manager implements ManagerInterface
     public function bootstrap()
     {
         foreach ($this->modules as $module) {
-            $module->bootstrap($this);
-            
-            $this->bootstrappedModules[] = $module;
+            if (!$module->bootstrapped()) {
+                $module->bootstrap($this);
+            }
         }
-
-        $this->isBootstrapped = true;
         
         return $this;
-    }
-
-    public function isBootstrapped()
-    {
-        return $this->isBootstrapped;
-    }
-
-    public function isModuleBootstrapped($module)
-    {
-        return in_array($module, $this->bootstrappedModules, true);
     }
 
     public function offsetSet($offset, $module)

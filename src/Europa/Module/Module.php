@@ -5,7 +5,7 @@ use ArrayAccess;
 use Europa\Config\Config;
 use Europa\Config\ConfigInterface;
 use Europa\Exception\Exception;
-use Europa\Filter\UpperCamelCaseFilter;
+use Europa\Filter\ClassNameFilter;
 use Europa\Fs\Locator;
 use Europa\Router\Router;
 use Europa\Version\SemVer;
@@ -13,6 +13,8 @@ use ReflectionExtension;
 
 class Module implements ArrayAccess, ModuleInterface
 {
+    private $bootstrapped = false;
+
     private $config = [
         'name'               => null,
         'version'            => '0',
@@ -24,7 +26,7 @@ class Module implements ArrayAccess, ModuleInterface
         'requiredExtensions' => [],
         'requiredClasses'    => [],
         'requiredFunctions'  => [],
-        'bootstrapperPrefix' => 'Bootstrapper\\',
+        'bootstrapperPrefix' => '',
         'bootstrapperSuffix' => ''
     ];
 
@@ -32,7 +34,7 @@ class Module implements ArrayAccess, ModuleInterface
 
     public function __construct($path, $config = [])
     {
-        $this->initPathAndName($path);
+        $this->initPath($path);
         $this->initConfig($config);
         $this->validateConfig();
     }
@@ -44,6 +46,8 @@ class Module implements ArrayAccess, ModuleInterface
 
     public function bootstrap(ManagerInterface $manager)
     {
+        $this->bootstrapped = true;
+
         $this->applyConfigs($manager);
         $this->validateManager($manager);
         $this->bootstrapDependencies($manager);
@@ -53,6 +57,11 @@ class Module implements ArrayAccess, ModuleInterface
         $this->invokeBootstrapper($manager);
         
         return $this;
+    }
+
+    public function bootstrapped()
+    {
+        return $this->bootstrapped;
     }
 
     public function config()
@@ -112,7 +121,7 @@ class Module implements ArrayAccess, ModuleInterface
                 Exception::toss(
                     'The module "%s" is required by the module "%s".',
                     $module,
-                    $this->name
+                    $this->name()
                 );
             }
 
@@ -124,7 +133,7 @@ class Module implements ArrayAccess, ModuleInterface
                     $module,
                     $manager->offsetGet($module)->version(),
                     $version,
-                    $this->name
+                    $this->name()
                 );
             }
         }
@@ -137,7 +146,7 @@ class Module implements ArrayAccess, ModuleInterface
                 Exception::toss(
                     'The extension "%s" is not loaded and is required by the module "%s".',
                     $extension,
-                    $this->name
+                    $this->name()
                 );
             }
 
@@ -150,7 +159,7 @@ class Module implements ArrayAccess, ModuleInterface
                     $extension->getName(),
                     $extension->getVersion(),
                     $version,
-                    $this->name
+                    $this->name()
                 );
             }
         }
@@ -160,7 +169,7 @@ class Module implements ArrayAccess, ModuleInterface
     {
         foreach ($this->config->requiredClasses as $class) {
             if (!class_exists($class, true)) {
-                Exception::toss('The class "%s" is required by the module "%s".', $class, $this->name);
+                Exception::toss('The class "%s" is required by the module "%s".', $class, $this->name());
             }
         }
     }
@@ -169,7 +178,7 @@ class Module implements ArrayAccess, ModuleInterface
     {
         foreach ($this->config->requiredFunctions as $function) {
             if (!function_exists($function)) {
-                Exception::toss('The function "%s" is required by the module "%s".', $function, $this->name);
+                Exception::toss('The function "%s" is required by the module "%s".', $function, $this->name());
             }
         }
     }
@@ -179,7 +188,7 @@ class Module implements ArrayAccess, ModuleInterface
         foreach ($this->config->requiredModules as $module => $version) {
             $module = $manager->offsetGet($module);
 
-            if (!$manager->isModuleBootstrapped($module)) {
+            if (!$module->bootstrapped()) {
                 $module->bootstrap($manager);
             }
         }
@@ -187,7 +196,7 @@ class Module implements ArrayAccess, ModuleInterface
 
     private function applyConfigs(ManagerInterface $manager)
     {
-        $manager->getServiceContainer()->config->modules[$this->name] = $this->config;
+        $manager->getServiceContainer()->config->modules[$this->name()] = $this->config;
     }
 
     private function applyRoutes(ManagerInterface $manager)
@@ -217,7 +226,7 @@ class Module implements ArrayAccess, ModuleInterface
 
     private function invokeBootstrapper(ManagerInterface $manager)
     {
-        if (class_exists($bootstrapper = $this->getBootstrapperClassName(), true)) {
+        if (class_exists($bootstrapper = $this->getBootstrapperClassName())) {
             (new $bootstrapper)->__invoke($this, $manager);
         }
     }
@@ -225,17 +234,15 @@ class Module implements ArrayAccess, ModuleInterface
     private function getBootstrapperClassName()
     {
         return $this->config->bootstrapperPrefix
-            . (new UpperCamelCaseFilter)->__invoke($this->name)
+            . (new ClassNameFilter)->__invoke($this->name())
             . $this->config->bootstrapperSuffix;
     }
 
-    private function initPathAndName($path)
+    private function initPath($path)
     {
         if (!$this->path = realpath($path)) {
             Exception::toss('The module path "%s" does not exist.', $path);
         }
-
-        $this->name = basename($this->path);
     }
 
     private function initConfig($config)
