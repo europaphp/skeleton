@@ -166,8 +166,8 @@ class App implements AppInterface
         foreach ($this->container->config['modules'] as $name => $config) {
             $config = new Config(
                 $this->container->config['defaultModuleConfig'],
-                $this->container->config['moduleConfigs'][$name],
-                $config
+                $config,
+                $this->container->config['moduleConfigs'][$name]
             );
 
             try {
