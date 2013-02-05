@@ -29,6 +29,7 @@ class App implements AppInterface
         'appPath'             => '{basePath}',
         'modules'             => [],
         'moduleAliases'       => [],
+        'moduleConfigs'       => [],
         'defaultModuleConfig' => [],
         'defaultViewClass'    => 'Europa\View\Php',
         'viewScriptFormat'    => ':controller/:action',
@@ -163,10 +164,16 @@ class App implements AppInterface
     private function initModules()
     {
         foreach ($this->container->config['modules'] as $name => $config) {
+            $config = new Config(
+                $this->container->config['defaultModuleConfig'],
+                $this->container->config['moduleConfigs'][$name],
+                $config
+            );
+
             try {
                 $this->modules->offsetSet($name, new Module(
                     $this->container->config['appPath'] . '/' . $name,
-                    new Config($this->container->config['defaultModuleConfig'], $config)
+                    $config
                 ));
             } catch (Exception $e) {
                 Exception::toss('Could not initialize module "%s" from the application config because: %s', $name, $e->getMessage());
