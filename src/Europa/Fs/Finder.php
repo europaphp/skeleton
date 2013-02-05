@@ -3,6 +3,7 @@
 namespace Europa\Fs;
 use AppendIterator;
 use ArrayIterator;
+use Countable;
 use DirectoryIterator;
 use Europa\Exception\Exception;
 use Europa\Fs\Directory;
@@ -20,7 +21,7 @@ use RecursiveIteratorIterator;
 use SplFileInfo;
 use Traversable;
 
-class Finder implements IteratorAggregate
+class Finder implements Countable, IteratorAggregate
 {
     const WILDCARD = '*';
 
@@ -43,6 +44,11 @@ class Finder implements IteratorAggregate
     private $prepend = [];
     
     private $append = [];
+
+    public function count()
+    {
+        return count($this->toArray());
+    }
     
     public function getIterator()
     {
@@ -140,9 +146,15 @@ class Finder implements IteratorAggregate
     
     public function in($path)
     {
-        if (is_dir($real = realpath($path))) {
-            $this->dirs[] = $real;
-        } elseif (strpos($path, self::WILDCARD)) {
+        if (is_array($path)) {
+            foreach ($path as $item) {
+                $this->in($item);
+            }
+
+            return $this;
+        }
+
+        if (strpos($path, self::WILDCARD)) {
             $paths = explode(self::WILDCARD, $path, 2);
 
             if (!is_dir($paths[0])) {
@@ -156,6 +168,12 @@ class Finder implements IteratorAggregate
 
                 $this->in($item->getRealpath() . $paths[1]);
             }
+
+            return $this;
+        }
+
+        if (is_dir($real = realpath($path))) {
+            $this->dirs[] = $real;
         }
 
         return $this;
