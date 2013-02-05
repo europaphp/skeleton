@@ -259,7 +259,7 @@ class Module implements ArrayAccess, ModuleInterface
         $name = $this->config->name;
 
         if (!$name) {
-            Exception::toss('You must specify a "name" in your module confuration.');
+            Exception::toss('You must specify a "name" in your module configuration.');
         }
 
         $parts = explode('/', $name);

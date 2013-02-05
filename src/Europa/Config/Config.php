@@ -286,8 +286,10 @@ class Config implements ConfigInterface
         $value = str_replace('\\', '\\\\', $value);
         return preg_replace_callback('/\{' . self::REGEX_VALID_NAME . '\}/', function($replace) {
             $replace = $replace[0];
-            $replace = str_replace('.', '->', $replace);
-            return str_replace('{', '{$this->', $replace);
+            $replace = str_replace('.', '\'][\'', $replace);
+            $replace = substr($replace, 0, -1);
+            $replace = str_replace('{', '{$this[\'', $replace);
+            return $replace . '\']}';
         }, $value);
     }
 
