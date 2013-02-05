@@ -146,14 +146,6 @@ class Finder implements Countable, IteratorAggregate
     
     public function in($path)
     {
-        if (is_array($path)) {
-            foreach ($path as $item) {
-                $this->in($item);
-            }
-
-            return $this;
-        }
-
         if (strpos($path, self::WILDCARD)) {
             $paths = explode(self::WILDCARD, $path, 2);
 
@@ -181,9 +173,7 @@ class Finder implements Countable, IteratorAggregate
 
     public function notIn($path)
     {
-        if (is_dir($real = realpath($path))) {
-            $this->notDirs[] = $real;
-        } elseif (strpos($path, self::WILDCARD)) {
+        if (strpos($path, self::WILDCARD)) {
             $paths = explode(self::WILDCARD, $path, 2);
 
             foreach (new DirectoryIterator($paths[0]) as $item) {
@@ -193,6 +183,12 @@ class Finder implements Countable, IteratorAggregate
 
                 $this->notIn($item->getRealpath() . $paths[1]);
             }
+
+            return $this;
+        }
+
+        if (is_dir($real = realpath($path))) {
+            $this->notDirs[] = $real;
         }
 
         return $this;
