@@ -1,72 +1,31 @@
 {
-    "hash": "29c24a4c65587767506c188dc382e71b",
+    "hash": "21d6031b9835a46e80a4a699cfe428f3",
     "packages": [
-        {
-            "name": "europaphp/module-help",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "http://github.com/europaphp/module-help",
-                "reference": "e21c1d47c8e10edc877367e3e1d3f43a1ce04919"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-help/zipball/e21c1d47c8e10edc877367e3e1d3f43a1ce04919",
-                "reference": "e21c1d47c8e10edc877367e3e1d3f43a1ce04919",
-                "shasum": ""
-            },
-            "require": {
-                "europaphp/module-main": "dev-master"
-            },
-            "time": "2013-02-01 08:06:44",
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "Controller": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Trey Shugart",
-                    "email": "treshugart@gmail.com",
-                    "homepage": "http://iamtres.com",
-                    "role": "Lead Developer"
-                }
-            ],
-            "description": "Command Line Help Module for EuropaPHP 2",
-            "keywords": [
-                "cli",
-                "help",
-                "man"
-            ]
-        },
+
+    ],
+    "packages-dev": [
         {
             "name": "europaphp/module-main",
             "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "http://github.com/europaphp/module-main",
-                "reference": "c401cce7c4b2293cf5c38325dbd4b81c767b7cc1"
+                "reference": "462224edf468740fb07b711c2d0cd9e70b72f01a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-main/zipball/c401cce7c4b2293cf5c38325dbd4b81c767b7cc1",
-                "reference": "c401cce7c4b2293cf5c38325dbd4b81c767b7cc1",
+                "url": "https://api.github.com/repos/europaphp/module-main/zipball/462224edf468740fb07b711c2d0cd9e70b72f01a",
+                "reference": "462224edf468740fb07b711c2d0cd9e70b72f01a",
                 "shasum": ""
             },
             "require": {
-                "europaphp/europaphp": "2.2.*"
+                "europaphp/europaphp": "2.2.x-dev"
             },
-            "time": "2013-02-01 08:07:06",
+            "time": "2013-02-04 23:13:34",
             "type": "library",
             "autoload": {
                 "psr-0": {
-                    "Bootstrapper": "src",
-                    "Controller": "src"
+                    "": "src"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -93,22 +52,22 @@
             "source": {
                 "type": "git",
                 "url": "http://github.com/europaphp/module-tests",
-                "reference": "b02a6ec22f0847a98cc65b67e6d5578473c4d444"
+                "reference": "8e81d2f70ec9acaaf5f47b63861769e727858ea9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-tests/zipball/b02a6ec22f0847a98cc65b67e6d5578473c4d444",
-                "reference": "b02a6ec22f0847a98cc65b67e6d5578473c4d444",
+                "url": "https://api.github.com/repos/europaphp/module-tests/zipball/8e81d2f70ec9acaaf5f47b63861769e727858ea9",
+                "reference": "8e81d2f70ec9acaaf5f47b63861769e727858ea9",
                 "shasum": ""
             },
             "require": {
                 "europaphp/module-main": "dev-master"
             },
-            "time": "2013-02-01 08:07:58",
+            "time": "2013-02-04 23:13:48",
             "type": "library",
             "autoload": {
                 "psr-0": {
-                    "Controller": "src"
+                    "": "src"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -183,15 +142,11 @@
             ]
         }
     ],
-    "packages-dev": [
-
-    ],
     "aliases": [
 
     ],
     "minimum-stability": "stable",
     "stability-flags": {
-        "europaphp/module-help": 20,
         "europaphp/module-main": 20,
         "europaphp/module-tests": 20,
         "treshugart/testes": 20
