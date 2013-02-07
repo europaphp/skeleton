@@ -23,17 +23,6 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
         return $this->script;
     }
 
-    public function setScriptSuffix($suffix)
-    {
-        $this->suffix = $suffix;
-        return $this;
-    }
-
-    public function getScriptSuffix()
-    {
-        return $this->suffix;
-    }
-
     public function setScriptLocator(callable $scriptLocator)
     {
         $this->scriptLocator = $scriptLocator;
@@ -49,14 +38,9 @@ abstract class ViewScriptAbstract implements ViewScriptInterface
     {
         if ($this->scriptLocator) {
             $locator = $this->scriptLocator;
-            return $locator($this->formatScript());
+            return $locator($this->script);
         } elseif (is_file($this->script)) {
             return $this->script;
         }
-    }
-
-    public function formatScript()
-    {
-        return $this->script . ($this->script && $this->suffix ? '.' . $this->suffix : '');
     }
 }

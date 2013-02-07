@@ -16,12 +16,12 @@ class Module implements ArrayAccess, ModuleInterface
     private $bootstrapped = false;
 
     private $config = [
+        'config-files'       => ['configs/config.yml'],
+        'route-files'        => ['configs/routes.yml'],
         'name'               => null,
         'version'            => '0',
-        'configs'            => ['configs/config.yml'],
-        'routes'             => ['configs/routes.yml'],
-        'srcPaths'           => ['src'],
-        'viewPaths'          => ['views'],
+        'autoload-paths'     => ['src'],
+        'view-paths'         => ['views'],
         'requiredModules'    => [],
         'requiredExtensions' => [],
         'requiredClasses'    => [],
@@ -48,12 +48,8 @@ class Module implements ArrayAccess, ModuleInterface
     {
         $this->bootstrapped = true;
 
-        $this->applyConfigs($manager);
         $this->validateManager($manager);
         $this->bootstrapDependencies($manager);
-        $this->applyRoutes($manager);
-        $this->applyClassPaths($manager);
-        $this->applyViewPaths($manager);
         $this->invokeBootstrapper($manager);
         
         return $this;
@@ -62,6 +58,17 @@ class Module implements ArrayAccess, ModuleInterface
     public function bootstrapped()
     {
         return $this->bootstrapped;
+    }
+
+    public function autoloadPaths()
+    {
+        $paths = [];
+
+        foreach ($this->config['autoload-paths'] as $path) {
+            $paths[] = $this->path() . '/' . $path;
+        }
+
+        return $paths;
     }
 
     public function config()
@@ -77,6 +84,30 @@ class Module implements ArrayAccess, ModuleInterface
     public function path()
     {
         return $this->path;
+    }
+
+    public function routes()
+    {
+        $routes = new Config;
+
+        foreach ($this->config['route-files'] as $file) {
+            if (realpath($file = $this->path . '/' . $file)) {
+                $routes->import($file);
+            }
+        }
+
+        return $routes;
+    }
+
+    public function viewPaths()
+    {
+        $paths = [];
+
+        foreach ($this->config['view-paths'] as $path) {
+            $paths[] = $this->path() . '/' . $path;
+        }
+
+        return $paths;
     }
 
     public function version()
@@ -194,36 +225,6 @@ class Module implements ArrayAccess, ModuleInterface
         }
     }
 
-    private function applyConfigs(ManagerInterface $manager)
-    {
-        $manager->getServiceContainer()->config->modules[$this->name()] = $this->config;
-    }
-
-    private function applyRoutes(ManagerInterface $manager)
-    {
-        $router = $manager->getServiceContainer()->router;
-
-        foreach ($this->config->routes as $routes) {
-            if ($options = realpath($this->path . '/' . $routes)) {
-                $router->import($options);
-            }
-        }
-    }
-
-    private function applyClassPaths(ManagerInterface $manager)
-    {
-        $paths = new Locator($this->path);
-        $paths->addPaths($this->config->srcPaths);
-        $manager->getServiceContainer()->loaderLocator->addPaths($paths);
-    }
-
-    private function applyViewPaths(ManagerInterface $manager)
-    {
-        $paths = new Locator($this->path);
-        $paths->addPaths($this->config->viewPaths, false);
-        $manager->getServiceContainer()->viewLocator->addPaths($paths);
-    }
-
     private function invokeBootstrapper(ManagerInterface $manager)
     {
         if (class_exists($bootstrapper = $this->getBootstrapperClassName())) {
@@ -249,19 +250,14 @@ class Module implements ArrayAccess, ModuleInterface
     {
         $this->config = new Config($this->config, $config);
 
-        foreach ($this->config->configs as $k => $config) {
-            if ($path = realpath($this->path . '/' . $config)) {
-                $this->config->import($path);
+        foreach ($this->config['config-files'] as $file) {
+            if ($config = realpath($this->path . '/' . $file)) {
+                $this->config->import($config);
             }
         }
     }
 
     private function validateConfig()
-    {
-        $this->validateConfigName();
-    }
-
-    private function validateConfigName()
     {
         $name = $this->config->name;
 

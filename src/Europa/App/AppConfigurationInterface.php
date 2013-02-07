@@ -1,27 +1,43 @@
 <?php
 
 namespace Europa\App;
-use Europa\Module\ManagerConfigurationInterface;
+use Europa\Config\ConfigInterface;
+use Europa\Module\ManagerInterface;
+use Europa\Request\RequestInterface;
+use Europa\Router\Router;
 
-interface AppConfigurationInterface extends ManagerConfigurationInterface
+interface AppConfigurationInterface
 {
-    public function event();
+    public function config();
 
-    public function loader();
+    public function event(ConfigInterface $config);
 
-    public function modules();
+    public function loader(callable $loaderLocator);
+
+    public function loaderLocator(ConfigInterface $config, ManagerInterface $modules);
+
+    public function modules(ConfigInterface $config);
 
     public function request();
 
     public function response();
 
-    public function view();
+    public function router(ManagerInterface $modules);
 
-    public function viewHelperConfiguration();
+    public function view(
+        ConfigInterface $config,
+        RequestInterface $request,
+        callable $viewLocator,
+        callable $viewHelpers,
+        callable $viewNegotiator,
+        callable $viewScriptFormatter
+    );
 
-    public function viewHelpers();
+    public function viewHelpers(Router $router);
 
-    public function viewNegotiator();
+    public function viewLocator(ConfigInterface $config, ManagerInterface $modules);
 
-    public function viewScript();
+    public function viewNegotiator(ConfigInterface $config);
+
+    public function viewScriptFormatter();
 }

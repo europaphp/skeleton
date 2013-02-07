@@ -307,7 +307,7 @@ class Config implements ConfigInterface
                 $adapter = $this->autodetectAdapterFromFile($config);
                 $config  = file_get_contents($config);
             } else {
-                Exception::toss('Could not autodetect the adapter to import "%s".', $config);
+                Exception::toss('Could not import "%s" because the file does not exist.', $config);
             }
         }
 

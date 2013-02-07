@@ -10,11 +10,18 @@ class ServiceContainer implements ServiceContainerInterface
 {
     private $cache = [];
 
+    private $dependencies = [];
+
     private $services = [];
 
     private $transient = [];
 
     private static $instances = [];
+
+    public function __clone()
+    {
+        $this->cache = [];
+    }
 
     public function __invoke($name)
     {
@@ -32,22 +39,13 @@ class ServiceContainer implements ServiceContainerInterface
 
     public function __set($name, $value)
     {
-        // If a string is given, it is assumed to just be a class.
-        if (is_string($value)) {
-            $value = function() use ($value) {
-                return new $value;
-            };
+        if (isset($this->cache[$name])) {
+            unset($this->cache[$name]);
         }
 
-        // Anything that is not a closure is returned by a closure.
-        if (!$value instanceof Closure) {
-            $value = function() use ($value) {
-                return $value;
-            };
-        }
+        $this->uncacheServicesThatDependOn($name);
 
-        // Rebind the closure to the container.
-        $this->services[$name] = $value->bindTo($this);
+        $this->services[$name] = $this->ensureClosure($value);
     }
 
     public function __get($name)
@@ -62,11 +60,13 @@ class ServiceContainer implements ServiceContainerInterface
             $this->throwNotExists($name);
         }
 
+        $service = call_user_func_array($service, $this->resolveDependenciesFor($name));
+
         if (isset($this->transient[$name])) {
-            return $service($this);
+            return $service;
         }
 
-        return $this->cache[$name] = $service($this);
+        return $this->cache[$name] = $service;
     }
 
     public function __isset($name)
@@ -107,7 +107,7 @@ class ServiceContainer implements ServiceContainerInterface
 
     public function transient($name)
     {
-        $this->transient[$name] = $name;
+        $this->transient[] = $name;
 
         if (isset($this->cache[$name])) {
             unset($this->cache[$name]);
@@ -118,7 +118,25 @@ class ServiceContainer implements ServiceContainerInterface
 
     public function isTransient($name)
     {
-        return isset($this->transient[$name]);
+        return in_array($name, $this->transient);
+    }
+
+    public function depends($name, array $on)
+    {
+        $this->dependencies[$name] = $on;
+        return $this;
+    }
+
+    public function dependencies($name)
+    {
+        return isset($this->dependencies[$name])
+            ? $this->dependencies[$name]
+            : [];
+    }
+
+    public function isDepenent($name, $on)
+    {
+        return in_array($on, $this->dependencies($name));
     }
 
     public function provides($blueprint)
@@ -151,7 +169,7 @@ class ServiceContainer implements ServiceContainerInterface
         return $this;
     }
 
-    public static function __callStatic($name, array $args = [])
+    public static function get($name, array $args = [])
     {
         $key = self::generateKey($name);
 
@@ -179,7 +197,52 @@ class ServiceContainer implements ServiceContainerInterface
         Exception::toss($message, $name, $this->fullName());
     }
 
-    public static function generateKey($name)
+    private function ensureClosure($value)
+    {
+        if (is_string($value)) {
+            $value = function() use ($value) {
+                return new $value;
+            };
+        }
+
+        if (!$value instanceof Closure) {
+            $value = function() use ($value) {
+                return $value;
+            };
+        }
+
+        return $value;
+    }
+
+    private function uncacheServicesThatDependOn($name)
+    {
+        foreach ($this->dependencies as $service => $dependencies) {
+            if (isset($this->cache[$service]) && in_array($name, $dependencies)) {
+                unset($this->cache[$service]);
+            }
+        }
+    }
+
+    private function resolveDependenciesFor($name)
+    {
+        $dependencies = [];
+
+        foreach ($this->dependencies($name) as $dependency) {
+            if ($this->__isset($dependency)) {
+                $dependencies[] = $this->__get($dependency);
+            } else {
+                Exception::toss(
+                    'The service "%s" requires that the dependency "%s" is defined.',
+                    $name,
+                    $dependency
+                );
+            }
+        }
+
+        return $dependencies;
+    }
+
+    private static function generateKey($name)
     {
         return get_called_class() . '::' . $name . '()';
     }

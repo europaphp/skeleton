@@ -30,7 +30,7 @@ class Php extends ViewScriptAbstract
 
         // ensure the script can be found
         if (!$script = $this->locateScript()) {
-            Exception::toss('The script "%s" does not exist.', $this->formatScript());
+            Exception::toss('The script "%s" does not exist.', $this->getScript());
         }
 
         // apply context
@@ -66,7 +66,7 @@ class Php extends ViewScriptAbstract
         return $rendered;
     }
 
-    public function context($name)
+    public function context($name = null)
     {
         if (!$name) {
             return $this->context;

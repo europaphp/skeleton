@@ -2,33 +2,13 @@
 
 namespace Europa\Module;
 use ArrayIterator;
-use Europa\Config\Config;
 use Europa\Exception\Exception;
-use Europa\Di\ServiceContainerInterface;
 
 class Manager implements ManagerInterface
 {
     private $aliases = [];
 
-    private $container;
-
     private $modules = [];
-
-    public function __construct(ServiceContainerInterface $container)
-    {
-        $this->setServiceContainer($container);
-    }
-
-    public function setServiceContainer(ServiceContainerInterface $container)
-    {
-        $this->container = $container->mustProvide('Europa\Module\ManagerConfigurationInterface');
-        return $this;
-    }
-
-    public function getServiceContainer()
-    {
-        return $this->container;
-    }
 
     public function bootstrap()
     {

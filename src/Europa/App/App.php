@@ -24,17 +24,7 @@ class App implements AppInterface
 
     const EVENT_DONE = 'done';
 
-    private $config = [
-        'basePath'            => null,
-        'appPath'             => '{basePath}',
-        'modules'             => [],
-        'moduleAliases'       => [],
-        'moduleConfigs'       => [],
-        'defaultModuleConfig' => [],
-        'defaultViewClass'    => 'Europa\View\Php',
-        'viewScriptFormat'    => ':controller/:action',
-        'viewSuffix'          => 'php'
-    ];
+    const EVENT_ERROR = 'error';
 
     private $container;
 
@@ -42,21 +32,34 @@ class App implements AppInterface
 
     public function __construct($config = [])
     {
-        $this->initConfig($config);
-        $this->initBasePath();
-        $this->initModules();
+        $configuration   = new AppConfiguration($config);
+        $this->container = new ServiceContainer;
+        $this->container->configure($configuration);
     }
 
-    public function __invoke($return = false)
+    public function __clone()
     {
-        $this->container->loader->register();
-        $this->container->modules->bootstrap();
-        
-        $controller = $this->resolveController();
-        $context    = $this->actionController($controller);
-        $rendered   = $this->renderView($context);
+        $this->container = clone $this->container;
+    }
 
-        return $this->runResponse($rendered, $return);
+    public function __invoke()
+    {
+        try {
+            $this->container->loader->register();
+            $this->container->modules->bootstrap();
+
+            $controller = $this->resolveController();
+            $context    = $this->actionController($controller);
+            $rendered   = $this->renderView($context);
+
+            return $this->runResponse($rendered);
+        } catch (Exception $e) {
+            if ($this->container->event->bound(self::EVENT_ERROR)) {
+                $this->container->event->trigger(self::EVENT_ERROR, $this, $e);
+            } else {
+                throw $e;
+            }
+        }
     }
 
     public function __set($name, $service)
@@ -137,52 +140,6 @@ class App implements AppInterface
         return self::$instances[$name];
     }
 
-    private function getDefaultBasePath()
-    {
-        $script = dirname($_SERVER['PHP_SELF']);
-        $script = $script === '/' ? '.' : $script;
-
-        return realpath($script . '/..');
-    }
-
-    private function initConfig($config)
-    {
-        $configuration = new AppConfiguration;
-        $configuration->setArguments('config', $this->config, $config);
-
-        $this->container = new ServiceContainer;
-        $this->container->configure($configuration);
-    }
-
-    private function initBasePath()
-    {
-        if (!$this->container->config['basePath']) {
-            $this->container->config['basePath'] = $this->getDefaultBasePath();
-        }
-    }
-
-    private function initModules()
-    {
-        foreach ($this->container->config['modules'] as $name => $configOverride) {
-            $defaultConfig = new Config(
-                $this->container->config['defaultModuleConfig'],
-                $this->container->config['defaultModuleConfigs'][$name]
-            );
-
-            try {
-                $module = new Module(
-                    $this->container->config['appPath'] . '/' . $name,
-                    $defaultConfig
-                );
-
-                $module->config()->import($configOverride);
-                $this->modules->offsetSet($name, $module);
-            } catch (Exception $e) {
-                Exception::toss('Could not initialize module "%s" from the application config because: %s', $name, $e->getMessage());
-            }
-        }
-    }
-
     private function resolveController()
     {
         $this->container->event->trigger(self::EVENT_ROUTE, $this);
@@ -219,17 +176,12 @@ class App implements AppInterface
         return $rendered;
     }
 
-    private function runResponse($rendered, $return)
+    private function runResponse($rendered)
     {
         $this->container->response->setBody($rendered);
         $this->container->event->trigger(self::EVENT_SEND, $this, $rendered);
-
-        if (!$return) {
-            $this->container->response->send();
-        }
-        
+        $this->container->response->send();
         $this->container->event->trigger(self::EVENT_DONE, $this);
-
-        return $return ? $rendered : $this;
+        return $this;
     }
 }

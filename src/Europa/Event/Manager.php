@@ -9,14 +9,12 @@ class Manager implements ManagerInterface
     
     public function bind($name, callable $callback)
     {
-        // create the event stack for the specified event if it doesn't exist
         if (!isset($this->stack[$name])) {
             $this->stack[$name] = [];
         }
-        
-        // add the handler to the stack
+
         $this->stack[$name][] = $callback;
-        
+
         return $this;
     }
     
@@ -49,6 +47,23 @@ class Manager implements ManagerInterface
         array_shift($args);
 
         return $this->triggerArray($name, $args);
+    }
+
+    public function bound($name, $callback = null)
+    {
+        foreach ($this->getStackNamesForEvent($name) as $event) {
+            if ($callback) {
+                foreach ($this->stack[$event] as $index => $bound) {
+                    if ($bound === $callback) {
+                        return true;
+                    }
+                }
+            } elseif (isset($this->stack[$event])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function triggerArray($name, array $args = [])
