@@ -40,7 +40,7 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
     public function controllers()
     {
         $finder = new Finder;
-        $finder->setCallback('Europa\Controller\ControllerInterface', function($controller) {
+        $finder->addCallback('Europa\Controller\ControllerInterface', function($controller) {
             $controller->setDependencyInjector($this);
         });
 

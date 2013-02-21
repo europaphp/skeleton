@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Di;
+use Closure;
 use Europa\Filter\ClassNameFilter;
 use Europa\Reflection\ClassReflector;
 
@@ -29,7 +30,7 @@ class Finder implements FinderInterface
 
         foreach ($this->args as $instanceof => $instanceofArgs) {
             if ($this->is($class, $instanceof)) {
-                $args = $instanceofArgs;
+                $args = array_merge($args, $instanceofArgs());
             }
         }
 
@@ -39,7 +40,6 @@ class Finder implements FinderInterface
         foreach ($this->callbacks as $instanceof => $callback) {
             if ($this->is($class, $instanceof)) {
                 $callback($class);
-                break;
             }
         }
 
@@ -64,15 +64,15 @@ class Finder implements FinderInterface
         return true;
     }
 
-    public function setArgs($instanceof, array $args)
+    public function addArgs($instanceof, Closure $closure)
     {
-        $this->args[$instanceof] = $args;
+        $this->args[$instanceof] = $closure;
         return $this;
     }
 
-    public function setCallback($instanceof, callable $callback)
+    public function addCallback($instanceof, Closure $closure)
     {
-        $this->callbacks[$instanceof] = $callback;
+        $this->callbacks[$instanceof] = $closure;
         return $this;
     }
 
