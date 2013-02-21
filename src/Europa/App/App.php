@@ -1,19 +1,12 @@
 <?php
 
 namespace Europa\App;
-use Europa\Config\Config;
-use Europa\Di\ServiceContainer;
-use Europa\Di\ServiceContainerInterface;
+use Europa\Controller\ControllerInterface;
 use Europa\Exception\Exception;
-use Europa\Module\Module;
-use Europa\Response\HttpInterface;
+use Europa\Di\ContainerInterface;
 
 class App implements AppInterface
 {
-    const DEFAULT_MODULE = 'main';
-
-    const DEFAULT_INSTANCE = 'default';
-
     const EVENT_ROUTE = 'route';
 
     const EVENT_ACTION = 'action';
@@ -28,160 +21,84 @@ class App implements AppInterface
 
     private $container;
 
-    private static $instances = [];
-
-    public function __construct($config = [])
+    public function __construct(ContainerInterface $container)
     {
-        $configuration   = new AppConfiguration($config);
-        $this->container = new ServiceContainer;
-        $this->container->configure($configuration);
-    }
-
-    public function __clone()
-    {
-        $this->container = clone $this->container;
-    }
-
-    public function __invoke()
-    {
-        try {
-            $this->container->loader->register();
-            $this->container->modules->bootstrap();
-
-            $controller = $this->resolveController();
-            $context    = $this->actionController($controller);
-            $rendered   = $this->renderView($context);
-
-            return $this->runResponse($rendered);
-        } catch (Exception $e) {
-            if ($this->container->event->bound(self::EVENT_ERROR)) {
-                $this->container->event->trigger(self::EVENT_ERROR, $this, $e);
-            } else {
-                throw $e;
-            }
-        }
-    }
-
-    public function __set($name, $service)
-    {
-        $this->container->__set($name, $service);
-    }
-
-    public function __get($name)
-    {
-        return $this->container->__get($name);
-    }
-
-    public function __isset($name)
-    {
-        return $this->container->__isset($name);
-    }
-
-    public function __unset($name)
-    {
-        $this->container->__unset($name);
-    }
-
-    public function setServiceContainer(ServiceContainerInterface $container)
-    {
-        $this->container = $container->mustProvide('Europa\App\AppConfigurationInterface');
-        return $this;
-    }
-
-    public function getServiceContainer()
-    {
-        return $this->container;
-    }
-
-    public function save($name = self::DEFAULT_INSTANCE)
-    {
-        self::$instances[$name] = $this;
-        return $this;
-    }
-
-    public function offsetSet($name, $module)
-    {
-        $this->container->modules->offsetSet($name, $module);
-        return $this;
-    }
-
-    public function offsetGet($name)
-    {
-        return $this->container->modules->offsetGet($name);
-    }
-
-    public function offsetExists($name)
-    {
-        return $this->container->modules->offsetExists($name);
-    }
-
-    public function offsetUnset($name)
-    {
-        $this->container->modules->offsetUnset($name);
-        return $this;
-    }
-
-    public function count()
-    {
-        return $this->container->modules->count();
-    }
-
-    public function getIterator()
-    {
-        return $this->container->modules->getIterator();
-    }
-
-    public static function get($name = self::DEFAULT_INSTANCE)
-    {
-        if (!isset(self::$instances[$name])) {
-            Exception::toss('Could not find application instance "%s".', $name);
+        if (!$container->provides('Europa\App\AppConfigurationInterface')) {
+            Exception::toss('The container passed to the application must provide "Europa\App\AppConfigurationInterface".');
         }
 
-        return self::$instances[$name];
+        $this->container = $container;
+    }
+
+    public function dispatch()
+    {
+        $this->container->get('modules')->bootstrap($this->container);
+
+        $controller = $this->resolveController();
+        $context    = $this->actionController($controller);
+        $rendered   = $this->renderView($context);
+
+        return $this->runResponse($rendered);
     }
 
     private function resolveController()
     {
-        $this->container->event->trigger(self::EVENT_ROUTE, $this);
+        $this->container->get('events')->trigger(self::EVENT_ROUTE, $this->container);
 
-        $router = $this->container->router;
-        
-        if (!$controller = $router($this->container->request)) {
-            Exception::toss('The router could not find a suitable controller for the request "%s".', $this->container->request);
+        if (!$this->container->get('routers')->route($this->container->get('request'))) {
+            Exception::toss('The router could not find a suitable controller for the request "%s".', $this->container->get('request'));
         }
 
-        return $controller;
+        $controller = $this->container->get('request')->getParam($this->container->get('config')['controller-param']);
+
+        if (!$this->container->get('controllers')->has($controller)) {
+            Exception::toss('The controller "%s" could not be found.', $controller);
+        }
+
+        return $this->container->get('controllers')->get($controller);
     }
 
-    private function actionController(callable $controller)
+    private function actionController(ControllerInterface $controller)
     {
-        $this->container->event->trigger(self::EVENT_ACTION, $this, $controller);
+        $this->container->get('events')->trigger(self::EVENT_ACTION, $this->container, $controller);
 
-        return $controller($this->container->request);
+        return $controller->__call(
+            $this->container->get('request')->getParam($this->container->get('config')['action-param']),
+            $this->container->get('request')->getParams()
+        );
     }
 
     private function renderView($context)
     {
+        $view    = $this->container->get('view');
         $context = $context ?: [];
 
-        $this->container->event->trigger(self::EVENT_RENDER, $this, $context);
+        $this->container->get('events')->trigger(self::EVENT_RENDER, $this->container, $context);
 
-        if ($this->container->response instanceof HttpInterface) {
-            $this->container->response->setContentTypeFromView($this->container->view);
+        if ($this->container->get('response') instanceof HttpInterface) {
+            $this->container->get('response')->setContentTypeFromView($view);
         }
 
-        $rendered = $this->container->view;
-        $rendered = $rendered($context);
+        return $view->render($context);;
+    }
 
-        return $rendered;
+    private function formatViewScript()
+    {
+        $format = $this->container->get('config')['view-script-format'];
+
+        foreach ($this->container->get('request')->getParams() as $name => $param) {
+            $format = str_replace(':' . $name, $param, $format);
+        }
+
+        return $format;
     }
 
     private function runResponse($rendered)
     {
-        $this->container->response->setBody($rendered);
-        $this->container->event->trigger(self::EVENT_SEND, $this, $rendered);
-        $this->container->response->send();
-        $this->container->event->trigger(self::EVENT_DONE, $this);
+        $this->container->get('response')->setBody($rendered);
+        $this->container->get('events')->trigger(self::EVENT_SEND, $this->container, $rendered);
+        $this->container->get('response')->send();
+        $this->container->get('events')->trigger(self::EVENT_DONE, $this->container);
         return $this;
     }
 }

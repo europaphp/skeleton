@@ -2,20 +2,20 @@
 
 namespace Europa\Fs;
 
-class LocatorArray
+class LocatorArray implements LocatorInterface
 {
     private $locators = [];
 
-    public function __invoke($file)
+    public function locate($file)
     {
         foreach ($this->locators as $locator) {
-            if ($real = $locator($file)) {
+            if ($real = $locator->locate($file)) {
                 return $real;
             }
         }
     }
 
-    public function add(callable $locator)
+    public function add(LocatorInterface $locator)
     {
         $this->locators[] = $locator;
         return $this;

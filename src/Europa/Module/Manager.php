@@ -2,80 +2,62 @@
 
 namespace Europa\Module;
 use ArrayIterator;
+use Europa\Di\ContainerInterface;
 use Europa\Exception\Exception;
+use Europa\Version\SemVer;
+use ReflectionExtension;
 
 class Manager implements ManagerInterface
 {
-    private $aliases = [];
+    const VALID_NAME_REGEX = '/[a-z][a-z0-9\-]*\/[a-z][a-z0-9\-]*/';
+
+    private $bootstrapped = [];
 
     private $modules = [];
 
-    public function bootstrap()
+    public function bootstrap(ContainerInterface $container)
     {
         foreach ($this->modules as $module) {
-            if (!$module->bootstrapped()) {
-                $module->bootstrap($this);
+            if (!in_array($module->getName(), $this->bootstrapped)) {
+                $this->validate($module);
+                $this->bootstrapDependencies($module, $container);
+                $module->bootstrap($container);
+                $this->bootstrapped[] = $module->getName();
             }
         }
         
         return $this;
     }
 
-    public function offsetSet($offset, $module)
+    public function add(ModuleInterface $module)
     {
-        if (!$module instanceof ModuleInterface) {
-            Exception::toss('The module "%s" must be implement Europa\Module\ModuleInterface.', $offset);
-        }
-
-        $name = $module->name();
+        $name = $module->getName();
 
         if (isset($this->modules[$name])) {
             Exception::toss('Cannot add module "%s" because it already exists. This may be because another module you are adding is attempting to use the same name.', $name);
         }
 
-        // For our purposes, we always use the specified module name as the main offset.
+        if (!preg_match(self::VALID_NAME_REGEX, $name)) {
+            Exception::toss('Modules names are required to be in the format "vendor-name/module-name". The name must be compliant with https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md.');
+        }
+
         $this->modules[$name] = $module;
 
-        // If an offset is specified, we consider that to be an alias for the module.
-        // The alias is simply a reference to the module itself. This allows us to
-        // simply access it via the modules array or the aliases array without any
-        // excess overhead.
-        if ($offset) {
-            $this->aliases[$offset] = $module;
-        }
-
         return $this;
     }
 
-    public function offsetGet($offset)
+    public function get($name)
     {
-        if (isset($this->modules[$offset])) {
-            return $this->modules[$offset];
+        if (isset($this->modules[$name])) {
+            return $this->modules[$name];
         }
 
-        if (isset($this->aliases[$offset])) {
-            return $this->aliases[$offset];
-        }
-
-        Exception::toss('The module "%s" does not exist.', $offset);
+        Exception::toss('The module "%s" does not exist.', $name);
     }
 
-    public function offsetExists($offset)
+    public function has($name)
     {
-        return isset($this->modules[$offset]) || isset($this->aliases[$offset]);
-    }
-
-    public function offsetUnset($offset)
-    {
-        if (isset($this->modules[$offset])) {
-            unset($this->modules[$offset]);
-        }
-
-        if (isset($this->aliases[$offset])) {
-            unset($this->aliases[$offset]);
-        }
-
-        return $this;
+        return isset($this->modules[$name]);
     }
 
     public function count()
@@ -86,5 +68,39 @@ class Manager implements ManagerInterface
     public function getIterator()
     {
         return new ArrayIterator($this->modules);
+    }
+
+    private function validate(ModuleInterface $module)
+    {
+        foreach ($module->getDependencies() as $name => $version) {
+            if (!$this->has($name)) {
+                Exception::toss(
+                    'The module "%s" is required by the module "%s".',
+                    $name,
+                    $module->getName()
+                );
+            }
+
+            $version = new SemVer($version);
+
+            if (!$version->is($this->get($name)->getVersion())) {
+                Exception::toss(
+                    'The module "%s", currently at version "%s", is required to be at version "%s" by the module "%s".',
+                    $name,
+                    $this->get($name)->getVersion(),
+                    $version,
+                    $module->getName()
+                );
+            }
+        }
+    }
+
+    private function bootstrapDependencies(ModuleInterface $module, ContainerInterface $container)
+    {
+        foreach ($module->getDependencies() as $name => $version) {
+            if (!in_array($name, $this->bootstrapped)) {
+                $this->get($name)->bootstrap($container);
+            }
+        }
     }
 }

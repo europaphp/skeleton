@@ -1,44 +1,31 @@
 <?php
 
 namespace Europa\Controller;
+use Europa\Di\DependencyInjectorAware;
 use Europa\Exception\Exception;
 use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
 use Europa\Reflection\ReflectorInterface;
-use Europa\Request\RequestInterface;
 
-abstract class ControllerAbstract
+abstract class ControllerAbstract implements ControllerInterface
 {
-    const ACTION = 'action';
+    use DependencyInjectorAware;
 
-    const FILTER = 'filter';
+    const DOC_TAG_FILTER = 'filter';
 
-    private $filter = true;
-
-    private $filters = [];
-
-    private $request;
-
-    public function __invoke(RequestInterface $request)
+    public function __call($action, array $context = [])
     {
-        $this->request = $request;
+        if (!method_exists($this, $action)) {
+            Exception::toss('The action "%s" is not defined in the controller "%s".', $action, get_class($this));
+        }
 
-        $context = $this->invoke($request->getParam(self::ACTION));
+        $class  = new ClassReflector($this);
+        $method = $class->getMethod($action);
 
-        $this->request = null;
-
-        return $context;
-    }
-
-    public function filter($switch = true)
-    {
-        $this->filter = $switch ?: false;
-        return $this;
-    }
-
-    public function request()
-    {
-        return $this->request;
+        $this->applyClassFilters($class, $method);
+        $this->applyActionFilters($class, $method);
+        
+        return $method->invokeArgs($this, $context);
     }
 
     public function forward($to)
@@ -46,33 +33,24 @@ abstract class ControllerAbstract
         return $this->invoke($to);
     }
 
-    private function invoke($action)
+    public function service($service)
     {
-        if (!method_exists($this, $action)) {
-            if (method_exists($this, '__call')) {
-                return $this->__call($action, $this->request()->getParams());
-            } else {
-                Exception::toss('The action "%s" is not defined in the controller "%s" and "__call" was not defined to catch it.', $action, get_class($this));
-            }
+        if (!$injector = $this->getDependencyInjector()) {
+            Exception::toss('Cannot get service "%s" from controller "%s" because no container was set.', $service, get_class($this));
         }
 
-        $class  = new ClassReflector($this);
-        $method = $class->getMethod($action);
-        $params = $this->request->getParams();
-
-        if ($this->filter) {
-            $this->applyClassFilters($class, $method);
-            $this->applyActionFilters($class, $method);
+        if (!$injector->has($service)) {
+            Exception::toss('Cannot get service "%s" from controller "%s" because it does not exist in the bound container.', $service, get_class($this));
         }
-        
-        return $method->invokeArgs($this, $this->request->getParams());
+
+        return $injector->get($service);
     }
 
     private function getFiltersFor(ReflectorInterface $reflector)
     {
         $filters = [];
 
-        foreach ($reflector->getDocBlock()->getTags(self::FILTER) as $filter) {
+        foreach ($reflector->getDocBlock()->getTags(self::DOC_TAG_FILTER) as $filter) {
             $parts = explode(' ', $filter->value(), 2);
             $class = trim($parts[0]);
             $value = isset($parts[1]) ? trim($parts[1]) : '';

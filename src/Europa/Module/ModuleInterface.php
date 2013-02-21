@@ -1,13 +1,19 @@
 <?php
 
 namespace Europa\Module;
+use Europa\Di\ContainerInterface;
 
 interface ModuleInterface
 {
-    public function bootstrap(ManagerInterface $manager);
-    public function bootstrapped();
-    public function config();
-    public function name();
-    public function path();
-    public function version();
+    public function bootstrap(ContainerInterface $container);
+
+    public function getConfig();
+
+    public function getDependencies();
+
+    public function getName();
+
+    public function getPath();
+
+    public function getVersion();
 }

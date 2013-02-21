@@ -12,7 +12,7 @@ class Jsonp extends Json
         $this->callback = $callback;
     }
   
-    public function __invoke(array $context = array())
+    public function render(array $context = array())
     {
         return $this->callback . '(' . parent::render($context) . ')';
     }

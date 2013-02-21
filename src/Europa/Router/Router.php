@@ -1,7 +1,6 @@
 <?php
 
 namespace Europa\Router;
-use ArrayAccess;
 use ArrayIterator;
 use Countable;
 use Europa\Config\Config;
@@ -9,84 +8,52 @@ use Europa\Exception\Exception;
 use Europa\Request\RequestInterface;
 use IteratorAggregate;
 
-class Router implements ArrayAccess, Countable, IteratorAggregate
+class Router implements Countable, IteratorAggregate, RouterInterface
 {
-    private $routes = array();
-    
-    public function __invoke(RequestInterface $request)
+    private $routes = [];
+
+    public function route(RequestInterface $request)
     {
         foreach ($this->routes as $name => $route) {
-            if ($controller = $route($name, $request)) {
-                return $controller;
+            if ($params = $route->query($request)) {
+                $request->setParams($params);
+                return true;
             }
         }
+
+        return false;
     }
 
-    public function format($route, array $params = [])
+    public function format($name, array $params = [])
     {
-        if (!$this->offsetExists($route)) {
-            Exception::toss('The route "%s" cannot be formatted because it does not exist.', $route);
+        if (!isset($this->routes[$name])) {
+            Exception::toss('The route "%s" cannot be formatted because it does not exist.', $name);
         }
 
-        $route = $this->offsetGet($route);
-
-        if (!$route instanceof Route) {
-            Exception::toss('The route "%s" must be an instance of "Europa\Router\Route" in order to be formatted.', $route);
-        }
-
-        return $route->format($params);
+        return $this->routes[$name]->format($params);
     }
 
-    public function import($routes)
+    public function set($name, RouteInterface $route)
     {
-        foreach (new Config($routes) as $name => $route) {
-            $this->offsetSet($name, $route);
-        }
-
-        return $this;
-    }
-
-    public function export()
-    {
-        return $this->routes;
-    }
-
-    public function clear()
-    {
-        $this->routes = [];
-        return $this;
-    }
-
-    public function offsetSet($name, $route)
-    {
-        if (!is_callable($route)) {
-            $route = new Route($route);
-        }
-
-        if (!$name) {
-            $name = count($this->routes);
-        }
-
         $this->routes[$name] = $route;
-
         return $this;
     }
-    
-    public function offsetGet($name)
+
+    public function get($name)
     {
         if (isset($this->routes[$name])) {
             return $this->routes[$name];
         }
 
-        Exception::toss('Cannot get route "%s" because it does not exist.', $name);
+        Exception::toss('The route "%s" does not exist.', $name);
     }
-    
-    public function offsetExists($name)
+
+    public function has($name)
     {
         return isset($this->routes[$name]);
     }
-    
-    public function offsetUnset($name)
+
+    public function remove($name)
     {
         if (isset($this->routes[$name])) {
             unset($this->routes[$name]);
@@ -103,5 +70,14 @@ class Router implements ArrayAccess, Countable, IteratorAggregate
     public function getIterator()
     {
         return new ArrayIterator($this->routes);
+    }
+
+    public function import($routes)
+    {
+        foreach (new Config($routes) as $name => $route) {
+            $this->set($name, new Route($route));
+        }
+
+        return $this;
     }
 }

@@ -2,59 +2,49 @@
 
 namespace Europa\Fs;
 
-class Loader
+class Loader implements LoaderInterface
 {
     private $locator;
 
     private $namespaceTokens = ['_', '\\'];
 
-    public function __invoke($class)
+    private $suffix = '.php';
+
+    public function __construct(LocatorInterface $locator)
+    {
+        $this->locator = $locator;
+    }
+
+    public function load($class)
     {
         if (class_exists($class, false)) {
             return true;
         }
 
-        $locator   = $this->locator;
         $formatted = str_replace($this->namespaceTokens, DIRECTORY_SEPARATOR, $class);
         
-        if ($locator && $file = $locator($formatted . '.php')) {
-            include $file;
-            return true;
-        }
-
-        if (is_file($file = __DIR__ . '/../../' . $formatted . '.php')) {
+        if ($this->locator && $file = $this->locator->locate($formatted . $this->suffix)) {
             include $file;
             return true;
         }
         
         return false;
     }
-    
-    public function setLocator(callable $locator)
+
+    public function register()
     {
-        $this->locator = $locator;
+        spl_autoload_register(array($this, 'load'), true);
         return $this;
-    }
-    
-    public function getLocator()
-    {
-        return $this->locator;
     }
 
-    public function hasLocator()
+    public function setSuffix($suffix)
     {
-        return isset($this->locator);
+        $this->suffix = $suffix;
+        return $this;
     }
 
-    public function removeLocator()
+    public function getSuffix()
     {
-        $this->locator = null;
-        return $this;
-    }
-    
-    public function register($prepend = false)
-    {
-        spl_autoload_register(array($this, '__invoke'), true, $prepend);
-        return $this;
+        return $this->suffix;
     }
 }

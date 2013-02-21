@@ -1,43 +1,49 @@
 <?php
 
 namespace Europa\App;
+use Closure;
 use Europa\Config\ConfigInterface;
+use Europa\Di\DependencyInjectorInterface;
+use Europa\Fs\LocatorInterface;
 use Europa\Module\ManagerInterface;
 use Europa\Request\RequestInterface;
-use Europa\Router\Router;
+use Europa\Router\RouterInterface;
+use Europa\View\NegotiatorInterface;
 
 interface AppConfigurationInterface
 {
     public function config();
 
-    public function event(ConfigInterface $config);
+    public function controllers();
 
-    public function loader(callable $loaderLocator);
+    public function events();
 
-    public function loaderLocator(ConfigInterface $config, ManagerInterface $modules);
+    public function loader(LocatorInterface $loaderLocators);
 
-    public function modules(ConfigInterface $config);
+    public function loaderLocators();
+
+    public function modules();
 
     public function request();
 
     public function response();
 
-    public function router(ManagerInterface $modules);
+    public function routers();
 
     public function view(
         ConfigInterface $config,
         RequestInterface $request,
-        callable $viewLocator,
-        callable $viewHelpers,
-        callable $viewNegotiator,
-        callable $viewScriptFormatter
+        LocatorInterface $viewLocators,
+        DependencyInjectorInterface $viewHelpers,
+        NegotiatorInterface $viewNegotiator,
+        Closure $viewScriptFormatter
     );
 
-    public function viewHelpers(Router $router);
+    public function viewHelpers();
 
-    public function viewLocator(ConfigInterface $config, ManagerInterface $modules);
+    public function viewLocators(ConfigInterface $config);
 
-    public function viewNegotiator(ConfigInterface $config);
+    public function viewNegotiator(ConfigInterface $viewNegotiatorConfig, RequestInterface $request);
 
-    public function viewScriptFormatter();
+    public function viewScriptFormatter(ConfigInterface $config);
 }

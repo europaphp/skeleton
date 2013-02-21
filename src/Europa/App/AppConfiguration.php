@@ -1,102 +1,72 @@
 <?php
 
 namespace Europa\App;
+use Closure;
 use Europa\Config\Config;
 use Europa\Config\ConfigInterface;
 use Europa\Di\ConfigurationAbstract;
-use Europa\Di\ServiceContainer;
+use Europa\Di\Container;
+use Europa\Di\DependencyInjectorArray;
+use Europa\Di\DependencyInjectorAwareInterface;
+use Europa\Di\DependencyInjectorInterface;
+use Europa\Di\Finder;
 use Europa\Event\Manager as EventManager;
 use Europa\Exception\Exception;
 use Europa\Fs\Loader;
-use Europa\Fs\Locator;
+use Europa\Fs\LocatorArray;
+use Europa\Fs\LocatorInterface;
 use Europa\Module\Manager as ModuleManager;
 use Europa\Module\ManagerInterface;
-use Europa\Module\Module;
 use Europa\Request\RequestAbstract;
 use Europa\Request\RequestInterface;
 use Europa\Response\ResponseAbstract;
-use Europa\Router\Router;
+use Europa\Router\RouterArray;
+use Europa\Router\RouterInterface;
 use Europa\View\HelperConfiguration;
 use Europa\View\Negotiator;
-use Europa\View\Php;
-use Europa\View\ViewScriptInterface;
+use Europa\View\NegotiatorInterface;
+use Europa\View\ScriptAwareInterface;
 
 class AppConfiguration extends ConfigurationAbstract implements AppConfigurationInterface
 {
-    private $config = [
-        'base-path'              => null,
-        'events'                 => [],
-        'modules'                => [],
-        'module-config'          => [],
-        'require-autoload-paths' => false,
-        'require-view-paths'     => false,
-        'view-negotiator-config' => [],
-        'view-script-format'     => ':controller/:action.php'
-    ];
-
-    public function __construct($config)
-    {
-        $this->config = new Config($this->config, $config);
-
-        if (!$this->config['base-path']) {
-            $basePath = dirname($_SERVER['PHP_SELF']);
-            $basePath = $basePath === '/' ? '.' : $basePath;
-            $basePath = realpath($basePath . '/..');
-            $this->config['base-path'] = $basePath;
-        }
-    }
-
     public function config()
     {
-        return $this->config;
+        return new Config([
+            'controller-param' => 'controller',
+            'action-param'     => 'action'
+        ]);
     }
 
-    public function event(ConfigInterface $config)
+    public function controllers()
     {
-        $manager = new EventManager;
+        $finder = new Finder;
+        $finder->setCallback('Europa\Controller\ControllerInterface', function($controller) {
+            $controller->setDependencyInjector($this);
+        });
 
-        foreach ($config['events'] as $event => $stack) {
-            foreach ($stack as $handler) {
-                $manager->bind($event, $this->ensureCallableEventHandler($event, $handler));
-            }
-        }
-
-        return $manager;
+        return $finder;
     }
 
-    public function loader(callable $loaderLocator)
+    public function events()
     {
-        $loader = new Loader;
-        $loader->setLocator($loaderLocator);
+        return new EventManager;
+    }
+
+    public function loader(LocatorInterface $loaderLocators)
+    {
+        $loader = new Loader($loaderLocators);
+        $loader->register();
         return $loader;
     }
 
-    public function loaderLocator(ConfigInterface $config, ManagerInterface $modules)
+    public function loaderLocators()
     {
-        $locator = new Locator;
-
-        foreach ($modules as $module) {
-            $locator->addPaths($module->autoloadPaths(), $config['require-autoload-paths']);
-        }
-
-        return $locator;
+        return new LocatorArray;
     }
 
-    public function modules(ConfigInterface $config)
+    public function modules()
     {
-        $manager = new ModuleManager($this);
-
-        foreach ($config['modules'] as $name) {
-            try {
-                $module = new Module($config['base-path'] . '/' . $name);
-                $module->config()->import($config['module-config'][$module->name()]);
-                $manager->offsetSet($name, $module);
-            } catch (Exception $e) {
-                Exception::toss('Could not initialize module "%s" from the application config because: %s', $name, $e->getMessage());
-            }
-        }
-
-        return $manager;
+        return new ModuleManager;
     }
 
     public function request()
@@ -109,91 +79,67 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
         return ResponseAbstract::detect();
     }
 
-    public function router(ManagerInterface $modules)
+    public function routers()
     {
-        $router = new Router;
-
-        foreach ($modules as $module) {
-            $router->import($module->routes());
-        }
-
-        return $router;
+        return new RouterArray;
     }
 
     public function view(
         ConfigInterface $config,
         RequestInterface $request,
-        callable $viewLocator,
-        callable $viewHelpers,
-        callable $viewNegotiator,
-        callable $viewScriptFormatter
+        LocatorInterface $viewLocators,
+        DependencyInjectorInterface $viewHelpers,
+        NegotiatorInterface $viewNegotiator,
+        Closure $viewScriptFormatter
     ) {
-        $view = $viewNegotiator($request);
+        $view = $viewNegotiator->negotiate($request);
 
-        if ($view instanceof ViewScriptInterface) {
-            $view->setScriptLocator($viewLocator);
-            $view->setScript($viewScriptFormatter($config['view-script-format'], $request));
+        if ($view instanceof ScriptAwareInterface) {
+            $view->setLocator($viewLocators);
+            $view->setScript($viewScriptFormatter($request));
         }
 
-        if ($view instanceof Php) {
-            $view->setServiceContainer($viewHelpers);
+        if ($view instanceof DependencyInjectorAwareInterface) {
+            $view->setDependencyInjector($viewHelpers);
         }
 
         return $view;
     }
 
-    public function viewHelpers(Router $router)
+    public function viewHelpers()
     {
-        $helpers = new ServiceContainer;
-        $helpers->configure(new HelperConfiguration($router));
+        $defaultContainer     = new Container;
+        $defaultConfiguration = new HelperConfiguration;
+        $defaultConfiguration->configure($defaultContainer);
+
+        $helpers = new DependencyInjectorArray;
+        $helpers->add($defaultContainer);
+
         return $helpers;
     }
 
-    public function viewLocator(ConfigInterface $config, ManagerInterface $modules)
+    public function viewLocators(ConfigInterface $config)
     {
-        $locator = new Locator;
-
-        foreach ($modules as $module) {
-            $locator->addPaths($module->viewPaths(), $config['require-view-paths']);
-        }
-
-        return $locator;
+        return new LocatorArray;
     }
 
-    public function viewNegotiator(ConfigInterface $config)
+    public function viewNegotiator(ConfigInterface $viewNegotiatorConfig, RequestInterface $request)
     {
-        return new Negotiator($config['view-negotiator-config']);
+        return new Negotiator($viewNegotiatorConfig, $request);
     }
 
-    public function viewScriptFormatter()
+    public function viewNegotiatorConfig()
     {
-        return function($format, $request) {
-            if (is_callable($format)) {
-                return $format($request);
-            }
+        return new Config;
+    }
 
-            foreach ($request->getParams() as $name => $param) {
-                $format = str_replace(':' . $name, $param, $format);
-            }
-
-            return $format;
+    public function viewScriptFormatter(ConfigInterface $config)
+    {
+        return function(RequestInterface $request) use ($config) {
+            return $request->getParam($config['controller-param'])
+                . '/'
+                . $request->getParam($config['action-param'])
+                . '.php';
         };
-    }
-
-    private function ensureCallableEventHandler($event, $handler)
-    {
-        if (is_string($handler) && class_exists($handler)) {
-            return new $handler;
-        }
-
-        if (!is_callable($handler)) {
-            Exception::toss(
-                'The event handler "%s" for the event "%s" is not callable.',
-                $handler,
-                $event
-            );
-        }
-
-        return $handler;
     }
 }

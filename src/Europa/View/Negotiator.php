@@ -1,11 +1,11 @@
 <?php
 
 namespace Europa\View;
-use Europa\Config\Config;
+use Europa\Config\ConfigInterface;
 use Europa\Request\Http;
 use Europa\Request\RequestInterface;
 
-class Negotiator
+class Negotiator implements NegotiatorInterface
 {
     private $suffixMap = [
         'json' => 'resolveJson',
@@ -23,60 +23,63 @@ class Negotiator
         'xml-view-config' => []
     ];
 
+    private $request;
+
     private $viewScriptFilter;
 
-    public function __construct($config = [])
+    public function __construct(ConfigInterface $config, RequestInterface $request)
     {
-        $this->config           = new Config($this->config, $config);
+        $this->config           = $config->import($this->config);
+        $this->request          = $request;
         $this->viewScriptFilter = [$this, 'viewScriptFilter'];
     }
 
-    public function __invoke(RequestInterface $request)
+    public function negotiate()
     {
         $view = null;
 
-        if ($this->isRequestNegotiable($request)) {
+        if ($this->isRequestNegotiable($this->request)) {
             $method = null;
 
-            if ($suffix = $request->getUri()->getSuffix()) {
+            if ($suffix = $this->request->getUri()->getSuffix()) {
                 $method = $this->suffixMap[$suffix];
-            } elseif ($type = $request->accepts(array_keys($this->typeMap))) {
+            } elseif ($type = $this->request->accepts(array_keys($this->typeMap))) {
                 $method = $this->typeMap[$type];
             }
 
             if ($method && method_exists($this, $method)) {
-                $view = $this->$method($request);
+                $view = $this->$method($this->request);
             }
         }
 
         if (!$view) {
-            $view = $this->resolvePhp($request);
+            $view = $this->resolvePhp($this->request);
         }
 
         return $view;
     }
 
-    private function resolveJson($request)
+    private function resolveJson()
     {
-        if ($callback = $request->getParam($this->config['jsonp-param'])) {
+        if ($callback = $this->request->getParam($this->config['jsonp-param'])) {
             return new Jsonp($callback);
         }
 
         return new Json;
     }
 
-    private function resolvePhp($request)
+    private function resolvePhp()
     {
         return new Php;
     }
 
-    private function resolveXml($request)
+    private function resolveXml()
     {
         return new Xml($this->config['xml-view-config']);
     }
 
-    private function isRequestNegotiable($request)
+    private function isRequestNegotiable()
     {
-        return $request instanceof Http;
+        return $this->request instanceof Http;
     }
 }
