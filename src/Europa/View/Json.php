@@ -17,7 +17,7 @@ class Json implements ViewInterface
     public function render(array $context = array())
     {
         $render = $this->formatParamsToJsonArray($context);
-        $render = json_encode($context, $this->config->options);
+        $render = json_encode($context, $this->config['options']);
         return $render;
     }
     

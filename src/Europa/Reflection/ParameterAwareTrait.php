@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\Reflection;
+use Europa\Exception\Exception;
 
 trait ParameterAwareTrait
 {

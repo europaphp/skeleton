@@ -54,8 +54,8 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
 
     public function loader(LocatorInterface $loaderLocators)
     {
-        $loader = new Loader($loaderLocators);
-        $loader->register();
+        $loader = new Loader;
+        $loader->setLocator($loaderLocators);
         return $loader;
     }
 

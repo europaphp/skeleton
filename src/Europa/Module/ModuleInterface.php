@@ -7,13 +7,15 @@ interface ModuleInterface
 {
     public function bootstrap(ContainerInterface $container);
 
-    public function getConfig();
-
-    public function getDependencies();
+    public function getNamespace();
 
     public function getName();
 
+    public function getVersion();
+
     public function getPath();
 
-    public function getVersion();
+    public function getConfig();
+
+    public function getDependencies();
 }

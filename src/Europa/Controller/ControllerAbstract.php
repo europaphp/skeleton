@@ -22,8 +22,8 @@ abstract class ControllerAbstract implements ControllerInterface
         $class  = new ClassReflector($this);
         $method = $class->getMethod($action);
 
-        $this->applyClassFilters($class, $method);
-        $this->applyActionFilters($class, $method);
+        $this->applyClassFilters($class, $method, $context);
+        $this->applyActionFilters($class, $method, $context);
         
         return $method->invokeArgs($this, $context);
     }
@@ -50,13 +50,13 @@ abstract class ControllerAbstract implements ControllerInterface
     {
         $filters = [];
 
-        foreach ($reflector->getDocBlock()->getTags(self::DOC_TAG_FILTER) as $filter) {
+        foreach ($reflector->getDocBlock()->getTags(static::DOC_TAG_FILTER) as $filter) {
             $parts = explode(' ', $filter->value(), 2);
             $class = trim($parts[0]);
             $value = isset($parts[1]) ? trim($parts[1]) : '';
 
             if (!class_exists($class)) {
-                Exception::toss('The filter "%s" specified in controller "%s" does not exist.', $class, get_class($this));
+                Exception::toss('The filter "%s" specified for "%s" does not exist.', $class, $reflector->__toString());
             }
 
             $filters[] = new $class($value);
@@ -65,17 +65,17 @@ abstract class ControllerAbstract implements ControllerInterface
         return $filters;
     }
 
-    private function applyClassFilters($class, $method)
+    private function applyClassFilters(ClassReflector $class, MethodReflector $method, array &$context)
     {
         foreach ($this->getFiltersFor($class) as $filter) {
-            $filter($this, $class, $method);
+            $filter($this, $class, $method, $context);
         }
     }
 
-    private function applyActionFilters($class, $method)
+    private function applyActionFilters(ClassReflector $class, MethodReflector $method, array &$context)
     {
         foreach ($this->getFiltersFor($method) as $filter) {
-            $filter($this, $class, $method);
+            $filter($this, $class, $method, $context);
         }
     }
 }

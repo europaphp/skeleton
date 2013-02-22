@@ -28,6 +28,7 @@ class App implements AppInterface
         }
 
         $this->container = $container;
+        $this->container->get('loader')->register();
     }
 
     public function dispatch()

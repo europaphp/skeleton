@@ -3,19 +3,21 @@
 namespace Europa\Di;
 use Closure;
 use Europa\Filter\ClassNameFilter;
+use Europa\Filter\FilterAware;
+use Europa\Filter\FilterAwareInterface;
 use Europa\Reflection\ClassReflector;
 
-class Finder implements FinderInterface
+class Finder implements FilterAwareInterface, FinderInterface
 {
-    private $filter;
+    use FilterAware;
 
     private $args = [];
 
     private $callbacks = [];
 
-    public function __construct(callable $filter = null)
+    public function __construct()
     {
-        $this->filter = $filter ?: new ClassNameFilter;
+        $this->setFilter(new ClassNameFilter);
     }
 
     public function get($name)

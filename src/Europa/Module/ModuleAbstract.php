@@ -17,12 +17,18 @@ abstract class ModuleAbstract implements ModuleInterface
 
     protected $dependencies = [];
 
+    protected $name;
+
+    protected $namespace;
+
     protected $path = '../..';
 
     public function __construct($config = [])
     {
+        $this->initNamespace();
+        $this->initName();
         $this->initPath();
-        $this->initConfig();
+        $this->initConfig($config);
         $this->init();
     }
 
@@ -33,7 +39,7 @@ abstract class ModuleAbstract implements ModuleInterface
 
     public function bootstrap(ContainerInterface $container)
     {
-        $class = $this->formatNameToNamespace() . '\\' . self::BOOTSTRAPPER;
+        $class = $this->namespace . '\\' . static::BOOTSTRAPPER;
 
         if (class_exists($class)) {
             $class = new $class($this, $container);
@@ -41,17 +47,19 @@ abstract class ModuleAbstract implements ModuleInterface
         }
     }
 
-    public function getConfig()
+    public function getNamespace()
     {
-        return $this->config;
+        return $this->namespace;
     }
 
     public function getName()
     {
-        $name = get_class($this);
-        $name = strtolower($name);
-        $name = str_replace(['\\', '_'], '/', $name);
-        return $name;
+        return $this->name;
+    }
+
+    public function getVersion()
+    {
+        return static::VERSION;
     }
 
     public function getPath()
@@ -59,9 +67,9 @@ abstract class ModuleAbstract implements ModuleInterface
         return $this->path;
     }
 
-    public function getVersion()
+    public function getConfig()
     {
-        return static::VERSION;
+        return $this->config;
     }
 
     public function getDependencies()
@@ -72,7 +80,24 @@ abstract class ModuleAbstract implements ModuleInterface
     private function formatNameToNamespace()
     {
         $filter = new ClassNameFilter;
-        return $filter($this->getName());
+        return $filter($this->name);
+    }
+
+    private function initNamespace()
+    {
+        if (!$this->namespace) {
+            $this->namespace = get_class($this);
+        }
+    }
+
+    private function initName()
+    {
+        if (!$this->name) {
+            $this->name = $this->namespace;
+        }
+
+        $this->name = strtolower($this->name);
+        $this->name = str_replace(['\\', '_'], '/', $this->name);
     }
 
     private function initPath()
@@ -85,11 +110,11 @@ abstract class ModuleAbstract implements ModuleInterface
         }
 
         if (!$this->path = realpath($path)) {
-            Exception::toss('The module "%s" specified and invalid path "%s".', $this->getName(), $path);
+            Exception::toss('The module "%s" specified and invalid path "%s".', $this->name, $path);
         }
     }
 
-    private function initConfig()
+    private function initConfig($config)
     {
         if (is_string($this->config)) {
             $this->config = $this->path . '/' . $this->config;

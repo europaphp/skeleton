@@ -14,13 +14,6 @@ class Locator implements Countable, IteratorAggregate, LocatorInterface
 
     private $root;
 
-    public function __construct($root = null)
-    {
-        if ($root && !$this->root = realpath($root)) {
-            Exception::toss('The root path "%s" does not exist.', $root);
-        }
-    }
-
     public function locate($file)
     {
         $file = str_replace('\\', '/', $file);
@@ -34,6 +27,20 @@ class Locator implements Countable, IteratorAggregate, LocatorInterface
                 return $this->cache[$file] = $real;
             }
         }
+    }
+
+    public function setRoot($root)
+    {
+        if (!$this->root = realpath($root)) {
+            Exception::toss('The root path "%s" does not exist.', $root);
+        }
+
+        return $this;
+    }
+
+    public function getRoot()
+    {
+        return $this->root;
     }
     
     public function addPath($path, $check = true)

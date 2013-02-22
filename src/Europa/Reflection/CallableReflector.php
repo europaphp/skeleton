@@ -10,15 +10,22 @@ class CallableReflector implements ReflectorInterface
 
     public function __construct(callable $callable)
     {
-        if (is_array($callable)) {
+        if ($callable instanceof Closure || (is_string($callable) && function_exists($callable))) {
+            $this->reflector = new FunctionReflector($callable);
+        } elseif (is_array($callable)) {
             $this->reflector = new MethodReflector($callable[0], $callable[1]);
         } elseif (is_object($callable)) {
             $this->reflector = new ClassReflector($callable);
-        } elseif ($callable instanceof Closure || function_exists($callable)) {
-            $this->reflector = new FunctionReflector($callable);
         }
 
-        Exception::toss('The callable could not be reflected.');
+        if (!$this->reflector) {
+            Exception::toss('The callable could not be reflected.');
+        }
+    }
+
+    public function __toString()
+    {
+        return $this->reflector->__toString();
     }
 
     public function getDocBlock()
