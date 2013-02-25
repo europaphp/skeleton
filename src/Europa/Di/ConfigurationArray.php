@@ -1,10 +1,16 @@
 <?php
 
 namespace Europa\Di;
+use Europa\Common\InstanceIterator;
 
-interface ConfigurationArrayInterface extends ConfigurationInterface
+class ConfigurationArray extends ConfigurationInterface
 {
-    private $configurations = [];
+    private $configurations;
+
+    public function __construct(Traversable $configurations)
+    {
+        $this->configurations = new InstanceIterator('Europa\Di\ConfigurationInterface', $configurations);
+    }
 
     public function configure(ContainerInterface $container)
     {
@@ -12,12 +18,6 @@ interface ConfigurationArrayInterface extends ConfigurationInterface
             $configuration->configure($container);
         }
 
-        return $this;
-    }
-
-    public function add(ConfigurationInterface $configuration)
-    {
-        $this->configurations[] = $configuration;
         return $this;
     }
 }

@@ -9,8 +9,6 @@ interface ContainerInterface extends DependencyInjectorInterface
 
     public function remove($name);
 
-    public function provides($blueprint);
-
     public function setAliases($name, array $aliases);
 
     public function setDependencies($name, array $dependencies);

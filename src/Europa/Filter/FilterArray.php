@@ -4,7 +4,7 @@ namespace Europa\Filter;
 use Europa\Common\CallableIterator;
 use Traversable;
 
-class ClassResolutionFilter
+class FilterArray
 {
     private $filters;
 
@@ -16,9 +16,9 @@ class ClassResolutionFilter
     public function __invoke($value)
     {
         foreach ($this->filters as $filter) {
-            if (class_exists($class = $filter($value), true)) {
-                return $class;
-            }
+            $value = $filter($value);
         }
+
+        return $value;
     }
 }

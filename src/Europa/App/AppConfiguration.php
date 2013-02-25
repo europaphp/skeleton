@@ -1,6 +1,7 @@
 <?php
 
 namespace Europa\App;
+use ArrayIterator;
 use Closure;
 use Europa\Config\Config;
 use Europa\Config\ConfigInterface;
@@ -15,6 +16,7 @@ use Europa\Exception\Exception;
 use Europa\Fs\Loader;
 use Europa\Fs\LocatorArray;
 use Europa\Fs\LocatorInterface;
+use Europa\Fs\LocatorAwareInterface;
 use Europa\Module\Manager as ModuleManager;
 use Europa\Module\ManagerInterface;
 use Europa\Request\RequestAbstract;
@@ -26,6 +28,7 @@ use Europa\View\HelperConfiguration;
 use Europa\View\Negotiator;
 use Europa\View\NegotiatorInterface;
 use Europa\View\ScriptAwareInterface;
+use Traversable;
 
 class AppConfiguration extends ConfigurationAbstract implements AppConfigurationInterface
 {
@@ -37,14 +40,12 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
         ]);
     }
 
-    public function controllers()
+    public function controllers(DependencyInjectorInterface $self)
     {
         $finder = new Finder;
-        $finder->addCallback('Europa\Controller\ControllerInterface', function($controller) {
-            $controller->setDependencyInjector($this);
+        return $finder->addCallback('Europa\Di\DependencyInjectorAwareInterface', function($controller) use ($self) {
+            return $controller->setDependencyInjector($self);
         });
-
-        return $finder;
     }
 
     public function events()
@@ -52,16 +53,21 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
         return new EventManager;
     }
 
-    public function loader(LocatorInterface $loaderLocators)
+    public function loader(LocatorInterface $loaderLocator)
     {
         $loader = new Loader;
-        $loader->setLocator($loaderLocators);
+        $loader->setLocator($loaderLocator);
         return $loader;
+    }
+
+    public function loaderLocator(Traversable $loaderLocators)
+    {
+        return new LocatorArray($loaderLocators);
     }
 
     public function loaderLocators()
     {
-        return new LocatorArray;
+        return new ArrayIterator;
     }
 
     public function modules()
@@ -79,48 +85,66 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
         return ResponseAbstract::detect();
     }
 
+    public function router(Traversable $routers)
+    {
+        return new RouterArray($routers);
+    }
+
     public function routers()
     {
-        return new RouterArray;
+        return new ArrayIterator;
     }
 
     public function view(
         ConfigInterface $config,
         RequestInterface $request,
-        LocatorInterface $viewLocators,
-        DependencyInjectorInterface $viewHelpers,
+        LocatorInterface $viewLocator,
+        DependencyInjectorInterface $viewHelperInjector,
         NegotiatorInterface $viewNegotiator,
         Closure $viewScriptFormatter
     ) {
         $view = $viewNegotiator->negotiate($request);
 
+        if ($view instanceof LocatorAwareInterface) {
+            $view->setLocator($viewLocator);
+        }
+
         if ($view instanceof ScriptAwareInterface) {
-            $view->setLocator($viewLocators);
             $view->setScript($viewScriptFormatter($request));
         }
 
         if ($view instanceof DependencyInjectorAwareInterface) {
-            $view->setDependencyInjector($viewHelpers);
+            $view->setDependencyInjector($viewHelperInjector);
         }
 
         return $view;
     }
 
-    public function viewHelpers()
+    public function viewHelperInjector(Traversable $viewHelperInjectors)
+    {
+        return new DependencyInjectorArray($viewHelperInjectors);
+    }
+
+    public function viewHelperInjectors()
     {
         $defaultContainer     = new Container;
         $defaultConfiguration = new HelperConfiguration;
         $defaultConfiguration->configure($defaultContainer);
 
-        $helpers = new DependencyInjectorArray;
-        $helpers->add($defaultContainer);
+        $viewHelperInjectors = new ArrayIterator;
+        $viewHelperInjectors->append($defaultContainer);
 
-        return $helpers;
+        return $viewHelperInjectors;
     }
 
-    public function viewLocators(ConfigInterface $config)
+    public function viewLocator(Traversable $viewLocators)
     {
-        return new LocatorArray;
+        return new LocatorArray($viewLocators);
+    }
+
+    public function viewLocators()
+    {
+        return new ArrayIterator;
     }
 
     public function viewNegotiator(ConfigInterface $viewNegotiatorConfig, RequestInterface $request)

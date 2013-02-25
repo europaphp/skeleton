@@ -25,8 +25,7 @@ class App implements AppInterface, DependencyInjectorAwareInterface
 
     public function __construct()
     {
-        $this->injector = new Container;
-        (new AppConfiguration)->configure($this->injector);
+        $this->injector = (new AppConfiguration)->configure(new Container);
     }
 
     public function dispatch()
@@ -44,7 +43,7 @@ class App implements AppInterface, DependencyInjectorAwareInterface
     {
         $this->injector->get('events')->trigger(self::EVENT_ROUTE, $this->injector);
 
-        if (!$this->injector->get('routers')->route($this->injector->get('request'))) {
+        if (!$this->injector->get('router')->route($this->injector->get('request'))) {
             Exception::toss('The router could not find a suitable controller for the request "%s".', $this->injector->get('request'));
         }
 

@@ -9,15 +9,7 @@ use ReflectionClass;
 
 class Container implements ContainerInterface
 {
-    const DOC_TAG_ALIAS = 'alias';
-
-    const DOC_TAG_BIND = 'bind';
-
-    const DOC_TAG_DEPENDENCY = 'dependency';
-
-    const DOC_TAG_PRIVATE = 'private';
-
-    const DOC_TAG_TRANSIENT = 'transient';
+    const SELF_DEPENDENCY_NAME = 'self';
 
     private $aliases = [];
 
@@ -42,9 +34,7 @@ class Container implements ContainerInterface
 
         $this->uncache($name);
 
-        $this->services[$name] = $service->bindTo($this);
-
-        $this->configureService($name, $this->services[$name]);
+        $this->services[$name] = $service;
 
         return $this;
     }
@@ -68,6 +58,19 @@ class Container implements ContainerInterface
         }
 
         $service = call_user_func_array($service, $this->resolveDependenciesFor($name));
+
+        if (isset($this->types[$name])) {
+            foreach ($this->types[$name] as $type) {
+                if (!$service instanceof $type) {
+                    Exception::toss(
+                        'The service "%s" is required to be an instance of "%s". Instance of "%s" supplied.',
+                        $name,
+                        $type,
+                        get_class($service)
+                    );
+                }
+            }
+        }
 
         if (isset($this->transient[$name])) {
             return $service;
@@ -105,18 +108,20 @@ class Container implements ContainerInterface
 
     public function setDependencies($name, array $dependencies)
     {
-        $this->dependencies[$name] = $dependencies;
+        $this->dependencies[$this->resolveAlias($name)] = $dependencies;
         return $this;
     }
 
     public function setPrivate($name)
     {
-        $this->private[] = $name;
+        $this->private[] = $this->resolveAlias($name);
         return $this;
     }
 
     public function setTransient($name)
     {
+        $name = $this->resolveAlias($name);
+
         $this->transient[] = $name;
 
         if (isset($this->cache[$name])) {
@@ -126,17 +131,10 @@ class Container implements ContainerInterface
         return $this;
     }
 
-    public function provides($blueprint)
+    public function setTypes($name, array $types)
     {
-        $reflector = new ReflectionClass($blueprint);
-
-        foreach ($reflector->getMethods() as $method) {
-            if (!isset($this->services[$method->getName()])) {
-                return false;
-            }
-        }
-
-        return true;
+        $this->types[$this->resolveAlias($name)] = $types;
+        return $this;
     }
 
     private function uncache($name)
@@ -167,7 +165,9 @@ class Container implements ContainerInterface
 
         if (isset($this->dependencies[$name])) {
             foreach ($this->dependencies[$name] as $dependency) {
-                if ($this->has($dependency)) {
+                if ($dependency === self::SELF_DEPENDENCY_NAME) {
+                    $dependencies[] = $this;
+                } elseif ($this->has($dependency)) {
                     $dependencies[] = $this->get($dependency);
                 } else {
                     Exception::toss('The service "%s" requires that the dependency "%s" is defined.', $name, $dependency);
@@ -176,61 +176,5 @@ class Container implements ContainerInterface
         }
 
         return $dependencies;
-    }
-
-    private function configureService($name, Closure $closure)
-    {
-        $closure = new FunctionReflector($closure);
-
-        $this->applyAliases($name, $closure);
-        $this->applyDependencies($name, $closure);
-        $this->applyPrivate($name, $closure);
-        $this->applyTransient($name, $closure);
-    }
-
-    private function applyAliases($name, ReflectorInterface $closure)
-    {
-        $docblock = $closure->getDocBlock();
-        $aliases  = [];
-
-        if ($docblock->hasTag(self::DOC_TAG_ALIAS)) {
-            foreach ($docblock->getTag(self::DOC_TAG_ALIAS) as $tag) {
-                $aliases[] = $tag->value();
-            }
-        }
-
-        $this->setAliases($name, $aliases);
-    }
-
-    private function applyDependencies($name, ReflectorInterface $closure)
-    {
-        $docblock     = $closure->getDocBlock();
-        $dependencies = [];
-
-        foreach ($closure->getParameters() as $index => $param) {
-            $dependencies[$index] = $param->getName();
-        }
-
-        if ($docblock->hasTag(self::DOC_TAG_DEPENDENCY)) {
-            foreach ($docblock->getTag(self::DOC_TAG_DEPENDENCY) as $index => $tag) {
-                $dependencies[$index] = $tag->value();
-            }
-        }
-
-        $this->setDependencies($name, $dependencies);
-    }
-
-    private function applyPrivate($name, ReflectorInterface $closure)
-    {
-        if ($closure->getDocBlock()->hasTag(self::DOC_TAG_PRIVATE)) {
-            $this->setPrivate($name);
-        }
-    }
-
-    private function applyTransient($name, ReflectorInterface $closure)
-    {
-        if ($closure->getDocBlock()->hasTag(self::DOC_TAG_TRANSIENT)) {
-            $this->setTransient($name);
-        }
     }
 }

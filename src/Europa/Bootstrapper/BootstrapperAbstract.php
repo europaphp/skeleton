@@ -12,7 +12,7 @@ abstract class BootstrapperAbstract implements BootstrapperInterface
         
         foreach ($that->getMethods() as $method) {
             if ($this->isValidMethod($method)) {
-                $method->invokeArgs($this, func_get_args());
+                $method->invoke($this);
             }
         }
         

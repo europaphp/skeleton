@@ -53,19 +53,6 @@ class Finder implements FilterAwareInterface, FinderInterface
         return class_exists(call_user_func($this->filter, $name));
     }
 
-    public function provides($blueprint)
-    {
-        $reflector = new ReflectionClass($blueprint);
-
-        foreach ($reflector->getMethods() as $method) {
-            if (!isset($this->has[$method->getName()])) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     public function addArgs($instanceof, Closure $closure)
     {
         $this->args[$instanceof] = $closure;

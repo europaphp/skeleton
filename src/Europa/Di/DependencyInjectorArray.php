@@ -1,11 +1,17 @@
 <?php
 
 namespace Europa\Di;
-use ReflectionClass;
+use Europa\Common\InstanceIterator;
+use Traversable;
 
-class DependencyInjectorArray implements DependencyInjectorArrayInterface
+class DependencyInjectorArray implements DependencyInjectorInterface
 {
-    private $injectors = [];
+    private $injectors;
+
+    public function __construct(Traversable $injectors)
+    {
+        $this->injectors = new InstanceIterator('Europa\Di\DependencyInjectorInterface', $injectors);
+    }
 
     public function get($name)
     {
@@ -27,28 +33,5 @@ class DependencyInjectorArray implements DependencyInjectorArrayInterface
         }
 
         return false;
-    }
-
-    public function provides($blueprint)
-    {
-        $reflector = new ReflectionClass($blueprint);
-
-        foreach ($reflector->getMethods() as $method) {
-            foreach ($this->injectors as $injector) {
-                if ($injector->has($method->getName())) {
-                    continue 2;
-                }
-            }
-
-            return false;
-        }
-
-        return true;
-    }
-
-    public function add(DependencyInjectorInterface $injector)
-    {
-        $this->injectors[] = $injector;
-        return $this;
     }
 }

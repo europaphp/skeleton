@@ -42,7 +42,7 @@ abstract class ModuleAbstract implements ModuleInterface
         $class = $this->namespace . '\\' . static::BOOTSTRAPPER;
 
         if (class_exists($class)) {
-            $class = new $class($this, $container);
+            $class = new $class($container, $this);
             $class->bootstrap();
         }
     }

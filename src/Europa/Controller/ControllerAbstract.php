@@ -1,13 +1,16 @@
 <?php
 
 namespace Europa\Controller;
+use Europa\Di\DependencyInjectorInterface;
 use Europa\Di\DependencyInjectorAware;
+use Europa\Di\DependencyInjectorAwareInterface;
 use Europa\Exception\Exception;
+use Europa\Module\ModuleInterface;
 use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
 use Europa\Reflection\ReflectorInterface;
 
-abstract class ControllerAbstract implements ControllerInterface
+abstract class ControllerAbstract implements ControllerInterface, DependencyInjectorAwareInterface
 {
     use DependencyInjectorAware;
 
@@ -28,22 +31,18 @@ abstract class ControllerAbstract implements ControllerInterface
         return $method->invokeArgs($this, $context);
     }
 
-    public function forward($to)
-    {
-        return $this->invoke($to);
-    }
-
     public function service($service)
     {
-        if (!$injector = $this->getDependencyInjector()) {
-            Exception::toss('Cannot get service "%s" from controller "%s" because no container was set.', $service, get_class($this));
-        }
-
-        if (!$injector->has($service)) {
+        if (!$this->injector->has($service)) {
             Exception::toss('Cannot get service "%s" from controller "%s" because it does not exist in the bound container.', $service, get_class($this));
         }
 
-        return $injector->get($service);
+        return $this->injector->get($service);
+    }
+
+    public function forward($to)
+    {
+        return $this->invoke($to);
     }
 
     private function getFiltersFor(ReflectorInterface $reflector)

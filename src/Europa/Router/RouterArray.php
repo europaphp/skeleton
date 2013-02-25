@@ -1,11 +1,18 @@
 <?php
 
 namespace Europa\Router;
+use Europa\Common\InstanceIterator;
 use Europa\Request\RequestInterface;
+use Traversable;
 
-class RouterArray implements RouterArrayInterface
+class RouterArray implements RouterInterface
 {
-    private $routers = [];
+    private $routers;
+
+    public function __construct(Traversable $routers)
+    {
+        $this->routers = new InstanceIterator('Europa\Router\RouterInterface', $routers);
+    }
 
     public function route(RequestInterface $request)
     {
@@ -27,11 +34,5 @@ class RouterArray implements RouterArrayInterface
         }
 
         Exception::toss('The route "%s" cannot be formatted because it does not exist.', $name);
-    }
-
-    public function add(RouterInterface $router)
-    {
-        $this->routers[] = $router;
-        return $this;
     }
 }

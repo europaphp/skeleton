@@ -23,7 +23,7 @@ class Yml
         return $parsed;
     }
 
-    private function generateErrorHandler()
+    private function generateErrorHandler($data)
     {
         return function($errno, $errstr, $errfile, $errline, $errcontext) use ($data) {
             Exception::toss('Unable to parse YAML string "%s" with error: %s', $data, $errstr);
