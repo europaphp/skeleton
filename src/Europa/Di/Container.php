@@ -17,8 +17,6 @@ class Container implements ContainerInterface
 
     private $dependencies = [];
 
-    private $private = [];
-
     private $services = [];
 
     private $transient = [];
@@ -42,10 +40,6 @@ class Container implements ContainerInterface
     public function get($name)
     {
         $name = $this->resolveAlias($name);
-
-        if (isset($this->private[$name])) {
-            Exception::toss('The service "%s" is not publicly accessible.', $name);
-        }
 
         if (isset($this->cache[$name])) {
             return $this->cache[$name];
@@ -109,12 +103,6 @@ class Container implements ContainerInterface
     public function setDependencies($name, array $dependencies)
     {
         $this->dependencies[$this->resolveAlias($name)] = $dependencies;
-        return $this;
-    }
-
-    public function setPrivate($name)
-    {
-        $this->private[] = $this->resolveAlias($name);
         return $this;
     }
 

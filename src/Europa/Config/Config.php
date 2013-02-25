@@ -7,10 +7,6 @@ class Config implements ConfigInterface
 {
     private $config = [];
 
-    private $cwd;
-
-    private $defaults = [];
-
     private $parent;
 
     public function __construct()
@@ -22,8 +18,11 @@ class Config implements ConfigInterface
 
     public function offsetSet($name, $value)
     {
-        if (!is_scalar($value) && !$value instanceof ConfigInterface) {
+        if ($value instanceof ConfigInterface) {
+            $value->setParent($this);
+        } else if (is_array($value) || is_object($value)) {
             $value = new static($value);
+            $value->setParent($this);
         }
 
         if ($value instanceof ConfigInterface) {
@@ -44,15 +43,11 @@ class Config implements ConfigInterface
         if (array_key_exists($name, $this->config)) {
             return $this->config[$name];
         }
-
-        if (array_key_exists($name, $this->defaults)) {
-            return $this->defaults[$name];
-        }
     }
 
     public function offsetExists($name)
     {
-        return array_key_exists($name, $this->config) || array_key_exists($name, $this->defaults);
+        return array_key_exists($name, $this->config);
     }
 
     public function offsetUnset($name)
@@ -105,9 +100,8 @@ class Config implements ConfigInterface
     public function import($config, callable $adapter = null)
     {
         if (is_string($config) && $file = $this->resolveFileFromString($config)) {
-            $this->cwd = dirname($file);
-            $config    = file_get_contents($file);
-            $adapter   = $adapter ? $adapter : $this->resolveAdapterFromFile($file);
+            $config  = file_get_contents($file);
+            $adapter = $adapter ? $adapter : $this->resolveAdapterFromFile($file);
         }
 
         if ($adapter) {
@@ -116,21 +110,9 @@ class Config implements ConfigInterface
 
         if (is_array($config) || is_object($config)) {
             foreach ($config as $name => $value) {
-                if (!is_scalar($value) && !$value instanceof ConfigInterface) {
-                    $value = new static($value);
-                }
-
-                if (is_int($name)) {
-                    $this->config[] = $value;
-                } elseif (isset($this->config[$name]) && $this->config[$name] instanceof ConfigInterface && $value instanceof ConfigInterface) {
-                    $this->config[$name]->import($value);
-                } else {
-                    $this->config[$name] = $value;
-                }
+                $this->offsetSet($name, $value);
             }
         }
-
-        $this->cwd = null;
 
         return $this;
     }
@@ -192,25 +174,10 @@ class Config implements ConfigInterface
         return array_values($this->config);
     }
 
-    public function setDefaults(array $defaults)
-    {
-        $this->defaults = $defaults;
-        return $this;
-    }
-
-    public function getDefaults()
-    {
-        return $this->defaults;
-    }
-
     private function resolveFileFromString($config)
     {
         if (is_file($config)) {
             return $config;
-        }
-
-        if (is_file($this->cwd . '/' . $config)) {
-            return $this->cwd . '/' . $config;
         }
     }
 

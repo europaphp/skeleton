@@ -13,7 +13,5 @@ interface ContainerInterface extends DependencyInjectorInterface
 
     public function setDependencies($name, array $dependencies);
 
-    public function setPrivate($name);
-
     public function setTransient($name);
 }

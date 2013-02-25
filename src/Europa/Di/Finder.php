@@ -13,7 +13,11 @@ class Finder implements FilterAwareInterface, FinderInterface
 
     private $args = [];
 
+    private $cache = [];
+
     private $callbacks = [];
+
+    private $transient = false;
 
     public function __construct()
     {
@@ -22,6 +26,10 @@ class Finder implements FilterAwareInterface, FinderInterface
 
     public function get($name)
     {
+        if (isset($this->cache[$name])) {
+            return $this->cache[$name];
+        }
+
         $class = call_user_func($this->filter, $name);
 
         if (!class_exists($class)) {
@@ -45,7 +53,11 @@ class Finder implements FilterAwareInterface, FinderInterface
             }
         }
 
-        return $class;
+        if ($this->transient) {
+            return $class;
+        }
+
+        return $this->cache[$name] = $class;
     }
 
     public function has($name)
@@ -62,6 +74,12 @@ class Finder implements FilterAwareInterface, FinderInterface
     public function addCallback($instanceof, Closure $closure)
     {
         $this->callbacks[$instanceof] = $closure;
+        return $this;
+    }
+
+    public function setTransient()
+    {
+        $this->transient = true;
         return $this;
     }
 

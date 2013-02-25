@@ -2,6 +2,7 @@
 
 namespace Europa\Di;
 use Europa\Common\InstanceIterator;
+use Europa\Exception\Exception;
 use Traversable;
 
 class DependencyInjectorArray implements DependencyInjectorInterface

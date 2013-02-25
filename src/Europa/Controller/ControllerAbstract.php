@@ -5,7 +5,6 @@ use Europa\Di\DependencyInjectorInterface;
 use Europa\Di\DependencyInjectorAware;
 use Europa\Di\DependencyInjectorAwareInterface;
 use Europa\Exception\Exception;
-use Europa\Module\ModuleInterface;
 use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
 use Europa\Reflection\ReflectorInterface;

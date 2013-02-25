@@ -14,10 +14,6 @@ interface ConfigInterface extends ArrayAccess, Countable, Iterator, Serializable
 
     public function clear();
 
-    public function setDefaults(array $defaults);
-
-    public function getDefaults();
-
     public function setParent(ConfigInterface $config);
 
     public function getParent();
