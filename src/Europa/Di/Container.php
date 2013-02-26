@@ -2,6 +2,7 @@
 
 namespace Europa\Di;
 use Closure;
+use Europa\Di\Exception\CircularReferenceException;
 use Europa\Exception\Exception;
 use Europa\Reflection\FunctionReflector;
 use Europa\Reflection\ReflectorInterface;
@@ -16,6 +17,8 @@ class Container implements ContainerInterface
     private $cache = [];
 
     private $dependencies = [];
+
+    private $loading = [];
 
     private $services = [];
 
@@ -45,6 +48,12 @@ class Container implements ContainerInterface
             return $this->cache[$name];
         }
 
+        if (isset($this->loading[$name])) {
+            throw new CircularReferenceException($name, array_keys($this->loading));
+        }
+
+        $this->loading[$name] = true;
+
         if (isset($this->services[$name])) {
             $service = $this->services[$name];
         } else {
@@ -65,6 +74,8 @@ class Container implements ContainerInterface
                 }
             }
         }
+
+        unset($this->loading[$name]);
 
         if (isset($this->transient[$name])) {
             return $service;

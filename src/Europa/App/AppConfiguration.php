@@ -160,10 +160,13 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
     public function viewScriptFormatter(ConfigInterface $config)
     {
         return function(RequestInterface $request) use ($config) {
-            return $request->getParam($config['controller-param'])
-                . '/'
-                . $request->getParam($config['action-param'])
-                . '.php';
+            $controller = $request->getParam($config['controller-param']);
+            $controller = str_replace('.', DIRECTORY_SEPARATOR, $controller);
+
+            $action = $request->getParam($config['action-param']);
+            $action = str_replace('.', DIRECTORY_SEPARATOR, $action);
+
+            return $controller . '/' . $action . '.php';
         };
     }
 }

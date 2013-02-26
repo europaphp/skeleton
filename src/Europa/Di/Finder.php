@@ -2,10 +2,12 @@
 
 namespace Europa\Di;
 use Closure;
+use Europa\Di\Exception\CircularReferenceException;
 use Europa\Filter\ClassNameFilter;
 use Europa\Filter\FilterAware;
 use Europa\Filter\FilterAwareInterface;
 use Europa\Reflection\ClassReflector;
+use Europa\Exception\Exception;
 
 class Finder implements FilterAwareInterface, FinderInterface
 {
@@ -16,6 +18,8 @@ class Finder implements FilterAwareInterface, FinderInterface
     private $cache = [];
 
     private $callbacks = [];
+
+    private $loading = [];
 
     private $transient = false;
 
@@ -29,6 +33,12 @@ class Finder implements FilterAwareInterface, FinderInterface
         if (isset($this->cache[$name])) {
             return $this->cache[$name];
         }
+
+        if (isset($this->loading[$name])) {
+            throw new CircularReferenceException($name, array_keys($this->loading));
+        }
+
+        $this->loading[$name] = true;
 
         $class = call_user_func($this->filter, $name);
 
@@ -52,6 +62,8 @@ class Finder implements FilterAwareInterface, FinderInterface
                 $callback($class);
             }
         }
+
+        unset($this->loading[$name]);
 
         if ($this->transient) {
             return $class;
