@@ -3,7 +3,7 @@
 namespace Europa\Di;
 use Closure;
 
-interface FinderInterface extends DependencyInjectorInterface
+interface ResolverInterface extends DependencyInjectorInterface
 {
     public function addArgs($instanceof, Closure $closure);
 

@@ -16,8 +16,6 @@ class Container implements ContainerInterface
 
     private $cache = [];
 
-    private $dependencies = [];
-
     private $loading = [];
 
     private $services = [];
@@ -29,13 +27,21 @@ class Container implements ContainerInterface
         $this->cache = [];
     }
 
+    public function configure(ConfigurationInterface $configuration)
+    {
+        $configuration->configure($this);
+        return $this;
+    }
+
     public function set($name, Closure $service)
     {
         $name = $this->resolveAlias($name);
 
-        $this->uncache($name);
+        if (isset($this->cache[$name])) {
+            unset($this->cache[$name]);
+        }
 
-        $this->services[$name] = $service;
+        $this->services[$name] = $service->bindTo($this);
 
         return $this;
     }
@@ -60,7 +66,7 @@ class Container implements ContainerInterface
             Exception::toss('The service "%s" does not exist.', $name);
         }
 
-        $service = call_user_func_array($service, $this->resolveDependenciesFor($name));
+        $service = $service();
 
         if (isset($this->types[$name])) {
             foreach ($this->types[$name] as $type) {
@@ -93,7 +99,9 @@ class Container implements ContainerInterface
     {
         $name = $this->resolveAlias($name);
 
-        $this->uncache($name);
+        if (isset($this->cache[$name])) {
+            unset($this->cache[$name]);
+        }
 
         if (isset($this->services[$name])) {
             unset($this->services[$name]);
@@ -108,12 +116,6 @@ class Container implements ContainerInterface
             $this->aliases[$alias] = $name;
         }
 
-        return $this;
-    }
-
-    public function setDependencies($name, array $dependencies)
-    {
-        $this->dependencies[$this->resolveAlias($name)] = $dependencies;
         return $this;
     }
 
@@ -136,19 +138,6 @@ class Container implements ContainerInterface
         return $this;
     }
 
-    private function uncache($name)
-    {
-        if (isset($this->cache[$name])) {
-            unset($this->cache[$name]);
-        }
-
-        foreach ($this->dependencies as $service => $dependencies) {
-            if (isset($this->cache[$service]) && in_array($name, $dependencies)) {
-                unset($this->cache[$service]);
-            }
-        }
-    }
-
     private function resolveAlias($name)
     {
         if (isset($this->aliases[$name])) {
@@ -156,24 +145,5 @@ class Container implements ContainerInterface
         }
 
         return $name;
-    }
-
-    private function resolveDependenciesFor($name)
-    {
-        $dependencies = [];
-
-        if (isset($this->dependencies[$name])) {
-            foreach ($this->dependencies[$name] as $dependency) {
-                if ($dependency === self::SELF_DEPENDENCY_NAME) {
-                    $dependencies[] = $this;
-                } elseif ($this->has($dependency)) {
-                    $dependencies[] = $this->get($dependency);
-                } else {
-                    Exception::toss('The service "%s" requires that the dependency "%s" is defined.', $name, $dependency);
-                }
-            }
-        }
-
-        return $dependencies;
     }
 }

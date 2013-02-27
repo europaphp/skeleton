@@ -9,7 +9,7 @@ use Europa\Filter\FilterAwareInterface;
 use Europa\Reflection\ClassReflector;
 use Europa\Exception\Exception;
 
-class Finder implements FilterAwareInterface, FinderInterface
+class Resolver implements FilterAwareInterface, ResolverInterface
 {
     use FilterAware;
 

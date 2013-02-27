@@ -2,7 +2,7 @@
 
 namespace Europa\Module;
 use ArrayIterator;
-use Europa\Di\ContainerInterface;
+use Europa\Di\DependencyInjectorInterface;
 use Europa\Exception\Exception;
 use Europa\Version\SemVer;
 use ReflectionExtension;
@@ -13,15 +13,22 @@ class Manager implements ManagerInterface
 
     private $bootstrapped = [];
 
+    private $injector;
+
     private $modules = [];
 
-    public function bootstrap(ContainerInterface $container)
+    public function __construct(DependencyInjectorInterface $injector)
+    {
+        $this->injector = $injector;
+    }
+
+    public function bootstrap()
     {
         foreach ($this->modules as $module) {
             if (!in_array($module->getName(), $this->bootstrapped)) {
                 $this->validate($module);
-                $this->bootstrapDependencies($module, $container);
-                $module->bootstrap($container);
+                $this->bootstrapDependencies($module);
+                $module->bootstrap($this->injector);
                 $this->bootstrapped[] = $module->getName();
             }
         }
@@ -95,11 +102,11 @@ class Manager implements ManagerInterface
         }
     }
 
-    private function bootstrapDependencies(ModuleInterface $module, ContainerInterface $container)
+    private function bootstrapDependencies(ModuleInterface $module)
     {
         foreach ($module->getDependencies() as $name => $version) {
             if (!in_array($name, $this->bootstrapped)) {
-                $this->get($name)->bootstrap($container);
+                $this->get($name)->bootstrap($this->injector);
             }
         }
     }

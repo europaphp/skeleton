@@ -1,7 +1,16 @@
 <?php
 
+use Europa\App\AppConfiguration;
+use Europa\Di\Container;
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$app = new Europa\App\App(__DIR__ . '/../europaphp.yml');
-$app->save();
-$app();
+$container = new Container;
+$container->configure(new AppConfiguration);
+$container->get('loader')->register();
+$container->get('modules')
+    ->add(new Europaphp\Help)
+    ->add(new Europaphp\Main)
+    ->add(new Europaphp\Tests);
+
+$container->get('app')->dispatch();

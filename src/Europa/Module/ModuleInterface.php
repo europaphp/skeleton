@@ -1,11 +1,11 @@
 <?php
 
 namespace Europa\Module;
-use Europa\Di\ContainerInterface;
+use Europa\Di\DependencyInjectorInterface;
 
 interface ModuleInterface
 {
-    public function bootstrap(ContainerInterface $container);
+    public function bootstrap(DependencyInjectorInterface $injector);
 
     public function getNamespace();
 

@@ -2,7 +2,7 @@
 
 namespace Europa\Module;
 use Europa\Config\Config;
-use Europa\Di\ContainerInterface;
+use Europa\Di\DependencyInjectorInterface;
 use Europa\Exception\Exception;
 use Europa\Filter\ClassNameFilter;
 use ReflectionClass;
@@ -37,12 +37,12 @@ abstract class ModuleAbstract implements ModuleInterface
         
     }
 
-    public function bootstrap(ContainerInterface $container)
+    public function bootstrap(DependencyInjectorInterface $injector)
     {
         $class = $this->namespace . '\\' . static::BOOTSTRAPPER;
 
         if (class_exists($class)) {
-            $class = new $class($container, $this);
+            $class = new $class($injector, $this);
             $class->bootstrap();
         }
     }

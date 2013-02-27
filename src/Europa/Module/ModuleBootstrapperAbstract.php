@@ -2,21 +2,21 @@
 
 namespace Europa\Module;
 use Europa\Bootstrapper\BootstrapperAbstract;
-use Europa\Di\ContainerInterface;
+use Europa\Di\DependencyInjectorInterface;
 use Europa\Di\Finder;
 use Europa\Fs\Locator;
 use Europa\Router\Router;
 
 abstract class ModuleBootstrapperAbstract extends BootstrapperAbstract
 {
-    private $container;
+    private $injector;
 
     private $module;
 
-    public function __construct(ContainerInterface $container, ModuleInterface $module)
+    public function __construct(DependencyInjectorInterface $injector, ModuleInterface $module)
     {
-        $this->container = $container;
-        $this->module    = $module;
+        $this->injector = $injector;
+        $this->module   = $module;
     }
 
     public function router()
@@ -24,7 +24,7 @@ abstract class ModuleBootstrapperAbstract extends BootstrapperAbstract
         if ($path = realpath($this->module->getPath() . '/configs/routes.yml')) {
             $router = new Router;
             $router->import($path);
-            $this->container->get('routers')->append($router);
+            $this->injector->get('routers')->append($router);
         }
     }
 
@@ -33,7 +33,7 @@ abstract class ModuleBootstrapperAbstract extends BootstrapperAbstract
         if ($path = realpath($this->module->getPath() . '/views')) {
             $locator = new Locator;
             $locator->addPath($path);
-            $this->container->get('viewLocators')->append($locator);
+            $this->injector->get('viewLocators')->append($locator);
         }
     }
 
@@ -42,9 +42,9 @@ abstract class ModuleBootstrapperAbstract extends BootstrapperAbstract
         return $this->module->getConfig()[$name];
     }
 
-    protected function getContainer()
+    protected function getDependencyInjector()
     {
-        return $this->container;
+        return $this->injector;
     }
 
     protected function getModule()
@@ -54,6 +54,6 @@ abstract class ModuleBootstrapperAbstract extends BootstrapperAbstract
 
     protected function getService($name)
     {
-        return $this->container->get($name);
+        return $this->injector->get($name);
     }
 }

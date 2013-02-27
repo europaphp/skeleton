@@ -1,16 +1,19 @@
 <?php
 
 namespace Europa\App;
+use Closure;
+use Europa\Config\ConfigInterface;
 use Europa\Controller\ControllerInterface;
+use Europa\Di\ResolverInterface;
+use Europa\Event\ManagerInterface as EventManagerInterface;
 use Europa\Exception\Exception;
-use Europa\Di\Container;
-use Europa\Di\DependencyInjectorAware;
-use Europa\Di\DependencyInjectorAwareInterface;
+use Europa\Module\ManagerInterface as ModuleManagerInterface;
+use Europa\Request\RequestInterface;
+use Europa\Response\ResponseInterface;
+use Europa\Router\RouterInterface;
 
-class App implements AppInterface, DependencyInjectorAwareInterface
+class App implements AppInterface
 {
-    use DependencyInjectorAware;
-
     const EVENT_ROUTE = 'route';
 
     const EVENT_ACTION = 'action';
@@ -23,14 +26,45 @@ class App implements AppInterface, DependencyInjectorAwareInterface
 
     const EVENT_ERROR = 'error';
 
-    public function __construct()
-    {
-        $this->injector = (new AppConfiguration)->configure(new Container);
+    private $config;
+
+    private $controllers;
+
+    private $events;
+
+    private $modules;
+
+    private $request;
+
+    private $response;
+
+    private $router;
+
+    private $views;
+
+    public function __construct(
+        ConfigInterface $config,
+        ResolverInterface $controllers,
+        EventManagerInterface $events,
+        ModuleManagerInterface $modules,
+        RequestInterface $request,
+        ResponseInterface $response,
+        RouterInterface $router,
+        Closure $views
+    ) {
+        $this->config      = $config;
+        $this->controllers = $controllers;
+        $this->events      = $events;
+        $this->modules     = $modules;
+        $this->request     = $request;
+        $this->response    = $response;
+        $this->router      = $router;
+        $this->views       = $views;
     }
 
     public function dispatch()
     {
-        $this->injector->get('modules')->bootstrap($this->injector);
+        $this->modules->bootstrap();
 
         $controller = $this->resolveController();
         $context    = $this->actionController($controller);
@@ -41,62 +75,52 @@ class App implements AppInterface, DependencyInjectorAwareInterface
 
     private function resolveController()
     {
-        $this->injector->get('events')->trigger(self::EVENT_ROUTE, $this->injector);
+        $this->events->trigger(self::EVENT_ROUTE, $this->controllers, $this->request, $this->router);
 
-        if (!$this->injector->get('router')->route($this->injector->get('request'))) {
-            Exception::toss('The router could not find a suitable controller for the request "%s".', $this->injector->get('request'));
+        if (!$this->router->route($this->request)) {
+            Exception::toss('The router could not find a suitable controller for the request "%s".', $this->request);
         }
 
-        $controller = $this->injector->get('request')->getParam($this->injector->get('config')['controller-param']);
+        $controller = $this->request->getParam($this->config['controller-param']);
 
-        if (!$this->injector->get('controllers')->has($controller)) {
+        if (!$this->controllers->has($controller)) {
             Exception::toss('The controller "%s" could not be found.', $controller);
         }
 
-        return $this->injector->get('controllers')->get($controller);
+        return $this->controllers->get($controller);
     }
 
     private function actionController(ControllerInterface $controller)
     {
-        $this->injector->get('events')->trigger(self::EVENT_ACTION, $this->injector, $controller);
+        $this->events->trigger(self::EVENT_ACTION, $controller, $this->request);
 
         return $controller->__call(
-            $this->injector->get('request')->getParam($this->injector->get('config')['action-param']),
-            $this->injector->get('request')->getParams()
+            $this->request->getParam($this->config['action-param']),
+            $this->request->getParams()
         );
     }
 
     private function renderView($context)
     {
-        $view    = $this->injector->get('view');
+        $view    = $this->views;
+        $view    = $view();
         $context = $context ?: [];
 
-        $this->injector->get('events')->trigger(self::EVENT_RENDER, $this->injector, $context);
+        $this->events->trigger(self::EVENT_RENDER, $context, $this->response, $view);
 
-        if ($this->injector->get('response') instanceof HttpInterface) {
-            $this->injector->get('response')->setContentTypeFromView($view);
+        if ($this->response instanceof HttpInterface) {
+            $this->response->setContentTypeFromView($view);
         }
 
-        return $view->render($context);;
-    }
-
-    private function formatViewScript()
-    {
-        $format = $this->injector->get('config')['view-script-format'];
-
-        foreach ($this->injector->get('request')->getParams() as $name => $param) {
-            $format = str_replace(':' . $name, $param, $format);
-        }
-
-        return $format;
+        return $view->render($context);
     }
 
     private function runResponse($rendered)
     {
-        $this->injector->get('response')->setBody($rendered);
-        $this->injector->get('events')->trigger(self::EVENT_SEND, $this->injector, $rendered);
-        $this->injector->get('response')->send();
-        $this->injector->get('events')->trigger(self::EVENT_DONE, $this->injector);
+        $this->response->setBody($rendered);
+        $this->events->trigger(self::EVENT_SEND, $this->response);
+        $this->response->send();
+        $this->events->trigger(self::EVENT_DONE, $this->response);
         return $this;
     }
 }

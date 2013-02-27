@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa\View;
-use Europa\Config\ConfigInterface;
+use Europa\Config\Config;
 use Europa\Request\Http;
 use Europa\Request\RequestInterface;
 
@@ -25,13 +25,10 @@ class Negotiator implements NegotiatorInterface
 
     private $request;
 
-    private $viewScriptFilter;
-
-    public function __construct(ConfigInterface $config, RequestInterface $request)
+    public function __construct(RequestInterface $request, $config = [])
     {
-        $this->config           = $config->import($this->config);
-        $this->request          = $request;
-        $this->viewScriptFilter = [$this, 'viewScriptFilter'];
+        $this->config  = new Config($this->config, $config);
+        $this->request = $request;
     }
 
     public function negotiate()
