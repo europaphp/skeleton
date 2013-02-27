@@ -11,6 +11,8 @@ $container->get('loader')->register();
 $container->get('modules')
     ->add(new Europaphp\Help)
     ->add(new Europaphp\Main)
-    ->add(new Europaphp\Tests);
+    ->add(new Europaphp\Tests([
+        'global-analysis-paths' => [__DIR__ . '/../src']
+    ]));
 
 $container->get('app')->dispatch();
