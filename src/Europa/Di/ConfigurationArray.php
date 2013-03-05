@@ -2,6 +2,7 @@
 
 namespace Europa\Di;
 use Europa\Common\InstanceIterator;
+use Traversable;
 
 class ConfigurationArray extends ConfigurationInterface
 {
