@@ -2,19 +2,19 @@
 
 namespace Europa\Di;
 use Closure;
-use Europa\Di\Exception\CircularReferenceException;
-use Europa\Exception\Exception;
 use Europa\Reflection\FunctionReflector;
 use Europa\Reflection\ReflectorInterface;
 use ReflectionClass;
 
 class Container implements ContainerInterface
 {
-    const SELF_DEPENDENCY_NAME = 'self';
+    const SERVICE_SELF = 'self';
 
     private $aliases = [];
 
     private $cache = [];
+
+    private $dependencies = [];
 
     private $loading = [];
 
@@ -41,7 +41,7 @@ class Container implements ContainerInterface
             unset($this->cache[$name]);
         }
 
-        $this->services[$name] = $service->bindTo($this);
+        $this->services[$name] = $service;
 
         return $this;
     }
@@ -55,7 +55,7 @@ class Container implements ContainerInterface
         }
 
         if (isset($this->loading[$name])) {
-            throw new CircularReferenceException($name, array_keys($this->loading));
+            throw new Exception\CircularReferenceException($name, array_keys($this->loading));
         }
 
         $this->loading[$name] = true;
@@ -66,7 +66,11 @@ class Container implements ContainerInterface
             Exception::toss('The service "%s" does not exist.', $name);
         }
 
-        $service = $service();
+        if ($dependencies = $this->resolveDependencies($name)) {
+            $service = call_user_func_array($service, $dependencies);
+        } else {
+            $service = $service();
+        }
 
         if (isset($this->types[$name])) {
             foreach ($this->types[$name] as $type) {
@@ -119,11 +123,41 @@ class Container implements ContainerInterface
         return $this;
     }
 
+    public function getAliases($name)
+    {
+        $aliases = [];
+
+        foreach ($this->aliases as $alias => $service) {
+            if ($service === $name) {
+                $aliases[] = $alias;
+            }
+        }
+
+        return $aliases;
+    }
+
+    public function setDependencies($name, array $dependencies)
+    {
+        $this->dependencies[$this->resolveAlias($name)] = $dependencies;
+        return $this;
+    }
+
+    public function getDependencies($name)
+    {
+        $name = $this->resolveAlias($name);
+
+        if (isset($this->dependencies[$name])) {
+            return $this->dependencies[$name];
+        }
+
+        return [];
+    }
+
     public function setTransient($name)
     {
         $name = $this->resolveAlias($name);
 
-        $this->transient[] = $name;
+        $this->transient[$name] = true;
 
         if (isset($this->cache[$name])) {
             unset($this->cache[$name]);
@@ -132,10 +166,26 @@ class Container implements ContainerInterface
         return $this;
     }
 
+    public function getTransient($name)
+    {
+        return isset($this->transeient[$name]);
+    }
+
     public function setTypes($name, array $types)
     {
         $this->types[$this->resolveAlias($name)] = $types;
         return $this;
+    }
+
+    public function getTypes()
+    {
+        $name = $this->resolveAlias($name);
+
+        if (isset($this->types[$name])) {
+            return $this->types[$name];    
+        }
+        
+        return [];
     }
 
     private function resolveAlias($name)
@@ -145,5 +195,22 @@ class Container implements ContainerInterface
         }
 
         return $name;
+    }
+
+    private function resolveDependencies($name)
+    {
+        $dependencies = [];
+
+        foreach ($this->getDependencies($name) as $dependency) {
+            if ($dependency === self::SERVICE_SELF) {
+                $dependencies[] = $this;
+            } elseif ($this->has($dependency)) {
+                $dependencies[] = $this->get($dependency);
+            } else {
+                throw new Exception\UndefinedDependency($name, $dependency);
+            }
+        }
+
+        return $dependencies;
     }
 }

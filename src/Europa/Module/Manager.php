@@ -25,11 +25,11 @@ class Manager implements ManagerInterface
     public function bootstrap()
     {
         foreach ($this->modules as $module) {
-            if (!in_array($module->getName(), $this->bootstrapped)) {
+            if (!in_array($module->name(), $this->bootstrapped)) {
                 $this->validate($module);
                 $this->bootstrapDependencies($module);
                 $module->bootstrap($this->injector);
-                $this->bootstrapped[] = $module->getName();
+                $this->bootstrapped[] = $module->name();
             }
         }
         
@@ -38,7 +38,7 @@ class Manager implements ManagerInterface
 
     public function add(ModuleInterface $module)
     {
-        $name = $module->getName();
+        $name = $module->name();
 
         if (isset($this->modules[$name])) {
             Exception::toss('Cannot add module "%s" because it already exists. This may be because another module you are adding is attempting to use the same name.', $name);
@@ -79,24 +79,24 @@ class Manager implements ManagerInterface
 
     private function validate(ModuleInterface $module)
     {
-        foreach ($module->getDependencies() as $name => $version) {
+        foreach ($module->dependencies() as $name => $version) {
             if (!$this->has($name)) {
                 Exception::toss(
                     'The module "%s" is required by the module "%s".',
                     $name,
-                    $module->getName()
+                    $module->name()
                 );
             }
 
             $version = new SemVer($version);
 
-            if (!$version->is($this->get($name)->getVersion())) {
+            if (!$version->is($this->get($name)->version())) {
                 Exception::toss(
                     'The module "%s", currently at version "%s", is required to be at version "%s" by the module "%s".',
                     $name,
-                    $this->get($name)->getVersion(),
+                    $this->get($name)->version(),
                     $version,
-                    $module->getName()
+                    $module->name()
                 );
             }
         }
@@ -104,7 +104,7 @@ class Manager implements ManagerInterface
 
     private function bootstrapDependencies(ModuleInterface $module)
     {
-        foreach ($module->getDependencies() as $name => $version) {
+        foreach ($module->dependencies() as $name => $version) {
             if (!in_array($name, $this->bootstrapped)) {
                 $this->get($name)->bootstrap($this->injector);
             }

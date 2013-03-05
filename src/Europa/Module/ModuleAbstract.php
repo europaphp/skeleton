@@ -3,7 +3,6 @@
 namespace Europa\Module;
 use Europa\Config\Config;
 use Europa\Di\DependencyInjectorInterface;
-use Europa\Exception\Exception;
 use Europa\Filter\ClassNameFilter;
 use ReflectionClass;
 
@@ -42,37 +41,41 @@ abstract class ModuleAbstract implements ModuleInterface
         $class = $this->namespace . '\\' . static::BOOTSTRAPPER;
 
         if (class_exists($class)) {
-            $class = new $class($injector, $this);
+            if (!is_subclass_of($class, 'Europa\Module\Bootstrapper\BootstrapperInterface')) {
+                throw new Exception\InvalidBootstrapperInstance($class);
+            }
+
+            $class = new $class($this, $injector);
             $class->bootstrap();
         }
     }
 
-    public function getNamespace()
+    public function ns()
     {
         return $this->namespace;
     }
 
-    public function getName()
+    public function name()
     {
         return $this->name;
     }
 
-    public function getVersion()
+    public function version()
     {
         return static::VERSION;
     }
 
-    public function getPath()
+    public function path()
     {
         return $this->path;
     }
 
-    public function getConfig()
+    public function config()
     {
         return $this->config;
     }
 
-    public function getDependencies()
+    public function dependencies()
     {
         return $this->dependencies;
     }
@@ -110,7 +113,7 @@ abstract class ModuleAbstract implements ModuleInterface
         }
 
         if (!$this->path = realpath($path)) {
-            Exception::toss('The module "%s" specified and invalid path "%s".', $this->name, $path);
+            Exception\InvalidPath($this->name, $path);
         }
     }
 

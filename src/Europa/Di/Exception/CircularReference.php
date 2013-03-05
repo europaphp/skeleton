@@ -2,7 +2,7 @@
 
 namespace Europa\Di\Exception;
 
-class CircularReferenceException extends \RuntimeException
+class CircularReference extends \RuntimeException
 {
     public function __construct($name, array $references)
     {

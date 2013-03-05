@@ -19,6 +19,7 @@ abstract class ConfigurationAbstract implements ConfigurationInterface
         foreach ($class->getMethods() as $method) {
             if ($this->isValidMethod($method)) {
                 $this->applyAliases($container, $method);
+                $this->applyDependencies($container, $method);
                 $this->applyTransient($container, $method);
                 $this->applyTypes($container, $method);
                 $container->set($method->getName(), $method->getClosure($this));
@@ -47,6 +48,17 @@ abstract class ConfigurationAbstract implements ConfigurationInterface
         }
 
         $container->setAliases($method->getName(), $aliases);
+    }
+
+    private function applyDependencies(ContainerInterface $container, MethodReflector $method)
+    {
+        $dependencies = [];
+
+        foreach ($method->getParameters() as $param) {
+            $dependencies[] = $param->getName();
+        }
+
+        $container->setDependencies($method->getName(), $dependencies);
     }
 
     private function applyTransient(ContainerInterface $container, MethodReflector $method)

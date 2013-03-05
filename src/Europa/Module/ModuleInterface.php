@@ -7,15 +7,15 @@ interface ModuleInterface
 {
     public function bootstrap(DependencyInjectorInterface $injector);
 
-    public function getNamespace();
+    public function ns();
 
-    public function getName();
+    public function name();
 
-    public function getVersion();
+    public function version();
 
-    public function getPath();
+    public function path();
 
-    public function getConfig();
+    public function config();
 
-    public function getDependencies();
+    public function dependencies();
 }

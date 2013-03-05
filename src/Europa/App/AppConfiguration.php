@@ -32,35 +32,43 @@ use Traversable;
 
 class AppConfiguration extends ConfigurationAbstract
 {
-    public function app()
+    private $config = [
+        'controller-param' => 'controller',
+        'action-param'     => 'action',
+        'view-suffix'      => '.php'
+    ];
+
+    public function __construct($config = [])
+    {
+        $this->config = new Config($this->config, $config);
+    }
+
+    public function app($config, $controllers, $events, $modules, $request, $response, $router, $views)
     {
         return new App(
-            $this->get('config'),
-            $this->get('controllers'),
-            $this->get('events'),
-            $this->get('modules'),
-            $this->get('request'),
-            $this->get('response'),
-            $this->get('router'),
-            $this->get('views')
+            $config,
+            $controllers,
+            $events,
+            $modules,
+            $request,
+            $response,
+            $router,
+            $views
         );
     }
 
     public function config()
     {
-        return new Config([
-            'controller-param' => 'controller',
-            'action-param'     => 'action',
-            'view-suffix'      => '.php'
-        ]);
+        return new Config($this->config);
     }
 
-    public function controllers()
+    public function controllers($self)
     {
         $resolver = new Resolver;
-        return $resolver->addCallback('Europa\Di\DependencyInjectorAwareInterface', function($controller) {
-            return $controller->setDependencyInjector($this);
+        $resolver->addCallback('Europa\Di\DependencyInjectorAwareInterface', function($controller) use ($self) {
+            $controller->setDependencyInjector($self);
         });
+        return $resolver;
     }
 
     public function events()
@@ -68,16 +76,16 @@ class AppConfiguration extends ConfigurationAbstract
         return new EventManager;
     }
 
-    public function loader()
+    public function loader($loaderLocator)
     {
         $loader = new Loader;
-        $loader->setLocator($this->get('loaderLocator'));
+        $loader->setLocator($loaderLocator);
         return $loader;
     }
 
-    public function loaderLocator()
+    public function loaderLocator($loaderLocators)
     {
-        return new LocatorArray($this->get('loaderLocators'));
+        return new LocatorArray($loaderLocators);
     }
 
     public function loaderLocators()
@@ -85,9 +93,9 @@ class AppConfiguration extends ConfigurationAbstract
         return new ArrayIterator;
     }
 
-    public function modules()
+    public function modules($self)
     {
-        return new ModuleManager($this);
+        return new ModuleManager($self);
     }
 
     public function request()
@@ -100,9 +108,9 @@ class AppConfiguration extends ConfigurationAbstract
         return ResponseAbstract::detect();
     }
 
-    public function router()
+    public function router($routers)
     {
-        return new RouterArray($this->get('routers'));
+        return new RouterArray($routers);
     }
 
     public function routers()
@@ -110,31 +118,31 @@ class AppConfiguration extends ConfigurationAbstract
         return new ArrayIterator;
     }
 
-    public function views()
+    public function views($viewHelperInjector, $viewLocator, $viewNegotiator, $viewScriptFormatter)
     {
         return function() {
-            $view = $this->get('viewNegotiator')->negotiate();
+            $view = $viewNegotiator->negotiate();
 
             if ($view instanceof LocatorAwareInterface) {
-                $view->setLocator($this->get('viewLocator'));
+                $view->setLocator($viewLocator);
             }
 
             if ($view instanceof ScriptAwareInterface) {
-                $formatter = $this->get('viewScriptFormatter');
+                $formatter = $viewScriptFormatter;
                 $view->setScript($formatter());
             }
 
             if ($view instanceof DependencyInjectorAwareInterface) {
-                $view->setDependencyInjector($this->get('viewHelperInjector'));
+                $view->setDependencyInjector($viewHelperInjector);
             }
 
             return $view;
         };
     }
 
-    public function viewHelperInjector()
+    public function viewHelperInjector($viewHelperInjectors)
     {
-        return new DependencyInjectorArray($this->get('viewHelperInjectors'));
+        return new DependencyInjectorArray($viewHelperInjectors);
     }
 
     public function viewHelperInjectors()
@@ -149,9 +157,9 @@ class AppConfiguration extends ConfigurationAbstract
         return $viewHelperInjectors;
     }
 
-    public function viewLocator()
+    public function viewLocator($viewLocators)
     {
-        return new LocatorArray($this->get('viewLocators'));
+        return new LocatorArray($viewLocators);
     }
 
     public function viewLocators()
@@ -159,17 +167,14 @@ class AppConfiguration extends ConfigurationAbstract
         return new ArrayIterator;
     }
 
-    public function viewNegotiator()
+    public function viewNegotiator($request)
     {
-        return new Negotiator($this->get('request'));
+        return new Negotiator($request);
     }
 
-    public function viewScriptFormatter()
+    public function viewScriptFormatter($config, $request)
     {
-        return function() {
-            $config  = $this->get('config');
-            $request = $this->get('request');
-
+        return function() use ($config, $request) {
             $controller = $request->getParam($config['controller-param']);
             $controller = str_replace('.', DIRECTORY_SEPARATOR, $controller);
 
