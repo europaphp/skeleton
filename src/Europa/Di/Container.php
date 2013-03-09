@@ -66,11 +66,7 @@ class Container implements ContainerInterface
             Exception::toss('The service "%s" does not exist.', $name);
         }
 
-        if ($dependencies = $this->resolveDependencies($name)) {
-            $service = call_user_func_array($service, $dependencies);
-        } else {
-            $service = $service();
-        }
+        $service = $service($this);
 
         if (isset($this->types[$name])) {
             foreach ($this->types[$name] as $type) {
@@ -195,22 +191,5 @@ class Container implements ContainerInterface
         }
 
         return $name;
-    }
-
-    private function resolveDependencies($name)
-    {
-        $dependencies = [];
-
-        foreach ($this->getDependencies($name) as $dependency) {
-            if ($dependency === self::SERVICE_SELF) {
-                $dependencies[] = $this;
-            } elseif ($this->has($dependency)) {
-                $dependencies[] = $this->get($dependency);
-            } else {
-                throw new Exception\UndefinedDependency($name, $dependency);
-            }
-        }
-
-        return $dependencies;
     }
 }
