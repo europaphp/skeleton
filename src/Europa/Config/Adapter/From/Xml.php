@@ -2,10 +2,10 @@
 
 namespace Europa\Config\Adapter\From;
 
-class Ini
+class Xml
 {
     public function __invoke($data)
     {
-        return parse_ini_string($data);
+        return json_decode(json_encode((array) simplexml_load_string($data)));
     }
 }
