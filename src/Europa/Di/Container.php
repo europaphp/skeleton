@@ -8,8 +8,6 @@ use ReflectionClass;
 
 class Container implements ContainerInterface
 {
-    const SERVICE_SELF = 'self';
-
     private $aliases = [];
 
     private $cache = [];
@@ -22,6 +20,8 @@ class Container implements ContainerInterface
 
     private $transient = [];
 
+    private static $instances = [];
+
     public function __clone()
     {
         $this->cache = [];
@@ -31,6 +31,21 @@ class Container implements ContainerInterface
     {
         $configuration->configure($this);
         return $this;
+    }
+
+    public function save($instanceName)
+    {
+        self::$instances[$instanceName] = $this;
+        return $this;
+    }
+
+    public function name()
+    {
+        foreach (self::$instances as $name => $instance) {
+            if ($instance === $this) {
+                return $name;
+            }
+        }
     }
 
     public function set($name, Closure $service)
@@ -63,7 +78,7 @@ class Container implements ContainerInterface
         if (isset($this->services[$name])) {
             $service = $this->services[$name];
         } else {
-            Exception::toss('The service "%s" does not exist.', $name);
+            throw new Exception\UnregisteredService($name, $this);
         }
 
         $service = $service($this);
@@ -178,9 +193,9 @@ class Container implements ContainerInterface
         $name = $this->resolveAlias($name);
 
         if (isset($this->types[$name])) {
-            return $this->types[$name];    
+            return $this->types[$name];
         }
-        
+
         return [];
     }
 
@@ -191,5 +206,14 @@ class Container implements ContainerInterface
         }
 
         return $name;
+    }
+
+    public static function open($instanceName)
+    {
+        if (isset(self::$instances[$instanceName])) {
+            return self::$instances[$instanceName];
+        }
+
+        throw new Exception\UnregisteredContainer($instanceName);
     }
 }

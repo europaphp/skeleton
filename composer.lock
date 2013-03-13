@@ -10,12 +10,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/europaphp/module-help.git",
-                "reference": "48685ab65d5ac2149b0ce887dade8f59593c7616"
+                "reference": "8b02b49875fa88f959a69f86aa120f446015f502"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-help/zipball/48685ab65d5ac2149b0ce887dade8f59593c7616",
-                "reference": "48685ab65d5ac2149b0ce887dade8f59593c7616",
+                "url": "https://api.github.com/repos/europaphp/module-help/zipball/8b02b49875fa88f959a69f86aa120f446015f502",
+                "reference": "8b02b49875fa88f959a69f86aa120f446015f502",
                 "shasum": ""
             },
             "require": {
@@ -45,7 +45,7 @@
                 "help",
                 "man"
             ],
-            "time": "2013-02-25 02:56:34"
+            "time": "2013-03-09 02:08:13"
         },
         {
             "name": "europaphp/module-main",
@@ -53,12 +53,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/europaphp/module-main.git",
-                "reference": "96ad786671a3260b0bfdbe8228a6efcfa874420c"
+                "reference": "e5fc52b52cda01f0318009451f17260c041cf559"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-main/zipball/96ad786671a3260b0bfdbe8228a6efcfa874420c",
-                "reference": "96ad786671a3260b0bfdbe8228a6efcfa874420c",
+                "url": "https://api.github.com/repos/europaphp/module-main/zipball/e5fc52b52cda01f0318009451f17260c041cf559",
+                "reference": "e5fc52b52cda01f0318009451f17260c041cf559",
                 "shasum": ""
             },
             "type": "library",
@@ -84,7 +84,7 @@
                 "default",
                 "main"
             ],
-            "time": "2013-02-25 02:57:13"
+            "time": "2013-03-09 02:46:21"
         },
         {
             "name": "europaphp/module-tests",
@@ -92,12 +92,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/europaphp/module-tests.git",
-                "reference": "448af891f3a7ac80491685faff896f3ed860e95e"
+                "reference": "c7b411f2bd93811e9612a81bd5f6c5da50eb430c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-tests/zipball/448af891f3a7ac80491685faff896f3ed860e95e",
-                "reference": "448af891f3a7ac80491685faff896f3ed860e95e",
+                "url": "https://api.github.com/repos/europaphp/module-tests/zipball/c7b411f2bd93811e9612a81bd5f6c5da50eb430c",
+                "reference": "c7b411f2bd93811e9612a81bd5f6c5da50eb430c",
                 "shasum": ""
             },
             "require": {
@@ -127,7 +127,7 @@
                 "help",
                 "man"
             ],
-            "time": "2013-02-26 23:53:45"
+            "time": "2013-03-09 02:07:01"
         },
         {
             "name": "treshugart/testes",
@@ -135,12 +135,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/treshugart/Testes.git",
-                "reference": "d2d0f4f50624b1c423406830418615e4a4e418fd"
+                "reference": "1e6d5d4c8c835b8cfecf4ad34e04f2dd9b1acec7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/treshugart/Testes/zipball/d2d0f4f50624b1c423406830418615e4a4e418fd",
-                "reference": "d2d0f4f50624b1c423406830418615e4a4e418fd",
+                "url": "https://api.github.com/repos/treshugart/Testes/zipball/1e6d5d4c8c835b8cfecf4ad34e04f2dd9b1acec7",
+                "reference": "1e6d5d4c8c835b8cfecf4ad34e04f2dd9b1acec7",
                 "shasum": ""
             },
             "require": {
@@ -179,7 +179,7 @@
                 "testing",
                 "unit"
             ],
-            "time": "2013-02-22 02:17:42"
+            "time": "2013-03-01 02:26:48"
         }
     ],
     "aliases": [
