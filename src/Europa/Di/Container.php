@@ -35,7 +35,12 @@ class Container implements ContainerInterface
 
     public function save($instanceName)
     {
+        if (isset(self::$instances[$instanceName])) {
+            throw new Exception\ContainerAlreadyRegistered($instanceName);
+        }
+
         self::$instances[$instanceName] = $this;
+
         return $this;
     }
 
