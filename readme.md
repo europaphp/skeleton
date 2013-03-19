@@ -8,7 +8,7 @@ EuropaPHP is an extremely fast, flexible and lightweight <del>M</del>VC Framewor
 Why Another PHP Framework?
 --------------------------
 
-EuropaPHP is the manifestation of the shortcomings of other PHP frameworks with a strong focus on mdularity, scalability, standards, the view/controller relationship and dependency injection. It is specifically designed to be paired with your favourite libraries and it will seamlessly integrate with anything.
+EuropaPHP is the manifestation of the shortcomings of other PHP frameworks with a strong focus on modularity, scalability, standards, the view/controller relationship and dependency injection. It is specifically designed to be paired with your favourite libraries and it will seamlessly integrate with anything.
 
 Installation
 ------------
@@ -44,7 +44,7 @@ From the install directory:
 Contributing
 ------------
 
-To contirbute, just fork and submit pull-requests. Each request will be reviewed and ideally include corresponding tests. If there are any updates to the API updating the documentation is also desirable.
+To contribute, just fork and submit pull-requests. Each request will be reviewed and ideally include corresponding tests. If there are any updates to the API updating the documentation is also desirable.
 
 License
 -------
