@@ -1,60 +1,89 @@
 <?php
 
 namespace Europa\Fs;
+use Europa\Exception\Exception;
 
-class Loader
+class Loader implements LoaderInterface, LocatorAwareInterface
 {
-    private $locator;
+    use LocatorAware;
 
-    private $namespaceTokens = ['_', '\\'];
+    private $included = [];
 
-    public function __invoke($class)
+    private $map = [];
+
+    private $separators = ['_', '\\'];
+
+    private $suffix = '.php';
+
+    public function load($class)
     {
         if (class_exists($class, false)) {
             return true;
         }
 
-        $locator   = $this->locator;
-        $formatted = str_replace($this->namespaceTokens, DIRECTORY_SEPARATOR, $class);
-        
-        if ($locator && $file = $locator($formatted . '.php')) {
-            include $file;
-            return true;
+        if (isset($this->included[$class])) {
+            Exception::toss(
+                'The class "%s" was supposed to be found in "%s". A potential cause is when a class name does not match PSR-0 standards.',
+                $class,
+                $this->included[$class]
+            );
         }
 
-        if (is_file($file = __DIR__ . '/../../' . $formatted . '.php')) {
-            include $file;
+        $subject = str_replace($this->separators, DIRECTORY_SEPARATOR, $class) . $this->suffix;
+
+        if (isset($this->map[$class])) {
+            include $found = $this->map[$class];
+        } elseif ($this->locator && $found = $this->locator->locate($subject)) {
+            include $found;
+        } elseif (is_file($found = __DIR__ . '/../../' . $subject)) {
+            include $found;
+        }
+
+        if ($found) {
+            $this->map[$class]      = $found;
+            $this->included[$class] = $found;
             return true;
         }
         
         return false;
     }
-    
-    public function setLocator(callable $locator)
+
+    public function register()
     {
-        $this->locator = $locator;
+        spl_autoload_register(array($this, 'load'), true);
         return $this;
-    }
-    
-    public function getLocator()
-    {
-        return $this->locator;
     }
 
-    public function hasLocator()
+    public function setNamespaceSeparators(array $separators)
     {
-        return isset($this->locator);
+        $this->separators = $separators;
+        return $this;
     }
 
-    public function removeLocator()
+    public function getNamespaceSeparators()
     {
-        $this->locator = null;
+        return $this->separators;
+    }
+
+    public function setSuffix($suffix)
+    {
+        $this->suffix = $suffix;
         return $this;
     }
-    
-    public function register($prepend = false)
+
+    public function getSuffix()
     {
-        spl_autoload_register(array($this, '__invoke'), true, $prepend);
+        return $this->suffix;
+    }
+
+    public function setClassMap(array $map)
+    {
+        $this->map = $map;
         return $this;
+    }
+
+    public function getClassMap()
+    {
+        return $this->map;
     }
 }

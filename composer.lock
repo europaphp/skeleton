@@ -1,34 +1,73 @@
 {
-    "hash": "21d6031b9835a46e80a4a699cfe428f3",
+    "hash": "d300e1ab30ff3cb965e8ef3c08467b5a",
     "packages": [
 
     ],
     "packages-dev": [
         {
-            "name": "europaphp/module-main",
+            "name": "europaphp/module-help",
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "http://github.com/europaphp/module-main",
-                "reference": "462224edf468740fb07b711c2d0cd9e70b72f01a"
+                "url": "https://github.com/europaphp/module-help.git",
+                "reference": "8b02b49875fa88f959a69f86aa120f446015f502"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-main/zipball/462224edf468740fb07b711c2d0cd9e70b72f01a",
-                "reference": "462224edf468740fb07b711c2d0cd9e70b72f01a",
+                "url": "https://api.github.com/repos/europaphp/module-help/zipball/8b02b49875fa88f959a69f86aa120f446015f502",
+                "reference": "8b02b49875fa88f959a69f86aa120f446015f502",
                 "shasum": ""
             },
             "require": {
-                "europaphp/europaphp": "2.2.x-dev"
+                "europaphp/module-main": "dev-master"
             },
-            "time": "2013-02-04 23:13:34",
             "type": "library",
             "autoload": {
                 "psr-0": {
                     "": "src"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "notification-url": "http://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "Command Line Help Module for EuropaPHP 2",
+            "keywords": [
+                "cli",
+                "help",
+                "man"
+            ],
+            "time": "2013-03-09 02:08:13"
+        },
+        {
+            "name": "europaphp/module-main",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/europaphp/module-main.git",
+                "reference": "e5fc52b52cda01f0318009451f17260c041cf559"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/module-main/zipball/e5fc52b52cda01f0318009451f17260c041cf559",
+                "reference": "e5fc52b52cda01f0318009451f17260c041cf559",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "": "src"
+                }
+            },
+            "notification-url": "http://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -44,33 +83,33 @@
             "keywords": [
                 "default",
                 "main"
-            ]
+            ],
+            "time": "2013-03-09 02:46:21"
         },
         {
             "name": "europaphp/module-tests",
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "http://github.com/europaphp/module-tests",
-                "reference": "8e81d2f70ec9acaaf5f47b63861769e727858ea9"
+                "url": "https://github.com/europaphp/module-tests.git",
+                "reference": "c7b411f2bd93811e9612a81bd5f6c5da50eb430c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-tests/zipball/8e81d2f70ec9acaaf5f47b63861769e727858ea9",
-                "reference": "8e81d2f70ec9acaaf5f47b63861769e727858ea9",
+                "url": "https://api.github.com/repos/europaphp/module-tests/zipball/c7b411f2bd93811e9612a81bd5f6c5da50eb430c",
+                "reference": "c7b411f2bd93811e9612a81bd5f6c5da50eb430c",
                 "shasum": ""
             },
             "require": {
                 "europaphp/module-main": "dev-master"
             },
-            "time": "2013-02-04 23:13:48",
             "type": "library",
             "autoload": {
                 "psr-0": {
                     "": "src"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "notification-url": "http://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -87,7 +126,8 @@
                 "cli",
                 "help",
                 "man"
-            ]
+            ],
+            "time": "2013-03-09 02:07:01"
         },
         {
             "name": "treshugart/testes",
@@ -95,12 +135,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/treshugart/Testes.git",
-                "reference": "206a6a8fecc6cee8a34db10b123bb5193632e728"
+                "reference": "1e6d5d4c8c835b8cfecf4ad34e04f2dd9b1acec7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/treshugart/Testes/archive/206a6a8fecc6cee8a34db10b123bb5193632e728.zip",
-                "reference": "206a6a8fecc6cee8a34db10b123bb5193632e728",
+                "url": "https://api.github.com/repos/treshugart/Testes/zipball/1e6d5d4c8c835b8cfecf4ad34e04f2dd9b1acec7",
+                "reference": "1e6d5d4c8c835b8cfecf4ad34e04f2dd9b1acec7",
                 "shasum": ""
             },
             "require": {
@@ -109,14 +149,13 @@
             "require-dev": {
                 "ext-xdebug": "*"
             },
-            "time": "2013-01-23 01:06:13",
             "type": "library",
             "autoload": {
                 "psr-0": {
                     "Testes": "src"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "notification-url": "http://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -131,15 +170,16 @@
             "description": "Dead simple unit and story test framework.",
             "homepage": "http://github.com/treshugart/Testes",
             "keywords": [
-                "testing",
                 "BDD",
-                "test",
                 "Behavior",
                 "development",
-                "unit",
+                "driven",
                 "story",
-                "driven"
-            ]
+                "test",
+                "testing",
+                "unit"
+            ],
+            "time": "2013-03-01 02:26:48"
         }
     ],
     "aliases": [
@@ -147,6 +187,7 @@
     ],
     "minimum-stability": "stable",
     "stability-flags": {
+        "europaphp/module-help": 20,
         "europaphp/module-main": 20,
         "europaphp/module-tests": 20,
         "treshugart/testes": 20

@@ -20,6 +20,7 @@
         "php": "5.4.*"
     },
     "require-dev": {
+        "europaphp/module-help": "dev-master",
         "europaphp/module-main": "dev-master",
         "europaphp/module-tests": "dev-master",
         "treshugart/testes": "1.0.x-dev"

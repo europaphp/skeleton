@@ -3,7 +3,7 @@
 namespace Europa\View;
 use Europa\Config\Config;
 
-class Json
+class Json implements ViewInterface
 {
     private $config = [
         'options' => 0
@@ -14,10 +14,10 @@ class Json
         $this->config = new Config($this->config, $config);
     }
 
-    public function __invoke(array $context = array())
+    public function render(array $context = array())
     {
         $render = $this->formatParamsToJsonArray($context);
-        $render = json_encode($context, $this->config->options);
+        $render = json_encode($context, $this->config['options']);
         return $render;
     }
     

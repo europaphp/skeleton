@@ -12,8 +12,6 @@ class UrlFilter
         $value = array_map('strtolower', $value);
         $value = implode('-', $value);
         $value = str_replace('/-', '/', $value);
-        $value = trim($value, '-');
-        
-        return $value;
+        return trim($value, '-');
     }
 }

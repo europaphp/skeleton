@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\Config\Adapte\From;
+namespace Europa\Config\Adapter\From;
 
 class Ini
 {

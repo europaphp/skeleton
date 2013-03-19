@@ -16,12 +16,6 @@ class MapFilter
         $this->map[$from] = $to;
         return $this;
     }
-
-    public function clear()
-    {
-        $this->map = [];
-        return $this;
-    }
     
     public function __invoke($value)
     {

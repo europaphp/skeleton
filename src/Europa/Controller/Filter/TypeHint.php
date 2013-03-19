@@ -8,10 +8,8 @@ use Europa\Reflection\MethodReflector;
 
 class TypeHint
 {
-    public function __invoke(ControllerAbstract $controller, $class, $method)
+    public function __invoke(ControllerAbstract $controller, ClassReflector $class, MethodReflector $method, array &$context)
     {
-        $request = $controller->request();
-
         foreach ($method->getParameters() as $param) {
             if (!$type = $param->getClass()) {
                 continue;
@@ -20,20 +18,19 @@ class TypeHint
             $type = $type->getName();
             $name = $param->getName();
 
-            if ($request->hasParam($name)) {
-                $value = $request->getParam($name);
+            if (isset($context[$name])) {
+                $value = $context[$name];
             } elseif ($param->isDefaultValueAvailable()) {
                 $value = $param->getDefaultValue();
             } else {
                 Exception::toss(
-                    'Cannot type-hint "%s" in "%s::%s()" because the request does not contain the parameter and a default value was not specified.',
+                    'Cannot type-hint "%s" in "%s" because the request does not contain the parameter and a default value was not specified.',
                     $name,
-                    $class->getName(),
-                    $method->getName()
+                    $method->__toString()
                 );
             }
 
-            $request->setParam($name, new $type($value));
+            $context[$name] = new $type($value);
         }
     }
 }

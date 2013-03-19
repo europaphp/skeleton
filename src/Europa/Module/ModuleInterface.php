@@ -1,13 +1,21 @@
 <?php
 
 namespace Europa\Module;
+use Europa\Di\DependencyInjectorInterface;
 
 interface ModuleInterface
 {
-    public function bootstrap(ManagerInterface $manager);
-    public function bootstrapped();
-    public function config();
+    public function bootstrap(DependencyInjectorInterface $injector);
+
+    public function ns();
+
     public function name();
-    public function path();
+
     public function version();
+
+    public function path();
+
+    public function config();
+
+    public function dependencies();
 }

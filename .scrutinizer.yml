@@ -1,0 +1,12 @@
+tools:
+  custom_commands:
+    - command: composer install --dev --prefer-dist
+
+  php_code_coverage:
+    test_command: php www/index.php test
+
+  php_code_sniffer: true
+
+  php_mess_detector: true
+
+  php_analyzer: true
