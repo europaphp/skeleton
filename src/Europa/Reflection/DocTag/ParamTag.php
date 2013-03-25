@@ -60,7 +60,7 @@ class ParamTag extends GenericTag
 
         // require a var name
         if (!isset($parts[1])) {
-            throw new UnexpectedValuException('A valid param name must be specified.');
+            throw new UnexpectedValueException('A valid param name must be specified.');
         }
         
         // require a variable delimitter the variable name
