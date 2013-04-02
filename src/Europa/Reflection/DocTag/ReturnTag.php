@@ -30,7 +30,7 @@ class ReturnTag extends GenericTag
     {
         return $this->description;
     }
-    
+
     public function isValid($value)
     {
         // get the type of the value
@@ -38,12 +38,12 @@ class ReturnTag extends GenericTag
         if ($valueType === 'object') {
             $valueType = get_class($value);
         }
-        
+
         // if there are no types, then it is valid
         if (!$this->types) {
             return true;
         }
-        
+
         // go through and check each type
         // if it matches one, then it's fine
         foreach ($this->types as $type) {
@@ -61,16 +61,16 @@ class ReturnTag extends GenericTag
                     $type = 'integer';
                     break;
             }
-            
+
             // check actual type against specified type
             if ($valueType === $type) {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     public function parseValue($value)
     {
         // a doc string must be specified
@@ -92,7 +92,7 @@ class ReturnTag extends GenericTag
             $this->description = $parts[1];
         }
     }
-    
+
     public function compileValue()
     {
         return implode(' | ', $this->types) . ' ' . $this->description;
