@@ -1,4 +1,8 @@
 {
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+    ],
     "hash": "d300e1ab30ff3cb965e8ef3c08467b5a",
     "packages": [
 
@@ -27,7 +31,7 @@
                     "": "src"
                 }
             },
-            "notification-url": "http://packagist.org/downloads/",
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -67,7 +71,7 @@
                     "": "src"
                 }
             },
-            "notification-url": "http://packagist.org/downloads/",
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -92,12 +96,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/europaphp/module-tests.git",
-                "reference": "c7b411f2bd93811e9612a81bd5f6c5da50eb430c"
+                "reference": "f3f70bd64a4b21400508e611cc8b3194ab9c2cb7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-tests/zipball/c7b411f2bd93811e9612a81bd5f6c5da50eb430c",
-                "reference": "c7b411f2bd93811e9612a81bd5f6c5da50eb430c",
+                "url": "https://api.github.com/repos/europaphp/module-tests/zipball/f3f70bd64a4b21400508e611cc8b3194ab9c2cb7",
+                "reference": "f3f70bd64a4b21400508e611cc8b3194ab9c2cb7",
                 "shasum": ""
             },
             "require": {
@@ -109,7 +113,7 @@
                     "": "src"
                 }
             },
-            "notification-url": "http://packagist.org/downloads/",
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -127,7 +131,7 @@
                 "help",
                 "man"
             ],
-            "time": "2013-03-09 02:07:01"
+            "time": "2013-03-09 02:45:24"
         },
         {
             "name": "treshugart/testes",
@@ -135,12 +139,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/treshugart/Testes.git",
-                "reference": "1e6d5d4c8c835b8cfecf4ad34e04f2dd9b1acec7"
+                "reference": "a0a7217466169542f1ae80aae37c5aa98b42498b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/treshugart/Testes/zipball/1e6d5d4c8c835b8cfecf4ad34e04f2dd9b1acec7",
-                "reference": "1e6d5d4c8c835b8cfecf4ad34e04f2dd9b1acec7",
+                "url": "https://api.github.com/repos/treshugart/Testes/zipball/a0a7217466169542f1ae80aae37c5aa98b42498b",
+                "reference": "a0a7217466169542f1ae80aae37c5aa98b42498b",
                 "shasum": ""
             },
             "require": {
@@ -155,7 +159,7 @@
                     "Testes": "src"
                 }
             },
-            "notification-url": "http://packagist.org/downloads/",
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -179,7 +183,7 @@
                 "testing",
                 "unit"
             ],
-            "time": "2013-03-01 02:26:48"
+            "time": "2013-05-13 12:25:04"
         }
     ],
     "aliases": [
@@ -191,5 +195,11 @@
         "europaphp/module-main": 20,
         "europaphp/module-tests": 20,
         "treshugart/testes": 20
-    }
+    },
+    "platform": {
+        "php": "5.4.*"
+    },
+    "platform-dev": [
+
+    ]
 }
