@@ -1,12 +1,9 @@
 <?php
 
-use Europa\App\AppConfiguration;
-use Europa\Di\Container;
-
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$container = new Container;
-$container->configure(new AppConfiguration);
+$container = new Europa\Di\Container;
+$container->configure(new Europa\App\AppConfiguration);
 $container->get('loader')->register();
 $container->get('modules')
     ->add(new Europaphp\Help)
