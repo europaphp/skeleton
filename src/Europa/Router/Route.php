@@ -15,6 +15,7 @@ class Route implements RouteInterface
     const DEFAULT_ACTION = 'get';
 
     private $config = [
+        'defaults'   => [],
         'pattern'    => '',
         'format'     => ':controller/:action',
         'controller' => self::DEFAULT_CONTROLLER,
@@ -49,11 +50,11 @@ class Route implements RouteInterface
 
     public function format(array $params = [])
     {
-        $uri    = $this->config->format;
+        $uri    = $this->config['format'];
         $params = array_merge($this->config['defaults']->export(), $params);
 
         foreach ($params as $name => $value) {
-            $uri = str_replace(':' . $name, $value);
+            $uri = str_replace(':' . $name, $value, $uri);
         }
 
         return $uri;
