@@ -32,7 +32,7 @@ class Manager implements ManagerInterface
                 $this->bootstrapped[] = $module->name();
             }
         }
-        
+
         return $this;
     }
 

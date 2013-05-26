@@ -5,7 +5,7 @@ The event component is a super-simple way to bind and trigger events. Instead of
 
 As long as your bound callback `is_callable()`, it can be triggered. This means any class that has an `__invoke()` method, `array($class, 'method')`, closures, lambda functions and any defined function.
 
-The Event component provides you with a default `Manager` that will solve 99% of your problems. For the rest, there is a `ManagerInterface` if you need to implement an edge case.
+The Event component provides you with a default `Emitter` that will solve 99% of your problems. For the rest, there is a `EmitterInterface` if you need to implement an edge case.
 
 Binding and Triggering Events
 =============================
@@ -14,41 +14,41 @@ Events are bound using strings and something callable:
 
     <?php
 
-    use Europa\Event\Manager;
+    use Europa\Event\Emitter;
 
-    $manager = new Manager;
+    $emitter = new Emitter;
 
     $cruel = function() {
         echo 'Cruel ';
     };
 
     // not sure what I want to say to the world
-    $manager->on('hello.pre-world', function($text) {
+    $emitter->on('hello.pre-world', function($text) {
         echo $text . ' ';
     });
 
     // the world sucks
-    $manager->on('hello.pre-world', $cruel);
+    $emitter->on('hello.pre-world', $cruel);
 
     // make it really exciting
-    $manager->on('hello.post-world', function() {
+    $emitter->on('hello.post-world', function() {
         echo '!!!!!!!';
     });
 
 You can unbind whole events, or just a certain callback:
 
     // I really didn't want to make it that exciting
-    $manager->off('hello.post-world');
+    $emitter->off('hello.post-world');
 
     // you know, it's not so bad anymore
-    $manager->off('hello.pre-world', $cruel);
+    $emitter->off('hello.pre-world', $cruel);
 
 Triggering is simple and also allows you to pass in data that is passed on to every event:
 
     // outputs "Hello World!"
-    $manager->trigger('hello.pre-world', ['Hello ']);
+    $emitter->emit('hello.pre-world', ['Hello ']);
     echo 'World!';
-    $manager->trigger('hello.post-world');
+    $emitter->emit('hello.post-world');
 
 If you've got some callable classes out there, go ahead and use them:
 
@@ -66,22 +66,22 @@ If you've got some callable classes out there, go ahead and use them:
 
 And trigger it:
 
-    use Europa\Event\Manager;
+    use Europa\Event\Emitter;
     use Event\MyEvent;
 
-    $manager = new Manager;
-    $manager->on('myevent', new MyEvent);
+    $emitter = new Emitter;
+    $emitter->on('myevent', new MyEvent);
 
     // outputs "Triggered my event!"
-    $manager->trigger('myevent');
+    $emitter->emit('myevent');
 
 ### Passing Data to the Handler
 
 You can also pass data to the handler at the time of triggering.
 
-    $manager->on('myEvent', function($arg1, $arg2) {
+    $emitter->on('myEvent', function($arg1, $arg2) {
         // do something
     });
 
-    $manager->trigger('myEvent', $arg1, $arg2);
-    $maanger->triggerArray('myEvent', [$arg1, $arg2]);
+    $emitter->emit('myEvent', $arg1, $arg2);
+    $maanger->emitArray('myEvent', [$arg1, $arg2]);

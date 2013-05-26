@@ -11,13 +11,13 @@ use Europa\Di\DependencyInjectorArray;
 use Europa\Di\DependencyInjectorAwareInterface;
 use Europa\Di\DependencyInjectorInterface;
 use Europa\Di\Resolver;
-use Europa\Event\Manager as EventManager;
+use Europa\Event\Emitter;
 use Europa\Exception\Exception;
 use Europa\Fs\Loader;
 use Europa\Fs\LocatorArray;
 use Europa\Fs\LocatorInterface;
 use Europa\Fs\LocatorAwareInterface;
-use Europa\Module\Manager as ModuleManager;
+use Europa\Module\Manager;
 use Europa\Module\ManagerInterface;
 use Europa\Request\RequestAbstract;
 use Europa\Request\RequestInterface;
@@ -73,7 +73,7 @@ class AppConfiguration extends ConfigurationAbstract
 
     public function events()
     {
-        return new EventManager;
+        return new Emitter;
     }
 
     public function loader(DependencyInjectorInterface $injector)
@@ -95,7 +95,7 @@ class AppConfiguration extends ConfigurationAbstract
 
     public function modules(DependencyInjectorInterface $injector)
     {
-        return new ModuleManager($injector);
+        return new Manager($injector);
     }
 
     public function request()

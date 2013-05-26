@@ -3,7 +3,7 @@
 namespace Europa\Event;
 use InvalidArgumentException;
 
-class Manager implements ManagerInterface
+class Emitter implements EmitterInterface
 {
     private $stack = [];
 
@@ -40,16 +40,29 @@ class Manager implements ManagerInterface
         return $this;
     }
 
-    public function trigger($name)
+    public function emit($name)
     {
         $args = func_get_args();
 
         array_shift($args);
 
-        return $this->triggerArray($name, $args);
+        return $this->emitArray($name, $args);
     }
 
-    public function bound($name, $callback = null)
+    public function emitArray($name, array $args = [])
+    {
+        foreach ($this->getStackNamesForEvent($name) as $event) {
+            foreach ($this->stack[$event] as $callback) {
+                if (call_user_func_array($callback, $args) === false) {
+                    return $this;
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    public function has($name, $callback = null)
     {
         foreach ($this->getStackNamesForEvent($name) as $event) {
             if ($callback) {
@@ -64,19 +77,6 @@ class Manager implements ManagerInterface
         }
 
         return false;
-    }
-
-    public function triggerArray($name, array $args = [])
-    {
-        foreach ($this->getStackNamesForEvent($name) as $event) {
-            foreach ($this->stack[$event] as $callback) {
-                if (call_user_func_array($callback, $args) === false) {
-                    return $this;
-                }
-            }
-        }
-
-        return $this;
     }
 
     private function getStackNamesForEvent($name)

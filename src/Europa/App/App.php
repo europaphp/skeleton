@@ -5,7 +5,7 @@ use Closure;
 use Europa\Config\ConfigInterface;
 use Europa\Controller\ControllerInterface;
 use Europa\Di\ResolverInterface;
-use Europa\Event\ManagerInterface as EventManagerInterface;
+use Europa\Event\EmitterInterface as EventEmitterInterface;
 use Europa\Exception\Exception;
 use Europa\Module\ManagerInterface as ModuleManagerInterface;
 use Europa\Request\RequestInterface;
@@ -45,7 +45,7 @@ class App implements AppInterface
     public function __construct(
         ConfigInterface $config,
         ResolverInterface $controllers,
-        EventManagerInterface $events,
+        EventEmitterInterface $events,
         ModuleManagerInterface $modules,
         RequestInterface $request,
         ResponseInterface $response,
@@ -75,7 +75,7 @@ class App implements AppInterface
 
     private function resolveController()
     {
-        $this->events->trigger(self::EVENT_ROUTE, $this->controllers, $this->request, $this->router);
+        $this->events->emit(self::EVENT_ROUTE, $this->controllers, $this->request, $this->router);
 
         if (!$this->router->route($this->request)) {
             Exception::toss('The router could not find a suitable controller for the request "%s".', $this->request);
@@ -92,7 +92,7 @@ class App implements AppInterface
 
     private function actionController(ControllerInterface $controller)
     {
-        $this->events->trigger(self::EVENT_ACTION, $controller, $this->request);
+        $this->events->emit(self::EVENT_ACTION, $controller, $this->request);
 
         return $controller->__call(
             $this->request->getParam($this->config['action-param']),
@@ -106,7 +106,7 @@ class App implements AppInterface
         $view    = $view();
         $context = $context ?: [];
 
-        $this->events->trigger(self::EVENT_RENDER, $context, $this->response, $view);
+        $this->events->emit(self::EVENT_RENDER, $context, $this->response, $view);
 
         if ($this->response instanceof HttpInterface) {
             $this->response->setContentTypeFromView($view);
@@ -118,9 +118,9 @@ class App implements AppInterface
     private function runResponse($rendered)
     {
         $this->response->setBody($rendered);
-        $this->events->trigger(self::EVENT_SEND, $this->response);
+        $this->events->emit(self::EVENT_SEND, $this->response);
         $this->response->send();
-        $this->events->trigger(self::EVENT_DONE, $this->response);
+        $this->events->emit(self::EVENT_DONE, $this->response);
         return $this;
     }
 }
