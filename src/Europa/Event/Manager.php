@@ -6,8 +6,8 @@ use InvalidArgumentException;
 class Manager implements ManagerInterface
 {
     private $stack = [];
-    
-    public function bind($name, callable $callback)
+
+    public function on($name, callable $callback)
     {
         if (!isset($this->stack[$name])) {
             $this->stack[$name] = [];
@@ -17,8 +17,8 @@ class Manager implements ManagerInterface
 
         return $this;
     }
-    
-    public function unbind($name = null, callable $callback = null)
+
+    public function off($name = null, callable $callback = null)
     {
         if (!$name) {
             $this->stack = [];
@@ -39,7 +39,7 @@ class Manager implements ManagerInterface
 
         return $this;
     }
-    
+
     public function trigger($name)
     {
         $args = func_get_args();
@@ -78,7 +78,7 @@ class Manager implements ManagerInterface
 
         return $this;
     }
-    
+
     private function getStackNamesForEvent($name)
     {
         $stack = [];

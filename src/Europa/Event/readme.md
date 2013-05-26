@@ -13,35 +13,35 @@ Binding and Triggering Events
 Events are bound using strings and something callable:
 
     <?php
-    
+
     use Europa\Event\Manager;
-    
+
     $manager = new Manager;
-    
+
     $cruel = function() {
         echo 'Cruel ';
     };
-    
+
     // not sure what I want to say to the world
-    $manager->bind('hello.pre-world', function($text) {
+    $manager->on('hello.pre-world', function($text) {
         echo $text . ' ';
     });
-    
+
     // the world sucks
-    $manager->bind('hello.pre-world', $cruel);
-    
+    $manager->on('hello.pre-world', $cruel);
+
     // make it really exciting
-    $manager->bind('hello.post-world', function() {
+    $manager->on('hello.post-world', function() {
         echo '!!!!!!!';
     });
 
 You can unbind whole events, or just a certain callback:
 
     // I really didn't want to make it that exciting
-    $manager->unbind('hello.post-world');
+    $manager->off('hello.post-world');
 
     // you know, it's not so bad anymore
-    $manager->unbind('hello.pre-world', $cruel);
+    $manager->off('hello.pre-world', $cruel);
 
 Triggering is simple and also allows you to pass in data that is passed on to every event:
 
@@ -53,9 +53,9 @@ Triggering is simple and also allows you to pass in data that is passed on to ev
 If you've got some callable classes out there, go ahead and use them:
 
     <?php
-    
+
     namespace Event;
-    
+
     class MyEvent
     {
         public function __invoke()
@@ -68,10 +68,10 @@ And trigger it:
 
     use Europa\Event\Manager;
     use Event\MyEvent;
-    
+
     $manager = new Manager;
-    $manager->bind('myevent', new MyEvent);
-    
+    $manager->on('myevent', new MyEvent);
+
     // outputs "Triggered my event!"
     $manager->trigger('myevent');
 
@@ -79,9 +79,9 @@ And trigger it:
 
 You can also pass data to the handler at the time of triggering.
 
-    $manager->bind('myEvent', function($arg1, $arg2) {
+    $manager->on('myEvent', function($arg1, $arg2) {
         // do something
     });
-    
+
     $manager->trigger('myEvent', $arg1, $arg2);
     $maanger->triggerArray('myEvent', [$arg1, $arg2]);

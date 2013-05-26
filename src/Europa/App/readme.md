@@ -97,7 +97,7 @@ You can add it by name and pass it a configuration:
     $app['module-name'] = [
         // config
     ];
-    
+
     $app['module-name'] = 'path/to/config.json';
 
 Or you can add the instance:
@@ -185,7 +185,7 @@ Application Events
 
 During the course of invoking your application some events will be triggered that you can bind handlers to. To bind handlers to the application service, you use the service container bound to it:
 
-    $app->event->bind('route', function() {
+    $app->event->on('route', function() {
         // do something
     });
 
