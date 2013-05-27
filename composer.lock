@@ -96,12 +96,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/europaphp/module-tests.git",
-                "reference": "f3f70bd64a4b21400508e611cc8b3194ab9c2cb7"
+                "reference": "68e97ca4d74cdaa15a8e8880160e4874e2c7cd94"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-tests/zipball/f3f70bd64a4b21400508e611cc8b3194ab9c2cb7",
-                "reference": "f3f70bd64a4b21400508e611cc8b3194ab9c2cb7",
+                "url": "https://api.github.com/repos/europaphp/module-tests/zipball/68e97ca4d74cdaa15a8e8880160e4874e2c7cd94",
+                "reference": "68e97ca4d74cdaa15a8e8880160e4874e2c7cd94",
                 "shasum": ""
             },
             "require": {
@@ -131,7 +131,7 @@
                 "help",
                 "man"
             ],
-            "time": "2013-03-09 02:45:24"
+            "time": "2013-05-27 00:01:08"
         },
         {
             "name": "treshugart/testes",
@@ -139,12 +139,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/treshugart/Testes.git",
-                "reference": "a0a7217466169542f1ae80aae37c5aa98b42498b"
+                "reference": "7ab5d2a2456a0db4a7345ce55b9be05c007ae978"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/treshugart/Testes/zipball/a0a7217466169542f1ae80aae37c5aa98b42498b",
-                "reference": "a0a7217466169542f1ae80aae37c5aa98b42498b",
+                "url": "https://api.github.com/repos/treshugart/Testes/zipball/7ab5d2a2456a0db4a7345ce55b9be05c007ae978",
+                "reference": "7ab5d2a2456a0db4a7345ce55b9be05c007ae978",
                 "shasum": ""
             },
             "require": {
@@ -183,7 +183,7 @@
                 "testing",
                 "unit"
             ],
-            "time": "2013-05-13 12:25:04"
+            "time": "2013-05-22 00:15:25"
         }
     ],
     "aliases": [
