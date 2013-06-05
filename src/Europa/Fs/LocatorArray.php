@@ -1,7 +1,7 @@
 <?php
 
 namespace Europa\Fs;
-use Europa\Common\InstanceIterator;
+use Europa\Iterator\InstanceIterator;
 use Traversable;
 
 class LocatorArray implements LocatorInterface
@@ -10,7 +10,7 @@ class LocatorArray implements LocatorInterface
 
     public function __construct(Traversable $locators)
     {
-        $this->locators = new InstanceIterator('Europa\Fs\LocatorInterface', $locators);
+        $this->locators = new InstanceIterator($locators, 'Europa\Fs\LocatorInterface');
     }
 
     public function locate($file)

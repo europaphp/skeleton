@@ -33,10 +33,10 @@ abstract class ModuleAbstract implements ModuleInterface
 
     public function init()
     {
-        
+
     }
 
-    public function bootstrap(DependencyInjectorInterface $injector)
+    public function bootstrap(callable $container)
     {
         $class = $this->namespace . '\\' . static::BOOTSTRAPPER;
 
@@ -45,7 +45,7 @@ abstract class ModuleAbstract implements ModuleInterface
                 throw new Exception\InvalidBootstrapperInstance($class);
             }
 
-            $class = new $class($this, $injector);
+            $class = new $class($this, $container);
             $class->bootstrap();
         }
     }

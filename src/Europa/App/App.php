@@ -1,22 +1,19 @@
 <?php
 
 namespace Europa\App;
-use Closure;
 use Europa\Config\ConfigInterface;
 use Europa\Controller\ControllerInterface;
 use Europa\Di\ResolverInterface;
-use Europa\Event\EmitterInterface as EventEmitterInterface;
+use Europa\Event\EmitterInterface;
 use Europa\Exception\Exception;
-use Europa\Module\ManagerInterface as ModuleManagerInterface;
+use Europa\Module\ManagerInterface;
 use Europa\Request\RequestInterface;
 use Europa\Response\ResponseInterface;
 use Europa\Router\RouterInterface;
 
-class App implements AppInterface
+class App
 {
     const EVENT_ROUTE = 'route';
-
-    const EVENT_ACTION = 'action';
 
     const EVENT_RENDER = 'render';
 
@@ -24,11 +21,7 @@ class App implements AppInterface
 
     const EVENT_DONE = 'done';
 
-    const EVENT_ERROR = 'error';
-
     private $config;
-
-    private $controllers;
 
     private $events;
 
@@ -44,59 +37,31 @@ class App implements AppInterface
 
     public function __construct(
         ConfigInterface $config,
-        ResolverInterface $controllers,
-        EventEmitterInterface $events,
-        ModuleManagerInterface $modules,
+        EmitterInterface $events,
+        ManagerInterface $modules,
         RequestInterface $request,
         ResponseInterface $response,
-        RouterInterface $router,
-        Closure $views
+        callable $router,
+        callable $views
     ) {
-        $this->config      = $config;
-        $this->controllers = $controllers;
-        $this->events      = $events;
-        $this->modules     = $modules;
-        $this->request     = $request;
-        $this->response    = $response;
-        $this->router      = $router;
-        $this->views       = $views;
+        $this->config   = $config;
+        $this->events   = $events;
+        $this->modules  = $modules;
+        $this->request  = $request;
+        $this->response = $response;
+        $this->router   = $router;
+        $this->views    = $views;
     }
 
-    public function dispatch()
+    public function __invoke()
     {
         $this->modules->bootstrap();
+        $this->events->emit(self::EVENT_ROUTE);
 
-        $controller = $this->resolveController();
-        $context    = $this->actionController($controller);
-        $rendered   = $this->renderView($context);
-
-        return $this->runResponse($rendered);
-    }
-
-    private function resolveController()
-    {
-        $this->events->emit(self::EVENT_ROUTE, $this->controllers, $this->request, $this->router);
-
-        if (!$this->router->route($this->request)) {
-            Exception::toss('The router could not find a suitable controller for the request "%s".', $this->request);
-        }
-
-        $controller = $this->request->getParam($this->config['controller-param']);
-
-        if (!$this->controllers->has($controller)) {
-            Exception::toss('The controller "%s" could not be found.', $controller);
-        }
-
-        return $this->controllers->get($controller);
-    }
-
-    private function actionController(ControllerInterface $controller)
-    {
-        $this->events->emit(self::EVENT_ACTION, $controller, $this->request);
-
-        return $controller->__call(
-            $this->request->getParam($this->config['action-param']),
-            $this->request->getParams()
+        return $this->runResponse(
+            $this->renderView(
+                $this->router->__invoke($this->request)
+            )
         );
     }
 
@@ -119,8 +84,10 @@ class App implements AppInterface
     {
         $this->response->setBody($rendered);
         $this->events->emit(self::EVENT_SEND, $this->response);
+
         $this->response->send();
         $this->events->emit(self::EVENT_DONE, $this->response);
+
         return $this;
     }
 }

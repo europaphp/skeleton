@@ -6,13 +6,19 @@ use Europa\Module\ModuleInterface;
 
 abstract class BootstrapperAbstract extends \Europa\Bootstrapper\BootstrapperAbstract implements BootstrapperInterface
 {
-    protected $injector;
+    protected $container;
 
     protected $module;
 
-    public function __construct(ModuleInterface $module, DependencyInjectorInterface $injector)
+    public function __construct(ModuleInterface $module, callable $container)
     {
-        $this->injector = $injector;
-        $this->module   = $module;
+        $this->container = $container;
+        $this->module = $module;
+    }
+
+    protected function container($service)
+    {
+        $container = $this->container;
+        return $container($service);
     }
 }

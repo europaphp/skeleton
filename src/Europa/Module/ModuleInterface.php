@@ -1,11 +1,10 @@
 <?php
 
 namespace Europa\Module;
-use Europa\Di\DependencyInjectorInterface;
 
 interface ModuleInterface
 {
-    public function bootstrap(DependencyInjectorInterface $injector);
+    public function bootstrap(callable $container);
 
     public function ns();
 

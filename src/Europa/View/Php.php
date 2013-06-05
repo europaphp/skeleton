@@ -1,32 +1,31 @@
 <?php
 
 namespace Europa\View;
-use Europa\Di\DependencyInjectorAware;
-use Europa\Di\DependencyInjectorAwareInterface;
-use Europa\Exception\Exception;
+use Europa\Di\ContainerAware;
+use Europa\Di\ContainerAwareInterface;
 
-class Php implements DependencyInjectorAwareInterface, ScriptAwareInterface, ViewInterface
+class Php implements ContainerAwareInterface, ScriptAwareInterface, ViewInterface
 {
-    use DependencyInjectorAware, ScriptAware;
+    use ContainerAware, ScriptAware;
 
     private $child;
-    
+
     private $extendStack = array();
-    
+
     private $childScript;
-    
+
     private $parentScript;
 
     private $context;
-    
+
     public function render(array $context = [])
     {
         if (!$this->getScript()) {
-            Exception::toss('No view script was specified.');
+            throw new Exception\UnspecifiedViewScript;
         }
 
         if (!$script = $this->locateScript()) {
-            Exception::toss('The script "%s" does not exist.', $this->getScript());
+            throw new Exception\InvalidViewScript($this->getScript());
         }
 
         // apply context
@@ -40,7 +39,7 @@ class Php implements DependencyInjectorAwareInterface, ScriptAwareInterface, Vie
 
         // get output
         $rendered = ob_get_clean();
-        
+
         // handle view extensions
         if ($this->parentScript) {
             // set the script so the parent has access to what child has been rendered
@@ -54,37 +53,37 @@ class Php implements DependencyInjectorAwareInterface, ScriptAwareInterface, Vie
 
             // set the rendered child so the parent has access to the rendered child
             $this->child = $rendered;
-            
+
             // render and return the output of the parent
             return $this->render($context);
         }
-        
+
         return $rendered;
     }
-    
+
     public function renderScript($script, array $context = array())
     {
         // capture old state
         $oldScript = $this->getScript();
         $oldParent = $this->parentScript;
         $oldChild  = $this->childScript;
-        
+
         // set new state
         $this->setScript($script);
         $this->parentScript = null;
         $this->childScript  = null;
-        
+
         // capture rendered script
         $render = $this->render($context);
-        
+
         // reapply old state
         $this->setScript($oldScript);
         $this->parentScript = $oldParent;
         $this->childScript  = $oldChild;
-        
+
         return $render;
     }
-    
+
     public function renderChild()
     {
         return $this->child;
@@ -101,38 +100,38 @@ class Php implements DependencyInjectorAwareInterface, ScriptAwareInterface, Vie
 
     public function helper($name)
     {
-        if (!$injector = $this->getDependencyInjector()) {
-            Exception::toss('Cannot get helper "%s" from view "%s" because no container was set.', $name, $this->getScript());
+        if (!$injector = $this->getContainer()) {
+            throw new Exception\NoContainer($name, $this->getScript());
         }
 
-        if (!$injector->has($name)) {
-            Exception::toss('Cannot get helper "%s" from view "%s" because it does not exist in the bound container.', $name, $this->getScript());
+        try {
+            return $injector->get($name);
+        } catch (\Exception $e) {
+            throw new Exception\CannotGetHelper($name, $this->getScript(), $e->getMessage());
         }
-
-        return $injector->get($name);
     }
-    
+
     public function extend($parent)
     {
         // the child is the current script
         $child = $this->getScript();
-        
+
         // child views cannot extend themselves
         if ($parent === $child) {
-            Exception::toss('Child view cannot extend itself.');
+            throw new Exception\CircularExtension;
         }
-        
+
         // if the child has already extended a parent, don't do anything
         if (in_array($child, $this->extendStack)) {
             return $this;
         }
-        
+
         // the extend stack makes sure that extend doesn't trigger recursion
         $this->extendStack[] = $child;
-        
+
         // set the parent
         $this->parentScript = $parent;
-        
+
         return $this;
     }
 }

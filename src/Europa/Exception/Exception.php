@@ -4,13 +4,10 @@ namespace Europa\Exception;
 
 class Exception extends \Exception
 {
-    public static function toss()
+    public function __construct()
     {
-        throw new static(call_user_func_array('sprintf', func_get_args()), static::code());
-    }
-
-    public static function code()
-    {
-        return crc32(get_called_class());
+        $args = func_get_args();
+        $message = array_shift($args);
+        parent::__construct(vsprintf($message, $args), crc32(get_class($this)));
     }
 }

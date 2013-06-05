@@ -5,7 +5,7 @@ use Europa\Config\Config;
 use Europa\Request\Http;
 use Europa\Request\RequestInterface;
 
-class Negotiator implements NegotiatorInterface
+class Negotiator
 {
     private $suffixMap = [
         'json' => 'resolveJson',
@@ -25,40 +25,39 @@ class Negotiator implements NegotiatorInterface
 
     private $request;
 
-    public function __construct(RequestInterface $request, $config = [])
+    public function __construct($config = [])
     {
-        $this->config  = new Config($this->config, $config);
-        $this->request = $request;
+        $this->config = new Config($this->config, $config);
     }
 
-    public function negotiate()
+    public function __invoke(RequestInterface $request)
     {
         $view = null;
 
-        if ($this->isRequestNegotiable($this->request)) {
+        if ($this->isRequestNegotiable($request)) {
             $method = null;
 
-            if ($suffix = $this->request->getUri()->getSuffix()) {
+            if ($suffix = $request->getUri()->getSuffix()) {
                 $method = $this->suffixMap[$suffix];
-            } elseif ($type = $this->request->accepts(array_keys($this->typeMap))) {
+            } elseif ($type = $request->accepts(array_keys($this->typeMap))) {
                 $method = $this->typeMap[$type];
             }
 
             if ($method && method_exists($this, $method)) {
-                $view = $this->$method($this->request);
+                $view = $this->$method($request);
             }
         }
 
         if (!$view) {
-            $view = $this->resolvePhp($this->request);
+            $view = $this->resolvePhp();
         }
 
         return $view;
     }
 
-    private function resolveJson()
+    private function resolveJson($request)
     {
-        if ($callback = $this->request->getParam($this->config['jsonp-param'])) {
+        if ($callback = $request->getParam($this->config['jsonp-param'])) {
             return new Jsonp($callback);
         }
 
@@ -75,8 +74,8 @@ class Negotiator implements NegotiatorInterface
         return new Xml($this->config['xml-view-config']);
     }
 
-    private function isRequestNegotiable()
+    private function isRequestNegotiable($request)
     {
-        return $this->request instanceof Http;
+        return $request instanceof Http;
     }
 }

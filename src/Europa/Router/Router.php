@@ -1,83 +1,129 @@
 <?php
 
 namespace Europa\Router;
-use ArrayIterator;
-use Countable;
 use Europa\Config\Config;
-use Europa\Exception\Exception;
+use Europa\Reflection\CallableReflector;
+use Europa\Reflection\ClassReflector;
+use Europa\Request\CliInterface;
+use Europa\Request\HttpInterface;
 use Europa\Request\RequestInterface;
-use IteratorAggregate;
 
-class Router implements Countable, IteratorAggregate, RouterInterface
+class Router
 {
-    private $routes = [];
+    private $container;
 
-    public function route(RequestInterface $request)
+    private $controllers = [];
+
+    private $fallbackController;
+
+    public function __construct(callable $container = null)
     {
-        foreach ($this->routes as $name => $route) {
-            if ($params = $route->query($request)) {
-                $request->setParams($params);
-                return true;
+        $this->container = $container;
+    }
+
+    public function __invoke(RequestInterface $request)
+    {
+        $call = null;
+        $request = $this->translateRequest($request);
+
+        foreach ($this->controllers as $pattern => $controller) {
+            if (preg_match($pattern, $request, $params)) {
+                $call = $controller;
+                break;
             }
         }
 
-        return false;
-    }
-
-    public function format($name, array $params = [])
-    {
-        if (!isset($this->routes[$name])) {
-            Exception::toss('The route "%s" cannot be formatted because it does not exist.', $name);
+        if (!$call) {
+            if ($this->fallbackController) {
+                $call = $this->fallbackController;
+            } else {
+                throw new Exception\ControllerNotFound('A route matching "%s" was unable to be found.', $request);
+            }
         }
 
-        return $this->routes[$name]->format($params);
+        $call = new CallableReflector($call);
+        return $call->getReflector()->invokeArgs($params);
     }
 
-    public function set($name, RouteInterface $route)
+    public function when($pattern, callable $controller)
     {
-        $this->routes[$name] = $route;
+        $this->controllers[$pattern] = $controller;
         return $this;
     }
 
-    public function get($name)
+    public function otherwise(callable $controller)
     {
-        if (isset($this->routes[$name])) {
-            return $this->routes[$name];
-        }
-
-        Exception::toss('The route "%s" does not exist.', $name);
-    }
-
-    public function has($name)
-    {
-        return isset($this->routes[$name]);
-    }
-
-    public function remove($name)
-    {
-        if (isset($this->routes[$name])) {
-            unset($this->routes[$name]);
-        }
-
+        $this->fallbackController = $controller;
         return $this;
-    }
-
-    public function count()
-    {
-        return count($this->routes);
-    }
-
-    public function getIterator()
-    {
-        return new ArrayIterator($this->routes);
     }
 
     public function import($routes)
     {
-        foreach (new Config($routes) as $name => $route) {
-            $this->set($name, new Route($route));
+        foreach (new Config($routes) as $config) {
+            $callable = $this->translateConfigToCallable($config);
+
+            if ($config['when']) {
+                $this->when($config['when'], $callable);
+            } elseif ($config['else']) {
+                $this->otherwise($config['else'], $callable);
+            } else {
+                throw new Exception\InvalidRouteConfiguration(
+                    'No route pattern for "when" or "else" was specified.'
+                );
+            }
         }
 
         return $this;
+    }
+
+    private function translateConfigToCallable($config)
+    {
+        if (is_callable($config['call'])) {
+            return $config['call'];
+        }
+
+        $class = null;
+        $method = null;
+
+        if (strpos($config['call'], '->')) {
+            $parts = explode('->', $config['call']);
+            $class = $parts[0];
+            $method = $parts[1];
+        }
+
+        if ($config['inject']) {
+            if (!$this->container) {
+                throw new Exception\MustSpecifyContainer(
+                    'Cannot inject "%s" to "%s" because no container was specified.',
+                    implode($config['inject']),
+                    $class
+                );
+            }
+
+            $deps = [];
+
+            foreach ($config['inject'] as $index => $dep) {
+                $deps[$index] = call_user_func($this->container, $dep);
+            }
+
+            $class = (new ClassReflector($class))->newInstanceArgs($deps);
+        } else {
+            $class = new $class;
+        }
+
+        return [$class, $method];
+    }
+
+    private function translateRequest(RequestInterface $request)
+    {
+        if ($request instanceof CliInterface) {
+            return $request->getCommand();
+        }
+
+        if ($request instanceof HttpInterface) {
+            return $request->getMethod() . ' ' . $request->getUri()->getRequest();
+        }
+
+        throw new Exception\InvalidRequestInstance('Unable to translate request "%s" into a queryable string.', get_class($request));
     }
 }

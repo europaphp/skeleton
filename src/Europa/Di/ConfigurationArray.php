@@ -1,19 +1,19 @@
 <?php
 
 namespace Europa\Di;
-use Europa\Common\InstanceIterator;
+use Europa\Iterator\CallableIterator;
 use Traversable;
 
-class ConfigurationArray extends ConfigurationInterface
+class ConfigurationArray
 {
     private $configurations;
 
     public function __construct(Traversable $configurations)
     {
-        $this->configurations = new InstanceIterator('Europa\Di\ConfigurationInterface', $configurations);
+        $this->configurations = new CallableIterator($configurations);
     }
 
-    public function configure(ContainerInterface $container)
+    public function __invoke(ContainerInterface $container)
     {
         foreach ($this->configurations as $configuration) {
             $configuration->configure($container);

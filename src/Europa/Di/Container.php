@@ -27,46 +27,7 @@ class Container implements ContainerInterface
         $this->cache = [];
     }
 
-    public function configure(ConfigurationInterface $configuration)
-    {
-        $configuration->configure($this);
-        return $this;
-    }
-
-    public function save($instanceName)
-    {
-        if (isset(self::$instances[$instanceName])) {
-            throw new Exception\ContainerAlreadyRegistered($instanceName);
-        }
-
-        self::$instances[$instanceName] = $this;
-
-        return $this;
-    }
-
-    public function name()
-    {
-        foreach (self::$instances as $name => $instance) {
-            if ($instance === $this) {
-                return $name;
-            }
-        }
-    }
-
-    public function set($name, Closure $service)
-    {
-        $name = $this->resolveAlias($name);
-
-        if (isset($this->cache[$name])) {
-            unset($this->cache[$name]);
-        }
-
-        $this->services[$name] = $service;
-
-        return $this;
-    }
-
-    public function get($name)
+    public function __invoke($name)
     {
         $name = $this->resolveAlias($name);
 
@@ -110,12 +71,9 @@ class Container implements ContainerInterface
         return $this->cache[$name] = $service;
     }
 
-    public function has($name)
-    {
-        return isset($this->services[$this->resolveAlias($name)]);
-    }
 
-    public function remove($name)
+
+    public function register($name, Closure $service)
     {
         $name = $this->resolveAlias($name);
 
@@ -123,11 +81,35 @@ class Container implements ContainerInterface
             unset($this->cache[$name]);
         }
 
-        if (isset($this->services[$name])) {
-            unset($this->services[$name]);
-        }
+        $this->services[$name] = $service;
 
         return $this;
+    }
+
+    public function configure(callable $configuration)
+    {
+        $configuration($this);
+        return $this;
+    }
+
+    public function save($as)
+    {
+        if (isset(self::$instances[$as])) {
+            throw new Exception\ContainerAlreadyRegistered($as);
+        }
+
+        self::$instances[$as] = $this;
+
+        return $this;
+    }
+
+    public function name()
+    {
+        foreach (self::$instances as $name => $instance) {
+            if ($instance === $this) {
+                return $name;
+            }
+        }
     }
 
     public function setAliases($name, array $aliases)
@@ -139,34 +121,10 @@ class Container implements ContainerInterface
         return $this;
     }
 
-    public function getAliases($name)
-    {
-        $aliases = [];
-
-        foreach ($this->aliases as $alias => $service) {
-            if ($service === $name) {
-                $aliases[] = $alias;
-            }
-        }
-
-        return $aliases;
-    }
-
     public function setDependencies($name, array $dependencies)
     {
         $this->dependencies[$this->resolveAlias($name)] = $dependencies;
         return $this;
-    }
-
-    public function getDependencies($name)
-    {
-        $name = $this->resolveAlias($name);
-
-        if (isset($this->dependencies[$name])) {
-            return $this->dependencies[$name];
-        }
-
-        return [];
     }
 
     public function setTransient($name)
@@ -182,26 +140,10 @@ class Container implements ContainerInterface
         return $this;
     }
 
-    public function getTransient($name)
-    {
-        return isset($this->transeient[$name]);
-    }
-
     public function setTypes($name, array $types)
     {
         $this->types[$this->resolveAlias($name)] = $types;
         return $this;
-    }
-
-    public function getTypes()
-    {
-        $name = $this->resolveAlias($name);
-
-        if (isset($this->types[$name])) {
-            return $this->types[$name];
-        }
-
-        return [];
     }
 
     private function resolveAlias($name)
@@ -213,12 +155,12 @@ class Container implements ContainerInterface
         return $name;
     }
 
-    public static function open($instanceName)
+    public static function get($name)
     {
-        if (isset(self::$instances[$instanceName])) {
-            return self::$instances[$instanceName];
+        if (isset(self::$instances[$name])) {
+            return self::$instances[$name];
         }
 
-        throw new Exception\UnregisteredContainer($instanceName);
+        throw new Exception\UnregisteredContainer($name);
     }
 }

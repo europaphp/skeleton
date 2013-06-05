@@ -4,7 +4,7 @@ namespace Europa\Di;
 use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
 
-abstract class ConfigurationAbstract implements ConfigurationInterface
+abstract class ConfigurationAbstract
 {
     const DOC_TAG_ALIAS = 'alias';
 
@@ -12,7 +12,7 @@ abstract class ConfigurationAbstract implements ConfigurationInterface
 
     const DOC_TAG_TRANSIENT = 'transient';
 
-    public function configure(ContainerInterface $container)
+    public function __invoke(ContainerInterface $container)
     {
         $class = new ClassReflector($this);
 
@@ -22,7 +22,7 @@ abstract class ConfigurationAbstract implements ConfigurationInterface
                 $this->applyDependencies($container, $method);
                 $this->applyTransient($container, $method);
                 $this->applyTypes($container, $method);
-                $container->set($method->getName(), $method->getClosure($this));
+                $container->register($method->getName(), $method->getClosure($this));
             }
         }
 
