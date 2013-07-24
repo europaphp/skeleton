@@ -1,26 +1,26 @@
 <?php
 
 namespace Europa\View;
-use Europa\Config\Config;
+use Europa\Config;
 
-class Json implements ViewInterface
+class Json
 {
     private $config = [
-        'options' => 0
+        'json_encode_options' => 0
     ];
 
     public function __construct($config = [])
     {
-        $this->config = new Config($this->config, $config);
+        $this->config = new Config\Config($this->config, $config);
     }
 
-    public function render(array $context = array())
+    public function __invoke(array $context = array())
     {
         $render = $this->formatParamsToJsonArray($context);
         $render = json_encode($context, $this->config['options']);
         return $render;
     }
-    
+
     private function formatParamsToJsonArray($data)
     {
         $array = array();
@@ -32,7 +32,7 @@ class Json implements ViewInterface
 
             $array[$name] = $item;
         }
-        
+
         return $array;
     }
 }

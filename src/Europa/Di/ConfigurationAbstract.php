@@ -12,6 +12,8 @@ abstract class ConfigurationAbstract
 
     const DOC_TAG_TRANSIENT = 'transient';
 
+    const METHOD_INIT = 'init';
+
     public function __invoke(ContainerInterface $container)
     {
         $class = new ClassReflector($this);
@@ -24,6 +26,10 @@ abstract class ConfigurationAbstract
                 $this->applyTypes($container, $method);
                 $container->register($method->getName(), $method->getClosure($this));
             }
+        }
+
+        if (method_exists($this, self::METHOD_INIT)) {
+            $this->{self::METHOD_INIT}($container);
         }
 
         return $this;
@@ -47,7 +53,9 @@ abstract class ConfigurationAbstract
             }
         }
 
-        $container->setAliases($method->getName(), $aliases);
+        if ($aliases) {
+            $container->alias($method->getName(), $aliases);
+        }
     }
 
     private function applyDependencies(ContainerInterface $container, MethodReflector $method)
@@ -58,20 +66,22 @@ abstract class ConfigurationAbstract
             $dependencies[] = $param->getName();
         }
 
-        $container->setDependencies($method->getName(), $dependencies);
+        if ($dependencies) {
+            $container->depends($method->getName(), $dependencies);
+        }
     }
 
     private function applyTransient(ContainerInterface $container, MethodReflector $method)
     {
         if ($method->getDocBlock()->hasTag(self::DOC_TAG_TRANSIENT)) {
-            $container->setTransient($method->getName());
+            $container->template($method->getName());
         }
     }
 
     private function applyTypes(ContainerInterface $container, MethodReflector $method)
     {
         if ($method->getDocBlock()->hasTag(self::DOC_TAG_RETURN)) {
-            $container->setTypes($method->getName(), $method->getDocBlock()->getTag(self::DOC_TAG_RETURN)->getTypes());
+            $container->constrain($method->getName(), $method->getDocBlock()->getTag(self::DOC_TAG_RETURN)->getTypes());
         }
     }
 }

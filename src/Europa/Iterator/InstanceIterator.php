@@ -8,7 +8,7 @@ use Traversable;
 
 class InstanceIterator implements IteratorAggregate
 {
-    private $instances = [];
+    private $instances;
 
     public function __construct(Traversable $instances, $instanceof = null)
     {
@@ -20,9 +20,9 @@ class InstanceIterator implements IteratorAggregate
             if ($instanceof && !$instance instanceof $instanceof) {
                 Exception::toss('The instance at offset "%s" must be an instance of "%s". Instance of "%s" supplied.', $this->key(), $this->instanceof, get_class($instance));
             }
-
-            $this->instances[] = $instance;
         }
+
+        $this->instances = $instances;
     }
 
     public function getIterator()

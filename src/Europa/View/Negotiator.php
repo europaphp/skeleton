@@ -1,81 +1,55 @@
 <?php
 
 namespace Europa\View;
-use Europa\Config\Config;
-use Europa\Request\Http;
-use Europa\Request\RequestInterface;
+use Europa\Request;
 
 class Negotiator
 {
-    private $suffixMap = [
-        'json' => 'resolveJson',
-        'xml'  => 'resolveXml'
-    ];
+    private $suffixMap = [];
 
-    private $typeMap = [
-        'application/json'       => 'resolveJson',
-        'application/javascript' => 'resolveJson',
-        'text/xml'               => 'resolveXml'
-    ];
+    private $contentTypeMap = [];
 
-    private $config = [
-        'jsonp-param'     => 'callback',
-        'xml-view-config' => []
-    ];
+    private $fallbackRenderer;
 
-    private $request;
-
-    public function __construct($config = [])
+    public function __invoke(Request\RequestInterface $request)
     {
-        $this->config = new Config($this->config, $config);
-    }
-
-    public function __invoke(RequestInterface $request)
-    {
-        $view = null;
-
-        if ($this->isRequestNegotiable($request)) {
-            $method = null;
-
+        if ($request instanceof Request\HttpInterface) {
             if ($suffix = $request->getUri()->getSuffix()) {
-                $method = $this->suffixMap[$suffix];
-            } elseif ($type = $request->accepts(array_keys($this->typeMap))) {
-                $method = $this->typeMap[$type];
-            }
-
-            if ($method && method_exists($this, $method)) {
-                $view = $this->$method($request);
+                $renderer = $this->suffixMap[$suffix];
+            } elseif ($contentType = $request->accepts(array_keys($this->contentTypeMap))) {
+                $renderer = $this->contentTypeMap[$contentType];
             }
         }
 
-        if (!$view) {
-            $view = $this->resolvePhp();
+        if (!isset($renderer)) {
+            $renderer = $this->fallbackRenderer;
         }
 
-        return $view;
-    }
-
-    private function resolveJson($request)
-    {
-        if ($callback = $request->getParam($this->config['jsonp-param'])) {
-            return new Jsonp($callback);
+        if (!isset($renderer)) {
+            throw new Exception\NotNegotiable(sprintf(
+                'Unable to negotiate a renderer for the request "%s".',
+                $request
+            ));
         }
 
-        return new Json;
+        return $renderer;
     }
 
-    private function resolvePhp()
+    public function mapSuffix($suffix, callable $renderer)
     {
-        return new Php;
+        $this->suffixMap[$suffix] = $renderer;
+        return $this;
     }
 
-    private function resolveXml()
+    public function mapContentType($contentType, callable $renderer)
     {
-        return new Xml($this->config['xml-view-config']);
+        $this->contentTypeMap[$contentType] = $renderer;
+        return $this;
     }
 
-    private function isRequestNegotiable($request)
+    public function otherwise(callable $fallbackRenderer)
     {
-        return $request instanceof Http;
+        $this->fallbackRenderer = $fallbackRenderer;
+        return $this;
     }
 }

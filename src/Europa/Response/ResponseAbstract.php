@@ -1,25 +1,38 @@
 <?php
 
 namespace Europa\Response;
-use Europa\Request\RequestAbstract;
+use Europa\Request;
 
 abstract class ResponseAbstract implements ResponseInterface
 {
     private $body;
-    
+
+    private $status;
+
     public function setBody($body)
     {
         $this->body = $body;
         return $this;
     }
-    
+
     public function getBody()
     {
         return $this->body;
     }
 
+    public function setStatus($status)
+    {
+        $this->status = (int) $status;
+        return $this;
+    }
+
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
     public static function detect()
     {
-        return RequestAbstract::isCli() ? new Cli : new Http;
+        return Request\RequestAbstract::isCli() ? new Cli : new Http;
     }
 }

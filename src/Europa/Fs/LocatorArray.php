@@ -1,19 +1,18 @@
 <?php
 
 namespace Europa\Fs;
-use Europa\Iterator\InstanceIterator;
-use Traversable;
+use Europa\Iterator;
 
-class LocatorArray implements LocatorInterface
+class LocatorArray
 {
     private $locators;
 
-    public function __construct(Traversable $locators)
+    public function __construct(\Traversable $locators)
     {
-        $this->locators = new InstanceIterator($locators, 'Europa\Fs\LocatorInterface');
+        $this->locators = new Iterator\InstanceIterator($locators, 'Europa\Fs\LocatorInterface');
     }
 
-    public function locate($file)
+    public function __invoke($file)
     {
         foreach ($this->locators as $locator) {
             if ($real = $locator->locate($file)) {

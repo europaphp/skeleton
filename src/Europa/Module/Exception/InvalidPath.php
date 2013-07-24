@@ -2,10 +2,7 @@
 
 namespace Europa\Module\Exception;
 
-class InvalidPath extends \InvalidArgumentException
+class InvalidPath extends \Europa\Exception\Exception
 {
-    public function __construct($name, $path)
-    {
-        parent::__consruct(sprintf('The module "%s" specified and invalid path "%s".', $name, $path));
-    }
+  public $message = 'The module :name specified and invalid path: :path.';
 }

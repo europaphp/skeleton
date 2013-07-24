@@ -17,11 +17,11 @@ class RouterArray
     public function __invoke(RequestInterface $request)
     {
         foreach ($this->routers as $router) {
-            if ($params = $router($request)) {
-                return $params;
+            if ($response = $router($request)) {
+                return $response;
             }
         }
 
-        return false;
+        throw new Exception\ControllerNotFound('A route was not matched by the supplied routers.');
     }
 }

@@ -1,7 +1,6 @@
 <?php
 
 namespace Europa\Di;
-use Closure;
 use Europa\Reflection\FunctionReflector;
 use Europa\Reflection\ReflectorInterface;
 use ReflectionClass;
@@ -27,7 +26,7 @@ class Container implements ContainerInterface
         $this->cache = [];
     }
 
-    public function __invoke($name)
+    public function __invoke($name, array $params = [])
     {
         $name = $this->resolveAlias($name);
 
@@ -47,7 +46,7 @@ class Container implements ContainerInterface
             throw new Exception\UnregisteredService($name, $this);
         }
 
-        $service = $service($this);
+        $service = $service($this, $params);
 
         if (isset($this->types[$name])) {
             foreach ($this->types[$name] as $type) {
@@ -71,9 +70,7 @@ class Container implements ContainerInterface
         return $this->cache[$name] = $service;
     }
 
-
-
-    public function register($name, Closure $service)
+    public function register($name, callable $service)
     {
         $name = $this->resolveAlias($name);
 
@@ -112,7 +109,7 @@ class Container implements ContainerInterface
         }
     }
 
-    public function setAliases($name, array $aliases)
+    public function alias($name, array $aliases)
     {
         foreach ($aliases as $alias) {
             $this->aliases[$alias] = $name;
@@ -121,13 +118,13 @@ class Container implements ContainerInterface
         return $this;
     }
 
-    public function setDependencies($name, array $dependencies)
+    public function depends($name, array $dependencies)
     {
         $this->dependencies[$this->resolveAlias($name)] = $dependencies;
         return $this;
     }
 
-    public function setTransient($name)
+    public function template($name)
     {
         $name = $this->resolveAlias($name);
 
@@ -140,7 +137,7 @@ class Container implements ContainerInterface
         return $this;
     }
 
-    public function setTypes($name, array $types)
+    public function constrain($name, array $types)
     {
         $this->types[$this->resolveAlias($name)] = $types;
         return $this;

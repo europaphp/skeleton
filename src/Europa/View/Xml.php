@@ -4,7 +4,7 @@ namespace Europa\View;
 use Europa\Config\Config;
 use Europa\Filter\ToStringFilter;
 
-class Xml implements ViewInterface
+class Xml
 {
     private $config = [
         'declare'          => true,
@@ -17,14 +17,14 @@ class Xml implements ViewInterface
     ];
 
     private $toStringFilter;
-    
+
     public function __construct($config = [])
     {
         $this->config         = new Config($this->config, $config);
         $this->toStringFilter = new ToStringFilter;
     }
-    
-    public function render(array $context = [])
+
+    public function __invoke(array $context = [])
     {
         $str = '';
 
@@ -41,20 +41,20 @@ class Xml implements ViewInterface
         if ($this->config['root-node']) {
             $context = [$this->config['root-node'] => $context];
         }
-        
+
         // Render the XML tree.
         foreach ($context as $name => $content) {
             $str .= $this->renderNode($name, $content);
         }
-        
+
         // Remove whitespace before returning.
         return trim($str);
     }
-    
+
     private function renderNode($name, $content, $level = 0)
     {
         $keys = $this->config['numeric-key-name'];
-        
+
         // translate a numeric key to a replacement key
         if (is_numeric($name)) {
             if (is_string($keys)) {
@@ -63,11 +63,11 @@ class Xml implements ViewInterface
                 $name = $keys[$level];
             }
         }
-        
+
         // indent the node
         $ind = $this->indent($level);
         $str = $ind . "<{$name}>";
-        
+
         // render child nodes if the value is traversable
         if (is_array($content) || is_object($content)) {
             $str .= PHP_EOL;
@@ -80,13 +80,13 @@ class Xml implements ViewInterface
         } else {
             $str .= $this->toStringFilter->__invoke($content);
         }
-        
+
         $str .= "</{$name}>";
         $str .= PHP_EOL;
-        
+
         return $str;
     }
-    
+
     private function indent($level)
     {
         $indent = $this->config['spaces'];

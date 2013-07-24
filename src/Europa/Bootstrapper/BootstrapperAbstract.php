@@ -4,18 +4,18 @@ namespace Europa\Bootstrapper;
 use Europa\Reflection\ClassReflector;
 use Europa\Reflection\MethodReflector;
 
-abstract class BootstrapperAbstract implements BootstrapperInterface
+abstract class BootstrapperAbstract
 {
-    public function bootstrap()
+    public function __invoke()
     {
         $that = new ClassReflector($this);
-        
+
         foreach ($that->getMethods() as $method) {
             if ($this->isValidMethod($method)) {
-                $method->invoke($this);
+                $method->invokeArgs($this, func_get_args());
             }
         }
-        
+
         return $this;
     }
 
@@ -28,11 +28,11 @@ abstract class BootstrapperAbstract implements BootstrapperInterface
         if ($method->isMagic()) {
             return false;
         }
-        
+
         if (!$method->isPublic()) {
             return false;
         }
-        
+
         return true;
     }
 }

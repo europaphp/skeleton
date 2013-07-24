@@ -4,7 +4,7 @@ namespace Europa\View;
 use Europa\Di\ContainerAware;
 use Europa\Di\ContainerAwareInterface;
 
-class Php implements ContainerAwareInterface, ScriptAwareInterface, ViewInterface
+class Php implements ContainerAwareInterface, ScriptAwareInterface
 {
     use ContainerAware, ScriptAware;
 
@@ -18,14 +18,14 @@ class Php implements ContainerAwareInterface, ScriptAwareInterface, ViewInterfac
 
     private $context;
 
-    public function render(array $context = [])
+    public function __invoke(array $context = [])
     {
         if (!$this->getScript()) {
-            throw new Exception\UnspecifiedViewScript;
+            throw new Exception\UnspecifiedViewScript('No view script was specified.');
         }
 
-        if (!$script = $this->locateScript()) {
-            throw new Exception\InvalidViewScript($this->getScript());
+        if (!$script = $this->getLocatedScript()) {
+            throw new Exception\InvalidViewScript(sprintf('The view script "%s" does not exist.', $this->getScript()));
         }
 
         // apply context
@@ -101,13 +101,22 @@ class Php implements ContainerAwareInterface, ScriptAwareInterface, ViewInterfac
     public function helper($name)
     {
         if (!$injector = $this->getContainer()) {
-            throw new Exception\NoContainer($name, $this->getScript());
+            throw new Exception\NoContainer(sprintf(
+                'Cannot get helper "%s" from view "%s" because no container was set.',
+                $name,
+                $this->getScript()
+            ));
         }
 
         try {
             return $injector->get($name);
         } catch (\Exception $e) {
-            throw new Exception\CannotGetHelper($name, $this->getScript(), $e->getMessage());
+            throw new Exception\CannotGetHelper(sprintf(
+                'Cannot get helper "%s" from view "%s" because: %s.',
+                $name,
+                $this->getScript(),
+                $e->getMessage()
+            ));
         }
     }
 
@@ -118,7 +127,7 @@ class Php implements ContainerAwareInterface, ScriptAwareInterface, ViewInterfac
 
         // child views cannot extend themselves
         if ($parent === $child) {
-            throw new Exception\CircularExtension;
+            throw new Exception\CircularExtension('Child view cannot extend itself.');
         }
 
         // if the child has already extended a parent, don't do anything

@@ -7,26 +7,26 @@ use IteratorAggregate;
 abstract class RequestAbstract implements IteratorAggregate, RequestInterface
 {
     private $id;
-    
+
     private $method;
-    
+
     private $params = [];
 
     public function __set($name, $value)
     {
         return $this->setParam($name, $value);
     }
-    
+
     public function __get($name)
     {
         return $this->getParam($name);
     }
-    
+
     public function __isset($name)
     {
         return $this->hasParam($name);
     }
-    
+
     public function __unset($name)
     {
         return $this->removeParam($name);
@@ -37,18 +37,18 @@ abstract class RequestAbstract implements IteratorAggregate, RequestInterface
         $this->method = $method;
         return $this;
     }
-    
+
     public function getMethod()
     {
         return $this->method;
     }
-    
+
     public function setParam($name, $value)
     {
         $this->params[$name] = $value;
         return $this;
     }
-    
+
     public function getParam($name, $default = null)
     {
         if (isset($this->params[$name])) {
@@ -56,12 +56,12 @@ abstract class RequestAbstract implements IteratorAggregate, RequestInterface
         }
         return $default;
     }
-    
+
     public function hasParam($name)
     {
         return array_key_exists($name, $this->params);
     }
-    
+
     public function removeParam($name)
     {
         if (isset($this->params[$name])) {
@@ -69,7 +69,7 @@ abstract class RequestAbstract implements IteratorAggregate, RequestInterface
         }
         return $this;
     }
-    
+
     public function setParams($params)
     {
         if (is_array($params) || is_object($params)) {
@@ -79,18 +79,18 @@ abstract class RequestAbstract implements IteratorAggregate, RequestInterface
         }
         return $this;
     }
-    
+
     public function getParams()
     {
         return $this->params;
     }
-    
+
     public function removeParams()
     {
         $this->params = array();
         return $this;
     }
-    
+
     public function searchParams($pattern, $delimiter = '/', $flags = null)
     {
         $params  = array();
@@ -102,7 +102,7 @@ abstract class RequestAbstract implements IteratorAggregate, RequestInterface
         }
         return $params;
     }
-    
+
     public function getId()
     {
         if (!$this->id) {
@@ -110,22 +110,22 @@ abstract class RequestAbstract implements IteratorAggregate, RequestInterface
         }
         return $this->id;
     }
-    
+
     public function getIterator()
     {
         return new ArrayIterator($this->params);
     }
-    
+
     public function serialize()
     {
         return serialize($this->getParams());
     }
-    
+
     public function unserialize($serialized)
     {
         return $this->setParams(unserialize($serialized));
     }
-    
+
     public static function isCli()
     {
         return PHP_SAPI === 'cli';

@@ -1,12 +1,10 @@
 <?php
 
 namespace Europa\Module;
-use Europa\Config\Config;
-use Europa\Di\DependencyInjectorInterface;
-use Europa\Filter\ClassNameFilter;
-use ReflectionClass;
+use Europa\Config;
+use Europa\Filter;
 
-abstract class ModuleAbstract implements ModuleInterface
+abstract class ModuleAbstract implements ModuleInterface, RouteAwareInterface, ViewScriptAwareInterface
 {
     const BOOTSTRAPPER = 'Bootstrapper';
 
@@ -22,12 +20,17 @@ abstract class ModuleAbstract implements ModuleInterface
 
     protected $path = '../..';
 
+    protected $routes = [];
+
+    protected $viewPaths = ['views'];
+
     public function __construct($config = [])
     {
         $this->initNamespace();
         $this->initName();
         $this->initPath();
         $this->initConfig($config);
+        $this->initRoutes();
         $this->init();
     }
 
@@ -41,12 +44,16 @@ abstract class ModuleAbstract implements ModuleInterface
         $class = $this->namespace . '\\' . static::BOOTSTRAPPER;
 
         if (class_exists($class)) {
-            if (!is_subclass_of($class, 'Europa\Module\Bootstrapper\BootstrapperInterface')) {
-                throw new Exception\InvalidBootstrapperInstance($class);
+            $class = new $class;
+
+            if (!is_callable($class)) {
+                throw new Exception\BootstrapperNotCallable(sprintf(
+                    'The bootstrapper class "%s" must be callable.',
+                    get_class($class)
+                ));
             }
 
-            $class = new $class($this, $container);
-            $class->bootstrap();
+            $class($this, $container);
         }
     }
 
@@ -80,9 +87,19 @@ abstract class ModuleAbstract implements ModuleInterface
         return $this->dependencies;
     }
 
+    public function routes()
+    {
+        return $this->routes;
+    }
+
+    public function viewPaths()
+    {
+        return $this->viewPaths;
+    }
+
     private function formatNameToNamespace()
     {
-        $filter = new ClassNameFilter;
+        $filter = new Filter\ClassNameFilter;
         return $filter($this->name);
     }
 
@@ -105,7 +122,7 @@ abstract class ModuleAbstract implements ModuleInterface
 
     private function initPath()
     {
-        $path = (new ReflectionClass($this))->getFileName();
+        $path = (new \ReflectionClass($this))->getFileName();
         $path = dirname($path);
 
         if ($this->path) {
@@ -113,7 +130,7 @@ abstract class ModuleAbstract implements ModuleInterface
         }
 
         if (!$this->path = realpath($path)) {
-            Exception\InvalidPath($this->name, $path);
+            throw new Exception\InvalidPath($this->name, $path);
         }
     }
 
@@ -123,6 +140,15 @@ abstract class ModuleAbstract implements ModuleInterface
             $this->config = $this->path . '/' . $this->config;
         }
 
-        $this->config = new Config($this->config, $config);
+        $this->config = new Config\Config($this->config, $config);
+    }
+
+    private function initRoutes()
+    {
+        if (is_string($this->routes)) {
+            $this->routes = $this->path . '/' . $this->routes;
+        }
+
+        $this->routes = new Config\Config($this->routes);
     }
 }

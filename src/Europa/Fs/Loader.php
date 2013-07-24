@@ -1,9 +1,9 @@
 <?php
 
 namespace Europa\Fs;
-use Europa\Exception\Exception;
+use Europa\Exception;
 
-class Loader implements LoaderInterface, LocatorAwareInterface
+class Loader implements LocatorAwareInterface
 {
     use LocatorAware;
 
@@ -15,7 +15,7 @@ class Loader implements LoaderInterface, LocatorAwareInterface
 
     private $suffix = '.php';
 
-    public function load($class)
+    public function __invoke($class)
     {
         if (class_exists($class, false)) {
             return true;
@@ -29,11 +29,12 @@ class Loader implements LoaderInterface, LocatorAwareInterface
             );
         }
 
+        $locator = $this->locator;
         $subject = str_replace($this->separators, DIRECTORY_SEPARATOR, $class) . $this->suffix;
 
         if (isset($this->map[$class])) {
             include $found = $this->map[$class];
-        } elseif ($this->locator && $found = $this->locator->locate($subject)) {
+        } elseif ($locator && $found = $locator($subject)) {
             include $found;
         } elseif (is_file($found = __DIR__ . '/../../' . $subject)) {
             include $found;
@@ -44,14 +45,19 @@ class Loader implements LoaderInterface, LocatorAwareInterface
             $this->included[$class] = $found;
             return true;
         }
-        
+
         return false;
     }
 
     public function register()
     {
-        spl_autoload_register(array($this, 'load'), true);
+        spl_autoload_register(array($this, '__invoke'), true);
         return $this;
+    }
+
+    public function getNamespaceSeparators()
+    {
+        return $this->namespaceSeparators;
     }
 
     public function setNamespaceSeparators(array $separators)
@@ -60,9 +66,9 @@ class Loader implements LoaderInterface, LocatorAwareInterface
         return $this;
     }
 
-    public function getNamespaceSeparators()
+    public function getSuffix()
     {
-        return $this->separators;
+        return $this->suffix;
     }
 
     public function setSuffix($suffix)
@@ -71,19 +77,14 @@ class Loader implements LoaderInterface, LocatorAwareInterface
         return $this;
     }
 
-    public function getSuffix()
+    public function getClassMap()
     {
-        return $this->suffix;
+        return $this->map;
     }
 
     public function setClassMap(array $map)
     {
         $this->map = $map;
         return $this;
-    }
-
-    public function getClassMap()
-    {
-        return $this->map;
     }
 }

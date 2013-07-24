@@ -2,7 +2,6 @@
 
 namespace Europa\Module;
 use ArrayIterator;
-use Europa\Exception\Exception;
 use Europa\Version\SemVer;
 use ReflectionExtension;
 
@@ -24,9 +23,10 @@ class Manager implements ManagerInterface
     public function bootstrap()
     {
         foreach ($this->modules as $module) {
+            $this->validate($module);
+            $this->bootstrapDependencies($module);
+
             if (!in_array($module->name(), $this->bootstrapped)) {
-                $this->validate($module);
-                $this->bootstrapDependencies($module);
                 $module->bootstrap($this->container);
                 $this->bootstrapped[] = $module->name();
             }
@@ -40,11 +40,11 @@ class Manager implements ManagerInterface
         $name = $module->name();
 
         if (isset($this->modules[$name])) {
-            Exception::toss('Cannot add module "%s" because it already exists. This may be because another module you are adding is attempting to use the same name.', $name);
+            throw new Exception\DuplicateModuleName(['name' => $name]);
         }
 
         if (!preg_match(self::VALID_NAME_REGEX, $name)) {
-            Exception::toss('Modules names are required to be in the format "vendor-name/module-name". The name must be compliant with https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md.');
+            throw new Exception\InvalidModuleName(['name' => $name]);
         }
 
         $this->modules[$name] = $module;
@@ -58,7 +58,7 @@ class Manager implements ManagerInterface
             return $this->modules[$name];
         }
 
-        Exception::toss('The module "%s" does not exist.', $name);
+        throw new Exception\ModuleNotFoundException(['name' => $name]);
     }
 
     public function has($name)
@@ -80,23 +80,21 @@ class Manager implements ManagerInterface
     {
         foreach ($module->dependencies() as $name => $version) {
             if (!$this->has($name)) {
-                Exception::toss(
-                    'The module "%s" is required by the module "%s".',
-                    $name,
-                    $module->name()
-                );
+                throw new Exception\ModuleDependencyRequred([
+                    'name' => $name,
+                    'dependant' => $module->name()
+                ]);
             }
 
             $version = new SemVer($version);
 
             if (!$version->is($this->get($name)->version())) {
-                Exception::toss(
-                    'The module "%s", currently at version "%s", is required to be at version "%s" by the module "%s".',
-                    $name,
-                    $this->get($name)->version(),
-                    $version,
-                    $module->name()
-                );
+                throw new Exception\ModuleVersionRequired([
+                    'name' => $name,
+                    'version' => $this->get($name)->version(),
+                    'requiredVersion' => $version,
+                    'dependant' => $module->name()
+                ]);
             }
         }
     }
@@ -106,6 +104,7 @@ class Manager implements ManagerInterface
         foreach ($module->dependencies() as $name => $version) {
             if (!in_array($name, $this->bootstrapped)) {
                 $this->get($name)->bootstrap($this->container);
+                $this->bootstrapped[] = $name;
             }
         }
     }

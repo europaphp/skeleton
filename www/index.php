@@ -2,8 +2,7 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$container = new Europa\Di\Container;
-$container->configure(new Europa\App\AppConfiguration);
+$container = new Europaphp\Main\Di\Container;
 $container('loader')->register();
 $container('modules')
     ->add(new Europaphp\Help)

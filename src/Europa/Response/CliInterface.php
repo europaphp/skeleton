@@ -2,7 +2,7 @@
 
 namespace Europa\Response;
 
-interface CliInterface extends ResponseInterface
+interface CliInterface
 {
-    
+    const OK = 0;
 }

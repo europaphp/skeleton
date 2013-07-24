@@ -4,7 +4,7 @@ namespace Europa\Fs;
 
 interface LocatorAwareInterface
 {
-    public function setLocator(LocatorInterface $locator);
-
     public function getLocator();
+
+    public function setLocator(callable $locator);
 }

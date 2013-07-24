@@ -6,11 +6,11 @@ use Europa\Request\Uri;
 class Http extends RequestAbstract implements HttpInterface
 {
     private $headers = array();
-    
+
     private $uri;
-    
+
     private $ip;
-    
+
     public function __construct()
     {
         $this->initDefaultUri();
@@ -19,18 +19,18 @@ class Http extends RequestAbstract implements HttpInterface
         $this->initDefaultHeaders();
         $this->initDefaultIp();
     }
-    
+
     public function __toString()
     {
-        return strtoupper($this->getMethod()) . ' ' . $this->getUri()->getRequestPart() . $this->getUri()->getQueryPart();
+        return strtoupper($this->getMethod()) . ' ' . $this->getUri()->getRequestPart();
     }
-    
+
     public function setHeader($name, $value)
     {
         $this->headers[$name] = $value;
         return $this;
     }
-    
+
     public function getHeader($name)
     {
         if ($this->hasHeader($name)) {
@@ -38,12 +38,12 @@ class Http extends RequestAbstract implements HttpInterface
         }
         return null;
     }
-    
+
     public function hasHeader($name)
     {
         return isset($this->headers[$name]);
     }
-    
+
     public function removeHeader($name)
     {
         if ($this->hasHeader($name)) {
@@ -51,29 +51,29 @@ class Http extends RequestAbstract implements HttpInterface
         }
         return $this;
     }
-    
+
     public function setHeaders(array $headers)
     {
         $this->headers = $headers;
         return $this;
     }
-    
+
     public function getHeaders()
     {
         return $this->headers;
     }
-    
+
     public function removeHeaders()
     {
         $this->headers = array();
         return $this;
     }
-    
+
     public function accepts($types, $max = null)
     {
         $accepts = $this->getAcceptedContentTypes();
         $max     = $max ? $max : count($accepts);
-        
+
         foreach ((array) $types as $value) {
             $position = array_search($value, $accepts);
 
@@ -81,15 +81,15 @@ class Http extends RequestAbstract implements HttpInterface
                 return $value;
             }
         }
-        
+
         return false;
     }
-    
+
     public function setAcceptedContentTypes(array $types)
     {
         return $this->setHeader('Accept', implode(',', $types));
     }
-    
+
     public function getAcceptedContentTypes()
     {
         $accept = $this->getHeader('Accept');
@@ -97,45 +97,45 @@ class Http extends RequestAbstract implements HttpInterface
         array_walk($accept, 'trim');
         return $accept;
     }
-    
+
     public function removeAcceptedContentTypes()
     {
         return $this->removeHeader('Accept');
     }
-    
+
     public function setUri($uri)
     {
         $this->uri = new Uri($uri);
         return $this;
     }
-    
+
     public function getUri()
     {
         return $this->uri;
     }
-    
+
     public function setIp($ip)
     {
         $this->ip = $ip;
         return $this;
     }
-    
+
     public function getIp()
     {
         return $this->ip;
     }
-    
+
     public function isXmlHttp()
     {
         return isset($_SERVER['HTTP_X_REQUESTED_WITH'])
             && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
-    
+
     private function initDefaultUri()
     {
         return $this->setUri(Uri::detect());
     }
-    
+
     private function initDefaultParams()
     {
         if ($input = file_get_contents('php://input')) {
@@ -149,11 +149,11 @@ class Http extends RequestAbstract implements HttpInterface
 
         return $this;
     }
-    
+
     private function initDefaultMethod()
     {
         $method = static::GET;
-        
+
         if (isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
             $method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
         } elseif (isset($_SERVER['REQUEST_METHOD'])) {
@@ -164,7 +164,7 @@ class Http extends RequestAbstract implements HttpInterface
 
         return $this;
     }
-    
+
     private function initDefaultHeaders()
     {
         foreach ($_SERVER as $name => $value) {
@@ -180,7 +180,7 @@ class Http extends RequestAbstract implements HttpInterface
 
         return $this;
     }
-    
+
     private function initDefaultIp()
     {
         $ip = null;
