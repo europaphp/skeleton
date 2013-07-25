@@ -4,5 +4,5 @@ namespace Europa\Module\Exception;
 
 class BootstrapperNotCallable extends \Europa\Exception\Exception
 {
-  public $message = 'The module :name\'s bootstrapper is not callable.';
+  public $message = 'The bootstrapper for ":name" is not callable.';
 }

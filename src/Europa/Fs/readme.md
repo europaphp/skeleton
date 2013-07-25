@@ -38,10 +38,8 @@ You can also manually load class files with it:
 If you want to find classes in a directory other than the Europa install path, you must use a locator  that contains a list of paths that you want to use.
 
     $loader->setLocator(new Europa\Fs\Locator);
-    $loader->getLocator()->addPaths([
-        '/path/to/one/dir',
-        '/path/to/another/dir'
-    ]);
+    $loader->getLocator()->setRoot('/my/root/path');
+    $loader->getLocator()->addPath('my/relative/path', 'suffix');
 
 If you add a locator, it will look in the defined paths before looking in the default install path.
 
@@ -64,16 +62,16 @@ Locates files based on a given base path and extension (or suffix). Take the fol
 The following code could be applied:
 
     <?php
-    
+
     use Europa\Fs\Locator;
-    
+
     $locator = new Locator;
     $locator->addPath('/some/path1', 'ini');
     $locator->addPath('/some/path2', 'ini');
-    
+
     // /some/path1/file1.ini
     $locator('sub/file1');
-    
+
     // false
     $locator('sub/file2');
 

@@ -2,10 +2,7 @@
 
 namespace Europa\Di\Exception;
 
-class ContainerAlreadyRegistered extends \RuntimeException
+class ContainerAlreadyRegistered extends \Europa\Exception\Exception
 {
-    public function __construct($instanceName)
-    {
-        parent::__construct(sprintf('The container "%s" cannot overwrite an existing container that has been saved with the same name.', $instanceName));
-    }
+  public $message = 'The container ":name" cannot overwrite an existing container that has been saved with the same name.';
 }

@@ -13,6 +13,11 @@ use ReflectionFunction;
         return $this->name;
     }
 
+    public function __invoke()
+    {
+        return $this->invokeArgs(func_get_args());
+    }
+
     public function invokeArgs(array $args = array())
     {
         if (func_num_args() === 2 && $this->getNumberOfParameters() > 0) {

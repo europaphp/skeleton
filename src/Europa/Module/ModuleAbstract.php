@@ -22,7 +22,9 @@ abstract class ModuleAbstract implements ModuleInterface, RouteAwareInterface, V
 
     protected $routes = [];
 
-    protected $viewPaths = ['views'];
+    protected $viewPaths = [
+        ['views', 'php']
+    ];
 
     public function __construct($config = [])
     {

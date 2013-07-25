@@ -21,7 +21,5 @@ class RouterArray
                 return $response;
             }
         }
-
-        throw new Exception\ControllerNotFound('A route was not matched by the supplied routers.');
     }
 }

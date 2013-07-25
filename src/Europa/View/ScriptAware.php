@@ -24,7 +24,7 @@ trait ScriptAware
     public function getLocatedScript()
     {
         if ($locator = $this->getLocator()) {
-            return $locator->locate($this->script);
+            return $locator($this->script);
         } elseif (is_file($this->script)) {
             return $this->script;
         }

@@ -6,14 +6,14 @@ use Europa\Reflection\MethodReflector;
 class ClassReflector extends \ReflectionClass implements ReflectorInterface
 {
     private $docString;
-    
+
     public function is($type)
     {
         return $this->getName() === $type
             || $this->isSubclassOf($type)
             || in_array($type, $this->getTraitNames());
     }
-    
+
     public function isAny(array $types)
     {
         foreach ($types as $type) {
@@ -21,9 +21,10 @@ class ClassReflector extends \ReflectionClass implements ReflectorInterface
                 return true;
             }
         }
+
         return false;
     }
-    
+
     public function isAll(array $types)
     {
         foreach ($types as $type) {
@@ -33,38 +34,44 @@ class ClassReflector extends \ReflectionClass implements ReflectorInterface
         }
         return true;
     }
-    
+
     public function getTree()
     {
         $tree      = [];
         $reflector = $this;
+
         while ($reflector) {
             $tree[]    = $reflector;
             $reflector = $reflector->getParentClass();
         }
+
         return array_reverse($tree);
     }
-    
+
     public function getTreeNames()
     {
         $tree = [];
+
         foreach ($this->getTree() as $parent) {
             $tree[] = $parent->getName();
         }
+
         return $tree;
     }
-    
+
     public function getMethod($method)
     {
         return new MethodReflector($this->getName(), $method);
     }
-    
+
     public function getMethods($filter = -1)
     {
         $methods = array();
+
         foreach (parent::getMethods($filter) as $method) {
             $methods[] = $this->getMethod($method->getName());
         }
+
         return $methods;
     }
 
@@ -88,6 +95,7 @@ class ClassReflector extends \ReflectionClass implements ReflectorInterface
 
         // go through each parent class
         $class = $this->getParentClass();
+
         while ($class) {
             if ($docString = $class->getDocComment()) {
                 $this->docString = $docString;
@@ -103,15 +111,16 @@ class ClassReflector extends \ReflectionClass implements ReflectorInterface
                 break;
             }
         }
-        
+
         return $this->docString;
     }
-    
+
     public function newInstanceArgs(array $args = null)
     {
         if ($this->hasMethod('__construct')) {
             return parent::newInstanceArgs($this->getMethod('__construct')->mergeNamedArgs($args));
         }
+
         return $this->newInstance();
     }
 }

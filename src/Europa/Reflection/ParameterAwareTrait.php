@@ -1,7 +1,6 @@
 <?php
 
 namespace Europa\Reflection;
-use Europa\Exception\Exception;
 
 trait ParameterAwareTrait
 {
@@ -28,7 +27,10 @@ trait ParameterAwareTrait
             } elseif ($param->isOptional()) {
                 $merged[$pos] = $param->getDefaultValue();
             } else {
-                Exception::toss('The required parameter "%s" for "%s()" was not specified.', $param->getName(), $this->__toString());
+                throw new Exception\InvalidParameter([
+                    'name' => $param->getName(),
+                    'function' => $this->__toString()
+                ]);
             }
         }
 

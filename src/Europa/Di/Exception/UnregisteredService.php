@@ -1,18 +1,8 @@
 <?php
 
 namespace Europa\Di\Exception;
-use Europa\Di\ContainerInterface;
 
-class UnregisteredService extends \RuntimeException
+class UnregisteredService extends \Europa\Exception\Exception
 {
-    public function __construct($serviceName, ContainerInterface $container)
-    {
-        if ($name = $container->name()) {
-            $containerMessage = ' in the container "' . $name . '".';
-        } else {
-            $containerMessage = '. Additionally the container it was requested in was not registered.';
-        }
-
-        parent::__construct(sprintf('The service "%s" is not registered%s', $serviceName, $containerMessage));
-    }
+  public $message = 'The service ":name" was not registered in ":container".';
 }

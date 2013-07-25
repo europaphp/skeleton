@@ -21,11 +21,11 @@ class Php implements ContainerAwareInterface, ScriptAwareInterface
     public function __invoke(array $context = [])
     {
         if (!$this->getScript()) {
-            throw new Exception\UnspecifiedViewScript('No view script was specified.');
+            throw new Exception\UnspecifiedViewScript;
         }
 
         if (!$script = $this->getLocatedScript()) {
-            throw new Exception\InvalidViewScript(sprintf('The view script "%s" does not exist.', $this->getScript()));
+            throw new Exception\InvalidViewScript(['view' => $this->getScript()]);
         }
 
         // apply context
@@ -55,7 +55,7 @@ class Php implements ContainerAwareInterface, ScriptAwareInterface
             $this->child = $rendered;
 
             // render and return the output of the parent
-            return $this->render($context);
+            return $this($context);
         }
 
         return $rendered;
@@ -101,22 +101,20 @@ class Php implements ContainerAwareInterface, ScriptAwareInterface
     public function helper($name)
     {
         if (!$injector = $this->getContainer()) {
-            throw new Exception\NoContainer(sprintf(
-                'Cannot get helper "%s" from view "%s" because no container was set.',
-                $name,
-                $this->getScript()
-            ));
+            throw new Exception\NoContainer([
+                'name' => $name,
+                'view' => $this->getScript()
+            ]);
         }
 
         try {
-            return $injector->get($name);
+            return $injector($name);
         } catch (\Exception $e) {
-            throw new Exception\CannotGetHelper(sprintf(
-                'Cannot get helper "%s" from view "%s" because: %s.',
-                $name,
-                $this->getScript(),
-                $e->getMessage()
-            ));
+            throw new Exception\CannotGetHelper([
+                'name' => $name,
+                'view' => $this->getScript(),
+                'message' => $e->getMessage()
+            ]);
         }
     }
 
@@ -127,7 +125,7 @@ class Php implements ContainerAwareInterface, ScriptAwareInterface
 
         // child views cannot extend themselves
         if ($parent === $child) {
-            throw new Exception\CircularExtension('Child view cannot extend itself.');
+            throw new Exception\CircularExtension(['child' => $child]);
         }
 
         // if the child has already extended a parent, don't do anything

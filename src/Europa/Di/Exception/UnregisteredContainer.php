@@ -2,10 +2,7 @@
 
 namespace Europa\Di\Exception;
 
-class UnregisteredContainer extends \RuntimeException
+class UnregisteredContainer extends \Europa\Exception\Exception
 {
-    public function __construct($instanceName)
-    {
-        parent::__construct(sprintf('The container "%s" is not registered.', $instanceName));
-    }
+  public $message = 'The container ":name" is not registered.';
 }

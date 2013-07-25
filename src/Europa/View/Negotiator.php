@@ -26,10 +26,7 @@ class Negotiator
         }
 
         if (!isset($renderer)) {
-            throw new Exception\NotNegotiable(sprintf(
-                'Unable to negotiate a renderer for the request "%s".',
-                $request
-            ));
+            throw new Exception\NotNegotiable(['request' => $request]);
         }
 
         return $renderer;

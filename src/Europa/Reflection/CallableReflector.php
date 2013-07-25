@@ -9,18 +9,18 @@ class CallableReflector implements ReflectorInterface
 
     private $reflector;
 
-    public function __construct(callable $callable)
+    public function __construct($callable, array $injectable = [])
     {
         if ($callable instanceof \Closure || (is_string($callable) && function_exists($callable))) {
-            $this->reflector = new FunctionReflector($callable);
+            $this->initFunction($callable);
         } elseif (is_array($callable)) {
-            $this->instance  = is_object($callable[0]) ? $callable[0] : null;
-            $this->reflector = new MethodReflector($callable[0], $callable[1]);
-        } elseif (is_object($callable)) {
-            $this->instance  = $callable;
-            $this->reflector = new MethodReflector($callable, '__invoke');
+            $this->initArray($callable);
+        } elseif (is_object($callable) && method_exists($callable, '__invoke')) {
+            $this->initInvokable($callable);
+        } elseif (strpos($callable, '->')) {
+            $this->initInstance($callable, $injectable);
         } else {
-            throw new Exception\NotReflectable('The callable could not be reflected.');
+            throw new Exception\InvalidCallable;
         }
     }
 
@@ -31,16 +31,31 @@ class CallableReflector implements ReflectorInterface
 
     public function __invoke()
     {
-        if ($this->instance) {
-            return $this->reflector->invokeArgs($this->instance, func_get_args());
-        }
-
-        return $this->reflector->invokeArgs(func_get_args());
+        return $this->invokeArgs(func_get_args());
     }
 
     public function __toString()
     {
         return $this->reflector->__toString();
+    }
+
+    public function invoke()
+    {
+        return $this->invokeArgs(func_get_args());
+    }
+
+    public function invokeArgs(array $args = [])
+    {
+        if ($this->instance) {
+            return $this->reflector->invokeArgs($this->instance, $args);
+        }
+
+        return $this->reflector->invokeArgs($args);
+    }
+
+    public function getInstance()
+    {
+        return $this->instance;
     }
 
     public function getReflector()
@@ -53,12 +68,28 @@ class CallableReflector implements ReflectorInterface
         return $this->reflector->getDocBlock();
     }
 
-    public function getClosure()
+    private function initFunction($callable)
     {
-        if ($this->reflector instanceof MethodReflector) {
-            return $this->reflector->getClosure($this->instance);
-        }
+        $this->reflector = new FunctionReflector($callable);
+    }
 
-        return $this->reflector->getClosure();
+    private function initArray($callable)
+    {
+        $this->instance = is_object($callable[0]) ? $callable[0] : null;
+        $this->reflector = new MethodReflector($callable[0], $callable[1]);
+    }
+
+    private function initInvokable($callable)
+    {
+        $this->instance = $callable;
+        $this->reflector = new MethodReflector($callable, '__invoke');
+    }
+
+    private function initInstance($callable, array $injectable)
+    {
+        $parts = explode('->', $callable, 2);
+        $class = new ClassReflector($parts[0]);
+        $this->instance = $class->newInstanceArgs($injectable);
+        $this->reflector = new MethodReflector($this->instance, $this->resolveMethod($parts[1]));
     }
 }

@@ -35,7 +35,10 @@ class Container implements ContainerInterface
         }
 
         if (isset($this->loading[$name])) {
-            throw new Exception\CircularReferenceException($name, array_keys($this->loading));
+            throw new Exception\CircularReference([
+                'name' => $name,
+                'references' => implode(' > ', array_keys($this->loading))
+            ]);
         }
 
         $this->loading[$name] = true;
@@ -43,7 +46,10 @@ class Container implements ContainerInterface
         if (isset($this->services[$name])) {
             $service = $this->services[$name];
         } else {
-            throw new Exception\UnregisteredService($name, $this);
+            throw new Exception\UnregisteredService([
+                'name' => $name,
+                'container' => get_class($this)
+            ]);
         }
 
         $service = $service($this, $params);
@@ -51,12 +57,11 @@ class Container implements ContainerInterface
         if (isset($this->types[$name])) {
             foreach ($this->types[$name] as $type) {
                 if (!$service instanceof $type) {
-                    Exception::toss(
-                        'The service "%s" is required to be an instance of "%s". Instance of "%s" supplied.',
-                        $name,
-                        $type,
-                        get_class($service)
-                    );
+                    throw new Exception\InvalidService([
+                        'name' => $name,
+                        'type' => $type,
+                        'class' => get_class($service)
+                    ]);
                 }
             }
         }
@@ -92,7 +97,7 @@ class Container implements ContainerInterface
     public function save($as)
     {
         if (isset(self::$instances[$as])) {
-            throw new Exception\ContainerAlreadyRegistered($as);
+            throw new Exception\ContainerAlreadyRegistered(['name' => $as]);
         }
 
         self::$instances[$as] = $this;
@@ -158,6 +163,6 @@ class Container implements ContainerInterface
             return self::$instances[$name];
         }
 
-        throw new Exception\UnregisteredContainer($name);
+        throw new Exception\UnregisteredContainer(['name' => $name]);
     }
 }

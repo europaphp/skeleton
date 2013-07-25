@@ -2,10 +2,7 @@
 
 namespace Europa\Di\Exception;
 
-class CircularReference extends \RuntimeException
+class CircularReference extends \Europa\Exception\Exception
 {
-    public function __construct($name, array $references)
-    {
-        parent::__construct(sprintf('The service "%s" is being circularly referenced by: "%s".', $name, implode(' > ', $references)));
-    }
+  public $message = 'The service ":name" is being circularly referenced by ":references".';
 }

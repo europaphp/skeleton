@@ -18,8 +18,8 @@ class Locator
             return $this->cache[$path];
         }
 
-        foreach ($this->paths as $path) {
-            if (is_file($real = realpath($path . '/' . $path))) {
+        foreach ($this->paths as $parts) {
+            if ($real = realpath($parts[0] . '/' . $path . ($parts[1] ? '.' . $parts[1] : ''))) {
                 return $this->cache[$path] = $real;
             }
         }
@@ -33,31 +33,33 @@ class Locator
     public function setRoot($root)
     {
         if (!$this->root = realpath($root)) {
-            throw new Exception\InvalidRootPath(sprintf('The root path "%s" does not exist.', $root));
+            throw new Exception\InvalidRootPath(['path' => $root]);
         }
 
         return $this;
     }
 
-    public function addPath($path, $check = true)
+    public function addPath($path, $suffix = null)
     {
         $path = $this->root ? $this->root . '/' . $path : $path;
 
         if ($real = realpath($path)) {
-            $this->paths[] = $real;
+            $this->paths[] = [$real, $suffix];
         } elseif ($check) {
-            throw new Exception\InvalidPath(sprintf('The path "%s" does not exist.', $path));
+            throw new Exception\InvalidPath(['path' => $path]);
         }
 
         return $this;
     }
 
-    public function addPaths($paths, $check = true)
+    public function addPaths(array $paths)
     {
-        if (is_array($paths) || is_object($paths)) {
-            foreach ($paths as $path) {
-                $this->addPath($path, $check);
+        foreach ($paths as $parts) {
+            if (!is_array($parts)) {
+                $parts = [$parts, null];
             }
+
+            $this->addPath($parts[0], $parts[1]);
         }
 
         return $this;
