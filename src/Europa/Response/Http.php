@@ -16,7 +16,7 @@ class Http extends ResponseAbstract implements HttpInterface
     {
         $body = $this->getBody();
 
-        http_response_code($this->status);
+        http_response_code($this->getStatus());
 
         $this->headers['Content-Length'] = strlen($body);
 

@@ -4,11 +4,15 @@ namespace Europa\Response;
 
 interface ResponseInterface
 {
-    public function setBody($body);
+  public function __invoke();
 
-    public function getBody();
+  public function __toString();
 
-    public function setStatus($status);
+  public function setBody($body);
 
-    public function getStatus();
+  public function getBody();
+
+  public function setStatus($status);
+
+  public function getStatus();
 }

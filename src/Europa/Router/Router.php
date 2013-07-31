@@ -1,7 +1,6 @@
 <?php
 
 namespace Europa\Router;
-use Europa\Di;
 use Europa\Filter;
 use Europa\Reflection;
 use Europa\Request;
@@ -10,27 +9,32 @@ use Europa\View;
 
 class Router implements RouterInterface
 {
-    use Di\ContainerAware;
-
-    private $route;
-
-    private $routes = [];
+    private $caller;
 
     private $fallback;
 
     private $matcher;
 
-    private $negotiator;
+    private $resolver;
 
-    private $response;
+    private $responseNegotiator;
+
+    private $route;
+
+    private $routes = [];
+
+    private $viewNegotiator;
 
     private $viewScriptFilter;
 
     public function __construct()
     {
+        $this->caller = new Caller;
         $this->matcher = new Matcher\Regex;
-        $this->negotiator = new View\Negotiator;
+        $this->resolver = new Resolver;
         $this->response = Response\ResponseAbstract::detect();
+        $this->responseNegotiator = new ResponseNegotiator;
+        $this->viewNegotiator = new ViewNegotiator;
         $this->viewScriptFilter = [$this, 'defaultViewScriptFilter'];
     }
 
@@ -42,21 +46,27 @@ class Router implements RouterInterface
             return;
         }
 
-        $controller = new Reflection\CallableReflector($controller);
-        $params = $this->callController($controller, $request) ?: [];
-        $view = call_user_func($this->negotiator, $request);
-
-        if ($view instanceof View\ScriptAwareInterface && $instance = $controller->getInstance()) {
-            $view->setScript(
-                call_user_func(
-                    $this->viewScriptFilter,
-                    get_class($instance),
-                    $controller->getReflector()->getName()
-                )
-            );
+        if (!$controller = call_user_func($this->resolver, $controller, $request)) {
+            throw new Exception\RouteNotCallable(['route' => $this->route]);
         }
 
-        return $this->response->setBody($view($params));
+        $args = call_user_func($this->caller, $controller, $request);
+        $view = call_user_func($this->viewNegotiator, $request);
+        $resp = call_user_func($this->responseNegotiator, $request);
+        $this->applyViewScriptIfApplicable($view, $controller);
+
+        return $resp->setBody($view($args));
+    }
+
+    public function getCaller()
+    {
+        return $this->caller;
+    }
+
+    public function setCaller(callable $caller)
+    {
+        $this->caller = $caller;
+        return $this;
     }
 
     public function getMatcher()
@@ -70,25 +80,36 @@ class Router implements RouterInterface
         return $this;
     }
 
-    public function getNegotiator()
+    public function getResolver()
     {
-        return $this->negotiator;
+        return $this->resolver;
     }
 
-    public function setNegotiator(callable $negotiator)
+    public function setResolver(callable $resolver)
     {
-        $this->negotiator = $negotiator;
+        $this->resolver = $resolver;
         return $this;
     }
 
-    public function getResponse()
+    public function getResponseNegotiator()
     {
-        return $this->response;
+        return $this->responseNegotiator;
     }
 
-    public function setResponse(ResponseInterface $response)
+    public function setResponseNegotiator(callable $negotiator)
     {
-        $this->response = $response;
+        $this->responseNegotiator = $negotiator;
+        return $this;
+    }
+
+    public function getViewNegotiator()
+    {
+        return $this->viewNegotiator;
+    }
+
+    public function setViewNegotiator(callable $negotiator)
+    {
+        $this->viewNegotiator = $negotiator;
         return $this;
     }
 
@@ -128,33 +149,6 @@ class Router implements RouterInterface
         return $this->fallback ?: false;
     }
 
-    private function callController(Reflection\CallableReflector $controller, Request\RequestInterface $request)
-    {
-        $parameters = [];
-        $container = $this->container;
-        $instance = $controller->getInstance();
-
-        // If the controller is an instance, we have already injected
-        // dependencies into it's constructor. To give the user the most from
-        // the router, we now inject named parameters into the method being
-        // called.
-        //
-        // If the controller is just a callable, we simply inject dependencies
-        // matching the parameter names into the callable since this is the
-        // only chance it will have access to dependencies in the container.
-        foreach ($controller->getReflector()->getParameters() as $parameter) {
-            if ($instance) {
-                if ($request->hasParam($parameter->getName())) {
-                    $parameters[] = $request->getParam($parameter->getName());
-                }
-            } else {
-                $parameters[] = $container($parameter->getName());
-            }
-        }
-
-        return $controller->invokeArgs($parameters);
-    }
-
     private function defaultViewScriptFilter($class, $method = null)
     {
         $path = str_replace('\\', DIRECTORY_SEPARATOR, $class);
@@ -164,5 +158,20 @@ class Router implements RouterInterface
         }
 
         return $path;
+    }
+
+    private function applyViewScriptIfApplicable(callable $view, callable $controller)
+    {
+        $controller = new Reflection\CallableReflector($controller);
+
+        if ($view instanceof View\ScriptAwareInterface && $instance = $controller->getInstance()) {
+            $view->setScript(
+                call_user_func(
+                    $this->viewScriptFilter,
+                    get_class($instance),
+                    $controller->getReflector()->getName()
+                )
+            );
+        }
     }
 }

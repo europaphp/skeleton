@@ -14,12 +14,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/europaphp/module-help.git",
-                "reference": "8b02b49875fa88f959a69f86aa120f446015f502"
+                "reference": "7356cddc5125a2913bef3a82d66a1343aa10813b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-help/zipball/8b02b49875fa88f959a69f86aa120f446015f502",
-                "reference": "8b02b49875fa88f959a69f86aa120f446015f502",
+                "url": "https://api.github.com/repos/europaphp/module-help/zipball/7356cddc5125a2913bef3a82d66a1343aa10813b",
+                "reference": "7356cddc5125a2913bef3a82d66a1343aa10813b",
                 "shasum": ""
             },
             "require": {
@@ -49,7 +49,7 @@
                 "help",
                 "man"
             ],
-            "time": "2013-03-09 02:08:13"
+            "time": "2013-06-05 07:17:25"
         },
         {
             "name": "europaphp/module-main",
@@ -57,12 +57,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/europaphp/module-main.git",
-                "reference": "e5fc52b52cda01f0318009451f17260c041cf559"
+                "reference": "aa66346de1359e8d2ac31fc5097b6cba9ded7ca9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-main/zipball/e5fc52b52cda01f0318009451f17260c041cf559",
-                "reference": "e5fc52b52cda01f0318009451f17260c041cf559",
+                "url": "https://api.github.com/repos/europaphp/module-main/zipball/aa66346de1359e8d2ac31fc5097b6cba9ded7ca9",
+                "reference": "aa66346de1359e8d2ac31fc5097b6cba9ded7ca9",
                 "shasum": ""
             },
             "type": "library",
@@ -88,7 +88,7 @@
                 "default",
                 "main"
             ],
-            "time": "2013-03-09 02:46:21"
+            "time": "2013-06-05 07:17:49"
         },
         {
             "name": "europaphp/module-tests",
@@ -139,12 +139,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/treshugart/Testes.git",
-                "reference": "7ab5d2a2456a0db4a7345ce55b9be05c007ae978"
+                "reference": "906f06d8225aa25033b44b5efb1e031a007e9052"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/treshugart/Testes/zipball/7ab5d2a2456a0db4a7345ce55b9be05c007ae978",
-                "reference": "7ab5d2a2456a0db4a7345ce55b9be05c007ae978",
+                "url": "https://api.github.com/repos/treshugart/Testes/zipball/906f06d8225aa25033b44b5efb1e031a007e9052",
+                "reference": "906f06d8225aa25033b44b5efb1e031a007e9052",
                 "shasum": ""
             },
             "require": {
@@ -183,7 +183,7 @@
                 "testing",
                 "unit"
             ],
-            "time": "2013-05-22 00:15:25"
+            "time": "2013-07-29 00:50:28"
         }
     ],
     "aliases": [

@@ -1,17 +1,15 @@
 <?php
 
 namespace Europa\Di;
-use Europa\Iterator\CallableIterator;
-use Europa\Exception\Exception;
-use Traversable;
+use Europa\Iterator;
 
 class ContainerArray
 {
     private $containers;
 
-    public function __construct(Traversable $containers)
+    public function __construct(\Traversable $containers)
     {
-        $this->containers = new CallableIterator($containers);
+        $this->containers = new Iterator\CallableIterator($containers);
     }
 
     public function __invoke($name)
@@ -19,7 +17,7 @@ class ContainerArray
         foreach ($this->containers as $container) {
             try {
                 return $container($name);
-            } catch(Exception $e) {
+            } catch(\Exception $e) {
 
             }
         }

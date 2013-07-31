@@ -9,7 +9,7 @@ class CallableReflector implements ReflectorInterface
 
     private $reflector;
 
-    public function __construct($callable, array $injectable = [])
+    public function __construct($callable)
     {
         if ($callable instanceof \Closure || (is_string($callable) && function_exists($callable))) {
             $this->initFunction($callable);
@@ -17,8 +17,6 @@ class CallableReflector implements ReflectorInterface
             $this->initArray($callable);
         } elseif (is_object($callable) && method_exists($callable, '__invoke')) {
             $this->initInvokable($callable);
-        } elseif (strpos($callable, '->')) {
-            $this->initInstance($callable, $injectable);
         } else {
             throw new Exception\InvalidCallable;
         }
@@ -83,13 +81,5 @@ class CallableReflector implements ReflectorInterface
     {
         $this->instance = $callable;
         $this->reflector = new MethodReflector($callable, '__invoke');
-    }
-
-    private function initInstance($callable, array $injectable)
-    {
-        $parts = explode('->', $callable, 2);
-        $class = new ClassReflector($parts[0]);
-        $this->instance = $class->newInstanceArgs($injectable);
-        $this->reflector = new MethodReflector($this->instance, $this->resolveMethod($parts[1]));
     }
 }

@@ -22,7 +22,7 @@ class Http extends RequestAbstract implements HttpInterface
 
     public function __toString()
     {
-        return strtoupper($this->getMethod()) . ' ' . $this->getUri()->getRequestPart();
+        return strtoupper($this->getMethod()) . ' ' . $this->getUri()->getRequest();
     }
 
     public function setHeader($name, $value)

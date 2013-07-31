@@ -9,6 +9,11 @@ abstract class ResponseAbstract implements ResponseInterface
 
     private $status;
 
+    public function __toString()
+    {
+        return $this->getBody();
+    }
+
     public function setBody($body)
     {
         $this->body = $body;

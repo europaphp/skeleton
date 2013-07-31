@@ -1,17 +1,15 @@
 <?php
 
 namespace Europa\App;
-use Europa\Event\EmitterInterface;
-use Europa\Module\ManagerInterface;
-use Europa\Request\RequestInterface;
+use Europa\Event;
+use Europa\Module;
+use Europa\Request;
 
 class Runner
 {
     const EVENT_ROUTE = 'route';
 
     const EVENT_SEND = 'send';
-
-    const EVENT_DONE = 'done';
 
     private $events;
 
@@ -22,9 +20,9 @@ class Runner
     private $router;
 
     public function __construct(
-        EmitterInterface $events,
-        ManagerInterface $modules,
-        RequestInterface $request,
+        Event\EmitterInterface $events,
+        Module\ManagerInterface $modules,
+        Request\RequestInterface $request,
         callable $router
     ) {
         $this->events  = $events;
@@ -45,6 +43,7 @@ class Runner
         }
 
         $this->events->emit(self::EVENT_SEND, $this->modules, $this->request, $response);
-        $response();
+
+        return $response;
     }
 }

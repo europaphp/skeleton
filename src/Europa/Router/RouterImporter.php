@@ -2,13 +2,10 @@
 
 namespace Europa\Router;
 use Europa\Config;
-use Europa\Di;
 use Europa\Reflection;
 
-class RouterImporter implements Di\ContainerAwareInterface
+class RouterImporter
 {
-    use Di\ContainerAware;
-
     public function __invoke(RouterInterface $router, $routes)
     {
         foreach (new Config\Config($routes) as $route) {

@@ -4,6 +4,8 @@ namespace Europa\Fs;
 
 class Locator
 {
+    private $check = false;
+
     private $cache = [];
 
     private $paths = [];
@@ -45,7 +47,7 @@ class Locator
 
         if ($real = realpath($path)) {
             $this->paths[] = [$real, $suffix];
-        } elseif ($check) {
+        } elseif ($this->check) {
             throw new Exception\InvalidPath(['path' => $path]);
         }
 
@@ -68,5 +70,16 @@ class Locator
     public function getPaths()
     {
         return $this->paths;
+    }
+
+    public function getCheck()
+    {
+        return $this->check;
+    }
+
+    public function setCheck($switch = true)
+    {
+        $this->check = $check ? true : false;
+        return $this;
     }
 }

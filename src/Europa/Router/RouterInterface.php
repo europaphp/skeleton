@@ -3,7 +3,7 @@
 namespace Europa\Router;
 use Europa\Di;
 
-interface RouterInterface extends Di\ContainerAwareInterface
+interface RouterInterface
 {
     public function when($pattern, $controller);
 

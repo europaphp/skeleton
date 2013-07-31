@@ -28,33 +28,18 @@ class Php implements ContainerAwareInterface, ScriptAwareInterface
             throw new Exception\InvalidViewScript(['view' => $this->getScript()]);
         }
 
-        // apply context
         $this->context = $context;
 
-        // capture the output
         ob_start();
-
-        // render
         include $script;
-
-        // get output
         $rendered = ob_get_clean();
 
-        // handle view extensions
         if ($this->parentScript) {
-            // set the script so the parent has access to what child has been rendered
             $this->childScript = $this->getScript();
-
-            // then set the parent script to the current script so the current instance is shared
             $this->setScript($this->parentScript);
-
-            // reset the parent script to avoid recursion
             $this->parentScript = null;
-
-            // set the rendered child so the parent has access to the rendered child
             $this->child = $rendered;
 
-            // render and return the output of the parent
             return $this($context);
         }
 
@@ -74,7 +59,7 @@ class Php implements ContainerAwareInterface, ScriptAwareInterface
         $this->childScript  = null;
 
         // capture rendered script
-        $render = $this->render($context);
+        $render = $this->__invoke($context);
 
         // reapply old state
         $this->setScript($oldScript);
@@ -120,23 +105,17 @@ class Php implements ContainerAwareInterface, ScriptAwareInterface
 
     public function extend($parent)
     {
-        // the child is the current script
         $child = $this->getScript();
 
-        // child views cannot extend themselves
         if ($parent === $child) {
             throw new Exception\CircularExtension(['child' => $child]);
         }
 
-        // if the child has already extended a parent, don't do anything
         if (in_array($child, $this->extendStack)) {
             return $this;
         }
 
-        // the extend stack makes sure that extend doesn't trigger recursion
         $this->extendStack[] = $child;
-
-        // set the parent
         $this->parentScript = $parent;
 
         return $this;

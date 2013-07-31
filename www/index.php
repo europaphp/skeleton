@@ -12,4 +12,6 @@ $container('modules')
     ]));
 
 $app = $container('app');
-$app();
+$res = $app();
+
+$res();
