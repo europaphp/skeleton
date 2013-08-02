@@ -6,6 +6,6 @@ php:
 before_script:
   - printf "\r" | pecl install yaml
   - composer selfupdate
-  - composer install --dev
+  - composer install
 
-script: php www/index.php test
+script: bin/eu test
