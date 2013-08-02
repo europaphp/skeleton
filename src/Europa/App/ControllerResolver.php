@@ -24,7 +24,9 @@ class ControllerResolver implements Di\ContainerAwareInterface
           $parts[1]
         ];
       } else {
-        return;
+        throw new Exception\InvalidController([
+          'controller' => print_r($controller, true)
+        ]);
       }
     }
 

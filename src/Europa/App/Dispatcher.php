@@ -46,12 +46,12 @@ class Dispatcher
     $this->moduleManager->bootstrap();
 
     if (!$controller = call_user_func($this->router, $this->request)) {
-      // throw new Exception\NoController;
+      throw new Exception\NoController([
+        'request' => $this->request
+      ]);
     }
 
-    if (!$controller = call_user_func($this->controllerResolver, $controller)) {
-      // throw new Exception\ControllerUnresolvable;
-    }
+    $controller = call_user_func($this->controllerResolver, $controller);
 
     call_user_func($this->viewFilter, $this->view, $controller);
 
