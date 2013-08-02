@@ -54,6 +54,7 @@ abstract class RequestAbstract implements IteratorAggregate, RequestInterface
         if (isset($this->params[$name])) {
             return $this->params[$name];
         }
+
         return $default;
     }
 
@@ -67,6 +68,7 @@ abstract class RequestAbstract implements IteratorAggregate, RequestInterface
         if (isset($this->params[$name])) {
             unset($this->params[$name]);
         }
+
         return $this;
     }
 
@@ -77,6 +79,7 @@ abstract class RequestAbstract implements IteratorAggregate, RequestInterface
                 $this->__set($name, $value);
             }
         }
+
         return $this;
     }
 
@@ -95,11 +98,13 @@ abstract class RequestAbstract implements IteratorAggregate, RequestInterface
     {
         $params  = array();
         $pattern = $delimiter . $pattern . $delimiter . $flags;
+
         foreach ($this->params as $name => $value) {
             if (preg_match($pattern, $name)) {
                 $params[$name] = $value;
             }
         }
+
         return $params;
     }
 
@@ -108,6 +113,7 @@ abstract class RequestAbstract implements IteratorAggregate, RequestInterface
         if (!$this->id) {
             $this->id = md5(uniqid(rand(), true));
         }
+
         return $this->id;
     }
 
@@ -124,15 +130,5 @@ abstract class RequestAbstract implements IteratorAggregate, RequestInterface
     public function unserialize($serialized)
     {
         return $this->setParams(unserialize($serialized));
-    }
-
-    public static function isCli()
-    {
-        return PHP_SAPI === 'cli';
-    }
-
-    public static function detect()
-    {
-        return self::isCli() ? new Cli : new Http;
     }
 }

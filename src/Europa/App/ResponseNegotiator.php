@@ -1,6 +1,6 @@
 <?php
 
-namespace Europa\Router;
+namespace Europa\App;
 use Europa\Request;
 use Europa\Response;
 

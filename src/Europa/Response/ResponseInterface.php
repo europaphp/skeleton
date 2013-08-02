@@ -4,9 +4,7 @@ namespace Europa\Response;
 
 interface ResponseInterface
 {
-  public function __invoke();
-
-  public function __toString();
+  public function send();
 
   public function setBody($body);
 

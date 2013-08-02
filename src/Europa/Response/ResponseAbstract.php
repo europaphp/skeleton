@@ -1,18 +1,12 @@
 <?php
 
 namespace Europa\Response;
-use Europa\Request;
 
 abstract class ResponseAbstract implements ResponseInterface
 {
     private $body;
 
     private $status;
-
-    public function __toString()
-    {
-        return $this->getBody();
-    }
 
     public function setBody($body)
     {
@@ -34,10 +28,5 @@ abstract class ResponseAbstract implements ResponseInterface
     public function getStatus()
     {
         return $this->status;
-    }
-
-    public static function detect()
-    {
-        return Request\RequestAbstract::isCli() ? new Cli : new Http;
     }
 }

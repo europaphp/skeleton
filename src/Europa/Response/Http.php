@@ -1,7 +1,6 @@
 <?php
 
 namespace Europa\Response;
-use Europa\Filter\CamelCaseSplitFilter;
 
 class Http extends ResponseAbstract implements HttpInterface
 {
@@ -12,11 +11,12 @@ class Http extends ResponseAbstract implements HttpInterface
         $this->setStatus(self::OK);
     }
 
-    public function __invoke()
+    public function send()
     {
         $body = $this->getBody();
+        $stat = $this->getStatus();
 
-        http_response_code($this->getStatus());
+        http_response_code($stat);
 
         $this->headers['Content-Length'] = strlen($body);
 
@@ -25,8 +25,7 @@ class Http extends ResponseAbstract implements HttpInterface
         }
 
         echo $body;
-
-        exit;
+        exit($stat === self::OK ? 0 : $stat);
     }
 
     public function setHeader($name, $value)
@@ -40,8 +39,6 @@ class Http extends ResponseAbstract implements HttpInterface
         if (isset($this->headers[$name])) {
             return $this->headers[$name];
         }
-
-        return null;
     }
 
     public function hasHeader($name)

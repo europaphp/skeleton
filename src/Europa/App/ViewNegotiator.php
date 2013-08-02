@@ -1,7 +1,9 @@
 <?php
 
-namespace Europa\Router;
+namespace Europa\App;
+use Europa\Reflection;
 use Europa\Request;
+use Europa\View;
 
 class ViewNegotiator
 {

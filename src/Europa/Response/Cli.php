@@ -9,7 +9,7 @@ class Cli extends ResponseAbstract implements CliInterface
         $this->setStatus(self::OK);
     }
 
-    public function __invoke()
+    public function send()
     {
         echo $this->getBody();
         exit($this->getStatus());

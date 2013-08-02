@@ -1,10 +1,11 @@
 <?php
 
 namespace Europa\Reflection;
-use Europa\Exception;
 
 class CallableReflector implements ReflectorInterface
 {
+    const POINTER = '->';
+
     private $instance;
 
     private $reflector;
@@ -17,8 +18,10 @@ class CallableReflector implements ReflectorInterface
             $this->initArray($callable);
         } elseif (is_object($callable) && method_exists($callable, '__invoke')) {
             $this->initInvokable($callable);
+        } elseif (is_string($callable) && strpos($callable, self::POINTER)) {
+            $this->initInstance($callable);
         } else {
-            throw new Exception\InvalidCallable;
+            throw new Exception\InvalidCallable(['type' => gettype($callable)]);
         }
     }
 
@@ -81,5 +84,11 @@ class CallableReflector implements ReflectorInterface
     {
         $this->instance = $callable;
         $this->reflector = new MethodReflector($callable, '__invoke');
+    }
+
+    private function initInstance($callable)
+    {
+        $parts = explode(self::POINTER, $callable);
+        $this->reflector = new MethodReflector($parts[0], $parts[1]);
     }
 }

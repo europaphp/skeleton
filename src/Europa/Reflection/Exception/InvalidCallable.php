@@ -1,8 +1,8 @@
 <?php
 
-namespace Europa\Router\Exception;
+namespace Europa\Reflection\Exception;
 
 class InvalidCallable extends \Europa\Exception\Exception
 {
-  public $message = 'The callable could not be reflected.';
+  public $message = 'A variable with the type of ":type" cannot be reflected.';
 }

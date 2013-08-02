@@ -1,15 +1,15 @@
 <?php
 
-namespace Europa\Router;
+namespace Europa\App;
 use Europa\Di;
 use Europa\Reflection;
 use Europa\Request;
 
-class Resolver
+class ControllerResolver implements Di\ContainerAwareInterface
 {
   use Di\ContainerAware;
 
-  public function __invoke($controller, Request\RequestInterface $request)
+  public function __invoke($controller)
   {
     if (!is_callable($controller)) {
       if (is_string($controller) && strpos($controller, '->')) {
