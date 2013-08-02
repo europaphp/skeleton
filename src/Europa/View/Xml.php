@@ -7,13 +7,13 @@ use Europa\Filter\ToStringFilter;
 class Xml
 {
   private $config = [
-    'declare'      => true,
-    'encoding'     => 'UTF-8',
-    'indent'       => true,
+    'declare' => true,
+    'encoding' => 'UTF-8',
+    'indent' => true,
     'numeric-key-name' => 'item',
-    'root-node'    => 'xml',
-    'spaces'       => 2,
-    'version'      => '1.0'
+    'root-node' => 'xml',
+    'spaces' => 2,
+    'version' => '1.0'
   ];
 
   private $toStringFilter;
