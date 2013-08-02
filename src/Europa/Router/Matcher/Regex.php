@@ -15,39 +15,39 @@ class Regex
 
   public function __construct()
   {
-  $this->delimiter = self::DELIMITER;
-  $this->flags = self::FLAGS;
+    $this->delimiter = self::DELIMITER;
+    $this->flags = self::FLAGS;
   }
 
   public function __invoke($pattern, Request\RequestInterface $request)
   {
-  if (preg_match($this->delimiter . '^' . $pattern . '$' . $this->delimiter . $this->flags, $request, $params)) {
-    array_shift($params);
-    return $params;
-  }
+    if (preg_match($this->delimiter . '^' . $pattern . '$' . $this->delimiter . $this->flags, $request, $params)) {
+      array_shift($params);
+      return $params;
+    }
 
-  return false;
+    return false;
   }
 
   public function getDelimiter()
   {
-  return $this->delimiter;
+    return $this->delimiter;
   }
 
   public function setDelimiter($delimiter)
   {
-  $this->delimiter = $delimiter;
-  return $this;
+    $this->delimiter = $delimiter;
+    return $this;
   }
 
   public function getFlags()
   {
-  return $this->flags;
+    return $this->flags;
   }
 
   public function setFlags($flags)
   {
-  $this->flags = $flags;
-  return $this;
+    $this->flags = $flags;
+    return $this;
   }
 }

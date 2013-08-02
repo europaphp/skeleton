@@ -101,6 +101,7 @@ class ClassReflector extends \ReflectionClass implements ReflectorInterface
         $this->docString = $docString;
         break;
       }
+
       $class = $class->getParentClass();
     }
 

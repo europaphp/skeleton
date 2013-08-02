@@ -86,9 +86,11 @@ class Directory extends Item implements IteratorAggregate, Countable
   {
     $oldPath = $this->getPathname();
     $newPath = dirname($oldPath) . DIRECTORY_SEPARATOR . basename($newName);
+
     if (!@rename($oldPath, $newPath)) {
       throw new RuntimeException("Path {$oldPath} could not be renamed to {$newPath}.");
     }
+
     return self::open($newPath);
   }
 
@@ -108,15 +110,18 @@ class Directory extends Item implements IteratorAggregate, Countable
     foreach ($this->getIterator() as $item) {
       $item->delete();
     }
+
     return $this;
   }
 
   public function size()
   {
     $size = 0;
+
     foreach ($this->getIterator() as $item) {
       $size += $item->getSize();
     }
+
     return $size;
   }
 
@@ -134,13 +139,16 @@ class Directory extends Item implements IteratorAggregate, Countable
 
   public function searchAndReplace($regex, $replacement)
   {
-    $items = array();
+    $items = [];
+
     foreach ($this->searchIn($regex)->getItems() as $file) {
       $count = File::open($file)->searchAndReplace($regex, $replacement);
+
       if ($count) {
         $items[] = $file;
       }
     }
+
     return $items;
   }
 
@@ -149,6 +157,7 @@ class Directory extends Item implements IteratorAggregate, Countable
     if (!is_dir($path)) {
       throw new RuntimeException("Could not open directory {$path}.");
     }
+
     return new static($path);
   }
 
@@ -174,6 +183,7 @@ class Directory extends Item implements IteratorAggregate, Countable
     if (is_dir($path)) {
       return static::open($path, $mask);
     }
+
     return static::create($path, $mask);
   }
 
@@ -183,6 +193,7 @@ class Directory extends Item implements IteratorAggregate, Countable
       $dir = new static($path);
       $dir->delete();
     }
+
     return static::create($path, $mask);
   }
 }

@@ -24,6 +24,7 @@ class Capture
     if (isset($this->cache[$name])) {
       return $this->cache[$name];
     }
+
     return '';
   }
 }

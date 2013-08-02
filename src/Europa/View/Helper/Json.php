@@ -31,10 +31,12 @@ class Json
   private function makeJsonEncodable($any)
   {
     if (is_array($any) || is_object($any)) {
-      $arr = array();
+      $arr = [];
+
       foreach ($any as $i => $v) {
         $arr[$i] = $this->makeJsonEncodable($v);
       }
+
       $any = $arr;
     }
 

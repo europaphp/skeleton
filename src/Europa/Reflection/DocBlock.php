@@ -58,6 +58,7 @@ class DocBlock
       if (!is_array($this->tags[$name])) {
         $this->tags[$name] = [$this->tags[$name]];
       }
+
       $this->tags[$name][] = $tag;
     } else {
       $this->tags[$name] = [$tag];
@@ -88,7 +89,7 @@ class DocBlock
        . ' * ' . $this->description . PHP_EOL
        . ' * '. PHP_EOL;
 
-    $last  = null;
+    $last = null;
     $longest = 0;
 
     foreach ($this->tags as $tagGroup) {

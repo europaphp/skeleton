@@ -7,10 +7,10 @@ class RequestNegotiator
 {
   public function __invoke()
   {
-  if (PHP_SAPI === 'cli') {
-    return new Request\Cli;
-  }
+    if (PHP_SAPI === 'cli') {
+      return new Request\Cli;
+    }
 
-  return new Request\Http;
+    return new Request\Http;
   }
 }

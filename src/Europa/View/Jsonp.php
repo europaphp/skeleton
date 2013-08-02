@@ -12,7 +12,7 @@ class Jsonp
   public function __construct($config = [])
   {
     $this->config = new Config\Config($this->config, $config);
-    $this->json   = new Json($config);
+    $this->json = new Json($config);
   }
 
   public function __invoke(array $context = array())

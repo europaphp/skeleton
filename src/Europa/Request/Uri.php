@@ -78,6 +78,7 @@ class Uri
     if ($this->hasParam($name)) {
       return $this->params[$name];
     }
+
     return null;
   }
 
@@ -91,6 +92,7 @@ class Uri
     if ($this->hasParam($name)) {
       unset($this->params[$name]);
     }
+
     return $this;
   }
 
@@ -127,6 +129,7 @@ class Uri
     if ($scheme = $this->getScheme()) {
       return $scheme . '://';
     }
+
     return '';
   }
 
@@ -167,13 +170,16 @@ class Uri
   {
     if ($host = $this->getHost()) {
       $auth = '';
+
       if ($user = $this->getUsername()) {
         $pass = $this->getPassword();
         $pass = $pass ? ':' . $pass : '';
         $auth = $user . $pass . '@';
       }
+
       return $this->getSchemePart() . $auth . $host . $this->getPortPart();
     }
+
     return '';
   }
 
@@ -281,6 +287,7 @@ class Uri
     if ($query = $this->getQuery()) {
       return '?' . $query;
     }
+
     return '';
   }
 
@@ -300,6 +307,7 @@ class Uri
     if ($frag = $this->getFragment()) {
       return '#' . $frag;
     }
+
     return '';
   }
 

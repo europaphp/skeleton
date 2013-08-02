@@ -21,6 +21,7 @@ class CallbackFilterIterator extends FilterIterator
         return false;
       }
     }
+
     return true;
   }
 }

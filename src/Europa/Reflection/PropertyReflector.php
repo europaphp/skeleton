@@ -40,6 +40,7 @@ class PropertyReflector extends ReflectionProperty implements ReflectorInterface
 
     // if not, check it's interfaces
     $methodName = $this->getName();
+
     foreach ($this->getDeclaringClass()->getInterfaces() as $iFace) {
       // coninue of the method doesn't exist in the interface
       if (!$iFace->hasMethod($methodName)) {

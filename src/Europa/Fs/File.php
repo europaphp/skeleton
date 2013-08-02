@@ -36,6 +36,7 @@ class File extends Item
         'Could not delete file ' . $this->getPathname() . '.'
       );
     }
+
     return $this;
   }
 
@@ -67,11 +68,13 @@ class File extends Item
   public function rename($newPath)
   {
     $oldPath = $this->getPathname();
+
     if (!@rename($oldPath, $newPath)) {
       throw new RuntimeException(
         'Could not rename file from ' . $oldPath . ' to ' . $newPath . '.'
       );
     }
+
     return new static($newPath);
   }
 
@@ -85,7 +88,7 @@ class File extends Item
     preg_match_all($regex, file_get_contents($this->getPathname()), $matches, PREG_SET_ORDER);
 
     if (count($matches)) {
-      $lines  = [];
+      $lines = [];
       $contents = $this->getContents();
 
       foreach ($matches as $match) {
@@ -103,7 +106,9 @@ class File extends Item
     $pathname = $this->getPathname();
     $contents = file_get_contents($pathname);
     $contents = preg_replace($regex, $replacement, $contents, -1, $count);
+
     file_put_contents($pathname, $contents);
+
     return $count;
   }
 
@@ -125,6 +130,7 @@ class File extends Item
   public function getInfo($key = null)
   {
     $info = pathinfo($this->getRealpath());
+
     if ($key) {
       if (array_key_exists($key, $info)) {
         return $info[$key];
@@ -132,6 +138,7 @@ class File extends Item
         throw new LogicException('Information for "' . $this->getRealpath() . '" does not contain "' . $key . '".');
       }
     }
+
     return $info;
   }
 
@@ -140,6 +147,7 @@ class File extends Item
     if (!is_file($file)) {
       throw new RuntimeException("Could not open file {$file}.");
     }
+
     return new static($file);
   }
 
@@ -173,6 +181,7 @@ class File extends Item
     if (is_file($path)) {
       return static::open($path, $mask);
     }
+
     return static::create($path, $mask);
   }
 
@@ -181,6 +190,7 @@ class File extends Item
     if (is_file($file)) {
       static::open($file)->delete();
     }
+
     return static::create($file, $mask);
   }
 }

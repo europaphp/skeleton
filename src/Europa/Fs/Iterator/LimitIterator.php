@@ -65,9 +65,11 @@ class LimitIterator extends IteratorIterator
   public function valid()
   {
     $valid = parent::valid();
+
     if ($this->limit > -1) {
       return $valid && $this->limit > $this->count;
     }
+
     return $valid;
   }
 

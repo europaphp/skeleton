@@ -14,12 +14,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/europaphp/module-help.git",
-                "reference": "c1bd8e9a5eb5fe2fd599ad339734ffbe7df92306"
+                "reference": "8d9dd6f931a3b1c790c47e736acd83b609f090fa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-help/zipball/c1bd8e9a5eb5fe2fd599ad339734ffbe7df92306",
-                "reference": "c1bd8e9a5eb5fe2fd599ad339734ffbe7df92306",
+                "url": "https://api.github.com/repos/europaphp/module-help/zipball/8d9dd6f931a3b1c790c47e736acd83b609f090fa",
+                "reference": "8d9dd6f931a3b1c790c47e736acd83b609f090fa",
                 "shasum": ""
             },
             "require": {
@@ -49,7 +49,7 @@
                 "help",
                 "man"
             ],
-            "time": "2013-08-02 04:27:11"
+            "time": "2013-08-02 05:43:51"
         },
         {
             "name": "europaphp/module-main",
@@ -57,12 +57,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/europaphp/module-main.git",
-                "reference": "8cafa6fe358c342c88f3f41662c6cfa67868782d"
+                "reference": "8fe09210b6dd1558dc61e229bf128c31cfb7d9c9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-main/zipball/8cafa6fe358c342c88f3f41662c6cfa67868782d",
-                "reference": "8cafa6fe358c342c88f3f41662c6cfa67868782d",
+                "url": "https://api.github.com/repos/europaphp/module-main/zipball/8fe09210b6dd1558dc61e229bf128c31cfb7d9c9",
+                "reference": "8fe09210b6dd1558dc61e229bf128c31cfb7d9c9",
                 "shasum": ""
             },
             "type": "library",
@@ -88,7 +88,7 @@
                 "default",
                 "main"
             ],
-            "time": "2013-08-02 04:26:55"
+            "time": "2013-08-02 05:30:57"
         },
         {
             "name": "europaphp/module-tests",
