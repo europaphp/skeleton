@@ -96,12 +96,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/europaphp/module-tests.git",
-                "reference": "a79bd7437ac4dc1116a6d50ec21dd71ac15f17dd"
+                "reference": "6f636352532157712e36b9c4049ce81b929ee335"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-tests/zipball/a79bd7437ac4dc1116a6d50ec21dd71ac15f17dd",
-                "reference": "a79bd7437ac4dc1116a6d50ec21dd71ac15f17dd",
+                "url": "https://api.github.com/repos/europaphp/module-tests/zipball/6f636352532157712e36b9c4049ce81b929ee335",
+                "reference": "6f636352532157712e36b9c4049ce81b929ee335",
                 "shasum": ""
             },
             "require": {
@@ -131,7 +131,7 @@
                 "help",
                 "man"
             ],
-            "time": "2013-08-02 04:46:45"
+            "time": "2013-08-02 04:56:45"
         },
         {
             "name": "treshugart/testes",
