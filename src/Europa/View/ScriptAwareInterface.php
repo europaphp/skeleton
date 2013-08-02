@@ -5,7 +5,7 @@ use Europa\Fs\LocatorAwareInterface;
 
 interface ScriptAwareInterface extends LocatorAwareInterface
 {
-    public function getScript();
+  public function getScript();
 
-    public function setScript($script);
+  public function setScript($script);
 }

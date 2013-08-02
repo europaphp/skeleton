@@ -4,5 +4,5 @@ namespace Europa\Module;
 
 interface RouteAwareInterface
 {
-    public function routes();
+  public function routes();
 }

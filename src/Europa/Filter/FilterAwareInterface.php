@@ -4,7 +4,7 @@ namespace Europa\Filter;
 
 interface FilterAwareInterface
 {
-    public function setFilter(callable $filter);
+  public function setFilter(callable $filter);
 
-    public function getFilter();
+  public function getFilter();
 }

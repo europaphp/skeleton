@@ -5,74 +5,74 @@ use IteratorIterator;
 
 class LimitIterator extends IteratorIterator
 {
-    private $offset = 0;
+  private $offset = 0;
 
-    private $limit = -1;
+  private $limit = -1;
 
-    private $count = 0;
+  private $count = 0;
 
-    private $index = 0;
+  private $index = 0;
 
-    public function setOffset($offset)
-    {
-        $this->offset = (int) $offset;
-        return $this;
-    }
-    
-    public function getOffset()
-    {
-        return $this->offset;
-    }
+  public function setOffset($offset)
+  {
+    $this->offset = (int) $offset;
+    return $this;
+  }
 
-    public function setLimit($limit)
-    {
-        $this->limit = (int) $limit;
-        return $this;
-    }
-    
-    public function getLimit()
-    {
-        return $this->limit;
-    }
-    
-    public function current()
-    {
-        // continue on until the offset is met
-        while ($this->index < $this->offset) {
-            $this->next();
-        }
+  public function getOffset()
+  {
+    return $this->offset;
+  }
 
-        // keep track of the number of items
-        $this->count++;
+  public function setLimit($limit)
+  {
+    $this->limit = (int) $limit;
+    return $this;
+  }
 
-        // Return parent's current object.
-        return parent::current();
+  public function getLimit()
+  {
+    return $this->limit;
+  }
+
+  public function current()
+  {
+    // continue on until the offset is met
+    while ($this->index < $this->offset) {
+      $this->next();
     }
 
-    public function next()
-    {
-        ++$this->index;
-        return parent::next();
-    }
+    // keep track of the number of items
+    $this->count++;
 
-    public function rewind()
-    {
-        $this->count = 0;
-        $this->index = 0;
-        parent::rewind();
-    }
+    // Return parent's current object.
+    return parent::current();
+  }
 
-    public function valid()
-    {
-        $valid = parent::valid();
-        if ($this->limit > -1) {
-            return $valid && $this->limit > $this->count;
-        }
-        return $valid;
-    }
+  public function next()
+  {
+    ++$this->index;
+    return parent::next();
+  }
 
-    private function isDot()
-    {
-        return parent::current() && (parent::current()->getBasename() === '.' || parent::current()->getBasename() === '..');
+  public function rewind()
+  {
+    $this->count = 0;
+    $this->index = 0;
+    parent::rewind();
+  }
+
+  public function valid()
+  {
+    $valid = parent::valid();
+    if ($this->limit > -1) {
+      return $valid && $this->limit > $this->count;
     }
+    return $valid;
+  }
+
+  private function isDot()
+  {
+    return parent::current() && (parent::current()->getBasename() === '.' || parent::current()->getBasename() === '..');
+  }
 }

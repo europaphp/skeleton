@@ -4,25 +4,25 @@ namespace Europa\Filter;
 
 class MapFilter
 {
-    private $map;
+  private $map;
 
-    public function __construct(array $map)
-    {
-        $this->map = $map;
+  public function __construct(array $map)
+  {
+    $this->map = $map;
+  }
+
+  public function __invoke($value)
+  {
+    if (isset($this->map[$value])) {
+      return $this->map[$value];
     }
 
-    public function __invoke($value)
-    {
-        if (isset($this->map[$value])) {
-            return $this->map[$value];
-        }
+    return $value;
+  }
 
-        return $value;
-    }
-
-    public function map($from, $to)
-    {
-        $this->map[$from] = $to;
-        return $this;
-    }
+  public function map($from, $to)
+  {
+    $this->map[$from] = $to;
+    return $this;
+  }
 }

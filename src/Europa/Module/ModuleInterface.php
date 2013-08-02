@@ -4,17 +4,17 @@ namespace Europa\Module;
 
 interface ModuleInterface
 {
-    public function bootstrap(callable $container);
+  public function bootstrap(callable $container);
 
-    public function ns();
+  public function ns();
 
-    public function name();
+  public function name();
 
-    public function version();
+  public function version();
 
-    public function path();
+  public function path();
 
-    public function config();
+  public function config();
 
-    public function dependencies();
+  public function dependencies();
 }

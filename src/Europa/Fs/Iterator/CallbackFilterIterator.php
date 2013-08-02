@@ -6,21 +6,21 @@ use Iterator;
 
 class CallbackFilterIterator extends FilterIterator
 {
-    private $filters = [];
-    
-    public function __construct(Iterator $iterator, array $filters)
-    {
-        $this->filters = $filters;
-        parent::__construct($iterator);
+  private $filters = [];
+
+  public function __construct(Iterator $iterator, array $filters)
+  {
+    $this->filters = $filters;
+    parent::__construct($iterator);
+  }
+
+  public function accept()
+  {
+    foreach ($this->filters as $filter) {
+      if ($filter($this->current()) === false) {
+        return false;
+      }
     }
-    
-    public function accept()
-    {
-        foreach ($this->filters as $filter) {
-            if ($filter($this->current()) === false) {
-                return false;
-            }
-        }
-        return true;
-    }
+    return true;
+  }
 }

@@ -4,17 +4,17 @@ namespace Europa\Di;
 
 interface ContainerInterface
 {
-    public function __invoke($name);
+  public function __invoke($name);
 
-    public function register($name, callable $service);
+  public function register($name, callable $service);
 
-    public function configure(callable $configuration);
+  public function configure(callable $configuration);
 
-    public function alias($name, array $aliases);
+  public function alias($name, array $aliases);
 
-    public function depends($name, array $dependencies);
+  public function depends($name, array $dependencies);
 
-    public function template($name);
+  public function template($name);
 
-    public function constrain($name, array $types);
+  public function constrain($name, array $types);
 }

@@ -8,12 +8,12 @@ trait RequestAware
 
   public function getRequest()
   {
-    return $this->request;
+  return $this->request;
   }
 
   public function setRequest(RequestInterface $request)
   {
-    $this->request = $request;
-    return $this;
+  $this->request = $request;
+  return $this;
   }
 }

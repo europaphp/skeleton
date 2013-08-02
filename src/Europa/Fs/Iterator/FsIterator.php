@@ -7,14 +7,14 @@ use IteratorIterator;
 
 class FsIterator extends IteratorIterator
 {
-    public function current()
-    {
-        // directory object
-        if (parent::current()->isDir()) {
-            return new Directory(parent::current()->getPathname());
-        }
-        
-        // file object
-        return new File(parent::current()->getPathname());
+  public function current()
+  {
+    // directory object
+    if (parent::current()->isDir()) {
+      return new Directory(parent::current()->getPathname());
     }
+
+    // file object
+    return new File(parent::current()->getPathname());
+  }
 }

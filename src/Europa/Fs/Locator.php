@@ -4,82 +4,82 @@ namespace Europa\Fs;
 
 class Locator
 {
-    private $check = false;
+  private $check = false;
 
-    private $cache = [];
+  private $cache = [];
 
-    private $paths = [];
+  private $paths = [];
 
-    private $root;
+  private $root;
 
-    public function __invoke($path)
-    {
-        $path = str_replace('\\', '/', $path);
+  public function __invoke($path)
+  {
+    $path = str_replace('\\', '/', $path);
 
-        if (isset($this->cache[$path])) {
-            return $this->cache[$path];
-        }
-
-        foreach ($this->paths as $parts) {
-            if ($real = realpath($parts[0] . '/' . $path . ($parts[1] ? '.' . $parts[1] : ''))) {
-                return $this->cache[$path] = $real;
-            }
-        }
+    if (isset($this->cache[$path])) {
+      return $this->cache[$path];
     }
 
-    public function getRoot()
-    {
-        return $this->root;
+    foreach ($this->paths as $parts) {
+      if ($real = realpath($parts[0] . '/' . $path . ($parts[1] ? '.' . $parts[1] : ''))) {
+        return $this->cache[$path] = $real;
+      }
+    }
+  }
+
+  public function getRoot()
+  {
+    return $this->root;
+  }
+
+  public function setRoot($root)
+  {
+    if (!$this->root = realpath($root)) {
+      throw new Exception\InvalidRootPath(['path' => $root]);
     }
 
-    public function setRoot($root)
-    {
-        if (!$this->root = realpath($root)) {
-            throw new Exception\InvalidRootPath(['path' => $root]);
-        }
+    return $this;
+  }
 
-        return $this;
+  public function addPath($path, $suffix = null)
+  {
+    $path = $this->root ? $this->root . '/' . $path : $path;
+
+    if ($real = realpath($path)) {
+      $this->paths[] = [$real, $suffix];
+    } elseif ($this->check) {
+      throw new Exception\InvalidPath(['path' => $path]);
     }
 
-    public function addPath($path, $suffix = null)
-    {
-        $path = $this->root ? $this->root . '/' . $path : $path;
+    return $this;
+  }
 
-        if ($real = realpath($path)) {
-            $this->paths[] = [$real, $suffix];
-        } elseif ($this->check) {
-            throw new Exception\InvalidPath(['path' => $path]);
-        }
+  public function addPaths(array $paths)
+  {
+    foreach ($paths as $parts) {
+      if (!is_array($parts)) {
+        $parts = [$parts, null];
+      }
 
-        return $this;
+      $this->addPath($parts[0], $parts[1]);
     }
 
-    public function addPaths(array $paths)
-    {
-        foreach ($paths as $parts) {
-            if (!is_array($parts)) {
-                $parts = [$parts, null];
-            }
+    return $this;
+  }
 
-            $this->addPath($parts[0], $parts[1]);
-        }
+  public function getPaths()
+  {
+    return $this->paths;
+  }
 
-        return $this;
-    }
+  public function getCheck()
+  {
+    return $this->check;
+  }
 
-    public function getPaths()
-    {
-        return $this->paths;
-    }
-
-    public function getCheck()
-    {
-        return $this->check;
-    }
-
-    public function setCheck($switch = true)
-    {
-        $this->check = $check ? true : false;
-        return $this;
-    }
+  public function setCheck($switch = true)
+  {
+    $this->check = $check ? true : false;
+    return $this;
+  }
 }

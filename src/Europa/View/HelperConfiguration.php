@@ -7,40 +7,40 @@ use Europa\Router\Router;
 
 class HelperConfiguration extends ConfigurationAbstract
 {
-    private $router;
+  private $router;
 
-    public function __construct(Router $router = null)
-    {
-        $this->router = $router;
-    }
+  public function __construct(Router $router = null)
+  {
+    $this->router = $router;
+  }
 
-    public function capture()
-    {
-        return new Helper\Capture;
-    }
+  public function capture()
+  {
+    return new Helper\Capture;
+  }
 
-    public function cli()
-    {
-        return new Helper\Cli;
-    }
+  public function cli()
+  {
+    return new Helper\Cli;
+  }
 
-    public function css()
-    {
-        return new Helper\Css;
-    }
+  public function css()
+  {
+    return new Helper\Css;
+  }
 
-    public function js()
-    {
-        return new Helper\Js;
-    }
+  public function js()
+  {
+    return new Helper\Js;
+  }
 
-    public function json()
-    {
-        return new Helper\Json;
-    }
+  public function json()
+  {
+    return new Helper\Json;
+  }
 
-    public function uri()
-    {
-        return new Helper\Uri($this->router);
-    }
+  public function uri()
+  {
+    return new Helper\Uri($this->router);
+  }
 }

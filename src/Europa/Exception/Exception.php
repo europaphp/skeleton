@@ -6,22 +6,22 @@ class Exception extends \Exception
 {
   public function __construct(array $params = [])
   {
-    parent::__construct($this->generateMessage($params), $this->generateCode());
+  parent::__construct($this->generateMessage($params), $this->generateCode());
   }
 
   private function generateMessage(array $params)
   {
-    $message = $this->message;
+  $message = $this->message;
 
-    foreach ($params as $name => $value) {
-      $message = str_replace(':' . $name, $value, $message);
-    }
+  foreach ($params as $name => $value) {
+    $message = str_replace(':' . $name, $value, $message);
+  }
 
-    return $message;
+  return $message;
   }
 
   private function generateCode()
   {
-    return crc32(get_class($this));
+  return crc32(get_class($this));
   }
 }

@@ -4,29 +4,29 @@ namespace Europa\Response;
 
 abstract class ResponseAbstract implements ResponseInterface
 {
-    private $body;
+  private $body;
 
-    private $status;
+  private $status;
 
-    public function setBody($body)
-    {
-        $this->body = $body;
-        return $this;
-    }
+  public function setBody($body)
+  {
+    $this->body = $body;
+    return $this;
+  }
 
-    public function getBody()
-    {
-        return $this->body;
-    }
+  public function getBody()
+  {
+    return $this->body;
+  }
 
-    public function setStatus($status)
-    {
-        $this->status = (int) $status;
-        return $this;
-    }
+  public function setStatus($status)
+  {
+    $this->status = (int) $status;
+    return $this;
+  }
 
-    public function getStatus()
-    {
-        return $this->status;
-    }
+  public function getStatus()
+  {
+    return $this->status;
+  }
 }

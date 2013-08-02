@@ -5,122 +5,122 @@ use Europa\Reflection\MethodReflector;
 
 class ClassReflector extends \ReflectionClass implements ReflectorInterface
 {
-    private $docString;
+  private $docString;
 
-    public function is($type)
-    {
-        return $this->getName() === $type
-            || $this->isSubclassOf($type)
-            || in_array($type, $this->getTraitNames());
-    }
+  public function is($type)
+  {
+    return $this->getName() === $type
+      || $this->isSubclassOf($type)
+      || in_array($type, $this->getTraitNames());
+  }
 
-    public function isAny(array $types)
-    {
-        foreach ($types as $type) {
-            if ($this->is($type)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public function isAll(array $types)
-    {
-        foreach ($types as $type) {
-            if (!$this->is($type)) {
-                return false;
-            }
-        }
+  public function isAny(array $types)
+  {
+    foreach ($types as $type) {
+      if ($this->is($type)) {
         return true;
+      }
     }
 
-    public function getTree()
-    {
-        $tree      = [];
-        $reflector = $this;
+    return false;
+  }
 
-        while ($reflector) {
-            $tree[]    = $reflector;
-            $reflector = $reflector->getParentClass();
-        }
+  public function isAll(array $types)
+  {
+    foreach ($types as $type) {
+      if (!$this->is($type)) {
+        return false;
+      }
+    }
+    return true;
+  }
 
-        return array_reverse($tree);
+  public function getTree()
+  {
+    $tree    = [];
+    $reflector = $this;
+
+    while ($reflector) {
+      $tree[]  = $reflector;
+      $reflector = $reflector->getParentClass();
     }
 
-    public function getTreeNames()
-    {
-        $tree = [];
+    return array_reverse($tree);
+  }
 
-        foreach ($this->getTree() as $parent) {
-            $tree[] = $parent->getName();
-        }
+  public function getTreeNames()
+  {
+    $tree = [];
 
-        return $tree;
+    foreach ($this->getTree() as $parent) {
+      $tree[] = $parent->getName();
     }
 
-    public function getMethod($method)
-    {
-        return new MethodReflector($this->getName(), $method);
+    return $tree;
+  }
+
+  public function getMethod($method)
+  {
+    return new MethodReflector($this->getName(), $method);
+  }
+
+  public function getMethods($filter = -1)
+  {
+    $methods = array();
+
+    foreach (parent::getMethods($filter) as $method) {
+      $methods[] = $this->getMethod($method->getName());
     }
 
-    public function getMethods($filter = -1)
-    {
-        $methods = array();
+    return $methods;
+  }
 
-        foreach (parent::getMethods($filter) as $method) {
-            $methods[] = $this->getMethod($method->getName());
-        }
+  public function getDocBlock()
+  {
+    return new DocBlock($this->getDocComment());
+  }
 
-        return $methods;
+  public function getDocComment()
+  {
+    // if it's already been retrieved, just return it
+    if ($this->docString) {
+      return $this->docString;
     }
 
-    public function getDocBlock()
-    {
-        return new DocBlock($this->getDocComment());
+    // check to see if it's here first
+    if ($docString = parent::getDocComment()) {
+      $this->docString = $docString;
+      return $docString;
     }
 
-    public function getDocComment()
-    {
-        // if it's already been retrieved, just return it
-        if ($this->docString) {
-            return $this->docString;
-        }
+    // go through each parent class
+    $class = $this->getParentClass();
 
-        // check to see if it's here first
-        if ($docString = parent::getDocComment()) {
-            $this->docString = $docString;
-            return $docString;
-        }
-
-        // go through each parent class
-        $class = $this->getParentClass();
-
-        while ($class) {
-            if ($docString = $class->getDocComment()) {
-                $this->docString = $docString;
-                break;
-            }
-            $class = $class->getParentClass();
-        }
-
-        // then go through each interface
-        foreach ($this->getInterfaces() as $iFace) {
-            if ($docString = $iFace->getDocComment()) {
-                $this->docString = $docString;
-                break;
-            }
-        }
-
-        return $this->docString;
+    while ($class) {
+      if ($docString = $class->getDocComment()) {
+        $this->docString = $docString;
+        break;
+      }
+      $class = $class->getParentClass();
     }
 
-    public function newInstanceArgs(array $args = null)
-    {
-        if ($this->hasMethod('__construct')) {
-            return parent::newInstanceArgs($this->getMethod('__construct')->mergeNamedArgs($args));
-        }
-
-        return $this->newInstance();
+    // then go through each interface
+    foreach ($this->getInterfaces() as $iFace) {
+      if ($docString = $iFace->getDocComment()) {
+        $this->docString = $docString;
+        break;
+      }
     }
+
+    return $this->docString;
+  }
+
+  public function newInstanceArgs(array $args = null)
+  {
+    if ($this->hasMethod('__construct')) {
+      return parent::newInstanceArgs($this->getMethod('__construct')->mergeNamedArgs($args));
+    }
+
+    return $this->newInstance();
+  }
 }

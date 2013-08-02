@@ -4,16 +4,16 @@ namespace Europa\Filter;
 
 trait FilterAware
 {
-    private $filter;
+  private $filter;
 
-    public function setFilter(callable $filter)
-    {
-        $this->filter = $filter;
-        return $this;
-    }
+  public function setFilter(callable $filter)
+  {
+    $this->filter = $filter;
+    return $this;
+  }
 
-    public function getFilter()
-    {
-        return $this->filter;
-    }
+  public function getFilter()
+  {
+    return $this->filter;
+  }
 }

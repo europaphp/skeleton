@@ -4,7 +4,7 @@ namespace Europa\Di;
 
 interface ContainerAwareInterface
 {
-    public function getContainer();
+  public function getContainer();
 
-    public function setContainer(callable $container);
+  public function setContainer(callable $container);
 }

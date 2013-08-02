@@ -5,90 +5,90 @@ use InvalidArgumentException;
 
 class Emitter implements EmitterInterface
 {
-    private $stack = [];
+  private $stack = [];
 
-    public function on($name, callable $callback)
-    {
-        if (!isset($this->stack[$name])) {
-            $this->stack[$name] = [];
-        }
-
-        $this->stack[$name][] = $callback;
-
-        return $this;
+  public function on($name, callable $callback)
+  {
+    if (!isset($this->stack[$name])) {
+      $this->stack[$name] = [];
     }
 
-    public function off($name = null, callable $callback = null)
-    {
-        if (!$name) {
-            $this->stack = [];
-            return $this;
-        }
+    $this->stack[$name][] = $callback;
 
-        foreach ($this->getStackNamesForEvent($name) as $event) {
-            if ($callback) {
-                foreach ($this->stack[$event] as $index => $bound) {
-                    if ($bound === $callback) {
-                        unset($this->stack[$event][$index]);
-                    }
-                }
-            } else {
-                unset($this->stack[$event]);
-            }
-        }
+    return $this;
+  }
 
-        return $this;
+  public function off($name = null, callable $callback = null)
+  {
+    if (!$name) {
+      $this->stack = [];
+      return $this;
     }
 
-    public function emit($name)
-    {
-        $args = func_get_args();
-
-        array_shift($args);
-
-        return $this->emitArray($name, $args);
-    }
-
-    public function emitArray($name, array $args = [])
-    {
-        foreach ($this->getStackNamesForEvent($name) as $event) {
-            foreach ($this->stack[$event] as $callback) {
-                if (call_user_func_array($callback, $args) === false) {
-                    return $this;
-                }
-            }
+    foreach ($this->getStackNamesForEvent($name) as $event) {
+      if ($callback) {
+        foreach ($this->stack[$event] as $index => $bound) {
+          if ($bound === $callback) {
+            unset($this->stack[$event][$index]);
+          }
         }
-
-        return $this;
+      } else {
+        unset($this->stack[$event]);
+      }
     }
 
-    public function has($name, $callback = null)
-    {
-        foreach ($this->getStackNamesForEvent($name) as $event) {
-            if ($callback) {
-                foreach ($this->stack[$event] as $index => $bound) {
-                    if ($bound === $callback) {
-                        return true;
-                    }
-                }
-            } elseif (isset($this->stack[$event])) {
-                return true;
-            }
+    return $this;
+  }
+
+  public function emit($name)
+  {
+    $args = func_get_args();
+
+    array_shift($args);
+
+    return $this->emitArray($name, $args);
+  }
+
+  public function emitArray($name, array $args = [])
+  {
+    foreach ($this->getStackNamesForEvent($name) as $event) {
+      foreach ($this->stack[$event] as $callback) {
+        if (call_user_func_array($callback, $args) === false) {
+          return $this;
         }
-
-        return false;
+      }
     }
 
-    private function getStackNamesForEvent($name)
-    {
-        $stack = [];
+    return $this;
+  }
 
-        foreach ($this->stack as $event => $handlers) {
-            if (strpos($event, $name) === 0) {
-                $stack[] = $event;
-            }
+  public function has($name, $callback = null)
+  {
+    foreach ($this->getStackNamesForEvent($name) as $event) {
+      if ($callback) {
+        foreach ($this->stack[$event] as $index => $bound) {
+          if ($bound === $callback) {
+            return true;
+          }
         }
-
-        return $stack;
+      } elseif (isset($this->stack[$event])) {
+        return true;
+      }
     }
+
+    return false;
+  }
+
+  private function getStackNamesForEvent($name)
+  {
+    $stack = [];
+
+    foreach ($this->stack as $event => $handlers) {
+      if (strpos($event, $name) === 0) {
+        $stack[] = $event;
+      }
+    }
+
+    return $stack;
+  }
 }

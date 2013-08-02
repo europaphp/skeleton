@@ -23,265 +23,265 @@ use Traversable;
 
 class Finder implements Countable, IteratorAggregate
 {
-    const WILDCARD = '*';
+  const WILDCARD = '*';
 
-    private $dirs = [];
+  private $dirs = [];
 
-    private $notDirs = [];
-    
-    private $is = [];
-    
-    private $not = [];
-    
-    private $filters = [];
-    
-    private $depth = -1;
+  private $notDirs = [];
 
-    private $offset = 0;
+  private $is = [];
 
-    private $limit = -1;
-    
-    private $prepend = [];
-    
-    private $append = [];
+  private $not = [];
 
-    public function count()
-    {
-        return count($this->toArray());
-    }
-    
-    public function getIterator()
-    {
-        // So we can merge results.
-        $it = new AppendIterator;
-        
-        // Prepend paths.
-        foreach ($this->prepend as $prepend) {
-            $it->append($this->normalizeTraversable($prepend));
-        }
-        
-        // Add directories recursively.
-        foreach ($this->dirs as $dir) {
-            if (!in_array($dir, $this->notDirs)) {
-                $it->append($this->getRecursiveIterator($dir));
-            }
-        }
+  private $filters = [];
 
-        // Limit results.
-        $it = new LimitIterator($it);
-        $it->setOffset($this->offset);
-        $it->setLimit($this->limit);
+  private $depth = -1;
 
-        // Apply filters.
-        $it = $this->applyFilters($it);
+  private $offset = 0;
 
-        // Append paths.
-        foreach ($this->append as $append) {
-            $it->append($this->normalizeTraversable($append));
-        }
+  private $limit = -1;
 
-        return $it;
+  private $prepend = [];
+
+  private $append = [];
+
+  public function count()
+  {
+    return count($this->toArray());
+  }
+
+  public function getIterator()
+  {
+    // So we can merge results.
+    $it = new AppendIterator;
+
+    // Prepend paths.
+    foreach ($this->prepend as $prepend) {
+      $it->append($this->normalizeTraversable($prepend));
     }
 
-    public function getFsIterator()
-    {
-        return new FsIterator($this->getIterator());
+    // Add directories recursively.
+    foreach ($this->dirs as $dir) {
+      if (!in_array($dir, $this->notDirs)) {
+        $it->append($this->getRecursiveIterator($dir));
+      }
     }
-    
-    public function prepend($prepend)
-    {
-        $this->prepend[] = $prepend;
+
+    // Limit results.
+    $it = new LimitIterator($it);
+    $it->setOffset($this->offset);
+    $it->setLimit($this->limit);
+
+    // Apply filters.
+    $it = $this->applyFilters($it);
+
+    // Append paths.
+    foreach ($this->append as $append) {
+      $it->append($this->normalizeTraversable($append));
+    }
+
+    return $it;
+  }
+
+  public function getFsIterator()
+  {
+    return new FsIterator($this->getIterator());
+  }
+
+  public function prepend($prepend)
+  {
+    $this->prepend[] = $prepend;
+    return $this;
+  }
+
+  public function append($append)
+  {
+    $this->append[] = $append;
+    return $this;
+  }
+
+  public function is($pattern)
+  {
+    $this->is[] = $pattern;
+    return $this;
+  }
+
+  public function not($pattern)
+  {
+    $this->not[] = $pattern;
+    return $this;
+  }
+
+  public function contains($pattern)
+  {
+    return $this->files()->filter(function($item) use ($pattern) {
+      return (new File($item))->contains($pattern);
+    });
+  }
+
+  public function files()
+  {
+    return $this->filter(function($item) {
+      return $item->isFile();
+    });
+  }
+
+  public function directories()
+  {
+    return $this->filter(function($item) {
+      return $item->isDir();
+    });
+  }
+
+  public function filter($filter)
+  {
+    if (!is_callable($filter)) {
+      throw new InvalidArgumentException('The filter must be callable.');
+    }
+
+    $this->filters[] = $filter;
+
+    return $this;
+  }
+
+  public function in($path)
+  {
+    if (strpos($path, self::WILDCARD)) {
+      $paths = explode(self::WILDCARD, $path, 2);
+
+      if (!is_dir($paths[0])) {
         return $this;
-    }
-    
-    public function append($append)
-    {
-        $this->append[] = $append;
-        return $this;
-    }
-    
-    public function is($pattern)
-    {
-        $this->is[] = $pattern;
-        return $this;
-    }
-    
-    public function not($pattern)
-    {
-        $this->not[] = $pattern;
-        return $this;
-    }
-    
-    public function contains($pattern)
-    {
-        return $this->files()->filter(function($item) use ($pattern) {
-            return (new File($item))->contains($pattern);
-        });
-    }
-    
-    public function files()
-    {
-        return $this->filter(function($item) {
-            return $item->isFile();
-        });
-    }
-    
-    public function directories()
-    {
-        return $this->filter(function($item) {
-            return $item->isDir();
-        });
-    }
-    
-    public function filter($filter)
-    {
-        if (!is_callable($filter)) {
-            throw new InvalidArgumentException('The filter must be callable.');
-        }
+      }
 
-        $this->filters[] = $filter;
-
-        return $this;
-    }
-    
-    public function in($path)
-    {
-        if (strpos($path, self::WILDCARD)) {
-            $paths = explode(self::WILDCARD, $path, 2);
-
-            if (!is_dir($paths[0])) {
-                return $this;
-            }
-
-            foreach (new DirectoryIterator($paths[0]) as $item) {
-                if ($item->isDot()) {
-                    continue;
-                }
-
-                $this->in($item->getRealpath() . $paths[1]);
-            }
-
-            return $this;
+      foreach (new DirectoryIterator($paths[0]) as $item) {
+        if ($item->isDot()) {
+          continue;
         }
 
-        if (is_dir($real = realpath($path))) {
-            $this->dirs[] = $real;
+        $this->in($item->getRealpath() . $paths[1]);
+      }
+
+      return $this;
+    }
+
+    if (is_dir($real = realpath($path))) {
+      $this->dirs[] = $real;
+    }
+
+    return $this;
+  }
+
+  public function notIn($path)
+  {
+    if (strpos($path, self::WILDCARD)) {
+      $paths = explode(self::WILDCARD, $path, 2);
+
+      foreach (new DirectoryIterator($paths[0]) as $item) {
+        if ($item->isDot()) {
+          continue;
         }
 
-        return $this;
+        $this->notIn($item->getRealpath() . $paths[1]);
+      }
+
+      return $this;
     }
 
-    public function notIn($path)
-    {
-        if (strpos($path, self::WILDCARD)) {
-            $paths = explode(self::WILDCARD, $path, 2);
-
-            foreach (new DirectoryIterator($paths[0]) as $item) {
-                if ($item->isDot()) {
-                    continue;
-                }
-
-                $this->notIn($item->getRealpath() . $paths[1]);
-            }
-
-            return $this;
-        }
-
-        if (is_dir($real = realpath($path))) {
-            $this->notDirs[] = $real;
-        }
-
-        return $this;
-    }
-    
-    public function depth($depth = null)
-    {
-        if (is_null($depth) || $depth < -1) {
-            $depth = -1;
-        }
-
-        $this->depth = $depth;
-
-        return $this;
+    if (is_dir($real = realpath($path))) {
+      $this->notDirs[] = $real;
     }
 
-    public function offset($offset)
-    {
-        $this->offset = (int) $offset;
-        return $this;
+    return $this;
+  }
+
+  public function depth($depth = null)
+  {
+    if (is_null($depth) || $depth < -1) {
+      $depth = -1;
     }
 
-    public function limit($limit)
-    {
-        $this->limit = (int) $limit;
-        return $this;
+    $this->depth = $depth;
+
+    return $this;
+  }
+
+  public function offset($offset)
+  {
+    $this->offset = (int) $offset;
+    return $this;
+  }
+
+  public function limit($limit)
+  {
+    $this->limit = (int) $limit;
+    return $this;
+  }
+
+  public function page($page, $limit)
+  {
+    $page = $page ? $page : 1;
+
+    $this->limit  = $limit;
+    $this->offset = ($page * $limit) - $limit;
+
+    return $this;
+  }
+
+  public function sort($cb)
+  {
+    $this->sort[] = $cb;
+    return $this;
+  }
+
+  public function toArray()
+  {
+    $arr = [];
+
+    foreach ($this->getIterator() as $item) {
+      $arr[] = $item->getPathname();
     }
 
-    public function page($page, $limit)
-    {
-        $page = $page ? $page : 1;
+    return array_unique($arr);
+  }
 
-        $this->limit  = $limit;
-        $this->offset = ($page * $limit) - $limit;
+  private function applyFilters(Iterator $iterator)
+  {
+    $iterator = new DotFilterIterator($iterator);
+    $iterator = new PathnameFilterIterator($iterator, $this->is, $this->not);
+    $iterator = new CallbackFilterIterator($iterator, $this->filters);
+    return $iterator;
+  }
 
-        return $this;
+  private function getRecursiveIterator($dir)
+  {
+    $iterator = new RecursiveIteratorIterator(
+      new RecursiveDirectoryIterator($dir),
+      RecursiveIteratorIterator::SELF_FIRST
+    );
+
+    $iterator->setMaxDepth($this->depth);
+
+    return $iterator;
+  }
+
+  private function normalizeTraversable($iterator)
+  {
+    if ($iterator instanceof IteratorAggregate) {
+      $iterator = $iterator->getIterator();
+    } elseif ($iterator instanceof Iterator) {
+      $iterator = $iterator;
+    } elseif ($iterator instanceof Traversable || is_array($iterator)) {
+      $traversable = new ArrayIterator();
+
+      foreach ($iterator as $item) {
+        $traversable->append($item instanceof SplFileInfo ? $item : new SplFileInfo($item));
+      }
+
+      $iterator = $traversable;
+    } else {
+      $iterator = new ArrayIterator([new SplFileInfo($iterator)]);
     }
-    
-    public function sort($cb)
-    {
-        $this->sort[] = $cb;
-        return $this;
-    }
 
-    public function toArray()
-    {
-        $arr = [];
-
-        foreach ($this->getIterator() as $item) {
-            $arr[] = $item->getPathname();
-        }
-
-        return array_unique($arr);
-    }
-    
-    private function applyFilters(Iterator $iterator)
-    {
-        $iterator = new DotFilterIterator($iterator);
-        $iterator = new PathnameFilterIterator($iterator, $this->is, $this->not);
-        $iterator = new CallbackFilterIterator($iterator, $this->filters);
-        return $iterator;
-    }
-    
-    private function getRecursiveIterator($dir)
-    {
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($dir),
-            RecursiveIteratorIterator::SELF_FIRST
-        );
-        
-        $iterator->setMaxDepth($this->depth);
-
-        return $iterator;
-    }
-    
-    private function normalizeTraversable($iterator)
-    {
-        if ($iterator instanceof IteratorAggregate) {
-            $iterator = $iterator->getIterator();
-        } elseif ($iterator instanceof Iterator) {
-            $iterator = $iterator;
-        } elseif ($iterator instanceof Traversable || is_array($iterator)) {
-            $traversable = new ArrayIterator();
-
-            foreach ($iterator as $item) {
-                $traversable->append($item instanceof SplFileInfo ? $item : new SplFileInfo($item));
-            }
-
-            $iterator = $traversable;
-        } else {
-            $iterator = new ArrayIterator([new SplFileInfo($iterator)]);
-        }
-        
-        return new FsIterator($iterator);
-    }
+    return new FsIterator($iterator);
+  }
 }

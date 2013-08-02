@@ -6,12 +6,12 @@ class ViewScriptFilter
 {
   public function __invoke($class, $method = null)
   {
-    $path = str_replace('\\', DIRECTORY_SEPARATOR, $class);
+  $path = str_replace('\\', DIRECTORY_SEPARATOR, $class);
 
-    if ($method) {
-      $path .= DIRECTORY_SEPARATOR . $method;
-    }
+  if ($method) {
+    $path .= DIRECTORY_SEPARATOR . $method;
+  }
 
-    return $path;
+  return $path;
   }
 }

@@ -7,19 +7,19 @@ use Traversable;
 
 class RouterArray
 {
-    private $routers;
+  private $routers;
 
-    public function __construct(Traversable $routers)
-    {
-        $this->routers = new CallableIterator($routers);
-    }
+  public function __construct(Traversable $routers)
+  {
+    $this->routers = new CallableIterator($routers);
+  }
 
-    public function __invoke(RequestInterface $request)
-    {
-        foreach ($this->routers as $router) {
-            if ($response = $router($request)) {
-                return $response;
-            }
-        }
+  public function __invoke(RequestInterface $request)
+  {
+    foreach ($this->routers as $router) {
+      if ($response = $router($request)) {
+        return $response;
+      }
     }
+  }
 }

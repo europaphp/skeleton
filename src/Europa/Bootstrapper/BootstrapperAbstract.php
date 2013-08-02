@@ -6,33 +6,33 @@ use Europa\Reflection\MethodReflector;
 
 abstract class BootstrapperAbstract
 {
-    public function __invoke()
-    {
-        $that = new ClassReflector($this);
+  public function __invoke()
+  {
+    $that = new ClassReflector($this);
 
-        foreach ($that->getMethods() as $method) {
-            if ($this->isValidMethod($method)) {
-                $method->invokeArgs($this, func_get_args());
-            }
-        }
-
-        return $this;
+    foreach ($that->getMethods() as $method) {
+      if ($this->isValidMethod($method)) {
+        $method->invokeArgs($this, func_get_args());
+      }
     }
 
-    private function isValidMethod(MethodReflector $method)
-    {
-        if ($method->getName() === 'bootstrap') {
-            return false;
-        }
+    return $this;
+  }
 
-        if ($method->isMagic()) {
-            return false;
-        }
-
-        if (!$method->isPublic()) {
-            return false;
-        }
-
-        return true;
+  private function isValidMethod(MethodReflector $method)
+  {
+    if ($method->getName() === 'bootstrap') {
+      return false;
     }
+
+    if ($method->isMagic()) {
+      return false;
+    }
+
+    if (!$method->isPublic()) {
+      return false;
+    }
+
+    return true;
+  }
 }

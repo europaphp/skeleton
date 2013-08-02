@@ -6,9 +6,9 @@ use Iterator;
 
 class DotFilterIterator extends FilterIterator
 {
-    public function accept()
-    {
-        $path = $this->current()->getBasename();
-        return $path !== '.' && $path !== '..';
-    }
+  public function accept()
+  {
+    $path = $this->current()->getBasename();
+    return $path !== '.' && $path !== '..';
+  }
 }
