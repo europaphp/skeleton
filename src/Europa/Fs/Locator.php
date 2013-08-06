@@ -41,7 +41,7 @@ class Locator
     return $this;
   }
 
-  public function addPath($path, $suffix = null)
+  public function addPath($path, $suffix = 'php')
   {
     $path = $this->root ? $this->root . '/' . $path : $path;
 
@@ -58,10 +58,14 @@ class Locator
   {
     foreach ($paths as $parts) {
       if (!is_array($parts)) {
-        $parts = [$parts, null];
+        $parts = [$parts];
       }
 
-      $this->addPath($parts[0], $parts[1]);
+      if (isset($parts[1])) {
+        $this->addPath($parts[0], $parts[1]);
+      } else {
+        $this->addPath($parts[0]);
+      }
     }
 
     return $this;
