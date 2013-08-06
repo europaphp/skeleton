@@ -13,8 +13,6 @@ class Loader implements LocatorAwareInterface
 
   private $separators = ['_', '\\'];
 
-  private $suffix = '.php';
-
   public function __invoke($class)
   {
     if (class_exists($class, false)) {
@@ -30,7 +28,7 @@ class Loader implements LocatorAwareInterface
     }
 
     $locator = $this->locator;
-    $subject = str_replace($this->separators, DIRECTORY_SEPARATOR, $class) . $this->suffix;
+    $subject = str_replace($this->separators, DIRECTORY_SEPARATOR, $class);
 
     if (isset($this->map[$class])) {
       include $found = $this->map[$class];
@@ -63,17 +61,6 @@ class Loader implements LocatorAwareInterface
   public function setNamespaceSeparators(array $separators)
   {
     $this->separators = $separators;
-    return $this;
-  }
-
-  public function getSuffix()
-  {
-    return $this->suffix;
-  }
-
-  public function setSuffix($suffix)
-  {
-    $this->suffix = $suffix;
     return $this;
   }
 
