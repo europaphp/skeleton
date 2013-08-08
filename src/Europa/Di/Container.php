@@ -11,13 +11,11 @@ class Container implements ContainerInterface
 
   private $cache = [];
 
-  private $dependencies = [];
-
   private $loading = [];
 
   private $services = [];
 
-  private $transient = [];
+  private $templates = [];
 
   private static $instances = [];
 
@@ -68,7 +66,7 @@ class Container implements ContainerInterface
 
     unset($this->loading[$name]);
 
-    if (isset($this->transient[$name])) {
+    if (isset($this->templates[$name])) {
       return $service;
     }
 
@@ -96,12 +94,7 @@ class Container implements ContainerInterface
 
   public function save($as)
   {
-    if (isset(self::$instances[$as])) {
-      throw new Exception\ContainerAlreadyRegistered(['name' => $as]);
-    }
-
     self::$instances[$as] = $this;
-
     return $this;
   }
 
@@ -123,17 +116,11 @@ class Container implements ContainerInterface
     return $this;
   }
 
-  public function depends($name, array $dependencies)
-  {
-    $this->dependencies[$this->resolveAlias($name)] = $dependencies;
-    return $this;
-  }
-
   public function template($name)
   {
     $name = $this->resolveAlias($name);
 
-    $this->transient[$name] = true;
+    $this->templates[$name] = true;
 
     if (isset($this->cache[$name])) {
       unset($this->cache[$name]);

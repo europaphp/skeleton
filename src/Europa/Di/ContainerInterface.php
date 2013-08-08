@@ -12,8 +12,6 @@ interface ContainerInterface
 
   public function alias($name, array $aliases);
 
-  public function depends($name, array $dependencies);
-
   public function template($name);
 
   public function constrain($name, array $types);

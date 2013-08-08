@@ -21,7 +21,6 @@ abstract class ConfigurationAbstract
     foreach ($class->getMethods() as $method) {
       if ($this->isValidMethod($method)) {
         $this->applyAliases($container, $method);
-        $this->applyDependencies($container, $method);
         $this->applyTransient($container, $method);
         $this->applyTypes($container, $method);
         $container->register($method->getName(), $method->getClosure($this));
@@ -55,19 +54,6 @@ abstract class ConfigurationAbstract
 
     if ($aliases) {
       $container->alias($method->getName(), $aliases);
-    }
-  }
-
-  private function applyDependencies(ContainerInterface $container, MethodReflector $method)
-  {
-    $dependencies = [];
-
-    foreach ($method->getParameters() as $param) {
-      $dependencies[] = $param->getName();
-    }
-
-    if ($dependencies) {
-      $container->depends($method->getName(), $dependencies);
     }
   }
 
