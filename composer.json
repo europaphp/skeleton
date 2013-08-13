@@ -17,7 +17,7 @@
         }
     },
     "require": {
-        "php": "5.4.*"
+        "php": ">=5.4.0, <6.0.0"
     },
     "require-dev": {
         "europaphp/module-help": "dev-master",
