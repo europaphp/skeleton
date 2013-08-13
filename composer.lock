@@ -1,5 +1,9 @@
 {
-    "hash": "c0f8dad712a775d57cd8e477ccff6dfd",
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+    ],
+    "hash": "e23f338a7271cea6d0841a0c0d4cc993",
     "packages": [
 
     ],
@@ -10,12 +14,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/treshugart/Testes.git",
-                "reference": "206a6a8fecc6cee8a34db10b123bb5193632e728"
+                "reference": "906f06d8225aa25033b44b5efb1e031a007e9052"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/treshugart/Testes/archive/206a6a8fecc6cee8a34db10b123bb5193632e728.zip",
-                "reference": "206a6a8fecc6cee8a34db10b123bb5193632e728",
+                "url": "https://api.github.com/repos/treshugart/Testes/zipball/906f06d8225aa25033b44b5efb1e031a007e9052",
+                "reference": "906f06d8225aa25033b44b5efb1e031a007e9052",
                 "shasum": ""
             },
             "require": {
@@ -24,7 +28,6 @@
             "require-dev": {
                 "ext-xdebug": "*"
             },
-            "time": "2013-01-23 01:06:13",
             "type": "library",
             "autoload": {
                 "psr-0": {
@@ -46,15 +49,16 @@
             "description": "Dead simple unit and story test framework.",
             "homepage": "http://github.com/treshugart/Testes",
             "keywords": [
-                "testing",
                 "BDD",
-                "test",
                 "Behavior",
                 "development",
-                "unit",
+                "driven",
                 "story",
-                "driven"
-            ]
+                "test",
+                "testing",
+                "unit"
+            ],
+            "time": "2013-07-29 00:50:28"
         }
     ],
     "aliases": [
@@ -63,5 +67,12 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "treshugart/testes": 20
-    }
+    },
+    "platform": {
+        "php": ">=5.4.0, <6.0.0",
+        "ext-yaml": "1.1.*"
+    },
+    "platform-dev": [
+
+    ]
 }
