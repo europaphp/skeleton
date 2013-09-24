@@ -46,6 +46,11 @@ class ServiceContainer implements ServiceContainerInterface
             };
         }
 
+        // Blow away cache if it exists.
+        if (isset($this->cache[$name])) {
+            unset($this->cache[$name]);
+        }
+
         // Rebind the closure to the container.
         $this->services[$name] = $value->bindTo($this);
     }
