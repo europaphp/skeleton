@@ -30,6 +30,8 @@ class Module implements ArrayAccess
 
     private $path;
 
+    private $invoked = false;
+
     public function __construct($path, $config = [])
     {
         if (!$this->path = realpath($path)) {
@@ -50,6 +52,12 @@ class Module implements ArrayAccess
 
     public function __invoke(ManagerInterface $manager)
     {
+        if ($this->invoked) {
+            return $this;
+        }
+
+        $this->invoked = true;
+
         // Ensure all requirements are met.
         $this->validate($manager);
 
@@ -65,10 +73,14 @@ class Module implements ArrayAccess
         $this->applyClassPaths($container->loaderLocator);
         $this->applyViewPaths($container->viewLocator);
 
+
         // If the bootstrapper class exists, invoke it.
         if (class_exists($bootstrapper = $this->getBootstrapperClassName(), true)) {
+            var_dump(__FILE__.':'.__LINE__, spl_object_hash($this), $bootstrapper);
             (new $bootstrapper)->__invoke($this, $manager);
+            var_dump(__FILE__.':'.__LINE__, spl_object_hash($this));
         }
+
 
         return $this;
     }
