@@ -76,9 +76,7 @@ class Module implements ArrayAccess
 
         // If the bootstrapper class exists, invoke it.
         if (class_exists($bootstrapper = $this->getBootstrapperClassName(), true)) {
-            var_dump(__FILE__.':'.__LINE__, spl_object_hash($this), $bootstrapper);
             (new $bootstrapper)->__invoke($this, $manager);
-            var_dump(__FILE__.':'.__LINE__, spl_object_hash($this));
         }
 
 
