@@ -73,12 +73,10 @@ class Module implements ArrayAccess
         $this->applyClassPaths($container->loaderLocator);
         $this->applyViewPaths($container->viewLocator);
 
-
         // If the bootstrapper class exists, invoke it.
         if (class_exists($bootstrapper = $this->getBootstrapperClassName(), true)) {
             (new $bootstrapper)->__invoke($this, $manager);
         }
-
 
         return $this;
     }
