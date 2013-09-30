@@ -8,4 +8,4 @@ before_script:
   - composer selfupdate
   - composer install
 
-script: bin/eu test
+script: bin/eu

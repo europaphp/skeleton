@@ -13,43 +13,31 @@ EuropaPHP is the manifestation of the shortcomings of other PHP frameworks with 
 Installation
 ------------
 
-There are a couple ways to install Europa.
+You can either clone, download the source or use Composer:
 
-### Source
+    composer create-project europaphp/skeleton
 
-Download from Github and extract it to where you want it.
+All required framework components will be available and you should be able to start a server and see something:
 
-### Composer
+    php -S localhost:3000 -t www
 
-    composer create-project treshugart/europaphp [installation path] [branch or tag]
+Then go to:
 
-If you want to use it as a composer package, just add `treshugart/europaphp` to your `composer.json` file.
+    http://localhost:3000
 
-Getting Started
----------------
+You can also see the available commands:
 
-To get up and running fast you can use composer to install some default modules. Just run:
-
-    composer install --dev
-
-And the modules `europaphp/main` and `europaphp/tests` will be installed. Once installed, you can run the base tests and begin writing your own.
-
-Running Tests
--------------
-
-From the install directory:
-
-    php www/index.php test
+    bin/eu ?
 
 Contributing
 ------------
 
-To contribute, just fork and submit pull-requests. Each request will be reviewed and ideally include corresponding tests. If there are any updates to the API updating the documentation is also desirable.
+Fork. Test. Code. Submit. Rinse. Repeat. Crack a beer.
 
 License
 -------
 
-Copyright (c) 2005-2011 Trey Shugart
+Copyright (c) 2005-2013 Trey Shugart
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
