@@ -180,35 +180,6 @@ Autoload paths are taken from the `srcPaths` configuration option and defaults t
 
 View paths are taken from the `viewPaths` configuration option and defaults to `views`. This can either be a string or array of paths relative to the module install path.
 
-Application Events
-------------------
-
-During the course of invoking your application some events will be triggered that you can bind handlers to. To bind handlers to the application service, you use the service container bound to it:
-
-    $app->event->on('route', function() {
-        // do something
-    });
-
-#### route
-
-Triggered prior to routing to a controller. The application instance is passed as the only argument to the event handler.
-
-#### action
-
-Triggered prior to actioning the controller. The application instance is passed as the first argument to the event handler and the controller as the second.
-
-#### render
-
-Triggered prior to rendering the view with the context returned from the action. The application instance is passed as the first argument and the context returned from the controller is the second.
-
-#### send
-
-Triggered prior to sending the response. The application instance is passed as the first argument and the rendered response as the second.
-
-#### done
-
-Triggered just before the dispatching completes. The application instance is the only passed argument.
-
 Saving and Accessing Your Application Instance
 ----------------------------------------------
 

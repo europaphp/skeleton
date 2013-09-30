@@ -28,11 +28,6 @@ Di
 
 Service containers and locators for finding and managing configured object instances.
 
-Event
------
-
-Simple event management using string event names and `callable` event handlers.
-
 Exception
 ---------
 
