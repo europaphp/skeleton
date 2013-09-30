@@ -3,26 +3,779 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "336ef6ac478db176e1ed64956c8c0cb7",
+    "hash": "ddacd532995a14f6a6ecbc30ef1d636f",
     "packages": [
-
-    ],
-    "packages-dev": [
+        {
+            "name": "europaphp/component-app",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/europaphp/component-app.git",
+                "reference": "647f4dbc0f995b669c7c1148b36efdd7654cdb7a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/component-app/zipball/647f4dbc0f995b669c7c1148b36efdd7654cdb7a",
+                "reference": "647f4dbc0f995b669c7c1148b36efdd7654cdb7a",
+                "shasum": ""
+            },
+            "require": {
+                "europaphp/component-di": "dev-master",
+                "europaphp/component-exception": "dev-master",
+                "europaphp/component-filter": "dev-master",
+                "europaphp/component-module": "dev-master",
+                "europaphp/component-reflection": "dev-master",
+                "europaphp/component-request": "dev-master",
+                "europaphp/component-response": "dev-master",
+                "europaphp/component-view": "dev-master",
+                "php": ">=5.4.0, <6.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Europa": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "EuropaPHP application component.",
+            "keywords": [
+                "Simple",
+                "controller",
+                "fast",
+                "modular",
+                "module",
+                "mvc",
+                "scalable",
+                "view"
+            ],
+            "time": "2013-09-30 12:20:46"
+        },
+        {
+            "name": "europaphp/component-bootstrapper",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/europaphp/component-bootstrapper.git",
+                "reference": "9f424b6f69a79ed95bf356f64c05e2849d219bce"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/component-bootstrapper/zipball/9f424b6f69a79ed95bf356f64c05e2849d219bce",
+                "reference": "9f424b6f69a79ed95bf356f64c05e2849d219bce",
+                "shasum": ""
+            },
+            "require": {
+                "europaphp/component-reflection": "dev-master",
+                "php": ">=5.4.0, <6.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Europa": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "EuropaPHP bootstrapper component.",
+            "keywords": [
+                "Simple",
+                "controller",
+                "fast",
+                "modular",
+                "module",
+                "mvc",
+                "scalable",
+                "view"
+            ],
+            "time": "2013-09-30 12:20:57"
+        },
+        {
+            "name": "europaphp/component-config",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/europaphp/component-config.git",
+                "reference": "677b163049f1e3c92c7755f104ea96c3110f4a0a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/component-config/zipball/677b163049f1e3c92c7755f104ea96c3110f4a0a",
+                "reference": "677b163049f1e3c92c7755f104ea96c3110f4a0a",
+                "shasum": ""
+            },
+            "require": {
+                "europaphp/component-exception": "dev-master",
+                "php": ">=5.4.0, <6.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Europa": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "EuropaPHP configuration component.",
+            "keywords": [
+                "Simple",
+                "controller",
+                "fast",
+                "modular",
+                "module",
+                "mvc",
+                "scalable",
+                "view"
+            ],
+            "time": "2013-09-30 12:21:14"
+        },
+        {
+            "name": "europaphp/component-di",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/europaphp/component-di.git",
+                "reference": "7a7b3686b4d2ab2e564000b79a9ef344b64c38ea"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/component-di/zipball/7a7b3686b4d2ab2e564000b79a9ef344b64c38ea",
+                "reference": "7a7b3686b4d2ab2e564000b79a9ef344b64c38ea",
+                "shasum": ""
+            },
+            "require": {
+                "europaphp/component-exception": "dev-master",
+                "europaphp/component-iterator": "dev-master",
+                "php": ">=5.4.0, <6.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Europa": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "EuropaPHP dependency injection component.",
+            "keywords": [
+                "Simple",
+                "controller",
+                "fast",
+                "modular",
+                "module",
+                "mvc",
+                "scalable",
+                "view"
+            ],
+            "time": "2013-09-30 12:21:32"
+        },
+        {
+            "name": "europaphp/component-exception",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/europaphp/component-exception.git",
+                "reference": "570d43c5b0ae2a3ce59b235c30650dd601112017"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/component-exception/zipball/570d43c5b0ae2a3ce59b235c30650dd601112017",
+                "reference": "570d43c5b0ae2a3ce59b235c30650dd601112017",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0, <6.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Europa": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "EuropaPHP exception component.",
+            "keywords": [
+                "Simple",
+                "controller",
+                "fast",
+                "modular",
+                "module",
+                "mvc",
+                "scalable",
+                "view"
+            ],
+            "time": "2013-09-30 11:54:42"
+        },
+        {
+            "name": "europaphp/component-filter",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/europaphp/component-filter.git",
+                "reference": "5689b994c242c14c463a30b9e831a617400e9887"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/component-filter/zipball/5689b994c242c14c463a30b9e831a617400e9887",
+                "reference": "5689b994c242c14c463a30b9e831a617400e9887",
+                "shasum": ""
+            },
+            "require": {
+                "europaphp/component-config": "dev-master",
+                "europaphp/component-iterator": "dev-master",
+                "php": ">=5.4.0, <6.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Europa": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "EuropaPHP filter component.",
+            "keywords": [
+                "Simple",
+                "controller",
+                "fast",
+                "modular",
+                "module",
+                "mvc",
+                "scalable",
+                "view"
+            ],
+            "time": "2013-09-30 12:21:54"
+        },
+        {
+            "name": "europaphp/component-fs",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/europaphp/component-fs.git",
+                "reference": "c08b612da2e0f742a27184c985a5555834a26e57"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/component-fs/zipball/c08b612da2e0f742a27184c985a5555834a26e57",
+                "reference": "c08b612da2e0f742a27184c985a5555834a26e57",
+                "shasum": ""
+            },
+            "require": {
+                "europaphp/component-exception": "dev-master",
+                "europaphp/component-iterator": "dev-master",
+                "php": ">=5.4.0, <6.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Europa": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "EuropaPHP filesystem component.",
+            "keywords": [
+                "Simple",
+                "controller",
+                "fast",
+                "modular",
+                "module",
+                "mvc",
+                "scalable",
+                "view"
+            ],
+            "time": "2013-09-30 12:22:10"
+        },
+        {
+            "name": "europaphp/component-iterator",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/europaphp/component-iterator.git",
+                "reference": "791a3cd3f3e7f60ad90e49116e782d6cf95a03ec"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/component-iterator/zipball/791a3cd3f3e7f60ad90e49116e782d6cf95a03ec",
+                "reference": "791a3cd3f3e7f60ad90e49116e782d6cf95a03ec",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0, <6.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Europa": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "EuropaPHP iterator component.",
+            "keywords": [
+                "Simple",
+                "controller",
+                "fast",
+                "modular",
+                "module",
+                "mvc",
+                "scalable",
+                "view"
+            ],
+            "time": "2013-09-30 11:55:31"
+        },
+        {
+            "name": "europaphp/component-module",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/europaphp/component-module.git",
+                "reference": "52f0878d96e37e93ad24e87897b68a8bba091b23"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/component-module/zipball/52f0878d96e37e93ad24e87897b68a8bba091b23",
+                "reference": "52f0878d96e37e93ad24e87897b68a8bba091b23",
+                "shasum": ""
+            },
+            "require": {
+                "europaphp/component-config": "dev-master",
+                "europaphp/component-exception": "dev-master",
+                "europaphp/component-filter": "dev-master",
+                "europaphp/component-version": "dev-master",
+                "php": ">=5.4.0, <6.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Europa": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "EuropaPHP module component.",
+            "keywords": [
+                "Simple",
+                "controller",
+                "fast",
+                "modular",
+                "module",
+                "mvc",
+                "scalable",
+                "view"
+            ],
+            "time": "2013-09-30 12:22:57"
+        },
+        {
+            "name": "europaphp/component-reflection",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/europaphp/component-reflection.git",
+                "reference": "b00ac0b530985442aff40a21d6404bdff8a99c25"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/component-reflection/zipball/b00ac0b530985442aff40a21d6404bdff8a99c25",
+                "reference": "b00ac0b530985442aff40a21d6404bdff8a99c25",
+                "shasum": ""
+            },
+            "require": {
+                "europaphp/component-exception": "dev-master",
+                "php": ">=5.4.0, <6.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Europa": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "EuropaPHP reflection component.",
+            "keywords": [
+                "Simple",
+                "controller",
+                "fast",
+                "modular",
+                "module",
+                "mvc",
+                "scalable",
+                "view"
+            ],
+            "time": "2013-09-30 12:23:10"
+        },
+        {
+            "name": "europaphp/component-request",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/europaphp/component-request.git",
+                "reference": "c2a8a549c8410245e7f6cd27bd8f829824a2dbcf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/component-request/zipball/c2a8a549c8410245e7f6cd27bd8f829824a2dbcf",
+                "reference": "c2a8a549c8410245e7f6cd27bd8f829824a2dbcf",
+                "shasum": ""
+            },
+            "require": {
+                "europaphp/component-exception": "dev-master",
+                "europaphp/component-filter": "dev-master",
+                "php": ">=5.4.0, <6.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Europa": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "EuropaPHP request component.",
+            "keywords": [
+                "Simple",
+                "controller",
+                "fast",
+                "modular",
+                "module",
+                "mvc",
+                "scalable",
+                "view"
+            ],
+            "time": "2013-09-30 12:23:33"
+        },
+        {
+            "name": "europaphp/component-response",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/europaphp/component-response.git",
+                "reference": "7c62fcfd6b277b7a150221cc2039b330e943e70f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/component-response/zipball/7c62fcfd6b277b7a150221cc2039b330e943e70f",
+                "reference": "7c62fcfd6b277b7a150221cc2039b330e943e70f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0, <6.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Europa": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "EuropaPHP response component.",
+            "keywords": [
+                "Simple",
+                "controller",
+                "fast",
+                "modular",
+                "module",
+                "mvc",
+                "scalable",
+                "view"
+            ],
+            "time": "2013-09-30 11:56:38"
+        },
+        {
+            "name": "europaphp/component-router",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/europaphp/component-router.git",
+                "reference": "476ee848b9fb8a75f1a2650336d7a4486322785d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/component-router/zipball/476ee848b9fb8a75f1a2650336d7a4486322785d",
+                "reference": "476ee848b9fb8a75f1a2650336d7a4486322785d",
+                "shasum": ""
+            },
+            "require": {
+                "europaphp/component-exception": "dev-master",
+                "europaphp/component-router": "dev-master",
+                "php": ">=5.4.0, <6.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Europa": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "EuropaPHP routing component.",
+            "keywords": [
+                "Simple",
+                "controller",
+                "fast",
+                "modular",
+                "module",
+                "mvc",
+                "scalable",
+                "view"
+            ],
+            "time": "2013-09-30 12:23:59"
+        },
+        {
+            "name": "europaphp/component-version",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/europaphp/component-version.git",
+                "reference": "6cd9bd3a47a754f0b152624bf48a07eecfa3ef6b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/component-version/zipball/6cd9bd3a47a754f0b152624bf48a07eecfa3ef6b",
+                "reference": "6cd9bd3a47a754f0b152624bf48a07eecfa3ef6b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0, <6.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Europa": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "EuropaPHP version component.",
+            "keywords": [
+                "Simple",
+                "controller",
+                "fast",
+                "modular",
+                "module",
+                "mvc",
+                "scalable",
+                "view"
+            ],
+            "time": "2013-09-30 11:57:13"
+        },
+        {
+            "name": "europaphp/component-view",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/europaphp/component-view.git",
+                "reference": "e40a2cdfe3182454a225120a39292574080788c7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/europaphp/component-view/zipball/e40a2cdfe3182454a225120a39292574080788c7",
+                "reference": "e40a2cdfe3182454a225120a39292574080788c7",
+                "shasum": ""
+            },
+            "require": {
+                "europaphp/component-config": "dev-master",
+                "europaphp/component-di": "dev-master",
+                "europaphp/component-exception": "dev-master",
+                "europaphp/component-filter": "dev-master",
+                "europaphp/component-fs": "dev-master",
+                "europaphp/component-request": "dev-master",
+                "europaphp/component-router": "dev-master",
+                "php": ">=5.4.0, <6.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Europa": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trey Shugart",
+                    "email": "treshugart@gmail.com",
+                    "homepage": "http://iamtres.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "EuropaPHP view component.",
+            "keywords": [
+                "Simple",
+                "controller",
+                "fast",
+                "modular",
+                "module",
+                "mvc",
+                "scalable",
+                "view"
+            ],
+            "time": "2013-09-30 12:24:34"
+        },
         {
             "name": "europaphp/module-help",
             "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/europaphp/module-help.git",
-                "reference": "8d9dd6f931a3b1c790c47e736acd83b609f090fa"
+                "reference": "fe5125217c9ad00756caec1a9a78b63f642c084d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-help/zipball/8d9dd6f931a3b1c790c47e736acd83b609f090fa",
-                "reference": "8d9dd6f931a3b1c790c47e736acd83b609f090fa",
+                "url": "https://api.github.com/repos/europaphp/module-help/zipball/fe5125217c9ad00756caec1a9a78b63f642c084d",
+                "reference": "fe5125217c9ad00756caec1a9a78b63f642c084d",
                 "shasum": ""
             },
             "require": {
+                "europaphp/component-module": "dev-master",
+                "europaphp/component-reflection": "dev-master",
+                "europaphp/component-request": "dev-master",
+                "europaphp/component-router": "dev-master",
                 "europaphp/module-main": "dev-master"
             },
             "type": "library",
@@ -31,7 +784,7 @@
                     "": "src"
                 }
             },
-            "notification-url": "http://packagist.org/downloads/",
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -49,7 +802,7 @@
                 "help",
                 "man"
             ],
-            "time": "2013-08-02 05:43:51"
+            "time": "2013-09-30 12:28:40"
         },
         {
             "name": "europaphp/module-main",
@@ -57,55 +810,25 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/europaphp/module-main.git",
-                "reference": "ae1cb6e34c6006fb885b774292cc0b728a15053f"
+                "reference": "77f0575063c452e1a9c0cea94334a4914175bc04"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-main/zipball/ae1cb6e34c6006fb885b774292cc0b728a15053f",
-                "reference": "ae1cb6e34c6006fb885b774292cc0b728a15053f",
-                "shasum": ""
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Trey Shugart",
-                    "email": "treshugart@gmail.com",
-                    "homepage": "http://iamtres.com",
-                    "role": "Lead Developer"
-                }
-            ],
-            "description": "Main module dependency for some other modules.",
-            "keywords": [
-                "default",
-                "main"
-            ],
-            "time": "2013-08-08 07:22:05"
-        },
-        {
-            "name": "europaphp/module-tests",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/europaphp/module-tests.git",
-                "reference": "e2bfaed0a8b2857f95846dc149a7c8c463c6f698"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/europaphp/module-tests/zipball/e2bfaed0a8b2857f95846dc149a7c8c463c6f698",
-                "reference": "e2bfaed0a8b2857f95846dc149a7c8c463c6f698",
+                "url": "https://api.github.com/repos/europaphp/module-main/zipball/77f0575063c452e1a9c0cea94334a4914175bc04",
+                "reference": "77f0575063c452e1a9c0cea94334a4914175bc04",
                 "shasum": ""
             },
             "require": {
-                "europaphp/module-main": "dev-master"
+                "europaphp/component-app": "dev-master",
+                "europaphp/component-bootstrapper": "dev-master",
+                "europaphp/component-di": "dev-master",
+                "europaphp/component-fs": "dev-master",
+                "europaphp/component-module": "dev-master",
+                "europaphp/component-reflection": "dev-master",
+                "europaphp/component-request": "dev-master",
+                "europaphp/component-response": "dev-master",
+                "europaphp/component-router": "dev-master",
+                "europaphp/component-view": "dev-master"
             },
             "type": "library",
             "autoload": {
@@ -125,76 +848,26 @@
                     "role": "Lead Developer"
                 }
             ],
-            "description": "Tests and test runner for EuropaPHP.",
+            "description": "Module that adds convetion and functionality to EuorpaPHP apps.",
             "keywords": [
                 "cli",
                 "help",
                 "man"
             ],
-            "time": "2013-08-08 07:22:16"
-        },
-        {
-            "name": "treshugart/testes",
-            "version": "1.0.x-dev",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/treshugart/Testes.git",
-                "reference": "906f06d8225aa25033b44b5efb1e031a007e9052"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/treshugart/Testes/zipball/906f06d8225aa25033b44b5efb1e031a007e9052",
-                "reference": "906f06d8225aa25033b44b5efb1e031a007e9052",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.4.0"
-            },
-            "require-dev": {
-                "ext-xdebug": "*"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "Testes": "src"
-                }
-            },
-            "notification-url": "http://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Trey Shugart",
-                    "email": "treshugart@gmail.com",
-                    "homepage": "http://iamtres.com",
-                    "role": "Lead Developer"
-                }
-            ],
-            "description": "Dead simple unit and story test framework.",
-            "homepage": "http://github.com/treshugart/Testes",
-            "keywords": [
-                "BDD",
-                "Behavior",
-                "development",
-                "driven",
-                "story",
-                "test",
-                "testing",
-                "unit"
-            ],
-            "time": "2013-07-29 00:50:28"
+            "time": "2013-09-30 12:28:53"
         }
+    ],
+    "packages-dev": [
+
     ],
     "aliases": [
 
     ],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "stability-flags": {
+        "europaphp/component-app": 20,
         "europaphp/module-help": 20,
-        "europaphp/module-main": 20,
-        "europaphp/module-tests": 20,
-        "treshugart/testes": 20
+        "europaphp/module-main": 20
     },
     "platform": {
         "php": ">=5.4.0, <6.0.0"

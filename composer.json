@@ -1,5 +1,5 @@
 {
-    "name": "europaphp/europaphp",
+    "name": "europaphp/skeleton",
     "description": "A skeleton EuropaPHP app.",
     "keywords": ["mvc", "view", "controller", "fast", "scalable", "simple", "module", "modular"],
     "license": "MIT",
@@ -18,9 +18,9 @@
     },
     "require": {
         "php": ">=5.4.0, <6.0.0",
-        "devco/testes": "1.0.x-dev",
-        "europaphp/app": "dev-master",
+        "europaphp/component-app": "dev-master",
         "europaphp/module-help": "dev-master",
         "europaphp/module-main": "dev-master"
-    }
+    },
+    "minimum-stability": "dev"
 }
