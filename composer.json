@@ -1,6 +1,6 @@
 {
     "name": "europaphp/europaphp",
-    "description": "A feather-weight, extremely-fast, diverse, scalable and productive PHP 5.4 View Controller framework.",
+    "description": "A skeleton EuropaPHP app.",
     "keywords": ["mvc", "view", "controller", "fast", "scalable", "simple", "module", "modular"],
     "license": "MIT",
     "authors": [
@@ -17,18 +17,10 @@
         }
     },
     "require": {
-        "php": ">=5.4.0, <6.0.0"
-    },
-    "require-dev": {
+        "php": ">=5.4.0, <6.0.0",
+        "devco/testes": "1.0.x-dev",
+        "europaphp/app": "dev-master",
         "europaphp/module-help": "dev-master",
-        "europaphp/module-main": "dev-master",
-        "europaphp/module-tests": "dev-master",
-        "treshugart/testes": "1.0.x-dev"
-    },
-    "replace": {
-        "treshugart/europaphp": "*"
-    },
-    "suggest": {
-        "ext-yaml": "Recommended for using YAML-based configuration files."
+        "europaphp/module-main": "dev-master"
     }
 }
