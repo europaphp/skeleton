@@ -8,7 +8,7 @@ EuropaPHP is an extremely fast, flexible and lightweight <del>M</del>VC Framewor
 Why Another PHP Framework?
 --------------------------
 
-EuropaPHP is the manifestation of the shortcomings of other PHP frameworks with a strong focus on scalability, standards, the view/controller relationship and dependency injection. It is specifically designed to be paired with your favourite libraries and it will seamlessly integrate with anything.
+EuropaPHP is the manifestation of the shortcomings of other PHP frameworks with a strong focus on modularity, scalability, standards, the view/controller relationship and dependency injection. It is specifically designed to be paired with your favourite libraries and it will seamlessly integrate with anything.
 
 Installation
 ------------
@@ -28,53 +28,11 @@ If you want to use it as a composer package, just add `treshugart/europaphp` to 
 Getting Started
 ---------------
 
-Everything is already all set up for you in a sample module called `main`. To get an overview of how everything fits together, the default conventions and how to customize your app, see the readme in the `Europa\App` component directory.
+To get up and running fast you can use composer to install some default modules. Just run:
 
-Documentation
--------------
+    composer install --dev
 
-To check out the documentation, just go into the `src` directory. Each directory has a `readme` that corresponds to it. To update the documentation, fork, pull-request, rinse, repeat.
-
-Key Features
-------------
-
-There's a lot of new stuff. For a more in depth look, check out each component's readme.
-
-### SRP and API Design
-
-EuropaPHP 2's major difference to previous releases is it's focus on how the Single Responsibility Principle is applied in a PHP context. As a result of this design, a lot of class functionality can be exposed through a single method. When this was the case, in order to maximise flexibility and eliminate unnecessary complexity, the class would expose that functionality using `__invoke()`. This makes the class itself interchangeable with anything that `is_callable()`. By utilising PHP 5.4, type-hints have been placed where appropriate to use `callable` so that you can use a callable class or closure to do what you need.
-
-### Service Containers
-
-Another major difference is how service containers are configured. Service containers take configurations via a `configure()` method. The configuration can be anything that is `callable`, however, there is a `Europa\Di\ConfigurationAbstract` class that you can extend to organise your configurations into classes. A benefit to using these classes is that you can define interfaces for these configurations and then check the container if they provide that configuration or configuration interface.
-
-### Controllers
-
-Controllers can now simply be closures, or anything that is `callable`. This way, you can have very lightweight controllers that don't require any other fucntionality, or you can extend the `Europa\Controller\ControllerAbstract` class to give you access to named arguments and filters.
-
-### Configuration
-
-An emphasis has also been placed on passing configurations into class constructors where appropriate. This is the case for routes as well as certain views and the main application component. In doing this, a `Europa\Config\Config` class was created to make using configurations easier. The configuration component ships with a few adapters to solve most of your needs: `Europa\Config\Adapter\Ini`, `Europa\Config\Adapter\Json` and `Europa\Config\Adapter\Php`. The config class allows for dot-notation to be used for option names as well as referencing other opiton values within another option value.
-
-### Event Management
-
-An `Event` component now exists to allow your application to create hooks at any point in it's lifecycle. As with many other parts, events can be anything that is `callable`.
-
-### Reflection
-
-The reflection component now contains a `FunctionReflector` for reflecting closures as well as normal functions.
-
-### Easier Routing
-
-The router has been completely overhauled to make it easier to define your application's structure. Since routes are passed a configuration we can use the `Config` component to read route configurations and directly pass it on to the route. As a result, all of the types of configuration files that are supported by the `Config` component are available to the router as well.
-
-### Effortless Content Negotiation
-
-The `View` component now ships with a `Negotiator` that will return - based on the request that is passed in - a certain view class appropriate to handle the given request. The negotiator is configurable to a point and is `callable`, so substituting your own is very easy.
-
-### Application Abstraction
-
-The `App` component was added to provide a way of eliminating as much boilerplate code as possible while still giving you as much flexibility as possible. It takes a single service container that it uses to grab it's dependencies from. This service container must provide `Europa\App\AppConfigurationInterface` or be configured with `Europa\App\AppConfiguration`. This means that you can substitute dependencies into it's container if need be to alter it in any way shape or form. It comes with good defaults so you probably won't have to do anything. Additionally, it accepts configuration options in its constructor to control smaller things like paths and naming conventions.
+And the modules `europaphp/main` and `europaphp/tests` will be installed. Once installed, you can run the base tests and begin writing your own.
 
 Running Tests
 -------------
@@ -83,17 +41,10 @@ From the install directory:
 
     php www/index.php test
 
-Command Line Usage
-------------------
-
-To checkout available commands, run:
-
-    php www/index.php ?
-
 Contributing
 ------------
 
-To contirbute, just fork and submit pull-requests. Each request will be reviewed and ideally will include corresponding tests and possibly a place in the documentation.
+To contribute, just fork and submit pull-requests. Each request will be reviewed and ideally include corresponding tests. If there are any updates to the API updating the documentation is also desirable.
 
 License
 -------

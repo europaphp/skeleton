@@ -1,17 +1,15 @@
 <?php
 
 namespace Europa\View;
-use Europa\Config\Config;
-use Europa\Di\Locator;
+use Europa\Di\DependencyInjectorAware;
+use Europa\Di\DependencyInjectorAwareInterface;
 use Europa\Exception\Exception;
-use Europa\Filter\ClassNameFilter;
-use Europa\Fs\Locator\LocatorArray;
 
-class Php extends ViewScriptAbstract
+class Php implements DependencyInjectorAwareInterface, ScriptAwareInterface, ViewInterface
 {
+    use DependencyInjectorAware, ScriptAware;
+
     private $child;
-    
-    private $helpers;
     
     private $extendStack = array();
     
@@ -21,16 +19,14 @@ class Php extends ViewScriptAbstract
 
     private $context;
     
-    public function __invoke(array $context = [])
+    public function render(array $context = [])
     {
-        // A script must be set.
         if (!$this->getScript()) {
             Exception::toss('No view script was specified.');
         }
 
-        // ensure the script can be found
         if (!$script = $this->locateScript()) {
-            Exception::toss('The script "%s" does not exist.', $this->formatScript());
+            Exception::toss('The script "%s" does not exist.', $this->getScript());
         }
 
         // apply context
@@ -60,30 +56,10 @@ class Php extends ViewScriptAbstract
             $this->child = $rendered;
             
             // render and return the output of the parent
-            return $this->__invoke($context);
+            return $this->render($context);
         }
         
         return $rendered;
-    }
-
-    public function context($name)
-    {
-        if (!$name) {
-            return $this->context;
-        }
-
-        return isset($this->context[$name]) ? $this->context[$name] : null;
-    }
-
-    public function helper($name)
-    {
-        if (!$this->helpers) {
-            Exception::toss('Could not return helper "%s" because it does not exist.', $name);
-        }
-
-        $helpers = $this->helpers;
-
-        return $helpers($name);
     }
     
     public function renderScript($script, array $context = array())
@@ -99,7 +75,7 @@ class Php extends ViewScriptAbstract
         $this->childScript  = null;
         
         // capture rendered script
-        $render = $this->__invoke($context);
+        $render = $this->render($context);
         
         // reapply old state
         $this->setScript($oldScript);
@@ -112,6 +88,28 @@ class Php extends ViewScriptAbstract
     public function renderChild()
     {
         return $this->child;
+    }
+
+    public function context($name = null)
+    {
+        if (!$name) {
+            return $this->context;
+        }
+
+        return isset($this->context[$name]) ? $this->context[$name] : null;
+    }
+
+    public function helper($name)
+    {
+        if (!$injector = $this->getDependencyInjector()) {
+            Exception::toss('Cannot get helper "%s" from view "%s" because no container was set.', $name, $this->getScript());
+        }
+
+        if (!$injector->has($name)) {
+            Exception::toss('Cannot get helper "%s" from view "%s" because it does not exist in the bound container.', $name, $this->getScript());
+        }
+
+        return $injector->get($name);
     }
     
     public function extend($parent)
@@ -136,16 +134,5 @@ class Php extends ViewScriptAbstract
         $this->parentScript = $parent;
         
         return $this;
-    }
-    
-    public function setServiceContainer(callable $helpers)
-    {
-        $this->helpers = $helpers;
-        return $this;
-    }
-    
-    public function getServiceContainer()
-    {
-        return $this->helpers;
     }
 }

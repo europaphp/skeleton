@@ -1,24 +1,40 @@
 <?php
 
 namespace Europa\Reflection;
+use Closure;
 use Europa\Exception\Exception;
 
-class CallableReflector
+class CallableReflector implements ReflectorInterface
 {
-    public static function detect(callable $callable)
+    private $reflector;
+
+    public function __construct(callable $callable)
     {
-        if ($callable instanceof \Closure || function_exists($callable)) {
-            return new \ReflectionFunction($callable);
+        if ($callable instanceof Closure || (is_string($callable) && function_exists($callable))) {
+            $this->reflector = new FunctionReflector($callable);
+        } elseif (is_array($callable)) {
+            $this->reflector = new MethodReflector($callable[0], $callable[1]);
+        } elseif (is_object($callable)) {
+            $this->reflector = new ClassReflector($callable);
         }
 
-        if (is_array($callable)) {
-            return new MethodReflector($callable[0], $callable[1]);
+        if (!$this->reflector) {
+            Exception::toss('The callable could not be reflected.');
         }
+    }
 
-        if (is_object($callable)) {
-            return new ClassReflector($callable);
-        }
+    public function __toString()
+    {
+        return $this->reflector->__toString();
+    }
 
-        Exception::toss('The callable could not be reflected.');
+    public function getDocBlock()
+    {
+        return $this->reflector->getDocBlock();
+    }
+
+    public function getReflector()
+    {
+        return $this->reflector;
     }
 }

@@ -3,9 +3,17 @@
 namespace Europa\View;
 use Europa\Di\ConfigurationAbstract;
 use Europa\Di\ServiceContainerInterface;
+use Europa\Router\Router;
 
 class HelperConfiguration extends ConfigurationAbstract
 {
+    private $router;
+
+    public function __construct(Router $router = null)
+    {
+        $this->router = $router;
+    }
+
     public function capture()
     {
         return new Helper\Capture;
@@ -31,8 +39,8 @@ class HelperConfiguration extends ConfigurationAbstract
         return new Helper\Json;
     }
 
-    public function uri(Router $router = null)
+    public function uri()
     {
-        return new Helper\Uri($router);
+        return new Helper\Uri($this->router);
     }
 }

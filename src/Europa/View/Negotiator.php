@@ -5,75 +5,78 @@ use Europa\Config\Config;
 use Europa\Request\Http;
 use Europa\Request\RequestInterface;
 
-class Negotiator
+class Negotiator implements NegotiatorInterface
 {
-    private $config = [
-        'jsonpParam' => 'callback',
-        'xmlConfig'  => [],
-        'suffixMap'   => [
-            'json' => 'resolveJson',
-            'xml'  => 'resolveXml'
-        ],
-        'typeMap' => [
-            'application/json'       => 'resolveJson',
-            'application/javascript' => 'resolveJson',
-            'text/xml'               => 'resolveXml'
-        ]
+    private $suffixMap = [
+        'json' => 'resolveJson',
+        'xml'  => 'resolveXml'
     ];
 
-    private $viewScriptFilter;
+    private $typeMap = [
+        'application/json'       => 'resolveJson',
+        'application/javascript' => 'resolveJson',
+        'text/xml'               => 'resolveXml'
+    ];
 
-    public function __construct($config = [])
+    private $config = [
+        'jsonp-param'     => 'callback',
+        'xml-view-config' => []
+    ];
+
+    private $request;
+
+    public function __construct(RequestInterface $request, $config = [])
     {
-        $this->config = new Config($this->config, $config);
-        $this->viewScriptFilter = [$this, 'viewScriptFilter'];
+        $this->config  = new Config($this->config, $config);
+        $this->request = $request;
     }
 
-    public function __invoke(RequestInterface $request)
+    public function negotiate()
     {
         $view = null;
 
-        // We only negotiate a content type if the request is using Http.
-        if ($request instanceof Http) {
+        if ($this->isRequestNegotiable($this->request)) {
             $method = null;
 
-            // Specifying a suffix overrides the Accept header.
-            if ($suffix = $request->getUri()->getSuffix()) {
-                $method = $this->config->suffixMap[$suffix];
-            } elseif ($type = $request->accepts(array_keys($this->config->typeMap->export()))) {
-                $method = $this->config->typeMap[$type];
+            if ($suffix = $this->request->getUri()->getSuffix()) {
+                $method = $this->suffixMap[$suffix];
+            } elseif ($type = $this->request->accepts(array_keys($this->typeMap))) {
+                $method = $this->typeMap[$type];
             }
 
-            // Only render a different view if one exists.
             if ($method && method_exists($this, $method)) {
-                $view = $this->$method($request);
+                $view = $this->$method($this->request);
             }
         }
 
-        // Default to using a PHP view.
         if (!$view) {
-            $view = $this->resolvePhp($request);
+            $view = $this->resolvePhp($this->request);
         }
 
         return $view;
     }
 
-    private function resolveJson($request)
+    private function resolveJson()
     {
-        if ($callback = $request->getParam($this->config->jsonpParam)) {
+        if ($callback = $this->request->getParam($this->config['jsonp-param'])) {
             return new Jsonp($callback);
         }
 
         return new Json;
     }
 
-    private function resolvePhp($request)
+    private function resolvePhp()
     {
-        return new Php($this->config->phpView);
+        return new Php;
     }
 
-    private function resolveXml($request)
+    private function resolveXml()
     {
-        return new Xml($this->config->xmlConfig);
+        return new Xml($this->config['xml-view-config']);
+    }
+
+    private function isRequestNegotiable()
+    {
+        return $this->request instanceof Http;
     }
 }

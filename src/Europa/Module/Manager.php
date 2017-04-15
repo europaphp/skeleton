@@ -2,78 +2,69 @@
 
 namespace Europa\Module;
 use ArrayIterator;
-use Europa\Config\Config;
+use Europa\Di\DependencyInjectorInterface;
 use Europa\Exception\Exception;
-use Europa\Di\ServiceContainerInterface;
+use Europa\Version\SemVer;
+use ReflectionExtension;
 
 class Manager implements ManagerInterface
 {
-    private $container;
+    const VALID_NAME_REGEX = '/[a-z][a-z0-9\-]*\/[a-z][a-z0-9\-]*/';
+
+    private $bootstrapped = [];
+
+    private $injector;
 
     private $modules = [];
 
-    public function __construct(ServiceContainerInterface $container)
+    public function __construct(DependencyInjectorInterface $injector)
     {
-        $this->setServiceContainer($container);
-    }
-
-    public function setServiceContainer(ServiceContainerInterface $container)
-    {
-        $this->container = $container->mustProvide('Europa\Module\ManagerConfigurationInterface');
-        return $this;
-    }
-
-    public function getServiceContainer()
-    {
-        return $this->container;
+        $this->injector = $injector;
     }
 
     public function bootstrap()
     {
         foreach ($this->modules as $module) {
-            $module($this);
+            if (!in_array($module->name(), $this->bootstrapped)) {
+                $this->validate($module);
+                $this->bootstrapDependencies($module);
+                $module->bootstrap($this->injector);
+                $this->bootstrapped[] = $module->name();
+            }
         }
         
         return $this;
     }
 
-    public function offsetSet($offset, $module)
+    public function add(ModuleInterface $module)
     {
-        if (is_string($module)) {
-            $offset = $module;
-            $module = [];
+        $name = $module->name();
+
+        if (isset($this->modules[$name])) {
+            Exception::toss('Cannot add module "%s" because it already exists. This may be because another module you are adding is attempting to use the same name.', $name);
         }
 
-        if (!is_callable($module)) {
-            $module = new Module($this->container->config->appPath . '/' . $offset, $module);
+        if (!preg_match(self::VALID_NAME_REGEX, $name)) {
+            Exception::toss('Modules names are required to be in the format "vendor-name/module-name". The name must be compliant with https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md.');
         }
 
-        $this->modules[$offset] = $module;
+        $this->modules[$name] = $module;
 
         return $this;
     }
 
-    public function offsetGet($offset)
+    public function get($name)
     {
-        if (isset($this->modules[$offset])) {
-            return $this->modules[$offset];
+        if (isset($this->modules[$name])) {
+            return $this->modules[$name];
         }
 
-        Exception::toss('The module "%s" does not exist.', $offset);
+        Exception::toss('The module "%s" does not exist.', $name);
     }
 
-    public function offsetExists($offset)
+    public function has($name)
     {
-        return isset($this->modules[$offset]);
-    }
-
-    public function offsetUnset($offset)
-    {
-        if (isset($this->modules[$offset])) {
-            unset($this->modules[$offset]);
-        }
-
-        return $this;
+        return isset($this->modules[$name]);
     }
 
     public function count()
@@ -84,5 +75,39 @@ class Manager implements ManagerInterface
     public function getIterator()
     {
         return new ArrayIterator($this->modules);
+    }
+
+    private function validate(ModuleInterface $module)
+    {
+        foreach ($module->dependencies() as $name => $version) {
+            if (!$this->has($name)) {
+                Exception::toss(
+                    'The module "%s" is required by the module "%s".',
+                    $name,
+                    $module->name()
+                );
+            }
+
+            $version = new SemVer($version);
+
+            if (!$version->is($this->get($name)->version())) {
+                Exception::toss(
+                    'The module "%s", currently at version "%s", is required to be at version "%s" by the module "%s".',
+                    $name,
+                    $this->get($name)->version(),
+                    $version,
+                    $module->name()
+                );
+            }
+        }
+    }
+
+    private function bootstrapDependencies(ModuleInterface $module)
+    {
+        foreach ($module->dependencies() as $name => $version) {
+            if (!in_array($name, $this->bootstrapped)) {
+                $this->get($name)->bootstrap($this->injector);
+            }
+        }
     }
 }

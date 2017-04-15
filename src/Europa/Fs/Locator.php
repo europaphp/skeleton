@@ -3,9 +3,10 @@
 namespace Europa\Fs;
 use ArrayIterator;
 use Europa\Exception\Exception;
+use Countable;
 use IteratorAggregate;
 
-class Locator implements IteratorAggregate
+class Locator implements Countable, IteratorAggregate, LocatorInterface
 {
     private $cache = array();
     
@@ -13,14 +14,7 @@ class Locator implements IteratorAggregate
 
     private $root;
 
-    public function __construct($root = null)
-    {
-        if (func_num_args()) {
-            $this->setRoot($root);
-        }
-    }
-
-    public function __invoke($file)
+    public function locate($file)
     {
         $file = str_replace('\\', '/', $file);
 
@@ -71,6 +65,11 @@ class Locator implements IteratorAggregate
         }
 
         return $this;
+    }
+
+    public function count()
+    {
+        return count($this->paths);
     }
 
     public function getIterator()

@@ -4,16 +4,16 @@ namespace Europa\View;
 use Europa\Config\Config;
 use Europa\Filter\ToStringFilter;
 
-class Xml
+class Xml implements ViewInterface
 {
     private $config = [
-        'declare'        => true,
-        'encoding'       => 'UTF-8',
-        'indent'         => true,
-        'numericKeyName' => 'item',
-        'rootNode'       => 'xml',
-        'spaces'         => 2,
-        'version'        => '1.0'
+        'declare'          => true,
+        'encoding'         => 'UTF-8',
+        'indent'           => true,
+        'numeric-key-name' => 'item',
+        'root-node'        => 'xml',
+        'spaces'           => 2,
+        'version'          => '1.0'
     ];
 
     private $toStringFilter;
@@ -24,23 +24,22 @@ class Xml
         $this->toStringFilter = new ToStringFilter;
     }
     
-    public function __invoke(array $context = [])
+    public function render(array $context = [])
     {
         $str = '';
-        
-        // Build the XML declaration if enabled.
-        if ($this->config->declare) {
+
+        if ($this->config['declare']) {
             $str = '<?xml version="'
-                . $this->toStringFilter->__invoke($this->config->version)
+                . $this->toStringFilter->__invoke($this->config['version'])
                 . '" encoding="'
-                . $this->config->encoding
+                . $this->config['encoding']
                 . '" ?>'
                 . PHP_EOL;
         }
 
         // Render a root node if given a name.
-        if ($this->config->rootNode) {
-            $context = [$this->config->rootNode => $context];
+        if ($this->config['root-node']) {
+            $context = [$this->config['root-node'] => $context];
         }
         
         // Render the XML tree.
@@ -54,7 +53,7 @@ class Xml
     
     private function renderNode($name, $content, $level = 0)
     {
-        $keys = $this->config->numericKeyName;
+        $keys = $this->config['numeric-key-name'];
         
         // translate a numeric key to a replacement key
         if (is_numeric($name)) {
@@ -90,7 +89,7 @@ class Xml
     
     private function indent($level)
     {
-        $indent = $this->config->spaces;
+        $indent = $this->config['spaces'];
         $indent = $indent ? str_repeat(' ', $indent) : "\t";
         return str_repeat($indent, $level);
     }

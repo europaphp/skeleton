@@ -1,72 +1,77 @@
 <?php
 
 namespace Europa\Di;
-use ArrayIterator;
 use Europa\Reflection\ClassReflector;
-use Europa\Reflection\FunctionReflector;
-use IteratorAggregate;
+use Europa\Reflection\MethodReflector;
 
-abstract class ConfigurationAbstract implements IteratorAggregate
+abstract class ConfigurationAbstract implements ConfigurationInterface
 {
+    const DOC_TAG_ALIAS = 'alias';
+
+    const DOC_TAG_RETURN = 'return';
+
     const DOC_TAG_TRANSIENT = 'transient';
 
-    private $methods;
-
-    private $arguments = [];
-
-    public function __invoke(ServiceContainerInterface $container)
+    public function configure(ContainerInterface $container)
     {
-        foreach ($this as $name => $closure) {
-            // Make sure arguments are merged.
-            $arguments = isset($this->arguments[$name]) ? $this->arguments[$name] : [];
+        $class = new ClassReflector($this);
 
-            // Rebind the closure so that it is bound to the container scope.
-            $closure = $closure->bindTo($container);
-
-            // Bind a proxy closure that will merge and call the configuration closure arguments at call time.
-            $container->__set($name, function() use ($closure, $arguments) {
-                $arguments = array_merge($arguments, func_get_args());
-                return call_user_func_array($closure, $arguments);
-            });
-
-            // We check the doc block to see if there are any annotations.
-            $closureReflector = new FunctionReflector($closure);
-
-            // If the transient doc tag exists, then we mark it as transient.
-            if ($closureReflector->getDocBlock()->hasTag(self::DOC_TAG_TRANSIENT)) {
-                $container->transient($name);
+        foreach ($class->getMethods() as $method) {
+            if ($this->isValidMethod($method)) {
+                $this->applyAliases($container, $method);
+                $this->applyDependencies($container, $method);
+                $this->applyTransient($container, $method);
+                $this->applyTypes($container, $method);
+                $container->set($method->getName(), $method->getClosure($this));
             }
         }
 
-        return $container;
-    }
-
-    public function setArguments($method)
-    {
-        $args = func_get_args();
-        array_shift($args);
-        return $this->setArgumentsArray($method, $args);
-    }
-
-    public function setArgumentsArray($method, array $arguments)
-    {
-        $this->arguments[$method] = $arguments;
         return $this;
     }
 
-    public function getIterator()
+    private function isValidMethod(MethodReflector $method)
     {
-        $class = new ClassReflector($this);
-        $this->methods = new ArrayIterator;
+        return $method->isPublic()
+            && !$method->isMagic()
+            && !$method->isInherited();
+    }
 
-        foreach ($class->getMethods() as $method) {
-            if ($method->isInherited() || $method->isMagic()) {
-                continue;
+    private function applyAliases(ContainerInterface $container, MethodReflector $method)
+    {
+        $docblock = $method->getDocBlock();
+        $aliases  = [];
+
+        if ($docblock->hasTag(self::DOC_TAG_ALIAS)) {
+            foreach ($docblock->getTag(self::DOC_TAG_ALIAS) as $tag) {
+                $aliases[] = $tag->value();
             }
-
-            $this->methods[$method->getName()] = $method->getClosure($this);
         }
 
-        return $this->methods;
+        $container->setAliases($method->getName(), $aliases);
+    }
+
+    private function applyDependencies(ContainerInterface $container, MethodReflector $method)
+    {
+        $dependencies = [];
+
+        foreach ($method->getParameters() as $param) {
+            $dependencies[] = $param->getName();
+        }
+
+        $container->setDependencies($method->getName(), $dependencies);
+    }
+
+    private function applyTransient(ContainerInterface $container, MethodReflector $method)
+    {
+        if ($method->getDocBlock()->hasTag(self::DOC_TAG_TRANSIENT)) {
+            $container->setTransient($method->getName());
+        }
+    }
+
+    private function applyTypes(ContainerInterface $container, MethodReflector $method)
+    {
+        if ($method->getDocBlock()->hasTag(self::DOC_TAG_RETURN)) {
+            $container->setTypes($method->getName(), $method->getDocBlock()->getTag(self::DOC_TAG_RETURN)->getTypes());
+        }
     }
 }

@@ -1,48 +1,101 @@
 <?php
 
 namespace Europa\App;
+use ArrayIterator;
+use Closure;
 use Europa\Config\Config;
+use Europa\Config\ConfigInterface;
 use Europa\Di\ConfigurationAbstract;
-use Europa\Di\ServiceContainer;
+use Europa\Di\Container;
+use Europa\Di\DependencyInjectorArray;
+use Europa\Di\DependencyInjectorAwareInterface;
+use Europa\Di\DependencyInjectorInterface;
+use Europa\Di\Resolver;
 use Europa\Event\Manager as EventManager;
+use Europa\Exception\Exception;
 use Europa\Fs\Loader;
-use Europa\Fs\Locator;
+use Europa\Fs\LocatorArray;
+use Europa\Fs\LocatorInterface;
+use Europa\Fs\LocatorAwareInterface;
 use Europa\Module\Manager as ModuleManager;
+use Europa\Module\ManagerInterface;
 use Europa\Request\RequestAbstract;
+use Europa\Request\RequestInterface;
 use Europa\Response\ResponseAbstract;
-use Europa\Router\Router;
+use Europa\Router\RouterArray;
+use Europa\Router\RouterInterface;
 use Europa\View\HelperConfiguration;
 use Europa\View\Negotiator;
-use Europa\View\Php;
-use Europa\View\ViewScriptInterface;
+use Europa\View\NegotiatorInterface;
+use Europa\View\ScriptAwareInterface;
+use Traversable;
 
-class AppConfiguration extends ConfigurationAbstract implements AppConfigurationInterface
+class AppConfiguration extends ConfigurationAbstract
 {
-    public function config($defaults, $config)
+    private $config = [
+        'controller-param' => 'controller',
+        'action-param'     => 'action',
+        'view-suffix'      => '.php'
+    ];
+
+    public function __construct($config = [])
     {
-        return new Config($defaults, $config);
+        $this->config = new Config($this->config, $config);
     }
 
-    public function event()
+    public function app(DependencyInjectorInterface $injector)
+    {
+        return new App(
+            $injector->get('config'),
+            $injector->get('controllers'),
+            $injector->get('events'),
+            $injector->get('modules'),
+            $injector->get('request'),
+            $injector->get('response'),
+            $injector->get('router'),
+            $injector->get('views')
+        );
+    }
+
+    public function config()
+    {
+        return new Config($this->config);
+    }
+
+    public function controllers(DependencyInjectorInterface $injector)
+    {
+        $resolver = new Resolver;
+        $resolver->addCallback('Europa\Di\DependencyInjectorAwareInterface', function($controller) use ($injector) {
+            $controller->setDependencyInjector($injector);
+        });
+        return $resolver;
+    }
+
+    public function events()
     {
         return new EventManager;
     }
 
-    public function loader()
+    public function loader(DependencyInjectorInterface $injector)
     {
         $loader = new Loader;
-        $loader->setLocator($this->loaderLocator);
+        $loader->setLocator($injector->get('loaderLocator'));
         return $loader;
     }
 
-    public function loaderLocator()
+    public function loaderLocator(DependencyInjectorInterface $injector)
     {
-        return new Locator;
+        return new LocatorArray($injector->get('loaderLocators'));
     }
 
-    public function modules()
+    public function loaderLocators()
     {
-        return new ModuleManager($this);
+        return new ArrayIterator;
+    }
+
+    public function modules(DependencyInjectorInterface $injector)
+    {
+        return new ModuleManager($injector);
     }
 
     public function request()
@@ -55,68 +108,83 @@ class AppConfiguration extends ConfigurationAbstract implements AppConfiguration
         return ResponseAbstract::detect();
     }
 
-    public function router()
+    public function router(DependencyInjectorInterface $injector)
     {
-        return new Router;
+        return new RouterArray($injector->get('routers'));
     }
 
-    public function view()
+    public function routers()
     {
-        $view = $this->viewNegotiator;
-        $view = $view($this->request);
-
-        if ($view instanceof ViewScriptInterface) {
-            $view->setScriptLocator($this->viewLocator);
-            $view->setScript($this->viewScript);
-            $view->setScriptSuffix($this->config['viewSuffix']);
-        }
-
-        if ($view instanceof Php) {
-            $view->setServiceContainer($this->viewHelpers);
-        }
-
-        return $view;
+        return new ArrayIterator;
     }
 
-    public function viewHelperConfiguration()
+    public function views(DependencyInjectorInterface $injector)
     {
-        $helperConfiguration = new HelperConfiguration;
-        $helperConfiguration->setArguments('uri', $this->router);
-        return $helperConfiguration;
+        return function() use ($injector) {
+            $view = $injector->get('viewNegotiator')->negotiate();
+
+            if ($view instanceof LocatorAwareInterface) {
+                $view->setLocator($injector->get('viewLocator'));
+            }
+
+            if ($view instanceof ScriptAwareInterface) {
+                $formatter = $injector->get('viewScriptFormatter');
+                $view->setScript($formatter());
+            }
+
+            if ($view instanceof DependencyInjectorAwareInterface) {
+                $view->setDependencyInjector($injector->get('viewHelperInjector'));
+            }
+
+            return $view;
+        };
     }
 
-    public function viewHelpers()
+    public function viewHelperInjector(DependencyInjectorInterface $injector)
     {
-        $helpers = new ServiceContainer;
-        $helpers->configure($this->viewHelperConfiguration);
-        return $helpers;
+        return new DependencyInjectorArray($injector->get('viewHelperInjectors'));
     }
 
-    public function viewLocator()
+    public function viewHelperInjectors()
     {
-        return new Locator;
+        $defaultContainer     = new Container;
+        $defaultConfiguration = new HelperConfiguration;
+        $defaultConfiguration->configure($defaultContainer);
+
+        $viewHelperInjectors = new ArrayIterator;
+        $viewHelperInjectors->append($defaultContainer);
+
+        return $viewHelperInjectors;
     }
 
-    public function viewNegotiator()
+    public function viewLocator(DependencyInjectorInterface $injector)
     {
-        return new Negotiator;
+        return new LocatorArray($injector->get('viewLocators'));
     }
 
-    /**
-     * @transient
-     */
-    public function viewScript()
+    public function viewLocators()
     {
-        $format = $this->config['viewScriptFormat'];
+        return new ArrayIterator;
+    }
 
-        if (is_callable($format)) {
-            return $format($this->request);
-        }
+    public function viewNegotiator(DependencyInjectorInterface $injector)
+    {
+        return new Negotiator($injector->get('request'));
+    }
 
-        foreach ($this->request->getParams() as $name => $param) {
-            $format = str_replace(':' . $name, $param, $format);
-        }
+    public function viewScriptFormatter(DependencyInjectorInterface $injector)
+    {
+        return function() use ($injector) {
+            $config  = $injector->get('config');
+            $request = $injector->get('request');
 
-        return $format;
+            $controller = $request->getParam($config['controller-param']);
+            $controller = str_replace('.', DIRECTORY_SEPARATOR, $controller);
+
+            $action = $request->getParam($config['action-param']);
+            $action = str_replace('.', DIRECTORY_SEPARATOR, $action);
+
+            return $controller . '/' . $action . $config['view-suffix'];
+        };
     }
 }

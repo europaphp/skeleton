@@ -1,23 +1,13 @@
 <?php
 
 namespace Europa\Config;
-use ArrayIterator;
 use Europa\Exception\Exception;
-use Europa\Filter\FromStringFilter;
 
 class Config implements ConfigInterface
 {
-    const REGEX_VALID_NAME = '[a-zA-Z_][a-zA-Z0-9_.]*';
-
-    const RESERVED_NAME_PARENT = '_parent';
-
     private $config = [];
 
     private $parent;
-
-    private $readonly = false;
-
-    private $evaluate = true;
 
     public function __construct()
     {
@@ -26,50 +16,23 @@ class Config implements ConfigInterface
         }
     }
 
-    public function __set($name, $value)
-    {
-        return $this->offsetSet($name, $value);
-    }
-
-    public function __get($name)
-    {
-        return $this->offsetGet($name);
-    }
-
-    public function __isset($name)
-    {
-        return $this->offsetExists($name);
-    }
-
-    public function __unset($name)
-    {
-        return $this->offsetUnset($name);
-    }
-
     public function offsetSet($name, $value)
     {
-        $this->checkReadonly();
-
-        if (is_array($value) || is_object($value)) {
+        if ($value instanceof ConfigInterface) {
+            $value->setParent($this);
+        } else if (is_array($value) || is_object($value)) {
             $value = new static($value);
+            $value->setParent($this);
         }
 
         if ($value instanceof ConfigInterface) {
             $value->setParent($this);
         }
 
-        extract($this->parseOptionName($name));
-
-        $config = $this;
-
-        foreach ($first as $name) {
-            $config = $config->createIfNotExists($name);
-        }
-
-        if ($first) {
-            $config->offsetSet($last, $value);
+        if ($name) {
+            $this->config[$name] = $value;
         } else {
-            $this->config[$last] = $value;
+            $this->config[] = $value;
         }
 
         return $this;
@@ -78,52 +41,20 @@ class Config implements ConfigInterface
     public function offsetGet($name)
     {
         if (array_key_exists($name, $this->config)) {
-            return $this->parseOptionValue($this->config[$name]);
-        }
-
-        if ($name === self::RESERVED_NAME_PARENT) {
-            return $this->getParent();
-        }
-
-        extract($this->parseOptionName($name));
-
-        if ($config) {
-            return $this->parseOptionValue($config->offsetGet($last));
+            return $this->config[$name];
         }
     }
 
     public function offsetExists($name)
     {
-        if (array_key_exists($name, $this->config)) {
-            return true;
-        }
-
-        if ($name === self::RESERVED_NAME_PARENT) {
-            return isset($this->parent);
-        }
-
-        extract($this->parseOptionName($name));
-
-        if ($config) {
-            return $config->offsetExists($last);
-        }
+        return array_key_exists($name, $this->config);
     }
 
     public function offsetUnset($name)
     {
-        $this->checkReadonly();
-
         if (array_key_exists($name, $this->config)) {
             unset($this->config[$name]);
         }
-
-        extract($this->parseOptionName($name));
-
-        if ($config) {
-            $config->offsetUnset($last);
-        }
-
-        return $this;
     }
 
     public function count()
@@ -131,28 +62,50 @@ class Config implements ConfigInterface
         return count($this->config);
     }
 
-    public function getIterator()
+    public function current()
     {
-        return new ArrayIterator($this->config);
+        return current($this->config);
     }
 
-    public function import($config)
+    public function key()
     {
-        $this->checkReadonly();
+        return key($this->config);
+    }
 
-        if (is_string($config)) {
-            $adapter = pathinfo($config, PATHINFO_EXTENSION);
-            $adapter = 'Europa\Config\Adapter\\' . ucfirst($adapter);
+    public function next()
+    {
+        next($this->config);
+    }
 
-            if (!class_exists($adapter)) {
-                Exception::toss('The config adapter "%s" does not exist.', $adapter);
-            }
+    public function rewind()
+    {
+        reset($this->config);
+    }
 
-            $config = new $adapter($config);
+    public function valid()
+    {
+        return key($this->config) !== null;
+    }
+
+    public function serialize()
+    {
+        return serialize($this->config);
+    }
+
+    public function unserialize($data)
+    {
+        $this->config = unserialize($data);
+    }
+
+    public function import($config, callable $adapter = null)
+    {
+        if (is_string($config) && $file = $this->resolveFileFromString($config)) {
+            $config  = file_get_contents($file);
+            $adapter = $adapter ? $adapter : $this->resolveAdapterFromFile($file);
         }
 
-        if (is_callable($config)) {
-            $config = $config();
+        if ($adapter) {
+            $config = $adapter($config);
         }
 
         if (is_array($config) || is_object($config)) {
@@ -164,11 +117,11 @@ class Config implements ConfigInterface
         return $this;
     }
 
-    public function export()
+    public function export(callable $adapter = null)
     {
         $config = [];
-        
-        foreach ($this->config as $name => $value) {
+
+        foreach ($this as $name => $value) {
             if ($value instanceof ConfigInterface) {
                 $config[$name] = $value->export();
             } else {
@@ -176,7 +129,17 @@ class Config implements ConfigInterface
             }
         }
 
+        if ($adapter) {
+            $config = $adapter($config);
+        }
+
         return $config;
+    }
+
+    public function clear()
+    {
+        $this->config = [];
+        return $this;
     }
 
     public function setParent(ConfigInterface $config)
@@ -190,7 +153,7 @@ class Config implements ConfigInterface
         return $this->parent;
     }
 
-    public function getRootParent()
+    public function getRoot()
     {
         $config = $this->getParent();
 
@@ -199,16 +162,6 @@ class Config implements ConfigInterface
         }
 
         return $config;
-    }
-
-    public function createIfNotExists($name)
-    {
-        if (!isset($this->config[$name]) || !$this->config[$name] instanceof ConfigInterface) {
-            $this->config[$name] = new static;
-            $this->config[$name]->setParent($this);
-        }
-
-        return $this->config[$name];
     }
 
     public function keys()
@@ -221,74 +174,23 @@ class Config implements ConfigInterface
         return array_values($this->config);
     }
 
-    public function readonly($switch = true)
+    private function resolveFileFromString($config)
     {
-        $this->readonly = $switch ?: false;
-        return $this;
+        if (is_file($config)) {
+            return $config;
+        }
     }
 
-    public function evaluate($switch = true)
+    private function resolveAdapterFromFile($config)
     {
-        $this->evaluate = $switch ?: false;
-        return $this;
-    }
+        $adapter = explode('.', $config);
+        $adapter = end($adapter);
+        $adapter = 'Europa\Config\Adapter\From\\' . ucfirst($adapter);
 
-    private function parseOptionName($name)
-    {
-        $all    = explode('.', $name);
-        $first  = $all;
-        $last   = array_pop($first);
-        $config = $this;
-
-        foreach ($first as $name) {
-            if ($config instanceof ConfigInterface) {
-                $config = $config->offsetGet($name);
-            } else {
-                break;
-            }
+        if (!class_exists($adapter)) {
+            Exception::toss('The import adapter "%s" autodetected from "%s" cannot be found.', $config, $adapter);
         }
 
-        if ($config === $this || !$config instanceof ConfigInterface) {
-            $config = false;
-        }
-
-        return [
-            'first'  => $first,
-            'last'   => $last,
-            'all'    => $all,
-            'config' => $config
-        ];
-    }
-
-    private function parseOptionValue($value)
-    {
-        if ($this->evaluate && $this->isParsable($value)) {
-            $value = eval('return "' . $this->convertValueToPhp($value) . '";');
-        }
-
-        return $value;
-    }
-
-    private function isParsable($value)
-    {
-        return is_string($value) && strpos($value, '{') !== false && strpos($value, '}') !== false;
-    }
-
-    private function convertValueToPhp($value)
-    {
-        $value = str_replace('"', '\"', $value);
-        $value = str_replace('\\', '\\\\', $value);
-        return preg_replace_callback('/\{' . self::REGEX_VALID_NAME . '\}/', function($replace) {
-            $replace = $replace[0];
-            $replace = str_replace('.', '->', $replace);
-            return str_replace('{', '{$this->', $replace);
-        }, $value);
-    }
-
-    private function checkReadonly()
-    {
-        if ($this->readonly) {
-            Exception::toss('Cannot modify the configuration because it is readonly.');
-        }
+        return new $adapter;
     }
 }
